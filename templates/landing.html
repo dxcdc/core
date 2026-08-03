@@ -4,82 +4,141 @@
 <!--[if gt IE 9]><!--> <html class="no-js" lang="pt-br"> <!--<![endif]-->
     <head>
         <meta charset="utf-8">
-        <title>CDC Core — Centralizador de Operações & Infraestrutura</title>
-        <meta name="description" content="CDC Core - Plataforma Centralizadora e Canivete Suíço de Operações CDC">
+        <title>CDC Core — Centralizador & Canivete de Operações CDC</title>
+        <meta name="description" content="CDC Core - Plataforma Centralizadora e Canivete Suíço de Operações CDC com design Lahomes">
         <meta name="author" content="CDC DevOps Team">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
 
         <!-- Favicon -->
         <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
 
-        <!-- Stylesheets -->
+        <!-- Stylesheets (Base ProUI + Lahomes RemixIcons) -->
         <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/plugins.css' %}">
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
         <link rel="stylesheet" href="{% static 'css/themes.css' %}">
+        
+        <!-- Lahomes Icons & Styling -->
+        <link rel="stylesheet" href="{% static 'lahomes/css/icons.min.css' %}">
 
         <script src="{% static 'js/vendor/modernizr.min.js' %}"></script>
         <style>
             body {
-                background: #1b1e24;
-                color: #eaedf1;
-                font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                background-color: #0f172a;
+                color: #e2e8f0;
+                font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             }
             .landing-header {
-                background: rgba(24, 28, 36, 0.95);
-                border-bottom: 1px solid #2d323d;
-                padding: 15px 0;
+                background: rgba(15, 23, 42, 0.92);
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid #1e293b;
+                padding: 16px 0;
                 position: fixed;
                 width: 100%;
                 top: 0;
                 z-index: 1000;
             }
             .hero-section {
-                padding: 140px 0 90px;
-                background: linear-gradient(135deg, #1b1e24 0%, #242a36 100%);
-                border-bottom: 1px solid #2d323d;
+                padding: 160px 0 100px;
+                background: radial-gradient(circle at top center, #1e293b 0%, #0f172a 70%);
+                border-bottom: 1px solid #1e293b;
+            }
+            .badge-lahomes {
+                background: rgba(59, 130, 246, 0.15);
+                color: #60a5fa;
+                border: 1px solid rgba(59, 130, 246, 0.3);
+                font-size: 0.85rem;
+                font-weight: 600;
+                padding: 6px 14px;
+                border-radius: 20px;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
             }
             .hero-title {
-                font-size: 3.2em;
-                font-weight: 700;
+                font-size: 3.4em;
+                font-weight: 800;
+                margin-top: 20px;
                 margin-bottom: 20px;
                 color: #ffffff;
+                letter-spacing: -0.5px;
+            }
+            .hero-title-gradient {
+                background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
             }
             .hero-subtitle {
                 font-size: 1.25em;
-                color: #99a5b5;
-                margin-bottom: 35px;
-                line-height: 1.6;
+                color: #94a3b8;
+                margin-bottom: 40px;
+                line-height: 1.7;
             }
-            .feature-card {
-                background: #242832;
-                border: 1px solid #2e3442;
-                border-radius: 6px;
-                padding: 30px;
+            .feature-card-lahomes {
+                background: #182234;
+                border: 1px solid #243046;
+                border-radius: 12px;
+                padding: 32px 24px;
                 margin-bottom: 30px;
-                transition: transform 0.2s ease, border-color 0.2s ease;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+                transition: all 0.3s ease;
             }
-            .feature-card:hover {
-                transform: translateY(-5px);
-                border-color: #1bbae1;
+            .feature-card-lahomes:hover {
+                transform: translateY(-6px);
+                border-color: #3b82f6;
+                box-shadow: 0 20px 30px -10px rgba(59, 130, 246, 0.25);
             }
-            .feature-icon {
-                font-size: 2.8em;
+            .feature-icon-wrapper {
+                width: 60px;
+                height: 60px;
+                border-radius: 12px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.8em;
+                margin-bottom: 24px;
+            }
+            .icon-primary { background: rgba(59, 130, 246, 0.12); color: #60a5fa; }
+            .icon-success { background: rgba(34, 197, 94, 0.12); color: #4ade80; }
+            .icon-warning { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+            .icon-purple  { background: rgba(168, 85, 247, 0.12); color: #c084fc; }
+
+            .stat-box-lahomes {
+                background: #162032;
+                border: 1px solid #212e44;
+                border-radius: 10px;
+                padding: 24px;
+                text-align: center;
+            }
+            .stat-number {
+                font-size: 2.2em;
+                font-weight: 700;
+                color: #ffffff;
+                margin-bottom: 4px;
+            }
+            .stat-label {
+                color: #64748b;
+                font-size: 0.9em;
+                font-weight: 500;
+            }
+            .benefit-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
                 margin-bottom: 20px;
-                color: #1bbae1;
+                color: #cbd5e1;
+                font-size: 1.05em;
             }
-            .status-banner {
-                background: #17212b;
-                border: 1px solid #273747;
-                border-radius: 6px;
-                padding: 20px;
-                margin-top: 40px;
+            .benefit-item i {
+                color: #3b82f6;
+                font-size: 1.3em;
+                margin-top: 2px;
             }
             .footer-landing {
-                background: #14171d;
+                background: #0b1120;
                 padding: 40px 0;
-                border-top: 1px solid #232832;
-                color: #728096;
+                border-top: 1px solid #1e293b;
+                color: #64748b;
             }
         </style>
     </head>
@@ -90,14 +149,18 @@
                 <div class="row">
                     <div class="col-xs-6">
                         <a href="{% url 'dashboard:landing' %}" class="navbar-brand" style="color: #fff; font-size: 1.5em; font-weight: 700; text-decoration: none;">
-                            <i class="gi gi-flash text-primary"></i> <strong>CDC</strong> Core
+                            <i class="ri-flashlight-fill text-primary" style="color: #3b82f6; margin-right: 6px;"></i> <strong>CDC</strong> Core
                         </a>
                     </div>
                     <div class="col-xs-6 text-right">
                         {% if user.is_authenticated %}
-                            <a href="{% url 'dashboard:index' %}" class="btn btn-primary"><i class="fa fa-dashboard"></i> Ir para o Painel</a>
+                            <a href="{% url 'dashboard:index' %}" class="btn btn-primary" style="border-radius: 6px; font-weight: 600;">
+                                <i class="ri-dashboard-line"></i> Painel Operacional
+                            </a>
                         {% else %}
-                            <a href="{% url 'dashboard:login' %}" class="btn btn-success"><i class="fa fa-lock"></i> Acessar Plataforma</a>
+                            <a href="{% url 'dashboard:login' %}" class="btn btn-success" style="border-radius: 6px; font-weight: 600;">
+                                <i class="ri-lock-2-line"></i> Entrar na Plataforma
+                            </a>
                         {% endif %}
                     </div>
                 </div>
@@ -109,92 +172,169 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-10 col-md-offset-1">
-                        <span class="label label-info text-uppercase" style="letter-spacing: 1px; padding: 6px 12px; font-size: 0.85em;">Hub de Operações CDC</span>
-                        <h1 class="hero-title">Centralizador de Infraestrutura & Canivete de Operações</h1>
+                        <div class="badge-lahomes">
+                            <i class="ri-checkbox-circle-fill"></i> Plataforma de Operações & Sustentação CDC
+                        </div>
+
+                        <h1 class="hero-title">
+                            Centralizador de Infraestrutura & <span class="hero-title-gradient">Canivete de Operações</span>
+                        </h1>
+
                         <p class="hero-subtitle">
-                            Sustentação inteligente, monitoramento de servidores, gestão de gateways VPN WireGuard, cofres de segredos e automações idempotentes reunidos em uma só plataforma.
+                            Orquestração completa para servidores, gateways de conexão VPN, cofres de segredos criptografados e automações idempotentes reunidos sob o padrão visual do tema <strong>Lahomes</strong>.
                         </p>
-                        <div>
+
+                        <div style="margin-bottom: 40px;">
                             {% if user.is_authenticated %}
-                                <a href="{% url 'dashboard:index' %}" class="btn btn-lg btn-primary" style="padding: 14px 32px; font-weight: 600;">
-                                    <i class="fa fa-dashboard"></i> Acessar Painel Principal
+                                <a href="{% url 'dashboard:index' %}" class="btn btn-lg btn-primary" style="padding: 14px 36px; border-radius: 8px; font-weight: 600; box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);">
+                                    <i class="ri-dashboard-3-line"></i> Ir para o Dashboard CDC Core
                                 </a>
                             {% else %}
-                                <a href="{% url 'dashboard:login' %}" class="btn btn-lg btn-success" style="padding: 14px 32px; font-weight: 600;">
-                                    <i class="fa fa-sign-in"></i> Entrar na Plataforma
+                                <a href="{% url 'dashboard:login' %}" class="btn btn-lg btn-success" style="padding: 14px 36px; border-radius: 8px; font-weight: 600; box-shadow: 0 10px 20px -5px rgba(34, 197, 94, 0.4);">
+                                    <i class="ri-login-circle-line"></i> Acessar Plataforma CDC
                                 </a>
                             {% endif %}
                         </div>
 
-                        <!-- System Status Indicator -->
-                        <div class="status-banner text-left">
-                            <div class="row">
-                                <div class="col-sm-8">
-                                    <h4 style="margin: 0; color: #fff;">
-                                        <i class="fa fa-circle text-success animation-pulse"></i> <strong>Status da Infraestrutura CDC:</strong> Todos os sistemas operacionais
-                                    </h4>
-                                    <small style="color: #8392a5;">Servidores, VPNs, Cofre de Segredos e Pipelines de Automação verificados.</small>
-                                </div>
-                                <div class="col-sm-4 text-right hidden-xs" style="margin-top: 5px;">
-                                    <span class="label label-success">SLA 99.9%</span>
+                        <!-- Stat Boxes Grid (Lahomes Style) -->
+                        <div class="row" style="margin-top: 50px;">
+                            <div class="col-sm-3 col-xs-6">
+                                <div class="stat-box-lahomes">
+                                    <div class="stat-number text-primary">100%</div>
+                                    <div class="stat-label">Sustentação Idempotente</div>
                                 </div>
                             </div>
+                            <div class="col-sm-3 col-xs-6">
+                                <div class="stat-box-lahomes">
+                                    <div class="stat-number text-success">99.9%</div>
+                                    <div class="stat-label">SLA dos Servidores</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-xs-6">
+                                <div class="stat-box-lahomes">
+                                    <div class="stat-number text-warning">256-bit</div>
+                                    <div class="stat-label">Criptografia do Cofre</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-xs-6">
+                                <div class="stat-box-lahomes">
+                                    <div class="stat-number text-info">3-2-1</div>
+                                    <div class="stat-label">Política de Backups</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Features Section (Lahomes RemixIcons) -->
+        <section style="padding: 90px 0; background: #0f172a;">
+            <div class="container">
+                <div class="text-center" style="margin-bottom: 60px;">
+                    <span class="badge-lahomes" style="margin-bottom: 10px;">
+                        <i class="ri-stack-line"></i> Módulos Especializados
+                    </span>
+                    <h2 style="color: #fff; font-size: 2.3em; font-weight: 700; margin-top: 10px;">Ferramentas de Operação CDC</h2>
+                    <p style="color: #94a3b8; font-size: 1.1em;">Arquitetura modular projetada para gerenciamento centralizado com zero atrito</p>
+                </div>
+
+                <div class="row">
+                    <!-- Feature 1: Infraestrutura -->
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-card-lahomes text-center">
+                            <div class="feature-icon-wrapper icon-primary">
+                                <i class="ri-server-line"></i>
+                            </div>
+                            <h3 style="color: #fff; font-size: 1.25em; font-weight: 600; margin-bottom: 12px;">Infraestrutura & Clusters</h3>
+                            <p style="color: #94a3b8; font-size: 0.95em; line-height: 1.6;">
+                                Monitoramento unificado para instâncias virtuais, nós de servidores e containers Docker ativos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2: VPN & Redes -->
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-card-lahomes text-center">
+                            <div class="feature-icon-wrapper icon-purple">
+                                <i class="ri-shield-keyhole-line"></i>
+                            </div>
+                            <h3 style="color: #fff; font-size: 1.25em; font-weight: 600; margin-bottom: 12px;">Gateways VPN & Redes</h3>
+                            <p style="color: #94a3b8; font-size: 0.95em; line-height: 1.6;">
+                                Gestão central de túneis WireGuard, certificados e controle granular de acesso remoto.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3: Cofre -->
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-card-lahomes text-center">
+                            <div class="feature-icon-wrapper icon-success">
+                                <i class="ri-key-2-line"></i>
+                            </div>
+                            <h3 style="color: #fff; font-size: 1.25em; font-weight: 600; margin-bottom: 12px;">Cofre de Segredos</h3>
+                            <p style="color: #94a3b8; font-size: 0.95em; line-height: 1.6;">
+                                Gerenciamento seguro de chaves SSH ed25519, segredos corporativos e tokens de API.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4: Automação -->
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-card-lahomes text-center">
+                            <div class="feature-icon-wrapper icon-warning">
+                                <i class="ri-terminal-box-line"></i>
+                            </div>
+                            <h3 style="color: #fff; font-size: 1.25em; font-weight: 600; margin-bottom: 12px;">Canivete & Automações</h3>
+                            <p style="color: #94a3b8; font-size: 0.95em; line-height: 1.6;">
+                                Pipelines idempotentes no GitHub Actions, backups Rclone offsite e gerador de receitas.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Main Features Section -->
-        <section style="padding: 80px 0; background: #1b1e24;">
+        <!-- Benefits & Governance Section (Lahomes Style) -->
+        <section style="padding: 80px 0; background: #131c2e; border-top: 1px solid #1e293b;">
             <div class="container">
-                <div class="text-center" style="margin-bottom: 60px;">
-                    <h2 style="color: #fff; font-size: 2.2em; font-weight: 700;">Recursos Integrados da Plataforma</h2>
-                    <p style="color: #8c9ba5; font-size: 1.1em;">Ferramentas de alta performance para orquestração e sustentação DevOps</p>
-                </div>
-
-                <div class="row">
-                    <!-- Feature 1 -->
-                    <div class="col-md-3 col-sm-6">
-                        <div class="feature-card text-center">
-                            <i class="gi gi-server feature-icon"></i>
-                            <h3 style="color: #fff; font-size: 1.3em;">Gestão de Infraestrutura</h3>
-                            <p style="color: #92a0b3; font-size: 0.95em;">
-                                Painel de controle para monitoramento de instâncias, containers Docker e servidores de produção CDC.
-                            </p>
+                <div class="row" style="display: flex; align-items: center; flex-wrap: wrap;">
+                    <div class="col-md-6">
+                        <span class="badge-lahomes" style="margin-bottom: 16px;">
+                            <i class="ri-shield-check-line"></i> Padrões & Governança CDC
+                        </span>
+                        <h2 style="color: #fff; font-size: 2.2em; font-weight: 700; margin-bottom: 24px;">
+                            Construído com Foco em Segurança, Reuso e Portabilidade
+                        </h2>
+                        
+                        <div class="benefit-item">
+                            <i class="ri-checkbox-circle-fill"></i>
+                            <div>
+                                <strong>Preservação de Conhecimento:</strong> Registro estruturado de receitas, ADRs e guias de sustentação.
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="ri-checkbox-circle-fill"></i>
+                            <div>
+                                <strong>Portabilidade Total:</strong> Facilidade de implantação em novos ambientes com zero atrito de configuração.
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="ri-checkbox-circle-fill"></i>
+                            <div>
+                                <strong>Automação Idempotente de Issues:</strong> Integração com GitHub Actions para tarefas repetíveis sem duplicações.
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Feature 2 -->
-                    <div class="col-md-3 col-sm-6">
-                        <div class="feature-card text-center">
-                            <i class="gi gi-shield feature-icon" style="color: #ae7ac4;"></i>
-                            <h3 style="color: #fff; font-size: 1.3em;">Gateways VPN & Redes</h3>
-                            <p style="color: #92a0b3; font-size: 0.95em;">
-                                Gestão centralizada de clientes e regras de acesso remoto via WireGuard e OpenVPN.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Feature 3 -->
-                    <div class="col-md-3 col-sm-6">
-                        <div class="feature-card text-center">
-                            <i class="gi gi-keys feature-icon" style="color: #76c065;"></i>
-                            <h3 style="color: #fff; font-size: 1.3em;">Cofre de Segredos</h3>
-                            <p style="color: #92a0b3; font-size: 0.95em;">
-                                Armazenamento seguro de chaves SSH ed25519, tokens de API e certificados da organização.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Feature 4 -->
-                    <div class="col-md-3 col-sm-6">
-                        <div class="feature-card text-center">
-                            <i class="gi gi-settings feature-icon" style="color: #de888a;"></i>
-                            <h3 style="color: #fff; font-size: 1.3em;">Automação & Backup</h3>
-                            <p style="color: #92a0b3; font-size: 0.95em;">
-                                Workflows idempotentes de GitHub Actions, sync de backups 3-2-1 via Rclone e geração de scripts.
-                            </p>
+                    <div class="col-md-6 text-center" style="margin-top: 30px;">
+                        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 40px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);">
+                            <i class="ri-rocket-2-fill text-primary" style="font-size: 4em; color: #3b82f6;"></i>
+                            <h3 style="color: #fff; font-size: 1.6em; font-weight: 700; margin-top: 20px;">Pronto para Acessar o CDC Core?</h3>
+                            <p style="color: #94a3b8; margin-bottom: 24px;">Faça login com as suas credenciais para visualizar o painel completo de operações.</p>
+                            <a href="{% url 'dashboard:login' %}" class="btn btn-primary btn-block btn-lg" style="border-radius: 8px; font-weight: 600;">
+                                <i class="ri-lock-unlock-line"></i> Acessar Painel de Controle
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -204,11 +344,11 @@
         <!-- Footer -->
         <footer class="footer-landing text-center">
             <div class="container">
-                <p style="margin-bottom: 10px;">
-                    <strong>CDC Core v1.0.0</strong> — Plataforma de Governança e Operações CDC
+                <p style="margin-bottom: 8px;">
+                    <strong>CDC Core v1.0.0</strong> — Governança & Operações CDC
                 </p>
-                <p style="font-size: 0.85em;">
-                    Desenvolvido com o tema ProUI 3.8 &bull; Todos os direitos reservados &copy; 2026 CDC
+                <p style="font-size: 0.85em; color: #475569;">
+                    Design integrado com componentes <strong>Lahomes v1.0</strong> &bull; Todos os direitos reservados &copy; 2026 CDC
                 </p>
             </div>
         </footer>
