@@ -146,10 +146,11 @@
         <!-- Navigation Header -->
         <header class="landing-header">
             <div class="container">
-                <div class="row">
+                <div class="row" style="display: flex; align-items: center;">
                     <div class="col-xs-6">
-                        <a href="{% url 'dashboard:landing' %}" class="navbar-brand" style="color: #fff; font-size: 1.5em; font-weight: 700; text-decoration: none;">
-                            <i class="ri-flashlight-fill text-primary" style="color: #3b82f6; margin-right: 6px;"></i> <strong>CDC</strong> Core
+                        <a href="{% url 'dashboard:landing' %}" class="navbar-brand" style="display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 0;">
+                            <img src="{% static 'img/cdc_logo_horizontal.png' %}" alt="CDC - Centro de Desenvolvimento e Cidadania" style="height: 42px; background: #ffffff; padding: 4px 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                            <span style="color: #ffffff; font-size: 1.3em; font-weight: 800; letter-spacing: 0.5px;">Core</span>
                         </a>
                     </div>
                     <div class="col-xs-6 text-right">
@@ -172,9 +173,13 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-10 col-md-offset-1">
-                        <div class="badge-lahomes">
-                            <i class="ri-checkbox-circle-fill"></i> Plataforma de Operações & Sustentação CDC
+                        <div style="margin-bottom: 25px;">
+                            <img src="{% static 'img/cdc_logo_horizontal.png' %}" alt="Centro de Desenvolvimento e Cidadania" style="max-height: 90px; background: #ffffff; padding: 10px 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
                         </div>
+                        <div class="badge-lahomes">
+                            <i class="ri-checkbox-circle-fill"></i> Centro de Desenvolvimento e Cidadania — Plataforma Core
+                        </div>
+
 
                         <h1 class="hero-title">
                             Centralizador de Infraestrutura & <span class="hero-title-gradient">Canivete de Operações</span>
