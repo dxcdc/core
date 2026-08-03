@@ -6,9 +6,13 @@ from django.contrib import messages
 
 User = get_user_model()
 
+def landing_view(request):
+    """Renderiza a Landing Page pública do CDC Core."""
+    return render(request, 'landing.html')
+
 @login_required(login_url='dashboard:login')
 def index(request):
-    """Renderiza o painel principal de operações do CDC Core."""
+    """Renderiza o painel principal de operações do CDC Core (Protegido por login)."""
     return render(request, 'dashboard/index.html')
 
 def login_view(request):
@@ -40,6 +44,6 @@ def login_view(request):
     return render(request, 'account/login.html')
 
 def logout_view(request):
-    """Realiza o logout do usuário."""
+    """Realiza o logout do usuário e redireciona para a Landing Page pública."""
     logout(request)
-    return redirect('dashboard:login')
+    return redirect('dashboard:landing')
