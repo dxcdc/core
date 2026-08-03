@@ -5,89 +5,176 @@
     <head>
         <meta charset="utf-8">
         <title>Login | CDC Core — Centralizador & Operações</title>
-        <meta name="description" content="CDC Core - Plataforma Centralizadora de Infraestrutura e Operações CDC">
+        <meta name="description" content="CDC Core - Plataforma Centralizadora de Infraestrutura e Operações do CDC">
         <meta name="author" content="CDC DevOps Team">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
 
-        <!-- Icons -->
+        <!-- Favicon -->
         <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
 
-        <!-- Stylesheets -->
+        <!-- Stylesheets (Base + Lahomes RemixIcons) -->
         <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/plugins.css' %}">
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
-        <link rel="stylesheet" href="{% static 'css/themes.css' %}">
+        <link rel="stylesheet" href="{% static 'lahomes/css/icons.min.css' %}">
 
         <script src="{% static 'js/vendor/modernizr.min.js' %}"></script>
+        <style>
+            body.authentication-bg {
+                background: radial-gradient(circle at top center, #1e293b 0%, #0f172a 70%);
+                background-color: #0f172a;
+                color: #e2e8f0;
+                font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 30px 15px;
+            }
+            .auth-card-lahomes {
+                background: #182234;
+                border: 1px solid #243046;
+                border-radius: 16px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                padding: 40px 35px;
+                max-width: 460px;
+                width: 100%;
+                margin: 0 auto;
+                transition: transform 0.3s ease;
+            }
+            .auth-logo-box {
+                background: #ffffff;
+                padding: 12px 24px;
+                border-radius: 12px;
+                display: inline-block;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                margin-bottom: 24px;
+            }
+            .auth-title {
+                color: #ffffff;
+                font-size: 1.6em;
+                font-weight: 700;
+                margin-bottom: 6px;
+            }
+            .auth-subtitle {
+                color: #94a3b8;
+                font-size: 0.95em;
+                margin-bottom: 30px;
+            }
+            .form-control-lahomes {
+                background: #0f172a !important;
+                border: 1px solid #28354d !important;
+                color: #f1f5f9 !important;
+                border-radius: 8px !important;
+                height: 46px !important;
+                font-size: 0.95em !important;
+                padding-left: 45px !important;
+                transition: border-color 0.2s ease !important;
+            }
+            .form-control-lahomes:focus {
+                border-color: #3b82f6 !important;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+            }
+            .input-icon-wrapper {
+                position: relative;
+                margin-bottom: 20px;
+            }
+            .input-icon-wrapper i {
+                position: absolute;
+                left: 15px;
+                top: 13px;
+                color: #64748b;
+                font-size: 1.25em;
+                z-index: 10;
+            }
+            .btn-lahomes-primary {
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                border: none;
+                color: #ffffff;
+                font-weight: 600;
+                font-size: 1em;
+                padding: 12px 20px;
+                border-radius: 8px;
+                width: 100%;
+                box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+                transition: all 0.2s ease;
+            }
+            .btn-lahomes-primary:hover {
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                color: #ffffff;
+                box-shadow: 0 15px 25px -5px rgba(59, 130, 246, 0.5);
+                transform: translateY(-1px);
+            }
+            .back-home-link {
+                color: #94a3b8;
+                text-decoration: none;
+                font-size: 0.9em;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                margin-top: 25px;
+                transition: color 0.2s ease;
+            }
+            .back-home-link:hover {
+                color: #60a5fa;
+                text-decoration: none;
+            }
+        </style>
     </head>
-    <body>
-        <!-- Login Background Image -->
-        <img src="{% static 'img/placeholders/headers/login_header.jpg' %}" alt="Login Background" class="full-bg animation-pulseSlow">
-        <!-- END Login Background Image -->
+    <body class="authentication-bg">
 
-        <!-- Login Container -->
-        <div id="login-container" class="animation-fadeIn">
-            <!-- Login Title -->
-            <div class="login-title text-center">
-                <div style="margin-bottom: 12px;">
-                    <img src="{% static 'img/cdc_logo_horizontal.png' %}" alt="Centro de Desenvolvimento e Cidadania" style="max-height: 60px; background: #ffffff; padding: 6px 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div class="auth-card-lahomes text-center">
+            <!-- Official CDC Logo Badge -->
+            <div class="auth-logo-box">
+                <img src="{% static 'img/cdc_logo_horizontal.png' %}" alt="Centro de Desenvolvimento e Cidadania" style="max-height: 54px;">
+            </div>
+
+            <!-- Title & Subtitle -->
+            <h1 class="auth-title">Painel de Operações</h1>
+            <p class="auth-subtitle">Acesso restrito para a equipe de tecnologia do CDC</p>
+
+            <!-- Error Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger alert-dismissable" style="border-radius: 8px; text-align: left; margin-bottom: 20px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5;">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true" style="color: #fca5a5;">&times;</button>
+                        <i class="ri-error-warning-line"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Login Form -->
+            <form action="{% url 'dashboard:login' %}" method="post" id="form-login">
+                {% csrf_token %}
+
+                <!-- Username/Email Field -->
+                <div class="input-icon-wrapper">
+                    <i class="ri-user-3-line"></i>
+                    <input type="text" id="login-email" name="login-email" class="form-control form-control-lahomes" placeholder="Usuário ou Email do CDC" required autofocus>
                 </div>
-                <h1><strong>CDC</strong> Core<br><small>Faça login para acessar o painel de operações</small></h1>
+
+                <!-- Password Field -->
+                <div class="input-icon-wrapper">
+                    <i class="ri-lock-password-line"></i>
+                    <input type="password" id="login-password" name="login-password" class="form-control form-control-lahomes" placeholder="Sua Senha" required>
+                </div>
+
+                <!-- Action Button -->
+                <button type="submit" class="btn btn-lahomes-primary">
+                    <i class="ri-login-circle-line" style="margin-right: 6px;"></i> Entrar no CDC Core
+                </button>
+            </form>
+
+            <!-- Back to Landing Page -->
+            <div>
+                <a href="{% url 'dashboard:landing' %}" class="back-home-link">
+                    <i class="ri-arrow-left-line"></i> Voltar para a página inicial pública
+                </a>
             </div>
-            <!-- END Login Title -->
-
-            <!-- Login Block -->
-            <div class="block push-bit">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-danger alert-dismissable" style="margin: 15px;">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                            <h4><i class="fa fa-times-circle"></i> Erro</h4> {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                <!-- Login Form -->
-                <form action="{% url 'dashboard:login' %}" method="post" id="form-login" class="form-horizontal form-bordered form-control-borderless">
-                    {% csrf_token %}
-
-                    <div class="form-group">
-                        <div class="col-xs-12">
-                            <div class="input-group">
-                                <span class="input-group-addon"><i class="gi gi-envelope"></i></span>
-                                <input type="text" id="login-email" name="login-email" class="form-control input-lg" placeholder="Email ou Usuário CDC">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-xs-12">
-                            <div class="input-group">
-                                <span class="input-group-addon"><i class="gi gi-asterisk"></i></span>
-                                <input type="password" id="login-password" name="login-password" class="form-control input-lg" placeholder="Senha">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group form-actions">
-                        <div class="col-xs-4">
-                            <label class="switch switch-primary" data-toggle="tooltip" title="Lembrar-me?">
-                                <input type="checkbox" id="login-remember-me" name="login-remember-me" checked>
-                                <span></span>
-                            </label>
-                        </div>
-                        <div class="col-xs-8 text-right">
-                            <button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-angle-right"></i> Acessar Painel</button>
-                        </div>
-                    </div>
-                </form>
-                <!-- END Login Form -->
-            </div>
-            <!-- END Login Block -->
         </div>
-        <!-- END Login Container -->
 
+        <!-- JS Vendor -->
         <script src="{% static 'js/vendor/jquery.min.js' %}"></script>
         <script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
-        <script src="{% static 'js/plugins.js' %}"></script>
-        <script src="{% static 'js/app.js' %}"></script>
     </body>
 </html>
