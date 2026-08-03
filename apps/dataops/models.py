@@ -116,3 +116,32 @@ class LogAuditoria(models.Model):
 
     def __str__(self):
         return f"[{self.executado_em.strftime('%d/%m/%Y %H:%M')}] [{self.nivel}] {self.acao_executada} -> {self.alvo_impactado}"
+
+
+class EstruturaVpn(models.Model):
+    """Modelo para cadastro dinâmico de Estruturas, Setores da Sede e Projetos de Proteção no Mapa da VPN."""
+    TIPO_CHOICES = (
+        ('sede', 'Setor da Sede'),
+        ('projeto', 'Projeto de Proteção à Vida'),
+    )
+    STATUS_CHOICES = (
+        ('Online', 'Ligado (Online)'),
+        ('Offline', 'Desligado (Offline)'),
+    )
+
+    nome = models.CharField(max_length=100, verbose_name="Nome da Estrutura / Setor")
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='sede', verbose_name="Ramo da Arquitetura")
+    pcs_sede = models.IntegerField(default=1, verbose_name="Computadores da Sede")
+    dispositivos_moveis = models.IntegerField(default=0, verbose_name="Celulares & Notebooks Externa")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Online', verbose_name="Status da Conexão")
+    ip_faixa = models.CharField(max_length=50, default='10.8.x.x', verbose_name="Faixa de IP")
+    latencia = models.CharField(max_length=20, default='12ms', verbose_name="Latência Média")
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Estrutura de VPN"
+        verbose_name_plural = "Estruturas de VPN"
+        ordering = ['tipo', 'nome']
+
+    def __str__(self):
+        return f"{self.nome} ({self.get_tipo_display()}) - {self.status}"

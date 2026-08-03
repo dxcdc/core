@@ -15,14 +15,24 @@
         </p>
     </div>
     <div class="d-flex gap-2">
+        <button class="btn btn-success btn-sm fw-bold d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalAddEstrutura" style="border-radius: 8px;">
+            <i class="ri-add-circle-line fs-16"></i> Adicionar Nova Estrutura
+        </button>
         <button class="btn btn-outline-primary btn-sm fw-bold" onclick="document.getElementById('imagem-referencia-card').scrollIntoView({behavior: 'smooth'});">
             <i class="ri-image-line me-1"></i> Ver Diagrama em Imagem
         </button>
-        <button class="btn btn-primary btn-sm fw-bold" style="background: #2563eb; border: none;">
-            <i class="ri-refresh-line me-1"></i> Atualizar Status da Rede
-        </button>
     </div>
 </div>
+
+<!-- Notification Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 mb-4 shadow-sm" role="alert" style="border-radius: 10px;">
+            <i class="ri-checkbox-circle-fill me-2 fs-16"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
 
 <!-- PAINEL INTERATIVO DE ARQUITETURA DE REDE -->
 <div class="card card-lahomes border-0 p-4 mb-4" style="background: #ffffff; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);">
@@ -30,7 +40,7 @@
     <!-- TITULO DO DIAGRAMA -->
     <div class="text-center mb-4">
         <h4 class="fw-bold text-dark mb-1" style="font-size: 1.5em; color: #1e293b;">Estrutura Hipotética de VPN Institucional</h4>
-        <small class="text-muted fst-italic" style="font-size: 0.9em;">Exemplo fictício para estudo preliminar</small>
+        <small class="text-muted fst-italic" style="font-size: 0.9em;">Exemplo fictício para estudo preliminar — Telemetria Dinâmica</small>
     </div>
 
     <!-- NÓ SUPERIOR: VPS / SERVIDOR VPN -->
@@ -77,45 +87,33 @@
                 </div>
 
                 <div class="row g-3">
-                    <!-- ADM -->
+                    {% for s in estruturas_sede %}
                     <div class="col-md-4">
-                        <div class="p-3 bg-white rounded-3 border text-center shadow-sm h-100">
-                            <h6 class="fw-bold text-primary mb-2">ADM</h6>
-                            <div class="d-flex justify-content-center gap-1 mb-2 text-primary fs-18">
-                                <i class="ri-computer-line"></i>
-                                <i class="ri-computer-line"></i>
-                                <i class="ri-computer-line"></i>
+                        <div class="p-3 bg-white rounded-3 border text-center shadow-sm h-100 position-relative">
+                            <h6 class="fw-bold text-primary mb-2">{{ s.nome }}</h6>
+                            
+                            <!-- Ícones com Cor de Status (Verde = Online, Vermelho = Offline) -->
+                            <div class="d-flex justify-content-center gap-1 mb-2 fs-18">
+                                {% for i in "x"|rjust:s.pcs_sede %}
+                                    <i class="ri-computer-line {% if s.status == 'Online' %}text-success{% else %}text-danger{% endif %}" title="Computador da Sede - {{ s.status }}"></i>
+                                {% endfor %}
                             </div>
-                            <small class="text-muted d-block" style="font-size: 0.78em;">3 computadores da sede</small>
-                            <span class="badge bg-success-subtle text-success mt-2" style="font-size: 0.72em;">Online (10.8.10.x)</span>
-                        </div>
-                    </div>
 
-                    <!-- Financeiro -->
-                    <div class="col-md-4">
-                        <div class="p-3 bg-white rounded-3 border text-center shadow-sm h-100">
-                            <h6 class="fw-bold text-primary mb-2">Financeiro</h6>
-                            <div class="d-flex justify-content-center gap-1 mb-2 text-primary fs-18">
-                                <i class="ri-computer-line"></i>
-                                <i class="ri-computer-line"></i>
-                            </div>
-                            <small class="text-muted d-block" style="font-size: 0.78em;">2 computadores da sede</small>
-                            <span class="badge bg-success-subtle text-success mt-2" style="font-size: 0.72em;">Online (10.8.11.x)</span>
-                        </div>
-                    </div>
+                            <small class="text-muted d-block" style="font-size: 0.78em;">{{ s.pcs_sede }} computador(es) da sede</small>
 
-                    <!-- RH -->
-                    <div class="col-md-4">
-                        <div class="p-3 bg-white rounded-3 border text-center shadow-sm h-100">
-                            <h6 class="fw-bold text-primary mb-2">RH</h6>
-                            <div class="d-flex justify-content-center gap-1 mb-2 text-primary fs-18">
-                                <i class="ri-computer-line"></i>
-                                <i class="ri-computer-line"></i>
-                            </div>
-                            <small class="text-muted d-block" style="font-size: 0.78em;">2 computadores da sede</small>
-                            <span class="badge bg-success-subtle text-success mt-2" style="font-size: 0.72em;">Online (10.8.12.x)</span>
+                            <!-- Badge de Status -->
+                            {% if s.status == 'Online' %}
+                                <span class="badge bg-success-subtle text-success fw-bold mt-2" style="font-size: 0.72em;">
+                                    <i class="ri-checkbox-circle-fill me-1"></i> Ligado ({{ s.ip_faixa }})
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger fw-bold mt-2" style="font-size: 0.72em;">
+                                    <i class="ri-close-circle-fill me-1"></i> Desligado ({{ s.ip_faixa }})
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -130,83 +128,140 @@
                 </div>
 
                 <div class="row g-3">
-                    <!-- PPCAM -->
+                    {% for p in estruturas_projeto %}
                     <div class="col-md-4">
                         <div class="p-3 bg-white rounded-3 border border-success text-center shadow-sm h-100">
-                            <h6 class="fw-bold text-success mb-1">PPCAM</h6>
+                            <h6 class="fw-bold text-success mb-1">{{ p.nome }}</h6>
                             <small class="text-muted d-block mb-2" style="font-size: 0.75em;"><i class="ri-building-line"></i> Sede do projeto</small>
                             <hr class="my-2">
-                            <small class="text-dark fw-semibold d-block mb-1" style="font-size: 0.78em;">Equipe externa</small>
-                            <div class="d-flex justify-content-center gap-1 text-success fs-16 mb-1">
-                                <i class="ri-smartphone-line"></i>
-                                <i class="ri-smartphone-line"></i>
-                                <i class="ri-laptop-line"></i>
-                            </div>
-                            <small class="text-muted d-block" style="font-size: 0.72em;">celulares e notebooks</small>
-                        </div>
-                    </div>
+                            
+                            {% if p.pcs_sede > 0 %}
+                                <div class="d-flex justify-content-center gap-1 mb-1 fs-16">
+                                    {% for i in "x"|rjust:p.pcs_sede %}
+                                        <i class="ri-computer-line {% if p.status == 'Online' %}text-success{% else %}text-danger{% endif %}" title="PC Sede do Projeto"></i>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
 
-                    <!-- PROVITA -->
-                    <div class="col-md-4">
-                        <div class="p-3 bg-white rounded-3 border border-success text-center shadow-sm h-100">
-                            <h6 class="fw-bold text-success mb-1">PROVITA</h6>
-                            <small class="text-muted d-block mb-2" style="font-size: 0.75em;"><i class="ri-building-line"></i> Sede do projeto</small>
-                            <hr class="my-2">
-                            <small class="text-dark fw-semibold d-block mb-1" style="font-size: 0.78em;">Equipe externa</small>
-                            <div class="d-flex justify-content-center gap-1 text-success fs-16 mb-1">
-                                <i class="ri-smartphone-line"></i>
-                                <i class="ri-smartphone-line"></i>
-                                <i class="ri-laptop-line"></i>
-                            </div>
-                            <small class="text-muted d-block" style="font-size: 0.72em;">celulares e notebooks</small>
-                        </div>
-                    </div>
+                            {% if p.dispositivos_moveis > 0 %}
+                                <small class="text-dark fw-semibold d-block mb-1" style="font-size: 0.78em;">Equipe externa</small>
+                                <div class="d-flex justify-content-center gap-1 fs-16 mb-1">
+                                    {% for i in "x"|rjust:p.dispositivos_moveis %}
+                                        <i class="ri-smartphone-line {% if p.status == 'Online' %}text-success{% else %}text-danger{% endif %}" title="Dispositivo Móvel Externo"></i>
+                                    {% endfor %}
+                                </div>
+                                <small class="text-muted d-block" style="font-size: 0.72em;">celulares e notebooks</small>
+                            {% endif %}
 
-                    <!-- PPDDH -->
-                    <div class="col-md-4">
-                        <div class="p-3 bg-white rounded-3 border border-success text-center shadow-sm h-100">
-                            <h6 class="fw-bold text-success mb-1">PPDDH</h6>
-                            <small class="text-muted d-block mb-2" style="font-size: 0.75em;"><i class="ri-building-line"></i> Sede do projeto</small>
-                            <hr class="my-2">
-                            <small class="text-dark fw-semibold d-block mb-1" style="font-size: 0.78em;">Equipe externa</small>
-                            <div class="d-flex justify-content-center gap-1 text-success fs-16 mb-1">
-                                <i class="ri-smartphone-line"></i>
-                                <i class="ri-smartphone-line"></i>
-                                <i class="ri-laptop-line"></i>
-                            </div>
-                            <small class="text-muted d-block" style="font-size: 0.72em;">celulares e notebooks</small>
+                            <!-- Status Badge -->
+                            {% if p.status == 'Online' %}
+                                <span class="badge bg-success text-white fw-bold mt-2" style="font-size: 0.72em;">
+                                    <i class="ri-checkbox-circle-fill me-1"></i> Ligado (Online)
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger text-white fw-bold mt-2" style="font-size: 0.72em;">
+                                    <i class="ri-close-circle-fill me-1"></i> Desligado (Offline)
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- BARRA DE LEGENDA INSTITUCIONAL -->
+    <!-- BARRA DE LEGENDA INSTITUCIONAL DE STATUS -->
     <div class="p-3 rounded-3 border bg-light">
         <div class="row align-items-center text-center text-md-start g-2" style="font-size: 0.88em; color: #475569;">
             <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-                <div class="rounded-circle p-2 bg-primary text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                    <i class="ri-lock-fill"></i>
-                </div>
-                <span><strong>Acesso remoto protegido</strong></span>
-            </div>
-            <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
                 <div class="rounded-circle p-2 bg-success text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                    <i class="ri-group-fill"></i>
+                    <i class="ri-checkbox-circle-line"></i>
                 </div>
-                <span><strong>Integração entre sede e projetos</strong></span>
+                <span><strong>Ícones Verdes:</strong> Ligado / Online</span>
             </div>
             <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-                <div class="rounded-circle p-2 bg-secondary text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                    <i class="ri-information-fill"></i>
+                <div class="rounded-circle p-2 bg-danger text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="ri-close-circle-line"></i>
                 </div>
-                <span class="fst-italic">Estrutura ilustrativa, não representa ambiente final</span>
+                <span><strong>Ícones Vermelhos:</strong> Desligado / Offline</span>
+            </div>
+            <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                <div class="rounded-circle p-2 bg-primary text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="ri-shield-check-line"></i>
+                </div>
+                <span><strong>Acesso remoto seguro com VPN</strong></span>
             </div>
         </div>
     </div>
 
+</div>
+
+<!-- MODAL CADASTRAR NOVA ESTRUTURA -->
+<div class="modal fade" id="modalAddEstrutura" tabindex="-1" aria-labelledby="modalAddEstruturaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header bg-light border-bottom px-4 py-3">
+                <h5 class="modal-title fw-bold text-dark" id="modalAddEstruturaLabel">
+                    <i class="ri-add-circle-fill text-success me-2"></i> Adicionar Nova Estrutura ao Mapa VPN
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form action="{% url 'dashboard:vpn' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-bold" style="font-size: 0.9em;">Nome da Estrutura / Setor</label>
+                        <input type="text" name="nome" class="form-control form-control-lahomes" placeholder="Ex: Setor Jurídico, Projeto Socioambiental..." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-bold" style="font-size: 0.9em;">Ramificação da Arquitetura</label>
+                        <select name="tipo" class="form-select">
+                            <option value="sede">Setor da Sede (Coluna Azul)</option>
+                            <option value="projeto">Projeto de Proteção à Vida (Coluna Verde)</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-dark fw-bold" style="font-size: 0.9em;">Computadores na Sede</label>
+                            <input type="number" name="pcs_sede" class="form-control" value="2" min="0" max="20">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-dark fw-bold" style="font-size: 0.9em;">Dispositivos Móveis</label>
+                            <input type="number" name="dispositivos_moveis" class="form-control" value="0" min="0" max="20">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-dark fw-bold" style="font-size: 0.9em;">Status Inicial</label>
+                            <select name="status" class="form-select">
+                                <option value="Online">Ligado (Online)</option>
+                                <option value="Offline">Desligado (Offline)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-dark fw-bold" style="font-size: 0.9em;">Faixa de IP</label>
+                            <input type="text" name="ip_faixa" class="form-control" value="10.8.15.x">
+                        </div>
+                    </div>
+
+                </div>
+                
+                <div class="modal-footer bg-light px-4 py-3 border-top">
+                    <button type="button" class="btn btn-light border fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success fw-bold px-4" style="border-radius: 8px;">
+                        <i class="ri-save-line me-1"></i> Cadastrar Estrutura
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- CARD COM A IMAGEM OFICIAL ENVIADA PELO CDC -->

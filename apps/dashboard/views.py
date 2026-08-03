@@ -58,48 +58,47 @@ def infra_view(request):
 @login_required(login_url='dashboard:login')
 def vpn_view(request):
     """Renderiza o Mapa de Infraestrutura & Conexões VPN por Projetos (PROVITA, PPCAM, PPDDH)."""
-    projetos = [
-        {
-            'sigla': 'PROVITA',
-            'nome': 'Programa de Proteção a Vítimas e Testemunhas Ameaçadas',
-            'gateway': 'gw-provita.vpn.cdc.org.br (WireGuard)',
-            'ip_gateway': '10.8.1.1',
-            'status': 'Ativo',
-            'estacoes': [
-                {'hostname': 'PROVITA-ADM-01', 'usuario': 'Coordenação Geral', 'ip': '10.8.1.10', 'latencia': '12ms', 'status': 'Online'},
-                {'hostname': 'PROVITA-TEC-02', 'usuario': 'Equipe de Serviço Social', 'ip': '10.8.1.11', 'latencia': '15ms', 'status': 'Online'},
-                {'hostname': 'PROVITA-JUR-03', 'usuario': 'Assessoria Jurídica', 'ip': '10.8.1.12', 'latencia': '18ms', 'status': 'Online'},
-                {'hostname': 'PROVITA-PSICO-04', 'usuario': 'Psicologia & Acolhimento', 'ip': '10.8.1.13', 'latencia': '14ms', 'status': 'Online'},
-                {'hostname': 'PROVITA-PLANT-05', 'usuario': 'Plantão 24h Emergencial', 'ip': '10.8.1.14', 'latencia': '11ms', 'status': 'Online'},
-            ]
-        },
-        {
-            'sigla': 'PPCAM',
-            'nome': 'Programa de Proteção a Crianças e Adolescentes Ameaçados de Morte',
-            'gateway': 'gw-ppcam.vpn.cdc.org.br (WireGuard)',
-            'ip_gateway': '10.8.2.1',
-            'status': 'Ativo',
-            'estacoes': [
-                {'hostname': 'PPCAM-ADM-01', 'usuario': 'Gestão Operacional', 'ip': '10.8.2.10', 'latencia': '16ms', 'status': 'Online'},
-                {'hostname': 'PPCAM-SOCIAL-02', 'usuario': 'Assistência Social', 'ip': '10.8.2.11', 'latencia': '22ms', 'status': 'Online'},
-                {'hostname': 'PPCAM-CAMPO-03', 'usuario': 'Equipe de Campo / Região', 'ip': '10.8.2.12', 'latencia': '35ms', 'status': 'Online'},
-                {'hostname': 'PPCAM-REGISTRO-04', 'usuario': 'Recepção e Prontuários', 'ip': '10.8.2.13', 'latencia': '19ms', 'status': 'Offline'},
-            ]
-        },
-        {
-            'sigla': 'PPDDH',
-            'nome': 'Programa de Proteção aos Defensores dos Direitos Humanos',
-            'gateway': 'gw-ppddh.vpn.cdc.org.br (OpenVPN)',
-            'ip_gateway': '10.8.3.1',
-            'status': 'Ativo',
-            'estacoes': [
-                {'hostname': 'PPDDH-COORD-01', 'usuario': 'Coordenação PPDDH', 'ip': '10.8.3.10', 'latencia': '14ms', 'status': 'Online'},
-                {'hostname': 'PPDDH-ADV-02', 'usuario': 'Advocacia Direitos Humanos', 'ip': '10.8.3.11', 'latencia': '17ms', 'status': 'Online'},
-                {'hostname': 'PPDDH-RELATORIA-03', 'usuario': 'Relatoria de Violações', 'ip': '10.8.3.12', 'latencia': '20ms', 'status': 'Online'},
-            ]
-        }
-    ]
-    return render(request, 'dashboard/vpn_mapa.html', {'projetos': projetos})
+    from apps.dataops.models import EstruturaVpn
+
+    if request.method == 'POST':
+        nome = request.POST.get('nome', '').strip()
+        tipo = request.POST.get('tipo', 'sede')
+        pcs_sede = int(request.POST.get('pcs_sede', 1))
+        dispositivos_moveis = int(request.POST.get('dispositivos_moveis', 0))
+        status = request.POST.get('status', 'Online')
+        ip_faixa = request.POST.get('ip_faixa', '10.8.x.x')
+
+        if nome:
+            nova_est = EstruturaVpn.objects.create(
+                nome=nome,
+                tipo=tipo,
+                pcs_sede=pcs_sede,
+                dispositivos_moveis=dispositivos_moveis,
+                status=status,
+                ip_faixa=ip_faixa,
+                latencia='12ms'
+            )
+            user_exec = UsuarioDataOps.objects.filter(email='fvier@cdc.org.br').first()
+            LogAuditoria.objects.create(
+                usuario_executor=user_exec,
+                nivel='SUCCESS',
+                acao_executada='CADASTRO_ESTRUTURA_VPN',
+                alvo_impactado=f"{nova_est.nome} ({nova_est.get_tipo_display()})",
+                detalhes=f"Nova estrutura cadastrada no mapa de infraestrutura VPN com status {status}."
+            )
+            messages.success(request, f'Estrutura "{nome}" adicionada com sucesso ao mapa de VPN!')
+            return redirect('dashboard:vpn')
+
+    estruturas_sede = EstruturaVpn.objects.filter(tipo='sede')
+    estruturas_projeto = EstruturaVpn.objects.filter(tipo='projeto')
+
+    context = {
+        'estruturas_sede': estruturas_sede,
+        'estruturas_projeto': estruturas_projeto,
+        'total_online': EstruturaVpn.objects.filter(status='Online').count(),
+        'total_offline': EstruturaVpn.objects.filter(status='Offline').count(),
+    }
+    return render(request, 'dashboard/vpn_mapa.html', context)
 
 @login_required(login_url='dashboard:login')
 def cofre_view(request):
