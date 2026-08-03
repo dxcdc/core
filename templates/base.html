@@ -1,77 +1,81 @@
 {% load static %}
 <!DOCTYPE html>
-<!--[if IE 9]>         <html class="no-js lt-ie10" lang="pt-br"> <![endif]-->
-<!--[if gt IE 9]><!--> <html class="no-js" lang="pt-br"> <!--<![endif]-->
+<html lang="pt-br" data-bs-theme="light">
     <head>
         <meta charset="utf-8">
-        <title>{% block title %}CDC Core — Centralizador & Operações{% endblock %}</title>
-        <meta name="description" content="CDC Core - Plataforma Centralizadora de Infraestrutura e Operações CDC">
+        <title>{% block title %}CDC Core — Centralizador & Operações do CDC{% endblock %}</title>
+        <meta name="description" content="CDC Core - Plataforma Centralizadora de Infraestrutura e Operações do CDC">
         <meta name="author" content="CDC DevOps Team">
-        <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <!-- Icons -->
+        <!-- Favicon -->
         <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
-        <link rel="apple-touch-icon" href="{% static 'img/icon57.png' %}" sizes="57x57">
-        <link rel="apple-touch-icon" href="{% static 'img/icon72.png' %}" sizes="72x72">
-        <link rel="apple-touch-icon" href="{% static 'img/icon76.png' %}" sizes="76x76">
-        <link rel="apple-touch-icon" href="{% static 'img/icon114.png' %}" sizes="114x114">
-        <link rel="apple-touch-icon" href="{% static 'img/icon120.png' %}" sizes="120x120">
-        <link rel="apple-touch-icon" href="{% static 'img/icon144.png' %}" sizes="144x144">
-        <link rel="apple-touch-icon" href="{% static 'img/icon152.png' %}" sizes="152x152">
-        <link rel="apple-touch-icon" href="{% static 'img/icon180.png' %}" sizes="180x180">
 
-        <!-- Stylesheets -->
-        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/plugins.css' %}">
+        <!-- Lahomes Stylesheets & Icons -->
+        <link rel="stylesheet" href="{% static 'lahomes/css/app.min.css' %}">
+        <link rel="stylesheet" href="{% static 'lahomes/css/icons.min.css' %}">
+        
+        <!-- Base Custom Overrides -->
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
-        <link rel="stylesheet" href="{% static 'css/themes.css' %}">
         {% block extra_css %}{% endblock %}
 
-        <script src="{% static 'js/vendor/modernizr.min.js' %}"></script>
+        <style>
+            body {
+                background-color: #f8fafc;
+                color: #334155;
+                font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            }
+            .wrapper {
+                display: flex;
+                min-height: 100vh;
+                overflow: hidden;
+            }
+            .page-content {
+                flex-grow: 1;
+                background-color: #f8fafc;
+                padding-bottom: 40px;
+                min-width: 0;
+            }
+            .card-lahomes {
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .card-lahomes:hover {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+            }
+        </style>
     </head>
     <body>
-        <div id="page-wrapper">
-            <!-- Preloader -->
-            <div class="preloader themed-background">
-                <h1 class="push-top-bottom text-light text-center"><strong>CDC</strong> Core</h1>
-                <div class="inner">
-                    <h3 class="text-light visible-lt-ie10"><strong>Carregando...</strong></h3>
-                    <div class="preloader-spinner hidden-lt-ie10"></div>
-                </div>
-            </div>
+        <!-- Main Wrapper -->
+        <div class="wrapper">
+            
+            <!-- Sidebar (Lahomes Style) -->
+            {% include 'partials/_sidebar.html' %}
 
-            <!-- Page Container -->
-            <div id="page-container" class="sidebar-partial sidebar-visible-lg sidebar-no-animations">
+            <!-- Page Content Wrapper -->
+            <div class="page-content">
                 
-                <!-- Main Sidebar -->
-                {% include 'partials/_sidebar.html' %}
+                <!-- Topbar Header (Lahomes Style) -->
+                {% include 'partials/_header.html' %}
 
-                <!-- Main Container -->
-                <div id="main-container">
-                    
-                    <!-- Header -->
-                    {% include 'partials/_header.html' %}
-
-                    <!-- Page Content -->
-                    <div id="page-content">
-                        {% block content %}{% endblock %}
-                    </div>
-
+                <!-- Container Fluid for Pages -->
+                <div class="container-fluid px-4 py-3">
+                    {% block content %}{% endblock %}
                 </div>
-                <!-- END Main Container -->
+
+                <!-- No Footer as requested for authenticated area -->
             </div>
-            <!-- END Page Container -->
+            <!-- END Page Content -->
+
         </div>
-        <!-- END Page Wrapper -->
+        <!-- END Wrapper -->
 
-        <!-- Scroll to top link -->
-        <a href="#" id="to-top"><i class="fa fa-angle-up"></i></a>
-
-        <!-- Include JQuery and Bootstrap JS -->
+        <!-- Vendor Scripts -->
         <script src="{% static 'js/vendor/jquery.min.js' %}"></script>
         <script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
-        <script src="{% static 'js/plugins.js' %}"></script>
-        <script src="{% static 'js/app.js' %}"></script>
         {% block extra_js %}{% endblock %}
     </body>
 </html>

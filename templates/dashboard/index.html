@@ -1,160 +1,233 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Dashboard | CDC Core — Centralizador de Operações{% endblock %}
+{% block title %}Dashboard | CDC Core — Centralizador de Operações do CDC{% endblock %}
 
 {% block content %}
-<!-- Dashboard Header -->
-<div class="content-header">
-    <div class="header-section">
-        <h1>
-            <i class="gi gi-stopwatch"></i>Painel Principal<br><small>Centralizador de Infraestrutura, VPNs e Canivete de Operações CDC</small>
-        </h1>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">Painel Principal de Operações</h3>
+        <p class="text-muted mb-0" style="font-size: 0.95em;">Centralizador de Infraestrutura, Gateways VPN e Utilitários do CDC</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 500;">
+            <i class="ri-refresh-line"></i> Atualizar Status
+        </button>
+        <button class="btn btn-primary btn-sm d-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 600; background: #2563eb; border: none;">
+            <i class="ri-add-line"></i> Nova Automação
+        </button>
     </div>
 </div>
-<ul class="breadcrumb breadcrumb-top">
-    <li>CDC Core</li>
-    <li><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-</ul>
-<!-- END Dashboard Header -->
 
-<!-- Top Stats Widgets -->
-<div class="row">
-    <div class="col-sm-6 col-lg-3">
-        <a href="javascript:void(0)" class="widget widget-hover-effect1">
-            <div class="widget-simple">
-                <div class="widget-icon pull-left themed-background-spring animation-fadeIn">
-                    <i class="gi gi-server"></i>
+<!-- Stat Widgets Grid (Lahomes Style) -->
+<div class="row g-3 mb-4">
+    
+    <!-- Widget 1: Servidores -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card card-lahomes h-100 border-0 p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Servidores Online</span>
+                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">12 / 12</h3>
+                    <span class="badge" style="background: rgba(34, 197, 94, 0.12); color: #16a34a; font-size: 0.78em; font-weight: 600;">
+                        <i class="ri-arrow-up-line"></i> 100% Operacional
+                    </span>
                 </div>
-                <h3 class="widget-content text-right animation-pullDown">
-                    <strong>12 / 12</strong><br>
-                    <small>Servidores Online</small>
-                </h3>
-            </div>
-        </a>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <a href="javascript:void(0)" class="widget widget-hover-effect1">
-            <div class="widget-simple">
-                <div class="widget-icon pull-left themed-background-amethyst animation-fadeIn">
-                    <i class="gi gi-shield"></i>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(37, 99, 235, 0.1); color: #2563eb; font-size: 1.6em;">
+                    <i class="ri-server-line"></i>
                 </div>
-                <h3 class="widget-content text-right animation-pullDown">
-                    <strong>45</strong><br>
-                    <small>Conexões VPN Ativas</small>
-                </h3>
             </div>
-        </a>
+        </div>
     </div>
-    <div class="col-sm-6 col-lg-3">
-        <a href="javascript:void(0)" class="widget widget-hover-effect1">
-            <div class="widget-simple">
-                <div class="widget-icon pull-left themed-background-fire animation-fadeIn">
-                    <i class="gi gi-cloud"></i>
+
+    <!-- Widget 2: Conexões VPN -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card card-lahomes h-100 border-0 p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Túneis VPN Ativos</span>
+                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">45</h3>
+                    <span class="badge" style="background: rgba(147, 51, 234, 0.12); color: #9333ea; font-size: 0.78em; font-weight: 600;">
+                        <i class="ri-shield-keyhole-line"></i> WireGuard OK
+                    </span>
                 </div>
-                <h3 class="widget-content text-right animation-pullDown">
-                    <strong>100%</strong><br>
-                    <small>Backups Concluídos</small>
-                </h3>
-            </div>
-        </a>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <a href="javascript:void(0)" class="widget widget-hover-effect1">
-            <div class="widget-simple">
-                <div class="widget-icon pull-left themed-background-emerald animation-fadeIn">
-                    <i class="gi gi-keys"></i>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(147, 51, 234, 0.1); color: #9333ea; font-size: 1.6em;">
+                    <i class="ri-shield-user-line"></i>
                 </div>
-                <h3 class="widget-content text-right animation-pullDown">
-                    <strong>28</strong><br>
-                    <small>Segredos no Cofre</small>
-                </h3>
             </div>
-        </a>
+        </div>
     </div>
+
+    <!-- Widget 3: Backups Offsite -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card card-lahomes h-100 border-0 p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Backups (Política 3-2-1)</span>
+                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">Sincronizado</h3>
+                    <span class="badge" style="background: rgba(34, 197, 94, 0.12); color: #16a34a; font-size: 0.78em; font-weight: 600;">
+                        <i class="ri-check-line"></i> Rclone Offsite OK
+                    </span>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(34, 197, 94, 0.1); color: #16a34a; font-size: 1.6em;">
+                    <i class="ri-cloud-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Widget 4: Cofre de Segredos -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card card-lahomes h-100 border-0 p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Cofre de Chaves & Tokens</span>
+                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">28 Segredos</h3>
+                    <span class="badge" style="background: rgba(217, 119, 6, 0.12); color: #d97706; font-size: 0.78em; font-weight: 600;">
+                        <i class="ri-lock-2-line"></i> ed25519 Criptografado
+                    </span>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(217, 119, 6, 0.1); color: #d97706; font-size: 1.6em;">
+                    <i class="ri-key-2-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
-<!-- END Top Stats Widgets -->
 
-<!-- Operational Overview & Quick Tools -->
-<div class="row">
+<!-- Main Operational Content Area -->
+<div class="row g-4">
+    
+    <!-- Table Status Column -->
     <div class="col-lg-8">
-        <!-- Main Operational Status Block -->
-        <div class="block full">
-            <div class="block-title">
-                <h2><i class="fa fa-dashboard"></i> <strong>Status dos Módulos Operacionais</strong></h2>
+        <div class="card card-lahomes border-0 p-4">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h5 class="fw-bold mb-0" style="color: #0f172a;">
+                    <i class="ri-activity-line me-2 text-primary"></i> Status dos Módulos Operacionais do CDC
+                </h5>
+                <span class="badge bg-light text-dark border">Verificação em Tempo Real</span>
             </div>
+
             <div class="table-responsive">
-                <table class="table table-vcenter table-striped">
-                    <thead>
+                <table class="table table-hover align-middle mb-0" style="font-size: 0.92em;">
+                    <thead class="table-light">
                         <tr>
-                            <th>Módulo</th>
-                            <th>Status</th>
-                            <th>Última Verificação</th>
-                            <th class="text-center">Ações</th>
+                            <th scope="col" style="color: #64748b;">Módulo Operacional</th>
+                            <th scope="col" style="color: #64748b;">Status</th>
+                            <th scope="col" style="color: #64748b;">Última Checagem</th>
+                            <th scope="col" class="text-end" style="color: #64748b;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><i class="gi gi-server text-success"></i> <strong>Cluster de Servidores</strong></td>
-                            <td><span class="label label-success">Saudável</span></td>
-                            <td>Há 2 minutos</td>
-                            <td class="text-center">
-                                <button class="btn btn-xs btn-default" data-toggle="tooltip" title="Ver Detalhes"><i class="fa fa-eye"></i></button>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="ri-server-fill text-success fs-18"></i>
+                                    <span class="fw-semibold" style="color: #0f172a;">Cluster de Servidores CDC</span>
+                                </div>
+                            </td>
+                            <td><span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #15803d; font-weight: 600;">Saudável</span></td>
+                            <td class="text-muted">Há 2 minutos</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-light border-0" title="Ver Detalhes"><i class="ri-eye-line"></i></button>
                             </td>
                         </tr>
                         <tr>
-                            <td><i class="gi gi-shield text-info"></i> <strong>Gateway VPN (WireGuard)</strong></td>
-                            <td><span class="label label-success">Ativo</span></td>
-                            <td>Há 1 minuto</td>
-                            <td class="text-center">
-                                <button class="btn btn-xs btn-default" data-toggle="tooltip" title="Ver Detalhes"><i class="fa fa-eye"></i></button>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="ri-shield-fill text-primary fs-18"></i>
+                                    <span class="fw-semibold" style="color: #0f172a;">Gateway VPN (WireGuard)</span>
+                                </div>
+                            </td>
+                            <td><span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #15803d; font-weight: 600;">Ativo</span></td>
+                            <td class="text-muted">Há 1 minuto</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-light border-0" title="Ver Detalhes"><i class="ri-eye-line"></i></button>
                             </td>
                         </tr>
                         <tr>
-                            <td><i class="gi gi-cloud text-warning"></i> <strong>Sincronização Rclone (Offsite)</strong></td>
-                            <td><span class="label label-info">Agendado</span></td>
-                            <td>Há 15 minutos</td>
-                            <td class="text-center">
-                                <button class="btn btn-xs btn-default" data-toggle="tooltip" title="Executar Agora"><i class="fa fa-play"></i></button>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="ri-cloud-fill text-warning fs-18"></i>
+                                    <span class="fw-semibold" style="color: #0f172a;">Sync Rclone Backup (Offsite)</span>
+                                </div>
+                            </td>
+                            <td><span class="badge" style="background: rgba(2, 132, 199, 0.15); color: #0369a1; font-weight: 600;">Agendado</span></td>
+                            <td class="text-muted">Há 15 minutos</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-light border-0" title="Executar Agora"><i class="ri-play-line"></i></button>
                             </td>
                         </tr>
                         <tr>
-                            <td><i class="gi gi-refresh text-primary"></i> <strong>GitHub Actions (Issues Idempotentes)</strong></td>
-                            <td><span class="label label-success">Sincronizado</span></td>
-                            <td>Há 5 minutos</td>
-                            <td class="text-center">
-                                <button class="btn btn-xs btn-default" data-toggle="tooltip" title="Logs"><i class="fa fa-list"></i></button>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="ri-git-branch-fill text-purple fs-18" style="color: #9333ea;"></i>
+                                    <span class="fw-semibold" style="color: #0f172a;">GitHub Actions (Issues Idempotentes)</span>
+                                </div>
+                            </td>
+                            <td><span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #15803d; font-weight: 600;">Sincronizado</span></td>
+                            <td class="text-muted">Há 5 minutos</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-light border-0" title="Logs"><i class="ri-file-list-line"></i></button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-        <!-- END Main Operational Status Block -->
     </div>
+
+    <!-- Quick Tools Column -->
     <div class="col-lg-4">
-        <!-- Quick Actions Block -->
-        <div class="block">
-            <div class="block-title">
-                <h2><i class="fa fa-wrench"></i> <strong>Canivete de Ferramentas</strong></h2>
-            </div>
-            <div class="list-group">
-                <a href="javascript:void(0)" class="list-group-item">
-                    <h4 class="list-group-item-heading"><i class="gi gi-keys text-primary"></i> Gerador de Chaves SSH</h4>
-                    <p class="list-group-item-text">Criar par de chaves ed25519 para novos servidores.</p>
+        <div class="card card-lahomes border-0 p-4 h-100">
+            <h5 class="fw-bold mb-4" style="color: #0f172a;">
+                <i class="ri-tools-line me-2 text-warning" style="color: #d97706;"></i> Canivete de Utilitários
+            </h5>
+
+            <div class="d-flex flex-column gap-3">
+                <a href="#" class="d-flex align-items-center justify-content-between p-3 rounded text-decoration-none" style="background: #f8fafc; border: 1px solid #e2e8f0; transition: all 0.2s ease;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded p-2" style="background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                            <i class="ri-key-line fs-20"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0" style="color: #0f172a; font-size: 0.92em;">Gerar Chaves SSH</h6>
+                            <small class="text-muted" style="font-size: 0.78em;">Par ed25519 para novos servidores</small>
+                        </div>
+                    </div>
+                    <i class="ri-arrow-right-s-line text-muted"></i>
                 </a>
-                <a href="javascript:void(0)" class="list-group-item">
-                    <h4 class="list-group-item-heading"><i class="gi gi-cloud text-info"></i> Disparar Backup Offsite</h4>
-                    <p class="list-group-item-text">Executar sync Rclone 3-2-1 para storage em nuvem.</p>
+
+                <a href="#" class="d-flex align-items-center justify-content-between p-3 rounded text-decoration-none" style="background: #f8fafc; border: 1px solid #e2e8f0; transition: all 0.2s ease;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded p-2" style="background: rgba(34, 197, 94, 0.1); color: #16a34a;">
+                            <i class="ri-cloud-upload-line fs-20"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0" style="color: #0f172a; font-size: 0.92em;">Disparar Sync Rclone</h6>
+                            <small class="text-muted" style="font-size: 0.78em;">Backup offsite 3-2-1 manual</small>
+                        </div>
+                    </div>
+                    <i class="ri-arrow-right-s-line text-muted"></i>
                 </a>
-                <a href="javascript:void(0)" class="list-group-item">
-                    <h4 class="list-group-item-heading"><i class="gi gi-book_open text-success"></i> Consultar Diretrizes</h4>
-                    <p class="list-group-item-text">Acessar documentação e ADRs de governança.</p>
+
+                <a href="#" class="d-flex align-items-center justify-content-between p-3 rounded text-decoration-none" style="background: #f8fafc; border: 1px solid #e2e8f0; transition: all 0.2s ease;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded p-2" style="background: rgba(147, 51, 234, 0.1); color: #9333ea;">
+                            <i class="ri-book-read-line fs-20"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0" style="color: #0f172a; font-size: 0.92em;">Diretrizes & ADRs</h6>
+                            <small class="text-muted" style="font-size: 0.78em;">Documentação de governança do CDC</small>
+                        </div>
+                    </div>
+                    <i class="ri-arrow-right-s-line text-muted"></i>
                 </a>
             </div>
         </div>
-        <!-- END Quick Actions Block -->
     </div>
+
 </div>
-<!-- END Operational Overview & Quick Tools -->
 {% endblock %}

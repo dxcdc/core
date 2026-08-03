@@ -1,125 +1,102 @@
 {% load static %}
-<div id="sidebar">
-    <!-- Wrapper for scrolling functionality -->
-    <div id="sidebar-scroll">
-        <!-- Sidebar Content -->
-        <div class="sidebar-content">
-            <!-- Brand -->
-            <a href="{% url 'dashboard:index' %}" class="sidebar-brand" style="display: flex; align-items: center; gap: 8px; justify-content: center; padding: 10px;">
-                <img src="{% static 'img/cdc_logo_icon.png' %}" alt="CDC Logo" style="height: 36px;">
-                <span class="sidebar-nav-mini-hide"><strong>CDC</strong> Core</span>
-            </a>
-            <!-- END Brand -->
+<aside class="sidebar-lahomes" style="width: 260px; min-width: 260px; background: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+    
+    <!-- Sidebar Brand -->
+    <div class="sidebar-brand-box px-4 py-3 d-flex align-items-center" style="border-bottom: 1px solid #f1f5f9; height: 70px;">
+        <a href="{% url 'dashboard:index' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+            <!-- Native Transparent PNG Logo without white box wrapper -->
+            <img src="{% static 'img/cdc_logo_icon.png' %}" alt="CDC Logo" style="height: 38px;">
+            <div class="d-flex flex-column">
+                <span style="color: #0f172a; font-size: 1.25em; font-weight: 800; letter-spacing: -0.3px; line-height: 1;">CDC Core</span>
+                <small style="color: #64748b; font-size: 0.72em; font-weight: 600; text-transform: uppercase;">Operações</small>
+            </div>
+        </a>
+    </div>
 
-            <!-- User Info -->
-            <div class="sidebar-section sidebar-user clearfix sidebar-nav-mini-hide">
-                <div class="sidebar-user-avatar">
-                    <a href="#">
-                        <img src="{% static 'img/placeholders/avatars/avatar2.jpg' %}" alt="avatar">
-                    </a>
-                </div>
-                <div class="sidebar-user-name">Operações CDC</div>
-                <div class="sidebar-user-links">
-                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Perfil"><i class="gi gi-user"></i></a>
-                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Mensagens"><i class="gi gi-envelope"></i></a>
-                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Configurações"><i class="gi gi-cogwheel"></i></a>
-                    <a href="{% url 'dashboard:logout' %}" data-toggle="tooltip" data-placement="bottom" title="Sair"><i class="gi gi-exit"></i></a>
+    <!-- Sidebar Navigation Links -->
+    <div class="sidebar-menu-wrapper px-3 py-4" style="flex-grow: 1; overflow-y: auto;">
+        
+        <!-- Category 1 -->
+        <div class="text-uppercase text-muted fw-bold mb-2 px-3" style="font-size: 0.72em; letter-spacing: 0.8px; color: #94a3b8 !important;">
+            Navegação Principal
+        </div>
+        
+        <ul class="nav nav-pills flex-column mb-4 gap-1">
+            <li class="nav-item">
+                <a href="{% url 'dashboard:index' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'index' %}active{% endif %}" style="border-radius: 8px; font-weight: 600; color: {% if request.resolver_match.url_name == 'index' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'index' %}#2563eb{% else %}transparent{% endif %};">
+                    <i class="ri-dashboard-3-line fs-18"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Category 2 -->
+        <div class="text-uppercase text-muted fw-bold mb-2 px-3" style="font-size: 0.72em; letter-spacing: 0.8px; color: #94a3b8 !important;">
+            Módulos de Operação
+        </div>
+
+        <ul class="nav nav-pills flex-column mb-4 gap-1">
+            <li class="nav-item">
+                <a href="#" class="nav-link d-flex align-items-center gap-3 py-2 px-3" style="border-radius: 8px; font-weight: 500; color: #475569;">
+                    <i class="ri-server-line fs-18 text-primary"></i>
+                    <span>Infraestrutura & VMs</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link d-flex align-items-center gap-3 py-2 px-3" style="border-radius: 8px; font-weight: 500; color: #475569;">
+                    <i class="ri-shield-keyhole-line fs-18 text-purple" style="color: #9333ea;"></i>
+                    <span>VPN & Redes WireGuard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link d-flex align-items-center gap-3 py-2 px-3" style="border-radius: 8px; font-weight: 500; color: #475569;">
+                    <i class="ri-key-2-line fs-18 text-success" style="color: #16a34a;"></i>
+                    <span>Cofre de Segredos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link d-flex align-items-center gap-3 py-2 px-3" style="border-radius: 8px; font-weight: 500; color: #475569;">
+                    <i class="ri-terminal-box-line fs-18 text-warning" style="color: #d97706;"></i>
+                    <span>Canivete de Ferramentas</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Category 3 -->
+        <div class="text-uppercase text-muted fw-bold mb-2 px-3" style="font-size: 0.72em; letter-spacing: 0.8px; color: #94a3b8 !important;">
+            Governança & Documentação
+        </div>
+
+        <ul class="nav nav-pills flex-column gap-1">
+            <li class="nav-item">
+                <a href="{% url 'dashboard:landing' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3" style="border-radius: 8px; font-weight: 500; color: #475569;">
+                    <i class="ri-earth-line fs-18 text-info" style="color: #0284c7;"></i>
+                    <span>Landing Page Pública</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link d-flex align-items-center gap-3 py-2 px-3" style="border-radius: 8px; font-weight: 500; color: #475569;">
+                    <i class="ri-book-open-line fs-18"></i>
+                    <span>Diretrizes de Governança</span>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+
+    <!-- Sidebar Bottom User Info -->
+    <div class="sidebar-user-box p-3" style="border-top: 1px solid #f1f5f9; background: #fafafa;">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+                <img src="{% static 'img/placeholders/avatars/avatar2.jpg' %}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px;">
+                <div class="d-flex flex-column">
+                    <span class="fw-bold" style="font-size: 0.85em; color: #0f172a;">{{ user.username|default:"dxcdc" }}</span>
+                    <small class="text-muted" style="font-size: 0.72em;">Operações do CDC</small>
                 </div>
             </div>
-            <!-- END User Info -->
-
-            <!-- Theme Colors -->
-            <ul class="sidebar-section sidebar-themes clearfix sidebar-nav-mini-hide">
-                <li>
-                    <a href="javascript:void(0)" class="themed-background-dark-night themed-border-night" data-theme="{% static 'css/themes/night.css' %}" data-toggle="tooltip" title="Night"></a>
-                </li>
-                <li>
-                    <a href="javascript:void(0)" class="themed-background-dark-amethyst themed-border-amethyst" data-theme="{% static 'css/themes/amethyst.css' %}" data-toggle="tooltip" title="Amethyst"></a>
-                </li>
-                <li>
-                    <a href="javascript:void(0)" class="themed-background-dark-modern themed-border-modern" data-theme="{% static 'css/themes/modern.css' %}" data-toggle="tooltip" title="Modern"></a>
-                </li>
-                <li>
-                    <a href="javascript:void(0)" class="themed-background-dark-flatie themed-border-flatie" data-theme="{% static 'css/themes/flatie.css' %}" data-toggle="tooltip" title="Flatie"></a>
-                </li>
-                <li>
-                    <a href="javascript:void(0)" class="themed-background-dark-emerald themed-border-emerald" data-theme="{% static 'css/themes/emerald.css' %}" data-toggle="tooltip" title="Emerald"></a>
-                </li>
-            </ul>
-            <!-- END Theme Colors -->
-
-            <!-- Sidebar Navigation -->
-            <ul class="sidebar-nav">
-                <li class="sidebar-header">
-                    <span class="sidebar-header-title">Navegação Principal</span>
-                </li>
-                <li>
-                    <a href="{% url 'dashboard:index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
-                        <i class="gi gi-stopwatch sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Dashboard</span>
-                    </a>
-                </li>
-                
-                <li class="sidebar-header">
-                    <span class="sidebar-header-title">Módulos de Operação</span>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-nav-menu">
-                        <i class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"></i>
-                        <i class="gi gi-server sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Infraestrutura</span>
-                    </a>
-                    <ul>
-                        <li><a href="#">Servidores & VMs</a></li>
-                        <li><a href="#">Containers Docker</a></li>
-                        <li><a href="#">Monitoramento & Status</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-nav-menu">
-                        <i class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"></i>
-                        <i class="gi gi-shield sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">VPN & Redes</span>
-                    </a>
-                    <ul>
-                        <li><a href="#">Clientes VPN</a></li>
-                        <li><a href="#">Gateways WireGuard</a></li>
-                        <li><a href="#">Regras de Firewall</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-nav-menu">
-                        <i class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"></i>
-                        <i class="gi gi-keys sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Cofre & Credenciais</span>
-                    </a>
-                    <ul>
-                        <li><a href="#">Chaves SSH</a></li>
-                        <li><a href="#">Tokens de API</a></li>
-                        <li><a href="#">Gestão de Segredos</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-nav-menu">
-                        <i class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"></i>
-                        <i class="gi gi-settings sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Canivete de Ferramentas</span>
-                    </a>
-                    <ul>
-                        <li><a href="#">Backups Rclone</a></li>
-                        <li><a href="#">Automações GitHub Actions</a></li>
-                        <li><a href="#">Gerador de Prompts IA</a></li>
-                        <li><a href="#">Postmortem & Logs</a></li>
-                    </ul>
-                </li>
-
-                <li class="sidebar-header">
-                    <span class="sidebar-header-title">Governança & Docs</span>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="gi gi-book_open sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Diretrizes de Doc</span>
-                    </a>
-                </li>
-            </ul>
-            <!-- END Sidebar Navigation -->
+            <a href="{% url 'dashboard:logout' %}" class="btn btn-sm btn-light border-0" title="Sair" style="color: #ef4444; background: #fee2e2;">
+                <i class="ri-logout-box-r-line"></i>
+            </a>
         </div>
-        <!-- END Sidebar Content -->
     </div>
-    <!-- END Wrapper for scrolling functionality -->
-</div>
+</aside>
