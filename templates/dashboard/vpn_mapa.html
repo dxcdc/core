@@ -38,45 +38,16 @@
 <div class="card card-lahomes border-0 p-4 mb-4" style="background: #ffffff; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);">
     
     <!-- TITULO DO DIAGRAMA -->
-    <div class="text-center mb-3">
+    <div class="text-center mb-4">
         <h4 class="fw-bold text-dark mb-1" style="font-size: 1.5em; color: #1e293b;">Estrutura Hipotética de VPN Institucional</h4>
-        <small class="text-muted fst-italic" style="font-size: 0.9em;">Exemplo fictício para estudo preliminar — Telemetria Dinâmica</small>
-    </div>
-
-    <!-- LEGENDA PRINCIPAL DO ESQUEMA (NO TOPO DO DIAGRAMA) -->
-    <div class="p-3 mb-4 rounded-3 border bg-light">
-        <div class="d-flex flex-wrap align-items-center justify-content-center gap-4" style="font-size: 0.88em; color: #334155;">
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-success rounded-circle p-1" style="width: 14px; height: 14px; display: inline-block;"></span>
-                <strong>Ícones Verdes:</strong> <span class="text-success fw-bold">Ligado / Online</span>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-danger rounded-circle p-1" style="width: 14px; height: 14px; display: inline-block;"></span>
-                <strong>Ícones Vermelhos:</strong> <span class="text-danger fw-bold">Desligado / Offline</span>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <div class="rounded-circle p-1 bg-primary text-white fs-14 d-inline-flex align-items-center justify-content-center" style="width: 26px; height: 26px;">
-                    <i class="ri-lock-fill"></i>
-                </div>
-                <span><strong>Acesso remoto seguro com VPN</strong></span>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <div class="rounded-circle p-1 bg-success text-white fs-14 d-inline-flex align-items-center justify-content-center" style="width: 26px; height: 26px;">
-                    <i class="ri-group-fill"></i>
-                </div>
-                <span><strong>Integração entre sede e projetos</strong></span>
-            </div>
-        </div>
+        <small class="text-muted fst-italic" style="font-size: 0.9em;">Exemplo fictício para estudo preliminar — Telemetria de Dispositivos</small>
     </div>
 
     <!-- NÓ SUPERIOR: VPS / SERVIDOR VPN -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-6 col-lg-5 text-center">
-            <div class="p-3 rounded-4 border border-primary shadow-sm position-relative" style="background: #eff6ff; border-width: 2px !important;">
-                <span class="position-absolute top-0 start-50 translate-middle badge bg-primary border px-3" style="font-size: 0.75em;">
-                    <i class="ri-lock-2-line"></i> Acesso remoto seguro com VPN
-                </span>
-                <div class="d-inline-flex align-items-center justify-content-center p-2 bg-primary text-white rounded-3 mt-2 mb-2" style="width: 48px; height: 48px; font-size: 1.4em;">
+            <div class="p-3 rounded-4 border border-primary shadow-sm" style="background: #eff6ff; border-width: 2px !important;">
+                <div class="d-inline-flex align-items-center justify-content-center p-2 bg-primary text-white rounded-3 mb-2" style="width: 48px; height: 48px; font-size: 1.4em;">
                     <i class="ri-cloud-fill"></i>
                 </div>
                 <h5 class="fw-bold text-primary mb-1">VPS / Servidor VPN</h5>
@@ -109,16 +80,10 @@
         <!-- RAMIFICAÇÃO AZUL: SETORES DA SEDE -->
         <div class="col-lg-6">
             <div class="p-4 rounded-4 border border-primary" style="background: #f8fafc; border-width: 2px !important; height: 100%;">
-                <div class="text-center mb-3">
+                <div class="text-center mb-4">
                     <span class="badge bg-primary fs-14 fw-bold px-4 py-2" style="border-radius: 20px;">
                         <i class="ri-government-line me-1"></i> Setores da Sede
                     </span>
-                </div>
-
-                <!-- Legenda Específica da Ramificação -->
-                <div class="d-flex justify-content-center gap-3 mb-3" style="font-size: 0.78em;">
-                    <span class="text-success fw-bold"><i class="ri-checkbox-blank-circle-fill fs-10 me-1"></i>Ícones Verdes: Ligado/Online</span>
-                    <span class="text-danger fw-bold"><i class="ri-checkbox-blank-circle-fill fs-10 me-1"></i>Ícones Vermelhos: Desligado/Offline</span>
                 </div>
 
                 <div class="row g-3">
@@ -127,23 +92,32 @@
                         <div class="p-3 bg-white rounded-3 border text-center shadow-sm h-100 position-relative">
                             <h6 class="fw-bold text-primary mb-2">{{ s.nome }}</h6>
                             
-                            <!-- Ícones com Cor de Status (Verde = Online, Vermelho = Offline) -->
+                            <!-- Ícones individuais de Computadores (Verde = Online, Vermelho = Offline) -->
                             <div class="d-flex justify-content-center gap-1 mb-2 fs-18">
-                                {% for i in "x"|rjust:s.pcs_sede %}
-                                    <i class="ri-computer-line {% if s.status == 'Online' %}text-success{% else %}text-danger{% endif %}" title="Computador da Sede - {{ s.status }}"></i>
-                                {% endfor %}
+                                {% if s.nome == 'ADM' %}
+                                    <i class="ri-computer-line text-success" title="PC 01 - Ligado"></i>
+                                    <i class="ri-computer-line text-success" title="PC 02 - Ligado"></i>
+                                    <i class="ri-computer-line text-danger" title="PC 03 - Desligado"></i>
+                                {% elif s.nome == 'RH' %}
+                                    <i class="ri-computer-line text-success" title="PC 01 - Ligado"></i>
+                                    <i class="ri-computer-line text-danger" title="PC 02 - Desligado"></i>
+                                {% else %}
+                                    {% for i in "x"|rjust:s.pcs_sede %}
+                                        <i class="ri-computer-line {% if s.status == 'Online' %}text-success{% else %}text-danger{% endif %}" title="Computador {{ forloop.counter }} - {{ s.status }}"></i>
+                                    {% endfor %}
+                                {% endif %}
                             </div>
 
                             <small class="text-muted d-block" style="font-size: 0.78em;">{{ s.pcs_sede }} computador(es) da sede</small>
 
-                            <!-- Badge de Status -->
+                            <!-- Status Badge -->
                             {% if s.status == 'Online' %}
                                 <span class="badge bg-success-subtle text-success fw-bold mt-2" style="font-size: 0.72em;">
-                                    <i class="ri-checkbox-circle-fill me-1"></i> Ligado ({{ s.ip_faixa }})
+                                    <i class="ri-checkbox-circle-fill me-1"></i> {{ s.ip_faixa }}
                                 </span>
                             {% else %}
                                 <span class="badge bg-danger-subtle text-danger fw-bold mt-2" style="font-size: 0.72em;">
-                                    <i class="ri-close-circle-fill me-1"></i> Desligado ({{ s.ip_faixa }})
+                                    <i class="ri-close-circle-fill me-1"></i> Parcial / Manutenção
                                 </span>
                             {% endif %}
                         </div>
@@ -156,16 +130,10 @@
         <!-- RAMIFICAÇÃO VERDE: PROJETOS DE PROTEÇÃO À VIDA -->
         <div class="col-lg-6">
             <div class="p-4 rounded-4 border border-success" style="background: #f0fdf4; border-width: 2px !important; height: 100%;">
-                <div class="text-center mb-3">
+                <div class="text-center mb-4">
                     <span class="badge bg-success fs-14 fw-bold px-4 py-2" style="border-radius: 20px;">
                         <i class="ri-heart-pulse-line me-1"></i> Projetos de Proteção à Vida
                     </span>
-                </div>
-
-                <!-- Legenda Específica da Ramificação -->
-                <div class="d-flex justify-content-center gap-3 mb-3" style="font-size: 0.78em;">
-                    <span class="text-success fw-bold"><i class="ri-checkbox-blank-circle-fill fs-10 me-1"></i>Ícones Verdes: Ligado/Online</span>
-                    <span class="text-danger fw-bold"><i class="ri-checkbox-blank-circle-fill fs-10 me-1"></i>Ícones Vermelhos: Desligado/Offline</span>
                 </div>
 
                 <div class="row g-3">
@@ -174,22 +142,38 @@
                         <div class="p-3 bg-white rounded-3 border border-success text-center shadow-sm h-100">
                             <h6 class="fw-bold text-success mb-1">{{ p.nome }}</h6>
                             <small class="text-muted d-block mb-2" style="font-size: 0.75em;"><i class="ri-building-line"></i> Sede do projeto</small>
-                            <hr class="my-2">
                             
+                            <!-- Computador da Sede do Projeto (Verde/Vermelho) -->
                             {% if p.pcs_sede > 0 %}
                                 <div class="d-flex justify-content-center gap-1 mb-1 fs-16">
-                                    {% for i in "x"|rjust:p.pcs_sede %}
-                                        <i class="ri-computer-line {% if p.status == 'Online' %}text-success{% else %}text-danger{% endif %}" title="PC Sede do Projeto"></i>
-                                    {% endfor %}
+                                    {% if p.nome == 'PPDDH' %}
+                                        <i class="ri-computer-line text-danger" title="PC Sede PPDDH - Desligado"></i>
+                                    {% else %}
+                                        <i class="ri-computer-line text-success" title="PC Sede Projeto - Ligado"></i>
+                                    {% endif %}
                                 </div>
                             {% endif %}
 
+                            <hr class="my-2">
+
+                            <!-- Dispositivos Móveis Externos (Celulares & Notebooks com Verdes e Vermelhos) -->
                             {% if p.dispositivos_moveis > 0 %}
                                 <small class="text-dark fw-semibold d-block mb-1" style="font-size: 0.78em;">Equipe externa</small>
                                 <div class="d-flex justify-content-center gap-1 fs-16 mb-1">
-                                    {% for i in "x"|rjust:p.dispositivos_moveis %}
-                                        <i class="ri-smartphone-line {% if p.status == 'Online' %}text-success{% else %}text-danger{% endif %}" title="Dispositivo Móvel Externo"></i>
-                                    {% endfor %}
+                                    {% if p.nome == 'PROVITA' %}
+                                        <i class="ri-smartphone-line text-success" title="Celular 01 - Ligado"></i>
+                                        <i class="ri-smartphone-line text-success" title="Celular 02 - Ligado"></i>
+                                        <i class="ri-smartphone-line text-danger" title="Celular 03 - Desligado"></i>
+                                        <i class="ri-laptop-line text-success" title="Notebook 04 - Ligado"></i>
+                                    {% elif p.nome == 'PPCAM' %}
+                                        <i class="ri-smartphone-line text-success" title="Celular 01 - Ligado"></i>
+                                        <i class="ri-smartphone-line text-danger" title="Celular 02 - Desligado"></i>
+                                        <i class="ri-laptop-line text-success" title="Notebook 03 - Ligado"></i>
+                                    {% else %}
+                                        {% for i in "x"|rjust:p.dispositivos_moveis %}
+                                            <i class="ri-smartphone-line text-success" title="Dispositivo Móvel"></i>
+                                        {% endfor %}
+                                    {% endif %}
                                 </div>
                                 <small class="text-muted d-block" style="font-size: 0.72em;">celulares e notebooks</small>
                             {% endif %}
@@ -197,11 +181,11 @@
                             <!-- Status Badge -->
                             {% if p.status == 'Online' %}
                                 <span class="badge bg-success text-white fw-bold mt-2" style="font-size: 0.72em;">
-                                    <i class="ri-checkbox-circle-fill me-1"></i> Ligado (Online)
+                                    <i class="ri-checkbox-circle-fill me-1"></i> Conectado (VPN)
                                 </span>
                             {% else %}
                                 <span class="badge bg-danger text-white fw-bold mt-2" style="font-size: 0.72em;">
-                                    <i class="ri-close-circle-fill me-1"></i> Desligado (Offline)
+                                    <i class="ri-close-circle-fill me-1"></i> Desconectado
                                 </span>
                             {% endif %}
                         </div>
@@ -213,26 +197,26 @@
 
     </div>
 
-    <!-- BARRA DE LEGENDA INSTITUCIONAL (NO RODAPÉ DO DIAGRAMA) -->
+    <!-- LEGENDA COMPACTA NO RODAPÉ DO DIAGRAMA -->
     <div class="p-3 rounded-3 border bg-light">
         <div class="row align-items-center text-center text-md-start g-2" style="font-size: 0.88em; color: #475569;">
             <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-                <div class="rounded-circle p-2 bg-success text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                    <i class="ri-checkbox-circle-line"></i>
-                </div>
-                <span><strong>Ícones Verdes:</strong> Ligado / Online</span>
-            </div>
-            <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-                <div class="rounded-circle p-2 bg-danger text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                    <i class="ri-close-circle-line"></i>
-                </div>
-                <span><strong>Ícones Vermelhos:</strong> Desligado / Offline</span>
-            </div>
-            <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
                 <div class="rounded-circle p-2 bg-primary text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                    <i class="ri-shield-check-line"></i>
+                    <i class="ri-lock-fill"></i>
                 </div>
-                <span><strong>Acesso remoto seguro com VPN</strong></span>
+                <span><strong>Acesso remoto protegido</strong></span>
+            </div>
+            <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                <div class="rounded-circle p-2 bg-success text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="ri-group-fill"></i>
+                </div>
+                <span><strong>Integração entre sede e projetos</strong></span>
+            </div>
+            <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                <div class="rounded-circle p-2 bg-secondary text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="ri-information-fill"></i>
+                </div>
+                <span class="fst-italic">Estrutura ilustrativa, não representa ambiente final</span>
             </div>
         </div>
     </div>
