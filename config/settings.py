@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     
     # Core Apps
     'apps.dashboard.apps.DashboardConfig',
+    'apps.dataops.apps.DataopsConfig',
 ]
 
 MIDDLEWARE = [

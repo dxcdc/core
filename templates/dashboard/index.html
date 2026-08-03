@@ -1,95 +1,109 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Dashboard | CDC Core — Centralizador de Operações do CDC{% endblock %}
+{% block title %}Dashboard DataOps | CDC Core — Centralizador de Operações do CDC{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-        <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">Painel Principal de Operações</h3>
-        <p class="text-muted mb-0" style="font-size: 0.95em;">Centralizador de Infraestrutura, Gateways VPN e Utilitários do CDC</p>
+        <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">
+            <i class="ri-pulse-line text-primary me-2"></i> Painel Operacional DataOps
+        </h3>
+        <p class="text-muted mb-0" style="font-size: 0.95em;">
+            Monitoramento em Tempo Real do Workspace, Governança de Dados e Automações do CDC
+        </p>
     </div>
     <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 500;">
+        <a href="{% url 'dashboard:simular_acao' acao='auditar_mfa_geral' %}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 600;">
+            <i class="ri-shield-user-line"></i> Forçar Auditoria MFA
+        </a>
+        <a href="{% url 'dashboard:index' %}" class="btn btn-primary btn-sm d-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 600; background: #2563eb; border: none;">
             <i class="ri-refresh-line"></i> Atualizar Status
-        </button>
-        <button class="btn btn-primary btn-sm d-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 600; background: #2563eb; border: none;">
-            <i class="ri-add-line"></i> Nova Automação
-        </button>
+        </a>
     </div>
 </div>
 
-<!-- Stat Widgets Grid (Lahomes Style) -->
+<!-- Notification Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 mb-4 shadow-sm" role="alert" style="border-radius: 10px;">
+            <i class="ri-checkbox-circle-fill me-2 fs-16"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Top Stat Widgets Grid (Lahomes Style) -->
 <div class="row g-3 mb-4">
     
-    <!-- Widget 1: Servidores -->
+    <!-- Widget 1: Contas no Workspace -->
     <div class="col-md-6 col-xl-3">
         <div class="card card-lahomes h-100 border-0 p-3">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Servidores Online</span>
-                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">12 / 12</h3>
-                    <span class="badge" style="background: rgba(34, 197, 94, 0.12); color: #16a34a; font-size: 0.78em; font-weight: 600;">
-                        <i class="ri-arrow-up-line"></i> 100% Operacional
+                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Contas no Workspace</span>
+                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">{{ stats.total_usuarios }} Contas</h3>
+                    <span class="badge" style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-size: 0.78em; font-weight: 600;">
+                        <i class="ri-shield-check-line"></i> Fonte da Verdade (DB)
                     </span>
                 </div>
                 <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(37, 99, 235, 0.1); color: #2563eb; font-size: 1.6em;">
-                    <i class="ri-server-line"></i>
+                    <i class="ri-group-line"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Widget 2: Conexões VPN -->
+    <!-- Widget 2: Risco de Cota (>80%) -->
     <div class="col-md-6 col-xl-3">
         <div class="card card-lahomes h-100 border-0 p-3">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Túneis VPN Ativos</span>
-                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">45</h3>
-                    <span class="badge" style="background: rgba(147, 51, 234, 0.12); color: #9333ea; font-size: 0.78em; font-weight: 600;">
-                        <i class="ri-shield-keyhole-line"></i> WireGuard OK
+                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Cota em Risco (>80%)</span>
+                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">{{ stats.contas_risco_cota }} Alerta</h3>
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: #dc2626; font-size: 0.78em; font-weight: 600;">
+                        <i class="ri-error-warning-line"></i> Caso Adriana (96%)
                     </span>
                 </div>
-                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(147, 51, 234, 0.1); color: #9333ea; font-size: 1.6em;">
-                    <i class="ri-shield-user-line"></i>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(239, 68, 68, 0.1); color: #dc2626; font-size: 1.6em;">
+                    <i class="ri-hard-drive-3-line"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Widget 3: Backups Offsite -->
+    <!-- Widget 3: Vulneráveis MFA -->
     <div class="col-md-6 col-xl-3">
         <div class="card card-lahomes h-100 border-0 p-3">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Backups (Política 3-2-1)</span>
-                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">Sincronizado</h3>
-                    <span class="badge" style="background: rgba(34, 197, 94, 0.12); color: #16a34a; font-size: 0.78em; font-weight: 600;">
-                        <i class="ri-check-line"></i> Rclone Offsite OK
-                    </span>
-                </div>
-                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(34, 197, 94, 0.1); color: #16a34a; font-size: 1.6em;">
-                    <i class="ri-cloud-line"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Widget 4: Cofre de Segredos -->
-    <div class="col-md-6 col-xl-3">
-        <div class="card card-lahomes h-100 border-0 p-3">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Cofre de Chaves & Tokens</span>
-                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">28 Segredos</h3>
+                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Sem MFA / 2FA</span>
+                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">{{ stats.contas_sem_mfa }} Ativas</h3>
                     <span class="badge" style="background: rgba(217, 119, 6, 0.12); color: #d97706; font-size: 0.78em; font-weight: 600;">
-                        <i class="ri-lock-2-line"></i> ed25519 Criptografado
+                        <i class="ri-alert-line"></i> Requer Orientação
                     </span>
                 </div>
                 <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(217, 119, 6, 0.1); color: #d97706; font-size: 1.6em;">
-                    <i class="ri-key-2-line"></i>
+                    <i class="ri-lock-unlock-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Widget 4: Grupos & Aliases -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card card-lahomes h-100 border-0 p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fw-semibold" style="font-size: 0.85em;">Grupos Institucionais</span>
+                    <h3 class="fw-bold text-dark my-1" style="font-size: 1.8em;">{{ stats.total_grupos }} Grupos</h3>
+                    <span class="badge" style="background: rgba(34, 197, 94, 0.12); color: #16a34a; font-size: 0.78em; font-weight: 600;">
+                        <i class="ri-recycle-line"></i> Aliases Ativos (Custo R$0)
+                    </span>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(34, 197, 94, 0.1); color: #16a34a; font-size: 1.6em;">
+                    <i class="ri-mail-volume-line"></i>
                 </div>
             </div>
         </div>
@@ -97,134 +111,223 @@
 
 </div>
 
-<!-- Main Operational Content Area -->
+<!-- CRITICAL ALERTS BANNER (Foco na Ferida - Capítulo 7) -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <!-- Caso 1: Adriana Santos (Cota) -->
+        <div class="card border-0 shadow-sm p-4" style="background: #fff5f5; border-left: 5px solid #ef4444 !important; border-radius: 12px;">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-danger">ALERTA CRÍTICO DE ARMAZENAMENTO</span>
+                        <small class="text-muted">Threshold 80% Superado</small>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">Caso Adriana Santos ({{ adriana.email }})</h5>
+                    <p class="text-muted mb-3 style=font-size: 0.9em;">
+                        Consumo atual: <strong>{{ adriana.cota_used_gb }} GB de {{ adriana.cota_total_gb }} GB ({{ adriana.porcentagem_uso }}%)</strong>. Risco imediato de bloqueio de envio e recebimento de e-mails do CDC.
+                    </p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                <span class="text-muted" style="font-size: 0.85em;"><i class="ri-time-line me-1"></i> Ação de Urgência Recomendada</span>
+                {% if adriana.cota_total_gb < 100 %}
+                    <a href="{% url 'dashboard:simular_acao' acao='expandir_cota_adriana' %}" class="btn btn-sm btn-danger fw-bold" style="border-radius: 6px;">
+                        <i class="ri-add-circle-line me-1"></i> Ampliar Cota para 100GB
+                    </a>
+                {% else %}
+                    <span class="badge bg-success text-white fw-bold"><i class="ri-check-line"></i> Cota Ampliada para 100GB</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <!-- Caso 2: Joab da Silva (Vulnerabilidade de Grupo) -->
+        <div class="card border-0 shadow-sm p-4" style="background: #fffbeb; border-left: 5px solid #f59e0b !important; border-radius: 12px;">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-warning text-dark">VULNERABILIDADE DE PRIVACIDADE</span>
+                        <small class="text-muted">Ex-Colaborador em Grupo</small>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">Caso Joab da Silva ({{ joab.email }})</h5>
+                    <p class="text-muted mb-3 style=font-size: 0.9em;">
+                        Conta com status <strong>{{ joab.status }}</strong> permanece como membro ativo do grupo de e-mail institucional
+                        {% if joab_vinculos %}
+                            <strong>equipeatitude@cdc.org.br</strong>.
+                        {% else %}
+                            <span class="text-success font-weight-bold">(Removido com sucesso)</span>.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                <span class="text-muted" style="font-size: 0.85em;"><i class="ri-shield-flash-line me-1"></i> Higiene de Grupo do DataOps</span>
+                {% if joab_vinculos %}
+                    <a href="{% url 'dashboard:simular_acao' acao='remover_joab_grupo' %}" class="btn btn-sm btn-warning text-dark fw-bold" style="border-radius: 6px;">
+                        <i class="ri-user-unfollow-line me-1"></i> Expurgar Joab do Grupo
+                    </a>
+                {% else %}
+                    <span class="badge bg-success text-white fw-bold"><i class="ri-check-line"></i> Membro Expurgado</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SIMULADOR DOS 8 FLUXOS AUTOMATIZADOS DATAOPS -->
+<div class="card card-lahomes border-0 p-4 mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="fw-bold text-dark mb-0">
+            <i class="ri-cpu-line me-2 text-primary"></i> Simulador dos 8 Fluxos Automatizados (Caderno DataOps)
+        </h5>
+        <span class="badge bg-primary-subtle text-primary fw-semibold">Ambiente de Testes Local</span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="p-3 rounded border bg-light text-center">
+                <i class="ri-user-shared-line fs-24 text-primary mb-2"></i>
+                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9em;">Fluxo 1: Desligamento</h6>
+                <small class="text-muted d-block mb-3" style="font-size: 0.78em;">Soberania Drive (acervo.digital@)</small>
+                <button class="btn btn-sm btn-outline-primary w-100" style="border-radius: 6px;" onclick="alert('Simulação do Fluxo 1: Custódia dos arquivos do Drive transferida para acervo.digital@cdc.org.br!');">
+                    <i class="ri-play-fill"></i> Executar Fluxo 1
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 rounded border bg-light text-center">
+                <i class="ri-history-line fs-24 text-warning mb-2"></i>
+                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9em;">Fluxo 2: Inatividade</h6>
+                <small class="text-muted d-block mb-3" style="font-size: 0.78em;">Varredura > 90 dias sem login</small>
+                <button class="btn btn-sm btn-outline-warning text-dark w-100" style="border-radius: 6px;" onclick="alert('Simulação do Fluxo 2: Contas de Cecília e Hamilton identificadas sem login há mais de 90 dias.');">
+                    <i class="ri-play-fill"></i> Executar Fluxo 2
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 rounded border bg-light text-center">
+                <i class="ri-user-received-2-line fs-24 text-success mb-2"></i>
+                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9em;">Fluxo 6: Conversão Alias</h6>
+                <small class="text-muted d-block mb-3" style="font-size: 0.78em;">Caso Paterson Silva</small>
+                <a href="{% url 'dashboard:simular_acao' acao='executar_alias_paterson' %}" class="btn btn-sm btn-outline-success w-100" style="border-radius: 6px;">
+                    <i class="ri-play-fill"></i> Checar Alias Paterson
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 rounded border bg-light text-center">
+                <i class="ri-whatsapp-line fs-24 text-success mb-2"></i>
+                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9em;">Bot n8n + Evolution</h6>
+                <small class="text-muted d-block mb-3" style="font-size: 0.78em;">Comando /status via WhatsApp</small>
+                <button class="btn btn-sm btn-outline-dark w-100" style="border-radius: 6px;" onclick="alert('Simulação de Mensageria: WhatsApp Allowlist validada. Comando /status executado para o número do analista.');">
+                    <i class="ri-send-plane-fill"></i> Testar Bot WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WORKSPACE USERS TABLE & AUDIT LOGS -->
 <div class="row g-4">
     
-    <!-- Table Status Column -->
-    <div class="col-lg-8">
-        <div class="card card-lahomes border-0 p-4">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <h5 class="fw-bold mb-0" style="color: #0f172a;">
-                    <i class="ri-activity-line me-2 text-primary"></i> Status dos Módulos Operacionais do CDC
+    <!-- User Telemetry Table -->
+    <div class="col-lg-7">
+        <div class="card card-lahomes border-0 p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="ri-database-2-line me-2 text-primary"></i> Telemetria de Usuários (Única Fonte da Verdade)
                 </h5>
-                <span class="badge bg-light text-dark border">Verificação em Tempo Real</span>
+                <span class="badge bg-light text-muted border">PostgreSQL</span>
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="font-size: 0.92em;">
+                <table class="table table-hover align-middle mb-0" style="font-size: 0.88em;">
                     <thead class="table-light">
                         <tr>
-                            <th scope="col" style="color: #64748b;">Módulo Operacional</th>
-                            <th scope="col" style="color: #64748b;">Status</th>
-                            <th scope="col" style="color: #64748b;">Última Checagem</th>
-                            <th scope="col" class="text-end" style="color: #64748b;">Ações</th>
+                            <th>Usuário / E-mail</th>
+                            <th>Setor</th>
+                            <th>Consumo Cota</th>
+                            <th>MFA</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="ri-server-fill text-success fs-18"></i>
-                                    <span class="fw-semibold" style="color: #0f172a;">Cluster de Servidores CDC</span>
-                                </div>
-                            </td>
-                            <td><span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #15803d; font-weight: 600;">Saudável</span></td>
-                            <td class="text-muted">Há 2 minutos</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-light border-0" title="Ver Detalhes"><i class="ri-eye-line"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="ri-shield-fill text-primary fs-18"></i>
-                                    <span class="fw-semibold" style="color: #0f172a;">Gateway VPN (WireGuard)</span>
-                                </div>
-                            </td>
-                            <td><span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #15803d; font-weight: 600;">Ativo</span></td>
-                            <td class="text-muted">Há 1 minuto</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-light border-0" title="Ver Detalhes"><i class="ri-eye-line"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="ri-cloud-fill text-warning fs-18"></i>
-                                    <span class="fw-semibold" style="color: #0f172a;">Sync Rclone Backup (Offsite)</span>
-                                </div>
-                            </td>
-                            <td><span class="badge" style="background: rgba(2, 132, 199, 0.15); color: #0369a1; font-weight: 600;">Agendado</span></td>
-                            <td class="text-muted">Há 15 minutos</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-light border-0" title="Executar Agora"><i class="ri-play-line"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="ri-git-branch-fill text-purple fs-18" style="color: #9333ea;"></i>
-                                    <span class="fw-semibold" style="color: #0f172a;">GitHub Actions (Issues Idempotentes)</span>
-                                </div>
-                            </td>
-                            <td><span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #15803d; font-weight: 600;">Sincronizado</span></td>
-                            <td class="text-muted">Há 5 minutos</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-light border-0" title="Logs"><i class="ri-file-list-line"></i></button>
-                            </td>
-                        </tr>
+                        {% for u in usuarios %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ u.nome }}</div>
+                                    <small class="text-muted">{{ u.email }}</small>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">{{ u.setor_atual }}</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 6px;">
+                                            <div class="progress-bar {% if u.porcentagem_uso >= 80 %}bg-danger{% else %}bg-primary{% endif %}" role="progressbar" style="width: {{ u.porcentagem_uso }}%;"></div>
+                                        </div>
+                                        <small class="fw-bold {% if u.porcentagem_uso >= 80 %}text-danger{% else %}text-muted{% endif %}">{{ u.porcentagem_uso }}%</small>
+                                    </div>
+                                    <small class="text-muted">{{ u.cota_used_gb }}GB de {{ u.cota_total_gb }}GB</small>
+                                </td>
+                                <td>
+                                    {% if u.mfa_ativo %}
+                                        <span class="badge bg-success-subtle text-success"><i class="ri-check-line"></i> Ativo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger-subtle text-danger"><i class="ri-close-line"></i> Ausente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if u.status == 'Ativo' %}
+                                        <span class="badge bg-success text-white">Ativo</span>
+                                    {% elif u.status == 'Suspenso' %}
+                                        <span class="badge bg-danger text-white">Suspenso</span>
+                                    {% elif u.status == 'Alias' %}
+                                        <span class="badge bg-info text-white">Apelido/Alias</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary text-white">{{ u.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Quick Tools Column -->
-    <div class="col-lg-4">
+    <!-- Live Audit Logs Table (Livro de Ocorrências Digital) -->
+    <div class="col-lg-5">
         <div class="card card-lahomes border-0 p-4 h-100">
-            <h5 class="fw-bold mb-4" style="color: #0f172a;">
-                <i class="ri-tools-line me-2 text-warning" style="color: #d97706;"></i> Canivete de Utilitários
-            </h5>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="ri-file-list-3-line me-2 text-success"></i> Logs de Auditoria Silenciosa
+                </h5>
+                <span class="badge bg-success-subtle text-success">Rastreamento Ético</span>
+            </div>
 
-            <div class="d-flex flex-column gap-3">
-                <a href="#" class="d-flex align-items-center justify-content-between p-3 rounded text-decoration-none" style="background: #f8fafc; border: 1px solid #e2e8f0; transition: all 0.2s ease;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded p-2" style="background: rgba(37, 99, 235, 0.1); color: #2563eb;">
-                            <i class="ri-key-line fs-20"></i>
+            <div class="list-group list-group-flush" style="max-height: 480px; overflow-y: auto; font-size: 0.85em;">
+                {% for log in logs %}
+                    <div class="list-group-item px-0 py-2 border-bottom">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="fw-bold text-dark">{{ log.acao_executada }}</span>
+                            <small class="text-muted">{{ log.executado_em|date:"d/m H:i" }}</small>
                         </div>
-                        <div>
-                            <h6 class="fw-bold mb-0" style="color: #0f172a; font-size: 0.92em;">Gerar Chaves SSH</h6>
-                            <small class="text-muted" style="font-size: 0.78em;">Par ed25519 para novos servidores</small>
+                        <p class="text-muted mb-1" style="font-size: 0.9em; line-height: 1.4;">
+                            {{ log.detalhes }}
+                        </p>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge {% if log.nivel == 'SUCCESS' %}bg-success{% elif log.nivel == 'WARN' %}bg-warning text-dark{% elif log.nivel == 'ERROR' %}bg-danger{% else %}bg-info{% endif %} px-2 py-1" style="font-size: 0.72em;">
+                                {{ log.nivel }}
+                            </span>
+                            <small class="text-muted">Alvo: {{ log.alvo_impactado|default:"Geral" }}</small>
                         </div>
                     </div>
-                    <i class="ri-arrow-right-s-line text-muted"></i>
-                </a>
-
-                <a href="#" class="d-flex align-items-center justify-content-between p-3 rounded text-decoration-none" style="background: #f8fafc; border: 1px solid #e2e8f0; transition: all 0.2s ease;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded p-2" style="background: rgba(34, 197, 94, 0.1); color: #16a34a;">
-                            <i class="ri-cloud-upload-line fs-20"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-0" style="color: #0f172a; font-size: 0.92em;">Disparar Sync Rclone</h6>
-                            <small class="text-muted" style="font-size: 0.78em;">Backup offsite 3-2-1 manual</small>
-                        </div>
-                    </div>
-                    <i class="ri-arrow-right-s-line text-muted"></i>
-                </a>
-
-                <a href="#" class="d-flex align-items-center justify-content-between p-3 rounded text-decoration-none" style="background: #f8fafc; border: 1px solid #e2e8f0; transition: all 0.2s ease;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded p-2" style="background: rgba(147, 51, 234, 0.1); color: #9333ea;">
-                            <i class="ri-book-read-line fs-20"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-0" style="color: #0f172a; font-size: 0.92em;">Diretrizes & ADRs</h6>
-                            <small class="text-muted" style="font-size: 0.78em;">Documentação de governança do CDC</small>
-                        </div>
-                    </div>
-                    <i class="ri-arrow-right-s-line text-muted"></i>
-                </a>
+                {% empty %}
+                    <p class="text-muted text-center my-4">Nenhum log registrado ainda.</p>
+                {% endfor %}
             </div>
         </div>
     </div>
