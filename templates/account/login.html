@@ -4,7 +4,7 @@
 <!--[if gt IE 9]><!--> <html class="no-js" lang="pt-br"> <!--<![endif]-->
     <head>
         <meta charset="utf-8">
-        <title>Login | CDC Core — Centralizador & Operações</title>
+        <title>Login | CDC Core — Centralizador & Operações do CDC</title>
         <meta name="description" content="CDC Core - Plataforma Centralizadora de Infraestrutura e Operações do CDC">
         <meta name="author" content="CDC DevOps Team">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
@@ -12,7 +12,7 @@
         <!-- Favicon -->
         <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
 
-        <!-- Stylesheets (Base + Lahomes RemixIcons) -->
+        <!-- Stylesheets (Light Theme Default) -->
         <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/plugins.css' %}">
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
@@ -21,9 +21,9 @@
         <script src="{% static 'js/vendor/modernizr.min.js' %}"></script>
         <style>
             body.authentication-bg {
-                background: radial-gradient(circle at top center, #1e293b 0%, #0f172a 70%);
-                background-color: #0f172a;
-                color: #e2e8f0;
+                background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+                background-color: #f8fafc;
+                color: #334155;
                 font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 min-height: 100vh;
                 display: flex;
@@ -32,10 +32,10 @@
                 padding: 30px 15px;
             }
             .auth-card-lahomes {
-                background: #182234;
-                border: 1px solid #243046;
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
                 border-radius: 16px;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.08);
                 padding: 40px 35px;
                 max-width: 460px;
                 width: 100%;
@@ -43,28 +43,24 @@
                 transition: transform 0.3s ease;
             }
             .auth-logo-box {
-                background: #ffffff;
-                padding: 12px 24px;
-                border-radius: 12px;
-                display: inline-block;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
                 margin-bottom: 24px;
+                display: inline-block;
             }
             .auth-title {
-                color: #ffffff;
+                color: #0f172a;
                 font-size: 1.6em;
                 font-weight: 700;
                 margin-bottom: 6px;
             }
             .auth-subtitle {
-                color: #94a3b8;
+                color: #64748b;
                 font-size: 0.95em;
                 margin-bottom: 30px;
             }
             .form-control-lahomes {
-                background: #0f172a !important;
-                border: 1px solid #28354d !important;
-                color: #f1f5f9 !important;
+                background: #ffffff !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #0f172a !important;
                 border-radius: 8px !important;
                 height: 46px !important;
                 font-size: 0.95em !important;
@@ -72,8 +68,8 @@
                 transition: border-color 0.2s ease !important;
             }
             .form-control-lahomes:focus {
-                border-color: #3b82f6 !important;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+                border-color: #2563eb !important;
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
             }
             .input-icon-wrapper {
                 position: relative;
@@ -83,12 +79,12 @@
                 position: absolute;
                 left: 15px;
                 top: 13px;
-                color: #64748b;
+                color: #94a3b8;
                 font-size: 1.25em;
                 z-index: 10;
             }
             .btn-lahomes-primary {
-                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
                 border: none;
                 color: #ffffff;
                 font-weight: 600;
@@ -96,17 +92,17 @@
                 padding: 12px 20px;
                 border-radius: 8px;
                 width: 100%;
-                box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+                box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3);
                 transition: all 0.2s ease;
             }
             .btn-lahomes-primary:hover {
-                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
                 color: #ffffff;
-                box-shadow: 0 15px 25px -5px rgba(59, 130, 246, 0.5);
+                box-shadow: 0 15px 25px -5px rgba(37, 99, 235, 0.4);
                 transform: translateY(-1px);
             }
             .back-home-link {
-                color: #94a3b8;
+                color: #64748b;
                 text-decoration: none;
                 font-size: 0.9em;
                 display: inline-flex;
@@ -116,7 +112,7 @@
                 transition: color 0.2s ease;
             }
             .back-home-link:hover {
-                color: #60a5fa;
+                color: #2563eb;
                 text-decoration: none;
             }
         </style>
@@ -124,9 +120,9 @@
     <body class="authentication-bg">
 
         <div class="auth-card-lahomes text-center">
-            <!-- Official CDC Logo Badge -->
+            <!-- Transparent PNG Logo natively rendered without white background box -->
             <div class="auth-logo-box">
-                <img src="{% static 'img/cdc_logo_horizontal.png' %}" alt="Centro de Desenvolvimento e Cidadania" style="max-height: 54px;">
+                <img src="{% static 'img/cdc_logo_horizontal.png' %}" alt="Centro de Desenvolvimento e Cidadania" style="max-height: 62px;">
             </div>
 
             <!-- Title & Subtitle -->
@@ -136,8 +132,8 @@
             <!-- Error Messages -->
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-danger alert-dismissable" style="border-radius: 8px; text-align: left; margin-bottom: 20px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5;">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true" style="color: #fca5a5;">&times;</button>
+                    <div class="alert alert-danger alert-dismissable" style="border-radius: 8px; text-align: left; margin-bottom: 20px; background: #fef2f2; border-color: #fecaca; color: #991b1b;">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true" style="color: #991b1b;">&times;</button>
                         <i class="ri-error-warning-line"></i> {{ message }}
                     </div>
                 {% endfor %}
