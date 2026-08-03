@@ -1,116 +1,225 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mapa de Infraestrutura & VPN | CDC Core{% endblock %}
+{% block title %}Estrutura Hipotética de VPN Institucional | CDC Core{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">
-            <i class="ri-shield-keyhole-line text-purple me-2" style="color: #9333ea;"></i> Mapa de Infraestrutura VPN por Projetos
+            <i class="ri-shield-keyhole-line text-primary me-2"></i> Estrutura Hipotética de VPN Institucional
         </h3>
         <p class="text-muted mb-0" style="font-size: 0.95em;">
-            Visualização de Conexões Seguras e Estações de Trabalho dos Projetos CDC: PROVITA, PPCAM e PPDDH
+            Exemplo fictício para estudo preliminar — Integração da Sede CDC com os Projetos de Proteção à Vida
         </p>
     </div>
     <div class="d-flex gap-2">
-        <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 500;">
-            <i class="ri-refresh-line"></i> Pingar Estações
+        <button class="btn btn-outline-primary btn-sm fw-bold" onclick="document.getElementById('imagem-referencia-card').scrollIntoView({behavior: 'smooth'});">
+            <i class="ri-image-line me-1"></i> Ver Diagrama em Imagem
+        </button>
+        <button class="btn btn-primary btn-sm fw-bold" style="background: #2563eb; border: none;">
+            <i class="ri-refresh-line me-1"></i> Atualizar Status da Rede
         </button>
     </div>
 </div>
 
-<!-- TOP SUMMARY CARDS -->
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card card-lahomes border-0 p-3" style="border-left: 4px solid #2563eb !important;">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <span class="badge bg-primary-subtle text-primary fw-bold mb-1">PROVITA</span>
-                    <h5 class="fw-bold text-dark mb-0">5 Estações Ativas</h5>
-                    <small class="text-muted">Gateway: gw-provita.vpn.cdc.org.br (10.8.1.1)</small>
+<!-- PAINEL INTERATIVO DE ARQUITETURA DE REDE -->
+<div class="card card-lahomes border-0 p-4 mb-4" style="background: #ffffff; border-radius: 16px; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);">
+    
+    <!-- TITULO DO DIAGRAMA -->
+    <div class="text-center mb-4">
+        <h4 class="fw-bold text-dark mb-1" style="font-size: 1.5em; color: #1e293b;">Estrutura Hipotética de VPN Institucional</h4>
+        <small class="text-muted fst-italic" style="font-size: 0.9em;">Exemplo fictício para estudo preliminar</small>
+    </div>
+
+    <!-- NÓ SUPERIOR: VPS / SERVIDOR VPN -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6 col-lg-5 text-center">
+            <div class="p-3 rounded-4 border border-primary shadow-sm" style="background: #eff6ff; border-width: 2px !important;">
+                <div class="d-inline-flex align-items-center justify-content-center p-2 bg-primary text-white rounded-3 mb-2" style="width: 48px; height: 48px; font-size: 1.4em;">
+                    <i class="ri-cloud-fill"></i>
                 </div>
-                <div class="rounded-circle p-2 bg-light text-primary fs-20">
-                    <i class="ri-shield-user-line"></i>
-                </div>
+                <h5 class="fw-bold text-primary mb-1">VPS / Servidor VPN</h5>
+                <small class="text-muted d-block font-monospace">185.217.124.85 | Gateway Master WireGuard / OpenVPN</small>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card card-lahomes border-0 p-3" style="border-left: 4px solid #16a34a !important;">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <span class="badge bg-success-subtle text-success fw-bold mb-1">PPCAM</span>
-                    <h5 class="fw-bold text-dark mb-0">4 Estações (1 Offline)</h5>
-                    <small class="text-muted">Gateway: gw-ppcam.vpn.cdc.org.br (10.8.2.1)</small>
+    <!-- LINHA DE CONEXÃO DIRETA -->
+    <div class="text-center mb-4">
+        <div class="d-inline-block border-start border-2 border-primary" style="height: 30px;"></div>
+    </div>
+
+    <!-- NÓ INTERMEDIÁRIO: SEDE CDC / SERVIÇOS LOCAIS -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="p-3 rounded-4 border border-primary shadow-sm" style="background: #ffffff; border-width: 2px !important;">
+                <div class="d-inline-flex align-items-center justify-content-center p-2 bg-primary text-white rounded-3 mb-2" style="width: 44px; height: 44px; font-size: 1.3em;">
+                    <i class="ri-building-4-line"></i>
                 </div>
-                <div class="rounded-circle p-2 bg-light text-success fs-20">
-                    <i class="ri-heart-pulse-line"></i>
-                </div>
+                <h5 class="fw-bold text-dark mb-1">Sede CDC / Serviços Locais</h5>
+                <p class="text-muted mb-0" style="font-size: 0.88em;">Acesso interno a sistemas, arquivos e serviços institucionais (10.8.0.1)</p>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card card-lahomes border-0 p-3" style="border-left: 4px solid #9333ea !important;">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <span class="badge bg-purple-subtle text-purple fw-bold mb-1" style="background: rgba(147, 51, 234, 0.1); color: #9333ea;">PPDDH</span>
-                    <h5 class="fw-bold text-dark mb-0">3 Estações Ativas</h5>
-                    <small class="text-muted">Gateway: gw-ppddh.vpn.cdc.org.br (10.8.3.1)</small>
-                </div>
-                <div class="rounded-circle p-2 bg-light text-purple fs-20" style="color: #9333ea;">
-                    <i class="ri-user-voice-line"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MAPA VISUAL DE PROJETOS -->
-{% for p in projetos %}
-<div class="card card-lahomes border-0 p-4 mb-4">
-    <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
-        <div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-dark text-white fs-14 fw-bold px-3 py-1">{{ p.sigla }}</span>
-                <h5 class="fw-bold text-dark mb-0">{{ p.nome }}</h5>
-            </div>
-            <small class="text-muted"><i class="ri-router-line me-1"></i> {{ p.gateway }} | IP Central: <strong>{{ p.ip_gateway }}</strong></small>
-        </div>
-        <span class="badge bg-success-subtle text-success fw-bold px-3 py-1"><i class="ri-checkbox-circle-fill"></i> Gateway {{ p.status }}</span>
-    </div>
-
-    <!-- Grid de Estações -->
-    <div class="row g-3">
-        {% for e in p.estacoes %}
-        <div class="col-md-4 col-lg-3">
-            <div class="p-3 rounded border {% if e.status == 'Online' %}bg-light{% else %}bg-light opacity-75{% endif %}" style="transition: all 0.2s ease;">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="fw-bold text-dark" style="font-size: 0.9em;">
-                        <i class="ri-computer-line me-1 {% if e.status == 'Online' %}text-primary{% else %}text-muted{% endif %}"></i> {{ e.hostname }}
+    <!-- DUAS COLUNAS PRINCIPAIS: SETORES DA SEDE & PROJETOS DE PROTEÇÃO -->
+    <div class="row g-4 mb-4">
+        
+        <!-- RAMIFICAÇÃO AZUL: SETORES DA SEDE -->
+        <div class="col-lg-6">
+            <div class="p-4 rounded-4 border border-primary" style="background: #f8fafc; border-width: 2px !important; height: 100%;">
+                <div class="text-center mb-4">
+                    <span class="badge bg-primary fs-14 fw-bold px-4 py-2" style="border-radius: 20px;">
+                        <i class="ri-government-line me-1"></i> Setores da Sede
                     </span>
-                    {% if e.status == 'Online' %}
-                        <span class="badge bg-success text-white" style="font-size: 0.72em;">Online</span>
-                    {% else %}
-                        <span class="badge bg-secondary text-white" style="font-size: 0.72em;">Offline</span>
-                    {% endif %}
-                </div>
-                
-                <div class="text-muted mb-2" style="font-size: 0.82em; font-weight: 500;">
-                    {{ e.usuario }}
                 </div>
 
-                <div class="d-flex align-items-center justify-content-between pt-2 border-top" style="font-size: 0.78em;">
-                    <span class="text-muted"><i class="ri-wifi-line me-1"></i> IP: <strong>{{ e.ip }}</strong></span>
-                    <span class="{% if e.status == 'Online' %}text-success fw-bold{% else %}text-muted{% endif %}">{{ e.latencia }}</span>
+                <div class="row g-3">
+                    <!-- ADM -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white rounded-3 border text-center shadow-sm h-100">
+                            <h6 class="fw-bold text-primary mb-2">ADM</h6>
+                            <div class="d-flex justify-content-center gap-1 mb-2 text-primary fs-18">
+                                <i class="ri-computer-line"></i>
+                                <i class="ri-computer-line"></i>
+                                <i class="ri-computer-line"></i>
+                            </div>
+                            <small class="text-muted d-block" style="font-size: 0.78em;">3 computadores da sede</small>
+                            <span class="badge bg-success-subtle text-success mt-2" style="font-size: 0.72em;">Online (10.8.10.x)</span>
+                        </div>
+                    </div>
+
+                    <!-- Financeiro -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white rounded-3 border text-center shadow-sm h-100">
+                            <h6 class="fw-bold text-primary mb-2">Financeiro</h6>
+                            <div class="d-flex justify-content-center gap-1 mb-2 text-primary fs-18">
+                                <i class="ri-computer-line"></i>
+                                <i class="ri-computer-line"></i>
+                            </div>
+                            <small class="text-muted d-block" style="font-size: 0.78em;">2 computadores da sede</small>
+                            <span class="badge bg-success-subtle text-success mt-2" style="font-size: 0.72em;">Online (10.8.11.x)</span>
+                        </div>
+                    </div>
+
+                    <!-- RH -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white rounded-3 border text-center shadow-sm h-100">
+                            <h6 class="fw-bold text-primary mb-2">RH</h6>
+                            <div class="d-flex justify-content-center gap-1 mb-2 text-primary fs-18">
+                                <i class="ri-computer-line"></i>
+                                <i class="ri-computer-line"></i>
+                            </div>
+                            <small class="text-muted d-block" style="font-size: 0.78em;">2 computadores da sede</small>
+                            <span class="badge bg-success-subtle text-success mt-2" style="font-size: 0.72em;">Online (10.8.12.x)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        {% endfor %}
+
+        <!-- RAMIFICAÇÃO VERDE: PROJETOS DE PROTEÇÃO À VIDA -->
+        <div class="col-lg-6">
+            <div class="p-4 rounded-4 border border-success" style="background: #f0fdf4; border-width: 2px !important; height: 100%;">
+                <div class="text-center mb-4">
+                    <span class="badge bg-success fs-14 fw-bold px-4 py-2" style="border-radius: 20px;">
+                        <i class="ri-heart-pulse-line me-1"></i> Projetos de Proteção à Vida
+                    </span>
+                </div>
+
+                <div class="row g-3">
+                    <!-- PPCAM -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white rounded-3 border border-success text-center shadow-sm h-100">
+                            <h6 class="fw-bold text-success mb-1">PPCAM</h6>
+                            <small class="text-muted d-block mb-2" style="font-size: 0.75em;"><i class="ri-building-line"></i> Sede do projeto</small>
+                            <hr class="my-2">
+                            <small class="text-dark fw-semibold d-block mb-1" style="font-size: 0.78em;">Equipe externa</small>
+                            <div class="d-flex justify-content-center gap-1 text-success fs-16 mb-1">
+                                <i class="ri-smartphone-line"></i>
+                                <i class="ri-smartphone-line"></i>
+                                <i class="ri-laptop-line"></i>
+                            </div>
+                            <small class="text-muted d-block" style="font-size: 0.72em;">celulares e notebooks</small>
+                        </div>
+                    </div>
+
+                    <!-- PROVITA -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white rounded-3 border border-success text-center shadow-sm h-100">
+                            <h6 class="fw-bold text-success mb-1">PROVITA</h6>
+                            <small class="text-muted d-block mb-2" style="font-size: 0.75em;"><i class="ri-building-line"></i> Sede do projeto</small>
+                            <hr class="my-2">
+                            <small class="text-dark fw-semibold d-block mb-1" style="font-size: 0.78em;">Equipe externa</small>
+                            <div class="d-flex justify-content-center gap-1 text-success fs-16 mb-1">
+                                <i class="ri-smartphone-line"></i>
+                                <i class="ri-smartphone-line"></i>
+                                <i class="ri-laptop-line"></i>
+                            </div>
+                            <small class="text-muted d-block" style="font-size: 0.72em;">celulares e notebooks</small>
+                        </div>
+                    </div>
+
+                    <!-- PPDDH -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white rounded-3 border border-success text-center shadow-sm h-100">
+                            <h6 class="fw-bold text-success mb-1">PPDDH</h6>
+                            <small class="text-muted d-block mb-2" style="font-size: 0.75em;"><i class="ri-building-line"></i> Sede do projeto</small>
+                            <hr class="my-2">
+                            <small class="text-dark fw-semibold d-block mb-1" style="font-size: 0.78em;">Equipe externa</small>
+                            <div class="d-flex justify-content-center gap-1 text-success fs-16 mb-1">
+                                <i class="ri-smartphone-line"></i>
+                                <i class="ri-smartphone-line"></i>
+                                <i class="ri-laptop-line"></i>
+                            </div>
+                            <small class="text-muted d-block" style="font-size: 0.72em;">celulares e notebooks</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BARRA DE LEGENDA INSTITUCIONAL -->
+    <div class="p-3 rounded-3 border bg-light">
+        <div class="row align-items-center text-center text-md-start g-2" style="font-size: 0.88em; color: #475569;">
+            <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                <div class="rounded-circle p-2 bg-primary text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="ri-lock-fill"></i>
+                </div>
+                <span><strong>Acesso remoto protegido</strong></span>
+            </div>
+            <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                <div class="rounded-circle p-2 bg-success text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="ri-group-fill"></i>
+                </div>
+                <span><strong>Integração entre sede e projetos</strong></span>
+            </div>
+            <div class="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                <div class="rounded-circle p-2 bg-secondary text-white fs-16 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="ri-information-fill"></i>
+                </div>
+                <span class="fst-italic">Estrutura ilustrativa, não representa ambiente final</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- CARD COM A IMAGEM OFICIAL ENVIADA PELO CDC -->
+<div class="card card-lahomes border-0 p-4 mb-4" id="imagem-referencia-card">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="fw-bold text-dark mb-0">
+            <i class="ri-image-2-line text-primary me-2"></i> Diagrama em Imagem de Referência Oficial
+        </h5>
+        <span class="badge bg-light text-dark border">Arquivo de Referência</span>
+    </div>
+    
+    <div class="text-center p-3 bg-light rounded border">
+        <img src="{% static 'img/estrutura_vpn_institucional.png' %}" alt="Estrutura Hipotética de VPN Institucional do CDC" class="img-fluid rounded shadow-sm" style="max-height: 580px; width: auto;">
     </div>
 </div>
-{% endfor %}
 {% endblock %}
