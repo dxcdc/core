@@ -1,8 +1,44 @@
-<footer class="clearfix">
-    <div class="pull-right">
-        Desenvolvido com <i class="fa fa-heart text-danger"></i> para a equipe <strong>CDC Operations</strong>
-    </div>
-    <div class="pull-left">
-        <span>2026</span> &copy; <a href="#" target="_blank">CDC Core v1.0.0</a> — ProUI 3.8
+{% load static %}
+<footer class="cdc-footer" style="background: #0d0e12; border-top: 1px solid #1c2029; padding: 35px 0 20px; color: #a0aec0; font-family: 'Open Sans', sans-serif;">
+    <div class="container-fluid" style="padding-left: 30px; padding-right: 30px;">
+        <!-- Top Section -->
+        <div class="row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 20px;">
+            <div class="col-sm-8 col-xs-12" style="margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                    <img src="{% static 'img/cdc_logo_icon.png' %}" alt="CDC Logo" style="height: 28px; background: #ffffff; padding: 2px 6px; border-radius: 6px;">
+                    <span style="color: #e2e8f0; font-size: 1.1em; font-weight: 500;">
+                        A plataforma completa de operações e infraestrutura para equipes do CDC.
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 25px; margin-left: 40px; font-size: 0.95em; color: #cbd5e1; flex-wrap: wrap;">
+                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa fa-phone" style="color: #22c55e;"></i> (81) 3224-6963
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa fa-envelope" style="color: #22c55e;"></i> rh@cdc.org.br
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-4 col-xs-12 text-right text-xs-left" style="margin-bottom: 15px;">
+                <div style="display: inline-flex; gap: 10px;">
+                    <a href="https://www.linkedin.com" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background: #1a1d24; border: 1px solid #2a2f3a; border-radius: 8px; color: #e2e8f0; text-decoration: none; font-size: 1.2em; transition: all 0.2s;">
+                        <i class="fa fa-linkedin"></i>
+                    </a>
+                    <a href="https://www.instagram.com" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background: #1a1d24; border: 1px solid #2a2f3a; border-radius: 8px; color: #e2e8f0; text-decoration: none; font-size: 1.2em; transition: all 0.2s;">
+                        <i class="fa fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider Line -->
+        <hr style="border-top: 1px solid #1c2029; margin: 15px 0 20px;">
+
+        <!-- Bottom Copyright & CNPJ Line -->
+        <div class="row">
+            <div class="col-xs-12 text-center" style="font-size: 0.88em; color: #64748b; line-height: 1.8;">
+                &middot; CDC Core &copy; 2026 Todos os direitos reservados &middot; &middot; Centro de Desenvolvimento e Cidadania - CDC &middot; CNPJ 03.970.166/0001-29 &middot;
+            </div>
+        </div>
     </div>
 </footer>

@@ -4,13 +4,13 @@
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Proprietary-red?style=flat-square)](#)
 
-O **CDC Core** é a plataforma centralizadora desenvolvida para gerenciar a infraestrutura, automações, monitoramento e utilitários de operações da organização **CDC**. Atua como o "canivete suíço" operacional da equipe de Infraestrutura e DevOps.
+O **CDC Core** é a plataforma centralizadora desenvolvida para gerenciar a infraestrutura, automações, monitoramento e utilitários de operações do **Centro de Desenvolvimento e Cidadania - CDC**. Atua como o "canivete suíço" operacional da equipe de Infraestrutura e DevOps.
 
 ---
 
 ## 🎯 Objetivos da Plataforma
 
-- **Centralização Operacional**: Painel unificado para controle de ativos, infraestrutura e utilitários da CDC.
+- **Centralização Operacional**: Painel unificado para controle de ativos, infraestrutura e utilitários do CDC.
 - **Canivete de Ferramentas (Swiss Army Knife)**: Módulos plugáveis para gestão de redes, VPNs, servidores, cofres de chaves e backups.
 - **Automação & Orquestração**: Integração via API e webhooks para tarefas recorrentes de sustentação e DevOps.
 - **Governança & Segurança**: Autenticação corporativa, trilha de auditoria e controle de acesso baseado em funções (RBAC).
