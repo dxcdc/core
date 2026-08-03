@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Governança & Diretrizes | CDC Core{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">
+            <i class="ri-book-read-line text-info me-2" style="color: #0284c7;"></i> Governança, Diretrizes & Registros de Decisão (ADRs)
+        </h3>
+        <p class="text-muted mb-0" style="font-size: 0.95em;">
+            Preservação da Memória Institucional, Acordo de Nomenclatura e Registros da Arquitetura do CDC
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card card-lahomes border-0 p-4 h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="ri-shield-check-line text-primary me-2"></i> Regra Geral da Marca CDC</h5>
+            <div class="p-3 bg-light rounded border mb-3">
+                <p class="mb-0 text-dark" style="font-size: 0.92em; line-height: 1.6;">
+                    O <strong>Centro de Desenvolvimento e Cidadania - CDC</strong> deve ser <strong>SEMPRE mencionado no masculino</strong> (ex: <em>"o CDC"</em>, <em>"do CDC"</em>, <em>"no CDC"</em> — NUNCA "a CDC" ou "da CDC").
+                </p>
+            </div>
+            <h6 class="fw-bold text-dark mb-2" style="font-size: 0.9em;">Regras de Transparência de Logotipos:</h6>
+            <ul class="text-muted" style="font-size: 0.88em; padding-left: 20px;">
+                <li>Logos enviadas em formato PNG possuem fundo transparente nativo e nunca devem ser envolvidas por molduras brancas artificiais.</li>
+                <li>O Tema Claro (Light) é o padrão oficial de toda a plataforma.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card card-lahomes border-0 p-4 h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="ri-file-text-line text-success me-2"></i> Padrão de Nomenclatura Histórica</h5>
+            <div class="p-3 bg-light rounded border">
+                <p class="mb-2 text-dark font-monospace" style="font-size: 0.88em;">
+                    desligadoem.AAAA.MM.emailoriginal@cdc.org.br
+                </p>
+                <small class="text-muted d-block mb-2">
+                    Regra para retenção legal de e-mails de ex-colaboradores com custo R$ 0 no Google Workspace.
+                </small>
+                <div class="p-2 bg-white rounded border">
+                    <small class="text-dark"><strong>Exemplo:</strong> joabsilva@cdc.org.br desligado em junho/2026 torna-se <code>desligadoem.2026.06.joabsilva@cdc.org.br</code>.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- REGISTROS DE DECISÃO DE ARQUITETURA (ADRs) -->
+<div class="card card-lahomes border-0 p-4">
+    <h5 class="fw-bold text-dark mb-3">
+        <i class="ri-git-commit-line me-2 text-primary"></i> Arquivos de Registro de Decisão de Arquitetura (ADRs)
+    </h5>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size: 0.9em;">
+            <thead class="table-light">
+                <tr>
+                    <th>Código ADR</th>
+                    <th>Data</th>
+                    <th>Decisão de Arquitetura</th>
+                    <th>Motivação / Justificativa</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in adrs %}
+                    <tr>
+                        <td class="fw-bold text-primary">{{ a.id }}</td>
+                        <td class="text-muted">{{ a.data }}</td>
+                        <td class="fw-bold text-dark">{{ a.decisao }}</td>
+                        <td class="text-muted">{{ a.motivo }}</td>
+                        <td><span class="badge bg-success-subtle text-success fw-bold">{{ a.status }}</span></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

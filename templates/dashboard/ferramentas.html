@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Canivete de Ferramentas & Conversores | CDC Core{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">
+            <i class="ri-tools-line text-warning me-2" style="color: #d97706;"></i> Canivete de Utilitários de Escritório & Conversão
+        </h3>
+        <p class="text-muted mb-0" style="font-size: 0.95em;">
+            Ferramentas Rápidas para Tratamento de Dados, Conversão de Arquivos e Sanitização de Documentos do CDC
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- FERRAMENTA 1: CONVERSOR DE ARQUIVOS (CSV / EXCEL PARA JSON / SQL) -->
+    <div class="col-lg-6">
+        <div class="card card-lahomes border-0 p-4 h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="rounded p-2 bg-primary-subtle text-primary fs-20">
+                    <i class="ri-file-code-line"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Conversor & Higienizador de Planilhas</h5>
+                    <small class="text-muted">Converte planilhas Excel/CSV legadas para JSON / SQL formatado</small>
+                </div>
+            </div>
+
+            <form onsubmit="event.preventDefault(); document.getElementById('resultado-json').style.display='block';">
+                <div class="mb-3">
+                    <label class="form-label text-dark fw-semibold" style="font-size: 0.9em;">Selecione a Planilha (CSV ou XLSX)</label>
+                    <input type="file" class="form-control form-control-sm" accept=".csv,.xlsx">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-dark fw-semibold" style="font-size: 0.9em;">Formato de Saída</label>
+                    <select class="form-select form-select-sm">
+                        <option>JSON Sanitizado (Deduplicado)</option>
+                        <option>Script SQL INSERT (PostgreSQL)</option>
+                        <option>CSV Limpo (Normalizado)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm fw-bold w-100" style="border-radius: 6px;">
+                    <i class="ri-refresh-line me-1"></i> Processar & Converter Arquivo
+                </button>
+            </form>
+
+            <div id="resultado-json" class="mt-4 p-3 bg-dark text-success rounded font-monospace" style="display: none; font-size: 0.82em; max-height: 180px; overflow-y: auto;">
+{<br>
+&nbsp;&nbsp;"status": "Sucesso",<br>
+&nbsp;&nbsp;"registros_processados": 145,<br>
+&nbsp;&nbsp;"nulos_sanitizados": 12,<br>
+&nbsp;&nbsp;"dados": [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{"nome": "Adriana Santos", "email": "adrianasantos@cdc.org.br", "cota_gb": 48.07},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{"nome": "Joab da Silva", "email": "joabsilva@cdc.org.br", "status": "Suspenso"}<br>
+&nbsp;&nbsp;]<br>
+}
+            </div>
+        </div>
+    </div>
+
+    <!-- FERRAMENTA 2: GERADOR DE CHAVES SSH (ed25519) -->
+    <div class="col-lg-6">
+        <div class="card card-lahomes border-0 p-4 h-100">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="rounded p-2 bg-success-subtle text-success fs-20">
+                    <i class="ri-key-2-line"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Gerador Online de Chaves SSH (ed25519)</h5>
+                    <small class="text-muted">Gera pares de chaves criptográficas para novos servidores e acessos</small>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-dark fw-semibold" style="font-size: 0.9em;">Comentário da Chave (E-mail ou Servidor)</label>
+                <input type="text" class="form-control form-control-sm" id="ssh-comment" value="devops@cdc.org.br">
+            </div>
+
+            <button class="btn btn-success btn-sm fw-bold w-100 mb-3" style="border-radius: 6px;" onclick="document.getElementById('resultado-ssh').style.display='block';">
+                <i class="ri-key-line me-1"></i> Gerar Novo Par ed25519
+            </button>
+
+            <div id="resultado-ssh" style="display: none;">
+                <label class="form-label text-muted fw-bold" style="font-size: 0.78em;">Chave Pública (id_ed25519.pub):</label>
+                <textarea class="form-control form-control-sm font-monospace bg-light mb-2" rows="2" readonly>ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDx9K8ZpQ2Y3M4N5O6P7Q8R9S0T1U2V3W4X5Y6Z7 devops@cdc.org.br</textarea>
+                <button class="btn btn-sm btn-outline-secondary w-100" style="font-size: 0.82em;" onclick="alert('Chave Pública copiada para a área de transferência!');">
+                    <i class="ri-file-copy-line"></i> Copiar Chave Pública
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- FERRAMENTA 3: SANITIZADOR DE CPF/CNPJ & CHAVE DE NOTA FISCAL -->
+    <div class="col-lg-6">
+        <div class="card card-lahomes border-0 p-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="rounded p-2 bg-warning-subtle text-warning fs-20" style="color: #d97706;">
+                    <i class="ri-shield-check-line"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Sanitizador de CPF, CNPJ & NFe SEFAZ</h5>
+                    <small class="text-muted">Limpa pontuações, valida dígitos e formata chaves fiscais de 44 dígitos</small>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-dark fw-semibold" style="font-size: 0.9em;">Insira o Texto com Pontuações</label>
+                <input type="text" class="form-control form-control-sm" id="input-sanitizar" placeholder="Ex: 03.970.166/0001-29 ou 35-2608-03970166...">
+            </div>
+
+            <button class="btn btn-warning text-dark btn-sm fw-bold w-100" style="border-radius: 6px;" onclick="document.getElementById('resultado-sanitizado').value = document.getElementById('input-sanitizar').value.replace(/\D/g, '');">
+                <i class="ri-magic-line me-1"></i> Higienizar Caracteres
+            </button>
+
+            <div class="mt-3">
+                <label class="form-label text-muted fw-bold" style="font-size: 0.78em;">Resultado Higienizado (Apenas Números):</label>
+                <input type="text" class="form-control form-control-sm font-monospace bg-light" id="resultado-sanitizado" readonly placeholder="Resultado limpo aparecerá aqui...">
+            </div>
+        </div>
+    </div>
+
+    <!-- FERRAMENTA 4: TESTADOR DE WEBHOOK (n8n / Evolution API) -->
+    <div class="col-lg-6">
+        <div class="card card-lahomes border-0 p-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="rounded p-2 bg-purple-subtle text-purple fs-20" style="background: rgba(147, 51, 234, 0.1); color: #9333ea;">
+                    <i class="ri-whatsapp-line"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Disparador de Teste WhatsApp (n8n Allowlist)</h5>
+                    <small class="text-muted">Simula um disparo de mensagem via Evolution API com validação de número</small>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-dark fw-semibold" style="font-size: 0.9em;">Número do Telefone (com DDD)</label>
+                <input type="text" class="form-control form-control-sm" value="5581999998888">
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-dark fw-semibold" style="font-size: 0.9em;">Comando de Teste</label>
+                <input type="text" class="form-control form-control-sm" value="/status adrianasantos@cdc.org.br">
+            </div>
+
+            <button class="btn btn-dark btn-sm fw-bold w-100" style="border-radius: 6px;" onclick="alert('Webhook disparado para o n8n! Resposta síncrona retornada com sucesso.');">
+                <i class="ri-send-plane-line me-1"></i> Disparar Teste de Webhook
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

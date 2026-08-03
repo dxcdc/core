@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mapa de Infraestrutura & VPN | CDC Core{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">
+            <i class="ri-shield-keyhole-line text-purple me-2" style="color: #9333ea;"></i> Mapa de Infraestrutura VPN por Projetos
+        </h3>
+        <p class="text-muted mb-0" style="font-size: 0.95em;">
+            Visualização de Conexões Seguras e Estações de Trabalho dos Projetos CDC: PROVITA, PPCAM e PPDDH
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" style="border-radius: 8px; font-weight: 500;">
+            <i class="ri-refresh-line"></i> Pingar Estações
+        </button>
+    </div>
+</div>
+
+<!-- TOP SUMMARY CARDS -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card card-lahomes border-0 p-3" style="border-left: 4px solid #2563eb !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="badge bg-primary-subtle text-primary fw-bold mb-1">PROVITA</span>
+                    <h5 class="fw-bold text-dark mb-0">5 Estações Ativas</h5>
+                    <small class="text-muted">Gateway: gw-provita.vpn.cdc.org.br (10.8.1.1)</small>
+                </div>
+                <div class="rounded-circle p-2 bg-light text-primary fs-20">
+                    <i class="ri-shield-user-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-lahomes border-0 p-3" style="border-left: 4px solid #16a34a !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="badge bg-success-subtle text-success fw-bold mb-1">PPCAM</span>
+                    <h5 class="fw-bold text-dark mb-0">4 Estações (1 Offline)</h5>
+                    <small class="text-muted">Gateway: gw-ppcam.vpn.cdc.org.br (10.8.2.1)</small>
+                </div>
+                <div class="rounded-circle p-2 bg-light text-success fs-20">
+                    <i class="ri-heart-pulse-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-lahomes border-0 p-3" style="border-left: 4px solid #9333ea !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="badge bg-purple-subtle text-purple fw-bold mb-1" style="background: rgba(147, 51, 234, 0.1); color: #9333ea;">PPDDH</span>
+                    <h5 class="fw-bold text-dark mb-0">3 Estações Ativas</h5>
+                    <small class="text-muted">Gateway: gw-ppddh.vpn.cdc.org.br (10.8.3.1)</small>
+                </div>
+                <div class="rounded-circle p-2 bg-light text-purple fs-20" style="color: #9333ea;">
+                    <i class="ri-user-voice-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAPA VISUAL DE PROJETOS -->
+{% for p in projetos %}
+<div class="card card-lahomes border-0 p-4 mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-dark text-white fs-14 fw-bold px-3 py-1">{{ p.sigla }}</span>
+                <h5 class="fw-bold text-dark mb-0">{{ p.nome }}</h5>
+            </div>
+            <small class="text-muted"><i class="ri-router-line me-1"></i> {{ p.gateway }} | IP Central: <strong>{{ p.ip_gateway }}</strong></small>
+        </div>
+        <span class="badge bg-success-subtle text-success fw-bold px-3 py-1"><i class="ri-checkbox-circle-fill"></i> Gateway {{ p.status }}</span>
+    </div>
+
+    <!-- Grid de Estações -->
+    <div class="row g-3">
+        {% for e in p.estacoes %}
+        <div class="col-md-4 col-lg-3">
+            <div class="p-3 rounded border {% if e.status == 'Online' %}bg-light{% else %}bg-light opacity-75{% endif %}" style="transition: all 0.2s ease;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fw-bold text-dark" style="font-size: 0.9em;">
+                        <i class="ri-computer-line me-1 {% if e.status == 'Online' %}text-primary{% else %}text-muted{% endif %}"></i> {{ e.hostname }}
+                    </span>
+                    {% if e.status == 'Online' %}
+                        <span class="badge bg-success text-white" style="font-size: 0.72em;">Online</span>
+                    {% else %}
+                        <span class="badge bg-secondary text-white" style="font-size: 0.72em;">Offline</span>
+                    {% endif %}
+                </div>
+                
+                <div class="text-muted mb-2" style="font-size: 0.82em; font-weight: 500;">
+                    {{ e.usuario }}
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between pt-2 border-top" style="font-size: 0.78em;">
+                    <span class="text-muted"><i class="ri-wifi-line me-1"></i> IP: <strong>{{ e.ip }}</strong></span>
+                    <span class="{% if e.status == 'Online' %}text-success fw-bold{% else %}text-muted{% endif %}">{{ e.latencia }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

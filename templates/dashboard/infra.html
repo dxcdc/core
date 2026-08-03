@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Infraestrutura & Containers | CDC Core{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">
+            <i class="ri-server-line text-primary me-2"></i> Infraestrutura & Clusters Docker (Easypanel)
+        </h3>
+        <p class="text-muted mb-0" style="font-size: 0.95em;">
+            Gerenciamento Visual de Servidores VPS Hostinger, Containers Ativos e Consumo de Recursos
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm fw-bold" style="border-radius: 8px; background: #2563eb; border: none;">
+            <i class="ri-refresh-line"></i> Sincronizar Easypanel
+        </button>
+    </div>
+</div>
+
+<!-- HOSTINGER VPS SUMMARY CARD -->
+<div class="card card-lahomes border-0 p-4 mb-4" style="background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-success"><i class="ri-checkbox-circle-fill"></i> VPS Hostinger Online</span>
+                <span class="badge bg-light text-dark border">Easypanel v1.33</span>
+            </div>
+            <h4 class="fw-bold text-dark mb-1">Servidor Principal CDC DataOps (vps-cdc-core)</h4>
+            <p class="text-muted mb-0" style="font-size: 0.92em;">
+                IP Público: <strong>185.217.124.85</strong> | Ubuntu 22.04 LTS | 4 vCPU | 8 GB RAM | 100 GB SSD NVMe
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <div class="d-inline-block text-start p-3 bg-white rounded border shadow-sm">
+                <small class="text-muted d-block" style="font-size: 0.78em;">USO TOTAL DE RAM</small>
+                <h5 class="fw-bold text-primary mb-0">777 MB / 8000 MB (9.7%)</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DOCKER CONTAINERS TABLE -->
+<div class="card card-lahomes border-0 p-4">
+    <h5 class="fw-bold text-dark mb-3">
+        <i class="ri-box-3-line me-2 text-primary"></i> Containers Docker Ativos no Easypanel
+    </h5>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size: 0.9em;">
+            <thead class="table-light">
+                <tr>
+                    <th>Nome do Container</th>
+                    <th>Imagem Docker</th>
+                    <th>Portas</th>
+                    <th>Uptime</th>
+                    <th>CPU</th>
+                    <th>RAM</th>
+                    <th>Status</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in containers %}
+                    <tr>
+                        <td class="fw-bold text-dark"><i class="ri-checkbox-blank-circle-fill text-success fs-12 me-1"></i> {{ c.nome }}</td>
+                        <td><code class="text-primary">{{ c.imagem }}</code></td>
+                        <td>{{ c.porta }}</td>
+                        <td class="text-muted">{{ c.uptime }}</td>
+                        <td class="fw-bold text-dark">{{ c.cpu }}</td>
+                        <td class="fw-bold text-primary">{{ c.ram }}</td>
+                        <td><span class="badge bg-success-subtle text-success fw-bold">{{ c.status }}</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-light border" title="Reiniciar"><i class="ri-restart-line"></i></button>
+                            <button class="btn btn-sm btn-light border" title="Logs"><i class="ri-file-list-line"></i></button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

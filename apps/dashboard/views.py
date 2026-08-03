@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
@@ -15,23 +15,15 @@ def landing_view(request):
 @login_required(login_url='dashboard:login')
 def index(request):
     """Renderiza o painel operacional DataOps do CDC Core no estilo Lahomes."""
-    # Consultas ao banco de dados do DataOps
     usuarios = UsuarioDataOps.objects.all()
     logs = LogAuditoria.objects.all()[:15]
     alertas_criticos = LogAuditoria.objects.filter(nivel__in=['ERROR', 'WARN'])[:5]
     
-    # Casos Específicos do Documento
     adriana = UsuarioDataOps.objects.filter(email='adrianasantos@cdc.org.br').first()
     joab = UsuarioDataOps.objects.filter(email='joabsilva@cdc.org.br').first()
     joab_vinculos = MembroGrupo.objects.filter(usuario=joab) if joab else []
     paterson = UsuarioDataOps.objects.filter(email='paterson.silva@cdc.org.br').first()
     voluntarios = UsuarioDataOps.objects.filter(e_voluntario=True)
-
-    # Estatísticas
-    total_usuarios = usuarios.count()
-    total_grupos = GrupoWorkspace.objects.count()
-    contas_risco_cota = UsuarioDataOps.objects.filter(cota_used_gb__gte=40).count()
-    contas_sem_mfa = UsuarioDataOps.objects.filter(mfa_ativo=False, status='Ativo').count()
 
     context = {
         'usuarios': usuarios,
@@ -43,13 +35,99 @@ def index(request):
         'paterson': paterson,
         'voluntarios': voluntarios,
         'stats': {
-            'total_usuarios': total_usuarios,
-            'total_grupos': total_grupos,
-            'contas_risco_cota': contas_risco_cota,
-            'contas_sem_mfa': contas_sem_mfa,
+            'total_usuarios': usuarios.count(),
+            'total_grupos': GrupoWorkspace.objects.count(),
+            'contas_risco_cota': UsuarioDataOps.objects.filter(cota_used_gb__gte=40).count(),
+            'contas_sem_mfa': UsuarioDataOps.objects.filter(mfa_ativo=False, status='Ativo').count(),
         }
     }
     return render(request, 'dashboard/index.html', context)
+
+@login_required(login_url='dashboard:login')
+def infra_view(request):
+    """Renderiza o módulo de Infraestrutura & Servidores / Containers Docker."""
+    containers = [
+        {'nome': 'cdc-postgresql-db', 'imagem': 'postgres:15-alpine', 'status': 'Rodando', 'porta': '5432:5432', 'uptime': '14 dias', 'cpu': '1.2%', 'ram': '142 MB'},
+        {'nome': 'cdc-django-backend', 'imagem': 'dxcdc/core:latest', 'status': 'Rodando', 'porta': '8000:8000', 'uptime': '7 dias', 'cpu': '2.4%', 'ram': '210 MB'},
+        {'nome': 'cdc-n8n-orchestrator', 'imagem': 'n8nio/n8n:latest', 'status': 'Rodando', 'porta': '5678:5678', 'uptime': '14 dias', 'cpu': '0.8%', 'ram': '185 MB'},
+        {'nome': 'cdc-evolution-api', 'imagem': 'atendimento/evolution-api:v1.8', 'status': 'Rodando', 'porta': '8080:8080', 'uptime': '14 dias', 'cpu': '1.5%', 'ram': '195 MB'},
+        {'nome': 'cdc-redis-cache', 'imagem': 'redis:7-alpine', 'status': 'Rodando', 'porta': '6379:6379', 'uptime': '14 dias', 'cpu': '0.2%', 'ram': '45 MB'},
+    ]
+    return render(request, 'dashboard/infra.html', {'containers': containers})
+
+@login_required(login_url='dashboard:login')
+def vpn_view(request):
+    """Renderiza o Mapa de Infraestrutura & Conexões VPN por Projetos (PROVITA, PPCAM, PPDDH)."""
+    projetos = [
+        {
+            'sigla': 'PROVITA',
+            'nome': 'Programa de Proteção a Vítimas e Testemunhas Ameaçadas',
+            'gateway': 'gw-provita.vpn.cdc.org.br (WireGuard)',
+            'ip_gateway': '10.8.1.1',
+            'status': 'Ativo',
+            'estacoes': [
+                {'hostname': 'PROVITA-ADM-01', 'usuario': 'Coordenação Geral', 'ip': '10.8.1.10', 'latencia': '12ms', 'status': 'Online'},
+                {'hostname': 'PROVITA-TEC-02', 'usuario': 'Equipe de Serviço Social', 'ip': '10.8.1.11', 'latencia': '15ms', 'status': 'Online'},
+                {'hostname': 'PROVITA-JUR-03', 'usuario': 'Assessoria Jurídica', 'ip': '10.8.1.12', 'latencia': '18ms', 'status': 'Online'},
+                {'hostname': 'PROVITA-PSICO-04', 'usuario': 'Psicologia & Acolhimento', 'ip': '10.8.1.13', 'latencia': '14ms', 'status': 'Online'},
+                {'hostname': 'PROVITA-PLANT-05', 'usuario': 'Plantão 24h Emergencial', 'ip': '10.8.1.14', 'latencia': '11ms', 'status': 'Online'},
+            ]
+        },
+        {
+            'sigla': 'PPCAM',
+            'nome': 'Programa de Proteção a Crianças e Adolescentes Ameaçados de Morte',
+            'gateway': 'gw-ppcam.vpn.cdc.org.br (WireGuard)',
+            'ip_gateway': '10.8.2.1',
+            'status': 'Ativo',
+            'estacoes': [
+                {'hostname': 'PPCAM-ADM-01', 'usuario': 'Gestão Operacional', 'ip': '10.8.2.10', 'latencia': '16ms', 'status': 'Online'},
+                {'hostname': 'PPCAM-SOCIAL-02', 'usuario': 'Assistência Social', 'ip': '10.8.2.11', 'latencia': '22ms', 'status': 'Online'},
+                {'hostname': 'PPCAM-CAMPO-03', 'usuario': 'Equipe de Campo / Região', 'ip': '10.8.2.12', 'latencia': '35ms', 'status': 'Online'},
+                {'hostname': 'PPCAM-REGISTRO-04', 'usuario': 'Recepção e Prontuários', 'ip': '10.8.2.13', 'latencia': '19ms', 'status': 'Offline'},
+            ]
+        },
+        {
+            'sigla': 'PPDDH',
+            'nome': 'Programa de Proteção aos Defensores dos Direitos Humanos',
+            'gateway': 'gw-ppddh.vpn.cdc.org.br (OpenVPN)',
+            'ip_gateway': '10.8.3.1',
+            'status': 'Ativo',
+            'estacoes': [
+                {'hostname': 'PPDDH-COORD-01', 'usuario': 'Coordenação PPDDH', 'ip': '10.8.3.10', 'latencia': '14ms', 'status': 'Online'},
+                {'hostname': 'PPDDH-ADV-02', 'usuario': 'Advocacia Direitos Humanos', 'ip': '10.8.3.11', 'latencia': '17ms', 'status': 'Online'},
+                {'hostname': 'PPDDH-RELATORIA-03', 'usuario': 'Relatoria de Violações', 'ip': '10.8.3.12', 'latencia': '20ms', 'status': 'Online'},
+            ]
+        }
+    ]
+    return render(request, 'dashboard/vpn_mapa.html', {'projetos': projetos})
+
+@login_required(login_url='dashboard:login')
+def cofre_view(request):
+    """Renderiza o Cofre de Segredos & Credenciais do CDC."""
+    segredos = [
+        {'nome': 'Chave Privada SSH Master (ed25519)', 'categoria': 'Infraestrutura', 'detalhe': 'Acesso root às VPS Hostinger', 'atualizado': 'Há 3 dias'},
+        {'nome': 'Service Account Token Google Workspace', 'categoria': 'API Token', 'detalhe': 'Delegação de autoridade @cdc.org.br', 'atualizado': 'Há 14 dias'},
+        {'nome': 'Token Webhook Evolution API WhatsApp', 'categoria': 'Mensageria', 'detalhe': 'Chave bearer de escuta n8n', 'atualizado': 'Há 7 dias'},
+        {'nome': 'Credenciais PostgreSQL DataOps', 'categoria': 'Banco de Dados', 'detalhe': 'Usuário cdc_user e senha criptografada', 'atualizado': 'Há 20 dias'},
+        {'nome': 'API Key OpenWeather / Telemetria', 'categoria': 'Utilitários', 'detalhe': 'Chave pública de dados ambientais', 'atualizado': 'Há 30 dias'},
+    ]
+    return render(request, 'dashboard/cofre.html', {'segredos': segredos})
+
+@login_required(login_url='dashboard:login')
+def ferramentas_view(request):
+    """Renderiza o Canivete de Ferramentas de Escritório e Conversores do CDC."""
+    return render(request, 'dashboard/ferramentas.html')
+
+@login_required(login_url='dashboard:login')
+def governanca_view(request):
+    """Renderiza a página de Governança, Diretrizes e ADRs do CDC."""
+    adrs = [
+        {'id': 'ADR-001', 'data': '2026-07-21', 'decisao': 'Adição de subpastas infra/, prompts/ e api/', 'motivo': 'Organização modular por recurso reutilizável', 'status': 'Aprovado'},
+        {'id': 'ADR-002', 'data': '2026-07-21', 'decisao': 'Adoção do modelo de arquivos na pasta docs/', 'motivo': 'Padronização de governança DevOps', 'status': 'Aprovado'},
+        {'id': 'ADR-003', 'data': '2026-07-24', 'decisao': 'Automação Idempotente de Issues via GitHub Actions', 'motivo': 'Garantir cadastro e rastreabilidade no GitHub sem duplicar', 'status': 'Aprovado'},
+        {'id': 'ADR-004', 'data': '2026-07-28', 'decisao': 'Padronização de Visualização Gráfica de Branches', 'motivo': 'Facilitar auditoria e entendimento visual do Git Graph', 'status': 'Aprovado'},
+    ]
+    return render(request, 'dashboard/governanca.html', {'adrs': adrs})
 
 @login_required(login_url='dashboard:login')
 def simular_acao(request, acao):

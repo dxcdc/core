@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cofre de Segredos & Credenciais | CDC Core{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">
+            <i class="ri-key-2-line text-success me-2" style="color: #16a34a;"></i> Cofre de Segredos & Credenciais Criptografadas
+        </h3>
+        <p class="text-muted mb-0" style="font-size: 0.95em;">
+            Gerenciamento Seguro de Chaves SSH, Tokens de API, Certificados e Senhas Institucionais (Criptografia AES-256)
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-success btn-sm fw-bold" style="border-radius: 8px;">
+            <i class="ri-add-line"></i> Adicionar Segredo
+        </button>
+    </div>
+</div>
+
+<div class="card card-lahomes border-0 p-4 mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size: 0.9em;">
+            <thead class="table-light">
+                <tr>
+                    <th>Nome do Segredo</th>
+                    <th>Categoria</th>
+                    <th>Descrição / Uso</th>
+                    <th>Última Atualização</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in segredos %}
+                    <tr>
+                        <td class="fw-bold text-dark">
+                            <i class="ri-lock-2-fill text-warning me-1"></i> {{ s.nome }}
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ s.categoria }}</span></td>
+                        <td class="text-muted">{{ s.detalhe }}</td>
+                        <td class="text-muted">{{ s.atualizado }}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-light border" onclick="alert('Segredo descriptografado em memória e copiado!');" title="Copiar Valor"><i class="ri-file-copy-line"></i> Copiar</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
