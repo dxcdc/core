@@ -35,8 +35,19 @@
 
             <!-- Login Block -->
             <div class="block push-bit">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger alert-dismissable" style="margin: 15px;">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <h4><i class="fa fa-times-circle"></i> Erro</h4> {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
                 <!-- Login Form -->
-                <form action="{% url 'dashboard:index' %}" method="get" id="form-login" class="form-horizontal form-bordered form-control-borderless">
+                <form action="{% url 'dashboard:login' %}" method="post" id="form-login" class="form-horizontal form-bordered form-control-borderless">
+                    {% csrf_token %}
+
                     <div class="form-group">
                         <div class="col-xs-12">
                             <div class="input-group">
