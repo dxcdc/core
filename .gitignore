@@ -1,0 +1,16 @@
+# Python & Django
+*.pyc
+*__pycache__*
+.venv/
+env/
+venv/
+db.sqlite3
+media/
+staticfiles/
+.env
+
+# Templates source files (ignored from git tracking to keep repo lightweight)
+Templates/
+.DS_Store
+*.log
+

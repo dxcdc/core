@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard | CDC Core — Centralizador de Operações{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="content-header">
+    <div class="header-section">
+        <h1>
+            <i class="gi gi-stopwatch"></i>Painel Principal<br><small>Centralizador de Infraestrutura, VPNs e Canivete de Operações CDC</small>
+        </h1>
+    </div>
+</div>
+<ul class="breadcrumb breadcrumb-top">
+    <li>CDC Core</li>
+    <li><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+</ul>
+<!-- END Dashboard Header -->
+
+<!-- Top Stats Widgets -->
+<div class="row">
+    <div class="col-sm-6 col-lg-3">
+        <a href="javascript:void(0)" class="widget widget-hover-effect1">
+            <div class="widget-simple">
+                <div class="widget-icon pull-left themed-background-spring animation-fadeIn">
+                    <i class="gi gi-server"></i>
+                </div>
+                <h3 class="widget-content text-right animation-pullDown">
+                    <strong>12 / 12</strong><br>
+                    <small>Servidores Online</small>
+                </h3>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <a href="javascript:void(0)" class="widget widget-hover-effect1">
+            <div class="widget-simple">
+                <div class="widget-icon pull-left themed-background-amethyst animation-fadeIn">
+                    <i class="gi gi-shield"></i>
+                </div>
+                <h3 class="widget-content text-right animation-pullDown">
+                    <strong>45</strong><br>
+                    <small>Conexões VPN Ativas</small>
+                </h3>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <a href="javascript:void(0)" class="widget widget-hover-effect1">
+            <div class="widget-simple">
+                <div class="widget-icon pull-left themed-background-fire animation-fadeIn">
+                    <i class="gi gi-cloud"></i>
+                </div>
+                <h3 class="widget-content text-right animation-pullDown">
+                    <strong>100%</strong><br>
+                    <small>Backups Concluídos</small>
+                </h3>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <a href="javascript:void(0)" class="widget widget-hover-effect1">
+            <div class="widget-simple">
+                <div class="widget-icon pull-left themed-background-emerald animation-fadeIn">
+                    <i class="gi gi-keys"></i>
+                </div>
+                <h3 class="widget-content text-right animation-pullDown">
+                    <strong>28</strong><br>
+                    <small>Segredos no Cofre</small>
+                </h3>
+            </div>
+        </a>
+    </div>
+</div>
+<!-- END Top Stats Widgets -->
+
+<!-- Operational Overview & Quick Tools -->
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Main Operational Status Block -->
+        <div class="block full">
+            <div class="block-title">
+                <h2><i class="fa fa-dashboard"></i> <strong>Status dos Módulos Operacionais</strong></h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter table-striped">
+                    <thead>
+                        <tr>
+                            <th>Módulo</th>
+                            <th>Status</th>
+                            <th>Última Verificação</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="gi gi-server text-success"></i> <strong>Cluster de Servidores</strong></td>
+                            <td><span class="label label-success">Saudável</span></td>
+                            <td>Há 2 minutos</td>
+                            <td class="text-center">
+                                <button class="btn btn-xs btn-default" data-toggle="tooltip" title="Ver Detalhes"><i class="fa fa-eye"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="gi gi-shield text-info"></i> <strong>Gateway VPN (WireGuard)</strong></td>
+                            <td><span class="label label-success">Ativo</span></td>
+                            <td>Há 1 minuto</td>
+                            <td class="text-center">
+                                <button class="btn btn-xs btn-default" data-toggle="tooltip" title="Ver Detalhes"><i class="fa fa-eye"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="gi gi-cloud text-warning"></i> <strong>Sincronização Rclone (Offsite)</strong></td>
+                            <td><span class="label label-info">Agendado</span></td>
+                            <td>Há 15 minutos</td>
+                            <td class="text-center">
+                                <button class="btn btn-xs btn-default" data-toggle="tooltip" title="Executar Agora"><i class="fa fa-play"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="gi gi-refresh text-primary"></i> <strong>GitHub Actions (Issues Idempotentes)</strong></td>
+                            <td><span class="label label-success">Sincronizado</span></td>
+                            <td>Há 5 minutos</td>
+                            <td class="text-center">
+                                <button class="btn btn-xs btn-default" data-toggle="tooltip" title="Logs"><i class="fa fa-list"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- END Main Operational Status Block -->
+    </div>
+    <div class="col-lg-4">
+        <!-- Quick Actions Block -->
+        <div class="block">
+            <div class="block-title">
+                <h2><i class="fa fa-wrench"></i> <strong>Canivete de Ferramentas</strong></h2>
+            </div>
+            <div class="list-group">
+                <a href="javascript:void(0)" class="list-group-item">
+                    <h4 class="list-group-item-heading"><i class="gi gi-keys text-primary"></i> Gerador de Chaves SSH</h4>
+                    <p class="list-group-item-text">Criar par de chaves ed25519 para novos servidores.</p>
+                </a>
+                <a href="javascript:void(0)" class="list-group-item">
+                    <h4 class="list-group-item-heading"><i class="gi gi-cloud text-info"></i> Disparar Backup Offsite</h4>
+                    <p class="list-group-item-text">Executar sync Rclone 3-2-1 para storage em nuvem.</p>
+                </a>
+                <a href="javascript:void(0)" class="list-group-item">
+                    <h4 class="list-group-item-heading"><i class="gi gi-book_open text-success"></i> Consultar Diretrizes</h4>
+                    <p class="list-group-item-text">Acessar documentação e ADRs de governança.</p>
+                </a>
+            </div>
+        </div>
+        <!-- END Quick Actions Block -->
+    </div>
+</div>
+<!-- END Operational Overview & Quick Tools -->
+{% endblock %}

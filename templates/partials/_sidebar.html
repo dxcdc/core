@@ -1,0 +1,124 @@
+{% load static %}
+<div id="sidebar">
+    <!-- Wrapper for scrolling functionality -->
+    <div id="sidebar-scroll">
+        <!-- Sidebar Content -->
+        <div class="sidebar-content">
+            <!-- Brand -->
+            <a href="{% url 'dashboard:index' %}" class="sidebar-brand">
+                <i class="gi gi-flash"></i><span class="sidebar-nav-mini-hide"><strong>CDC</strong> Core</span>
+            </a>
+            <!-- END Brand -->
+
+            <!-- User Info -->
+            <div class="sidebar-section sidebar-user clearfix sidebar-nav-mini-hide">
+                <div class="sidebar-user-avatar">
+                    <a href="#">
+                        <img src="{% static 'img/placeholders/avatars/avatar2.jpg' %}" alt="avatar">
+                    </a>
+                </div>
+                <div class="sidebar-user-name">Operações CDC</div>
+                <div class="sidebar-user-links">
+                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Perfil"><i class="gi gi-user"></i></a>
+                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Mensagens"><i class="gi gi-envelope"></i></a>
+                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Configurações"><i class="gi gi-cogwheel"></i></a>
+                    <a href="{% url 'dashboard:login' %}" data-toggle="tooltip" data-placement="bottom" title="Sair"><i class="gi gi-exit"></i></a>
+                </div>
+            </div>
+            <!-- END User Info -->
+
+            <!-- Theme Colors -->
+            <ul class="sidebar-section sidebar-themes clearfix sidebar-nav-mini-hide">
+                <li>
+                    <a href="javascript:void(0)" class="themed-background-dark-night themed-border-night" data-theme="{% static 'css/themes/night.css' %}" data-toggle="tooltip" title="Night"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" class="themed-background-dark-amethyst themed-border-amethyst" data-theme="{% static 'css/themes/amethyst.css' %}" data-toggle="tooltip" title="Amethyst"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" class="themed-background-dark-modern themed-border-modern" data-theme="{% static 'css/themes/modern.css' %}" data-toggle="tooltip" title="Modern"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" class="themed-background-dark-flatie themed-border-flatie" data-theme="{% static 'css/themes/flatie.css' %}" data-toggle="tooltip" title="Flatie"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" class="themed-background-dark-emerald themed-border-emerald" data-theme="{% static 'css/themes/emerald.css' %}" data-toggle="tooltip" title="Emerald"></a>
+                </li>
+            </ul>
+            <!-- END Theme Colors -->
+
+            <!-- Sidebar Navigation -->
+            <ul class="sidebar-nav">
+                <li class="sidebar-header">
+                    <span class="sidebar-header-title">Navegação Principal</span>
+                </li>
+                <li>
+                    <a href="{% url 'dashboard:index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                        <i class="gi gi-stopwatch sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Dashboard</span>
+                    </a>
+                </li>
+                
+                <li class="sidebar-header">
+                    <span class="sidebar-header-title">Módulos de Operação</span>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-nav-menu">
+                        <i class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"></i>
+                        <i class="gi gi-server sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Infraestrutura</span>
+                    </a>
+                    <ul>
+                        <li><a href="#">Servidores & VMs</a></li>
+                        <li><a href="#">Containers Docker</a></li>
+                        <li><a href="#">Monitoramento & Status</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-nav-menu">
+                        <i class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"></i>
+                        <i class="gi gi-shield sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">VPN & Redes</span>
+                    </a>
+                    <ul>
+                        <li><a href="#">Clientes VPN</a></li>
+                        <li><a href="#">Gateways WireGuard</a></li>
+                        <li><a href="#">Regras de Firewall</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-nav-menu">
+                        <i class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"></i>
+                        <i class="gi gi-keys sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Cofre & Credenciais</span>
+                    </a>
+                    <ul>
+                        <li><a href="#">Chaves SSH</a></li>
+                        <li><a href="#">Tokens de API</a></li>
+                        <li><a href="#">Gestão de Segredos</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-nav-menu">
+                        <i class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"></i>
+                        <i class="gi gi-settings sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Canivete de Ferramentas</span>
+                    </a>
+                    <ul>
+                        <li><a href="#">Backups Rclone</a></li>
+                        <li><a href="#">Automações GitHub Actions</a></li>
+                        <li><a href="#">Gerador de Prompts IA</a></li>
+                        <li><a href="#">Postmortem & Logs</a></li>
+                    </ul>
+                </li>
+
+                <li class="sidebar-header">
+                    <span class="sidebar-header-title">Governança & Docs</span>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="gi gi-book_open sidebar-nav-icon"></i><span class="sidebar-nav-mini-hide">Diretrizes de Doc</span>
+                    </a>
+                </li>
+            </ul>
+            <!-- END Sidebar Navigation -->
+        </div>
+        <!-- END Sidebar Content -->
+    </div>
+    <!-- END Wrapper for scrolling functionality -->
+</div>
