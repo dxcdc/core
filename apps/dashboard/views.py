@@ -192,8 +192,8 @@ def login_view(request):
         return redirect('dashboard:index')
 
     if request.method == 'POST':
-        username_input = request.POST.get('login-email', '').strip()
-        password_input = request.POST.get('login-password', '').strip()
+        username_input = (request.POST.get('login-email') or request.POST.get('username') or '').strip()
+        password_input = (request.POST.get('login-password') or request.POST.get('password') or '').strip()
 
         user = authenticate(request, username=username_input, password=password_input)
 
@@ -206,7 +206,8 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect('dashboard:index')
+            next_url = request.GET.get('next') or request.POST.get('next') or 'dashboard:index'
+            return redirect(next_url)
         else:
             messages.error(request, 'Usuário/Email ou senha incorretos.')
 
