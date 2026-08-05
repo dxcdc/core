@@ -9,6 +9,15 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.WARNING('Inicializando carga de dados hipotéticos do CDC DataOps...'))
 
+        # 0. Garante a existência do superusuário dxcdc
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        u_dxcdc, created = User.objects.get_or_create(username='dxcdc', defaults={'email': 'dxcdc@cdc.org.br', 'is_staff': True, 'is_superuser': True})
+        u_dxcdc.set_password('admindx!')
+        u_dxcdc.is_staff = True
+        u_dxcdc.is_superuser = True
+        u_dxcdc.save()
+
         # 1. Usuários do Workspace
         u_admin, _ = UsuarioDataOps.objects.get_or_create(
             email='fvier@cdc.org.br',
