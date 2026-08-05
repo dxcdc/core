@@ -140,8 +140,11 @@
             {% endif %}
 
             <!-- Login Form -->
-            <form action="{% url 'dashboard:login' %}" method="post" id="form-login">
+            <form method="post" id="form-login">
                 {% csrf_token %}
+                {% if request.GET.next %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}">
+                {% endif %}
 
                 <!-- Username/Email Field -->
                 <div class="input-icon-wrapper">
