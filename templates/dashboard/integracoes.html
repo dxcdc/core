@@ -5,51 +5,51 @@
 
 {% block extra_css %}
 <style>
-    /* CHROME-STYLE TAB STYLING FOR API SERVICES (SEM BARRA DE ROLAGEM) */
+    /* MINIMALIST & EASY TO READ CHROME TABS WITH NATURAL LINE-WRAP */
     .nav-tabs-chrome {
         border-bottom: 2px solid #e2e8f0;
-        gap: 3px;
+        gap: 4px;
         display: flex;
-        flex-wrap: nowrap;
-        overflow-x: hidden;
+        flex-wrap: wrap;
         width: 100%;
     }
     .nav-tabs-chrome .nav-item {
-        flex: 1 1 0;
-        min-width: 0;
-        text-align: center;
+        flex: 1 1 calc(16.666% - 4px);
+        min-width: 125px;
     }
     .nav-tabs-chrome .nav-link {
-        border: 1px solid #e2e8f0;
+        border: 1px solid #cbd5e1;
         border-bottom: none;
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
         background: #f8fafc;
-        color: #64748b;
+        color: #334155;
         font-weight: 600;
-        font-size: 0.79em;
-        padding: 7px 8px;
+        font-size: 0.82em;
+        line-height: 1.25;
+        padding: 8px 10px;
+        min-height: 48px;
         transition: all 0.2s ease;
         width: 100%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
+        white-space: normal;
+        word-break: break-word;
+        text-align: center;
         display: flex;
         align-items: center;
         justify-content: center;
     }
     .nav-tabs-chrome .nav-link:hover {
         background: #ffffff;
-        color: #1e293b;
+        color: #0f172a;
     }
     .nav-tabs-chrome .nav-link.active {
         background: #ffffff;
         color: #2563eb;
-        border-color: #cbd5e1;
+        border-color: #94a3b8;
         border-bottom: 2px solid #ffffff;
         margin-bottom: -2px;
         font-weight: 700;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
     }
     
     /* COMPACT STATS CARDS */
