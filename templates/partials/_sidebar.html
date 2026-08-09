@@ -36,18 +36,99 @@
         </div>
 
         <ul class="nav nav-pills flex-column mb-4 gap-1" style="list-style: none; padding-left: 0; margin-left: 0;">
+            
+            <!-- MENU RETRÁTIL: CENTRAL DE INTEGRAÇÕES & APIS -->
             <li class="nav-item">
-                <a href="{% url 'dashboard:workspace' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'workspace' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'workspace' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'workspace' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-google-line fs-18" style="color: {% if request.resolver_match.url_name == 'workspace' %}#ffffff{% else %}#0284c7{% endif %};"></i>
-                    <span>Google Workspace</span>
+                <a href="#collapseIntegracoes" data-bs-toggle="collapse" role="button" aria-expanded="{% if request.resolver_match.url_name == 'integracoes' %}true{% else %}false{% endif %}" aria-controls="collapseIntegracoes" class="nav-link d-flex align-items-center justify-content-between py-2 px-3 {% if request.resolver_match.url_name == 'integracoes' %}active{% endif %}" style="border-radius: 8px; font-weight: 600; color: {% if request.resolver_match.url_name == 'integracoes' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'integracoes' %}#2563eb{% else %}transparent{% endif %};">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="ri-plug-line fs-18" style="color: {% if request.resolver_match.url_name == 'integracoes' %}#ffffff{% else %}#ea580c{% endif %};"></i>
+                        <span>Central de Integrações</span>
+                    </div>
+                    <i class="ri-chevron-down-line fs-16"></i>
                 </a>
+
+                <!-- SUB-ITENS DAS INTEGRAÇÕES DA API -->
+                <div class="collapse {% if request.resolver_match.url_name == 'integracoes' %}show{% endif %} mt-1" id="collapseIntegracoes">
+                    <ul class="nav flex-column ps-3 gap-1" style="border-left: 2px solid #e2e8f0; margin-left: 14px;">
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:integracoes' %}" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-dashboard-line text-primary"></i> Visão Geral das APIs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:integracoes' %}#google-workspace" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-google-line text-primary"></i> Google Workspace SDK
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:integracoes' %}#whatsapp-evolution" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-whatsapp-line text-success"></i> WhatsApp Evolution API
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:integracoes' %}#ongsys-api" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-heart-pulse-line text-danger"></i> ONGSYS API v1
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:integracoes' %}#sefaz-nfe" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-file-text-line text-warning"></i> SEFAZ & NF-e (A1)
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:integracoes' %}#vpn-wireguard" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-shield-keyhole-line text-purple" style="color: #9333ea;"></i> VPN WireGuard API
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:integracoes' %}#postgresql-vault" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-database-2-line text-dark"></i> PostgreSQL & Vault DB
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
+
+            <!-- MENU RETRÁTIL: GOOGLE WORKSPACE -->
             <li class="nav-item">
-                <a href="{% url 'dashboard:integracoes' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'integracoes' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'integracoes' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'integracoes' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-plug-line fs-18" style="color: {% if request.resolver_match.url_name == 'integracoes' %}#ffffff{% else %}#ea580c{% endif %};"></i>
-                    <span>Central de Integrações & APIs</span>
+                <a href="#collapseWorkspace" data-bs-toggle="collapse" role="button" aria-expanded="{% if request.resolver_match.url_name == 'workspace' %}true{% else %}false{% endif %}" aria-controls="collapseWorkspace" class="nav-link d-flex align-items-center justify-content-between py-2 px-3 {% if request.resolver_match.url_name == 'workspace' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'workspace' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'workspace' %}#2563eb{% else %}transparent{% endif %};">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="ri-google-line fs-18" style="color: {% if request.resolver_match.url_name == 'workspace' %}#ffffff{% else %}#0284c7{% endif %};"></i>
+                        <span>Google Workspace</span>
+                    </div>
+                    <i class="ri-chevron-down-line fs-16"></i>
                 </a>
+                <div class="collapse {% if request.resolver_match.url_name == 'workspace' %}show{% endif %} mt-1" id="collapseWorkspace">
+                    <ul class="nav flex-column ps-3 gap-1" style="border-left: 2px solid #e2e8f0; margin-left: 14px;">
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:workspace' %}" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-user-line text-primary"></i> 1. Usuários & OUs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:workspace' %}" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-folder-shared-line text-info"></i> 2. Cotas & Drive
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:workspace' %}" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-team-line text-success"></i> 3. Grupos & Auditoria
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:workspace' %}" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-key-fill text-warning"></i> 4. Tokens OAuth
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard:workspace' %}" class="nav-link py-1 px-3 d-flex align-items-center gap-2" style="font-size: 0.84em; color: #64748b; font-weight: 500;">
+                                <i class="ri-time-line text-purple" style="color: #9333ea;"></i> 5. Ciclo de Voluntários
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
+
             <li class="nav-item">
                 <a href="{% url 'dashboard:infra' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'infra' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'infra' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'infra' %}#2563eb{% else %}transparent{% endif %};">
                     <i class="ri-server-line fs-18" style="color: {% if request.resolver_match.url_name == 'infra' %}#ffffff{% else %}#2563eb{% endif %};"></i>
