@@ -321,24 +321,50 @@ def simular_acao(request, acao):
 @login_required(login_url='dashboard:login')
 def integracoes_view(request):
     """Renderiza a Central de Integrações & APIs do CDC Core com configurações e conectores."""
+    from .google_service import test_google_workspace_connection, save_service_account_json, get_credentials_file_path
+
     if request.method == 'POST':
         api_name = request.POST.get('api_name', 'Google Workspace')
-        messages.success(request, f'Configurações da integração "{api_name}" salvas com sucesso! Modo de validação ativo.')
+        
+        if 'json_file' in request.FILES:
+            try:
+                save_service_account_json(request.FILES['json_file'])
+                messages.success(request, 'Chave JSON da Service Account salva com sucesso no diretório de credenciais!')
+            except Exception as e:
+                messages.error(request, f'Erro ao salvar arquivo JSON: {e}')
+
+        elif 'json_text' in request.POST and request.POST.get('json_text').strip():
+            try:
+                save_service_account_json(request.POST.get('json_text').strip())
+                messages.success(request, 'Credencial JSON da Service Account salva com sucesso!')
+            except Exception as e:
+                messages.error(request, f'Formato JSON inválido: {e}')
+        else:
+            messages.success(request, f'Parâmetros da integração "{api_name}" atualizados com sucesso!')
+            
         return redirect('dashboard:integracoes')
+
+    # Testa status real da conexão Google Workspace
+    google_connected, google_msg, google_diag = test_google_workspace_connection()
+    creds_exist = bool(get_credentials_file_path())
 
     integracoes_list = [
         {
             'slug': 'google-workspace',
-            'nome': 'Google Workspace (Admin SDK)',
+            'nome': 'Google Workspace (Admin SDK & Drive API)',
             'categoria': 'Gestão & Soberania de Dados',
             'icone': 'ri-google-line',
             'cor_icone': 'text-primary',
             'descricao': 'Conjunto completo de APIs do Google Workspace (Directory v1, Drive v3, Groups, OAuth Tokens e Reports API) para soberania de contas @cdc.org.br.',
-            'status': 'Conectado (Service Account)',
-            'badge_status': 'success',
+            'status': 'Conectado (API Real)' if google_connected else ('Chave JSON Carregada' if creds_exist else 'Aguardando Chave JSON'),
+            'badge_status': 'success' if google_connected else ('warning' if creds_exist else 'secondary'),
             'endpoint': 'https://admin.googleapis.com',
+            'google_connected': google_connected,
+            'google_msg': google_msg,
+            'google_diag': google_diag,
+            'creds_exist': creds_exist,
             'campos': [
-                {'name': 'service_account_email', 'label': 'Service Account Email', 'value': 'cdc-core-service-account@cdc-core.iam.gserviceaccount.com'},
+                {'name': 'service_account_email', 'label': 'Service Account Email', 'value': google_diag.get('service_account', 'cdc-core-service-account@cdc-core.iam.gserviceaccount.com')},
                 {'name': 'delegated_user', 'label': 'E-mail do Administrador Delegado', 'value': 'dxcdc@cdc.org.br'},
                 {'name': 'scopes', 'label': 'Escopos OAuth2 Solicitados', 'value': 'admin.directory.user, admin.directory.group, drive.readonly, admin.reports.audit.readonly'},
             ],

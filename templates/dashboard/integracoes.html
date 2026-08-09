@@ -204,6 +204,46 @@
                 </div>
             </div>
 
+            <!-- CAIXA DE CARGA / UPLOAD DA SERVICE ACCOUNT JSON KEY (GOOGLE WORKSPACE) -->
+            {% if api.slug == 'google-workspace' %}
+            <div class="card border border-primary-subtle p-3 mb-4" style="border-radius: 12px; background-color: #f0f9ff !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                        <i class="ri-key-fill text-primary fs-18"></i> Credencial Service Account JSON (Google Cloud Console)
+                    </h6>
+                    {% if api.creds_exist %}
+                    <span class="badge bg-success text-white fw-bold"><i class="ri-checkbox-circle-fill me-1"></i> Chave JSON Presente</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark fw-bold"><i class="ri-alert-line me-1"></i> Aguardando Upload da Chave</span>
+                    {% endif %}
+                </div>
+                <p class="text-muted mb-3" style="font-size: 0.84em; line-height: 1.4;">
+                    Para realizar a comunicação real com a Directory API (v1) e Drive API (v3), faça o upload do arquivo <code>.json</code> da Service Account gerado no Google Cloud Console ou cole o conteúdo do JSON abaixo.
+                </p>
+
+                <form method="POST" action="{% url 'dashboard:integracoes' %}" enctype="multipart/form-data" class="row g-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="api_name" value="Google Workspace">
+                    
+                    <div class="col-md-6">
+                        <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.78em;">1. Upload do Arquivo .JSON da Service Account</label>
+                        <input type="file" class="form-control form-control-sm bg-white" name="json_file" accept=".json">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.78em;">2. Ou Cole a Chave JSON Secreta</label>
+                        <input type="text" class="form-control form-control-sm bg-white font-monospace" name="json_text" placeholder='{"type": "service_account", "project_id": "cdc-core", ...}' style="font-size: 0.78em;">
+                    </div>
+
+                    <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                        <button type="submit" class="btn btn-sm btn-primary fw-bold" style="border-radius: 6px;">
+                            <i class="ri-upload-cloud-line me-1"></i> Salvar e Autenticar Chave JSON
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+
             <!-- Parâmetros de Configuração de Chaves -->
             <form method="POST" action="{% url 'dashboard:integracoes' %}" class="mb-4">
                 {% csrf_token %}
