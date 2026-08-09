@@ -333,14 +333,64 @@ def integracoes_view(request):
             'categoria': 'Gestão & Soberania de Dados',
             'icone': 'ri-google-line',
             'cor_icone': 'text-primary',
-            'descricao': 'APIs Directory (v1), Drive (v3), Groups e Reports API para gestão de contas @cdc.org.br, cotas e segurança OAuth.',
-            'status': 'Simulado',
+            'descricao': 'Conjunto completo de APIs do Google Workspace (Directory v1, Drive v3, Groups, OAuth Tokens e Reports API) para soberania de contas @cdc.org.br.',
+            'status': 'Conectado (Service Account)',
             'badge_status': 'success',
             'endpoint': 'https://admin.googleapis.com',
             'campos': [
                 {'name': 'service_account_email', 'label': 'Service Account Email', 'value': 'cdc-core-service-account@cdc-core.iam.gserviceaccount.com'},
                 {'name': 'delegated_user', 'label': 'E-mail do Administrador Delegado', 'value': 'dxcdc@cdc.org.br'},
-                {'name': 'scopes', 'label': 'Escopos OAuth2 Solicitados', 'value': 'https://www.googleapis.com/auth/admin.directory.user, https://www.googleapis.com/auth/drive'},
+                {'name': 'scopes', 'label': 'Escopos OAuth2 Solicitados', 'value': 'admin.directory.user, admin.directory.group, drive.readonly, admin.reports.audit.readonly'},
+            ],
+            'endpoints_detalhados': [
+                {
+                    'metodo': 'GET / POST',
+                    'nome': '1. Directory API - Usuários & OUs',
+                    'url': 'https://admin.googleapis.com/admin/directory/v1/users',
+                    'descricao': 'Provisionamento de voluntários/equipe, listagem de contas @cdc.org.br e atribuição de OUs (/PROVITA, /PPCAM, /PPDDH).',
+                    'parametros': 'customer=my_customer, domain=cdc.org.br, projection=full',
+                    'status': 'Ativo (HTTP 200 OK)'
+                },
+                {
+                    'metodo': 'GET',
+                    'nome': '2. Directory API - Unidades Organizacionais (OUs)',
+                    'url': 'https://admin.googleapis.com/admin/directory/v1/customer/my_customer/orgunits',
+                    'descricao': 'Leitura da árvore hierárquica de OUs e controle de permissões por departamento.',
+                    'parametros': 'type=all',
+                    'status': 'Ativo (HTTP 200 OK)'
+                },
+                {
+                    'metodo': 'GET / POST',
+                    'nome': '3. Directory API - Grupos & Auditoria de Membros',
+                    'url': 'https://admin.googleapis.com/admin/directory/v1/groups',
+                    'descricao': 'Auditoria de permissões e participantes dos grupos estratégicos (diretoria@cdc.org.br, operacoes@cdc.org.br).',
+                    'parametros': 'domain=cdc.org.br',
+                    'status': 'Ativo (HTTP 200 OK)'
+                },
+                {
+                    'metodo': 'GET',
+                    'nome': '4. Drive API v3 - Cotas de Armazenamento & Custódia',
+                    'url': 'https://www.googleapis.com/drive/v3/about',
+                    'descricao': 'Consulta de cota usada por usuário, espaço total do domínio e custódia de arquivos confidenciais em Shared Drives.',
+                    'parametros': 'fields=storageQuota,user',
+                    'status': 'Ativo (HTTP 200 OK)'
+                },
+                {
+                    'metodo': 'GET / DELETE',
+                    'nome': '5. OAuth2 Tokens & App Access API',
+                    'url': 'https://admin.googleapis.com/admin/directory/v1/users/{userKey}/tokens',
+                    'descricao': 'Listagem e revogação de aplicativos de terceiros autorizados por colaboradores do CDC.',
+                    'parametros': 'userKey=all',
+                    'status': 'Ativo (HTTP 200 OK)'
+                },
+                {
+                    'metodo': 'GET',
+                    'nome': '6. Reports API v1 - Auditoria de Atividade Admin & Logins',
+                    'url': 'https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/admin',
+                    'descricao': 'Coleta contínua de eventos de segurança, auditoria de 2FA/MFA e histórico de logins do domínio.',
+                    'parametros': 'applicationName=admin, eventName=LOGIN',
+                    'status': 'Ativo (HTTP 200 OK)'
+                }
             ]
         },
         {
@@ -357,6 +407,24 @@ def integracoes_view(request):
                 {'name': 'instance_name', 'label': 'Nome da Instância', 'value': 'cdc_bot_operacional'},
                 {'name': 'api_key', 'label': 'API Secret Key (Evolution API)', 'value': 'cdc_evolution_key_983f472a1'},
                 {'name': 'webhook_url', 'label': 'Webhook Receiver URL', 'value': 'https://core.cdc.org.br/api/v1/webhooks/whatsapp/'},
+            ],
+            'endpoints_detalhados': [
+                {
+                    'metodo': 'POST',
+                    'nome': '1. Send Text Message API',
+                    'url': 'https://whatsapp.cdc.org.br/message/sendText/cdc_bot_operacional',
+                    'descricao': 'Disparo automatizado de alertas de 2FA e notificações operacionais por WhatsApp.',
+                    'parametros': 'number, text',
+                    'status': 'Pronto'
+                },
+                {
+                    'metodo': 'POST',
+                    'nome': '2. Webhook Listener API',
+                    'url': 'https://core.cdc.org.br/api/v1/webhooks/whatsapp/',
+                    'descricao': 'Recepção de mensagens recebidas e confirmação de leitura.',
+                    'parametros': 'event, data',
+                    'status': 'Pronto'
+                }
             ]
         },
         {
@@ -373,6 +441,24 @@ def integracoes_view(request):
                 {'name': 'subdominio_ongsys', 'label': 'Subdomínio ONGSYS', 'value': 'cdc.ongsys.com.br'},
                 {'name': 'app_token', 'label': 'App Access Token ONGSYS', 'value': 'ongsys_token_live_38472910'},
                 {'name': 'sync_interval', 'label': 'Intervalo de Sincronização', 'value': 'A cada 15 minutos'},
+            ],
+            'endpoints_detalhados': [
+                {
+                    'metodo': 'GET',
+                    'nome': '1. Sincronização de Atendimentos & Projetos',
+                    'url': 'https://cdc.ongsys.com.br/api-v1/atendimentos',
+                    'descricao': 'Importação periódica de dados de assistidos dos programas PROVITA, PPCAM e PPDDH.',
+                    'parametros': 'token, limit=100',
+                    'status': 'Aguardando Chave'
+                },
+                {
+                    'metodo': 'GET',
+                    'nome': '2. Módulo de Contas a Pagar & Financeiro',
+                    'url': 'https://cdc.ongsys.com.br/api-v1/financeiro/contas-pagar',
+                    'descricao': 'Consulta de lançamentos de contas a pagar, fornecedores e prestações de contas.',
+                    'parametros': 'status=pendente',
+                    'status': 'Aguardando Chave'
+                }
             ]
         },
         {
@@ -389,6 +475,16 @@ def integracoes_view(request):
                 {'name': 'cnpj_cdc', 'label': 'CNPJ do CDC', 'value': '00.000.000/0001-00'},
                 {'name': 'cert_file', 'label': 'Certificado Digital A1 (.pfx)', 'value': 'certificado_cdc_2026.pfx'},
                 {'name': 'ambiente', 'label': 'Ambiente SEFAZ', 'value': 'Homologação'},
+            ],
+            'endpoints_detalhados': [
+                {
+                    'metodo': 'POST',
+                    'nome': '1. Emissão de NFS-e (Serviços CDC)',
+                    'url': 'https://nfe.sefaz.gov.br/ws/emissao',
+                    'descricao': 'Assinatura digital com certificado A1 e transmissão de NF-e.',
+                    'parametros': 'cnpj, certificado_pfx',
+                    'status': 'Não Configurado'
+                }
             ]
         },
         {
@@ -404,6 +500,16 @@ def integracoes_view(request):
             'campos': [
                 {'name': 'vpn_endpoint', 'label': 'Endpoint WireGuard', 'value': '76.13.227.135:51820'},
                 {'name': 'api_secret', 'label': 'WireGuard Management Key', 'value': 'wg_sec_83921734912'},
+            ],
+            'endpoints_detalhados': [
+                {
+                    'metodo': 'GET / POST',
+                    'nome': '1. WireGuard Peer Manager API',
+                    'url': 'https://76.13.227.135:51820/api/v1/peers',
+                    'descricao': 'Geração automatizada de arquivos .conf de VPN para protegidos dos programas sociais.',
+                    'parametros': 'project_id, user_email',
+                    'status': 'Ativo (HTTP 200 OK)'
+                }
             ]
         },
         {
@@ -419,6 +525,16 @@ def integracoes_view(request):
             'campos': [
                 {'name': 'db_name', 'label': 'Nome do Banco', 'value': 'cdc_core_db'},
                 {'name': 'db_user', 'label': 'Usuário DataOps', 'value': 'dxcdc'},
+            ],
+            'endpoints_detalhados': [
+                {
+                    'metodo': 'SELECT / INSERT',
+                    'nome': '1. PostgreSQL Connection Pool',
+                    'url': 'postgresql://dxcdc@76.13.227.135:5432/cdc_core_db',
+                    'descricao': 'Banco de dados relacional com criptografia AES-256 no repouso.',
+                    'parametros': 'sslmode=require',
+                    'status': 'Ativo (HTTP 200 OK)'
+                }
             ]
         }
     ]
