@@ -5,28 +5,32 @@
 
 {% block extra_css %}
 <style>
-    /* CHROME TABS BAR STYLING */
+    /* CHROME TABS BAR STYLING - NO SCROLLBAR, PERFECT FIT 100% */
     .chrome-tabs-wrapper {
         background: #e2e8f0;
-        padding: 10px 12px 0 12px;
+        padding: 8px 8px 0 8px;
         border-radius: 14px 14px 0 0;
         border: 1px solid #cbd5e1;
         border-bottom: none;
         display: flex;
         align-items: flex-end;
         gap: 4px;
-        overflow-x: auto;
+        width: 100%;
+        overflow: hidden; /* ELIMINADA BARRA DE ROLAGEM */
     }
     .chrome-tab-item {
         position: relative;
+        flex: 1 1 0; /* DISTRIBUIÇÃO IGUALITÁRIA DAS 5 ABAS EM 100% */
+        min-width: 0;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 10px 18px;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 8px;
         background: #cbd5e1;
         color: #475569;
         font-weight: 600;
-        font-size: 0.88em;
+        font-size: 0.82em;
         border-radius: 10px 10px 0 0;
         border: 1px solid #cbd5e1;
         border-bottom: none;
@@ -34,6 +38,11 @@
         transition: all 0.15s ease;
         text-decoration: none;
         user-select: none;
+        white-space: nowrap;
+    }
+    .chrome-tab-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
         white-space: nowrap;
     }
     .chrome-tab-item:hover:not(.active) {
@@ -60,24 +69,25 @@
         border-radius: 10px 10px 0 0;
     }
     .chrome-tab-favicon {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 13px;
+        font-size: 12px;
     }
     .chrome-tab-close {
-        font-size: 12px;
+        font-size: 11px;
         color: #94a3b8;
         border-radius: 50%;
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-left: 4px;
+        margin-left: 2px;
         transition: background 0.15s ease;
     }
     .chrome-tab-close:hover {
@@ -88,7 +98,7 @@
         background: #ffffff;
         border: 1px solid #cbd5e1;
         border-radius: 0 0 16px 16px;
-        padding: 30px;
+        padding: 24px;
         box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
         margin-bottom: 30px;
     }
@@ -98,12 +108,25 @@
     .tab-pane-custom.active {
         display: block;
     }
+    /* FILTRO DATAOPS OTIMIZADO E COMPACTO */
     .filter-bar-box {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
-        padding: 14px;
+        padding: 10px 14px;
         margin-bottom: 20px;
+    }
+    .filter-select-sm {
+        height: 34px !important;
+        font-size: 0.82em !important;
+        border-radius: 6px !important;
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+    .filter-input-sm {
+        height: 34px !important;
+        font-size: 0.84em !important;
+        border-radius: 6px !important;
     }
 </style>
 {% endblock %}
@@ -116,7 +139,7 @@
             <i class="ri-google-line text-info me-2"></i> Módulo Google Workspace (@cdc.org.br)
         </h3>
         <p class="text-muted mb-0" style="font-size: 0.95em;">
-            Navegue pelas guias <strong>Google Chrome</strong> e utilize os filtros de pesquisa rápida em tempo real em cada sessão.
+            As 5 guias no estilo <strong>Google Chrome</strong> encaixam perfeitamente na tela com filtros avançados DataOps.
         </p>
     </div>
     <div class="d-flex gap-2">
@@ -202,37 +225,37 @@
     </div>
 </div>
 
-<!-- BARRA DE GUIAS ESTILO GOOGLE CHROME -->
+<!-- BARRA DE GUIAS ESTILO GOOGLE CHROME - 100% LARGURA SEM ROLAGEM -->
 <div class="chrome-tabs-wrapper" id="chromeTabsBar">
-    <button class="chrome-tab-item active" data-tab-target="#guia-usuarios">
+    <button class="chrome-tab-item active" data-tab-target="#guia-usuarios" title="1. Usuários & OUs (Directory API)">
         <span class="chrome-tab-favicon bg-primary text-white"><i class="ri-user-line"></i></span>
-        <span>1. Usuários & OUs (Directory API)</span>
+        <span class="chrome-tab-title">1. Usuários & OUs</span>
         <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
 
-    <button class="chrome-tab-item" data-tab-target="#guia-drive">
+    <button class="chrome-tab-item" data-tab-target="#guia-drive" title="2. Cotas & Custódia de Drive">
         <span class="chrome-tab-favicon bg-info text-white"><i class="ri-folder-shared-line"></i></span>
-        <span>2. Cotas & Custódia de Drive</span>
-        <span class="badge bg-danger rounded-circle p-1 ms-1" style="width: 8px; height: 8px;" title="Alerta Cota 96%"></span>
+        <span class="chrome-tab-title">2. Cotas & Drive</span>
+        <span class="badge bg-danger rounded-circle p-1 ms-1" style="width: 7px; height: 7px;" title="Alerta Cota 96%"></span>
         <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
 
-    <button class="chrome-tab-item" data-tab-target="#guia-grupos">
+    <button class="chrome-tab-item" data-tab-target="#guia-grupos" title="3. Grupos & Auditoria de Membros">
         <span class="chrome-tab-favicon bg-success text-white"><i class="ri-team-line"></i></span>
-        <span>3. Grupos & Auditoria de Membros</span>
-        <span class="badge bg-warning rounded-circle p-1 ms-1" style="width: 8px; height: 8px;" title="Vazamento em Grupo"></span>
+        <span class="chrome-tab-title">3. Grupos & Auditoria</span>
+        <span class="badge bg-warning rounded-circle p-1 ms-1" style="width: 7px; height: 7px;" title="Vazamento em Grupo"></span>
         <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
 
-    <button class="chrome-tab-item" data-tab-target="#guia-oauth">
+    <button class="chrome-tab-item" data-tab-target="#guia-oauth" title="4. Tokens & Apps OAuth">
         <span class="chrome-tab-favicon bg-warning text-white"><i class="ri-key-fill"></i></span>
-        <span>4. Tokens & Apps OAuth</span>
+        <span class="chrome-tab-title">4. Apps & OAuth</span>
         <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
 
-    <button class="chrome-tab-item" data-tab-target="#guia-lifecycle">
+    <button class="chrome-tab-item" data-tab-target="#guia-lifecycle" title="5. Ciclo de Vida de Voluntários">
         <span class="chrome-tab-favicon text-white" style="background: #9333ea;"><i class="ri-time-line"></i></span>
-        <span>5. Ciclo de Vida de Voluntários</span>
+        <span class="chrome-tab-title">5. Voluntários & Aliases</span>
         <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
 </div>
@@ -245,24 +268,23 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-shield-user-line me-2 text-primary"></i> 1. Diretório de Usuários, Unidades Organizacionais (OUs) e Licenciamento</h5>
-                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Admin Directory API (directory_v1)</code>.</p>
+                <p class="text-muted mb-0" style="font-size: 0.85em;">Dados hipotéticos da <code>Google Admin Directory API (directory_v1)</code>.</p>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-secondary btn-sm" onclick="alert('Exportando tabela de usuários do Workspace em JSON...');">
-                    <i class="ri-download-2-line me-1"></i> Exportar JSON
-                </button>
-            </div>
+            <button class="btn btn-outline-secondary btn-sm" onclick="alert('Exportando tabela de usuários do Workspace em JSON...');">
+                <i class="ri-download-2-line me-1"></i> Exportar JSON
+            </button>
         </div>
 
-        <!-- BARRA DE PESQUISA E FILTROS DA GUIA 1 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="position-relative flex-grow-1" style="max-width: 380px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 12px; top: 10px; font-size: 1.1em;"></i>
-                <input type="text" class="form-control form-control-sm ps-5 bg-white border" id="search-tab1" onkeyup="filterTab1()" placeholder="Buscar por nome ou e-mail..." style="height: 38px; border-radius: 8px;">
+        <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 1 -->
+        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="position-relative flex-grow-1" style="max-width: 260px;">
+                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
+                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab1" onkeyup="filterTab1()" placeholder="Buscar nome ou e-mail...">
             </div>
+            
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm bg-white border" id="filter-ou-tab1" onchange="filterTab1()" style="height: 38px; border-radius: 8px; font-size: 0.88em;">
-                    <option value="todos">Todas as OUs</option>
+                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-ou-tab1" onchange="filterTab1()">
+                    <option value="todos">Unidades (Todas)</option>
                     <option value="presidencia">/Presidencia</option>
                     <option value="transformacaodigital">/TransformacaoDigital</option>
                     <option value="coordenacao">/Coordenacao</option>
@@ -270,13 +292,28 @@
                     <option value="voluntarios">/Voluntarios</option>
                 </select>
 
-                <select class="form-select form-select-sm bg-white border" id="filter-mfa-tab1" onchange="filterTab1()" style="height: 38px; border-radius: 8px; font-size: 0.88em;">
+                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-mfa-tab1" onchange="filterTab1()">
                     <option value="todos">Status 2FA (Todos)</option>
                     <option value="ativado">🟢 2FA Ativado</option>
                     <option value="pendente">🔴 2FA Pendente</option>
                 </select>
 
-                <button class="btn btn-sm btn-light border d-flex align-items-center gap-1" onclick="resetTab1()" style="height: 38px; border-radius: 8px;">
+                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-licenca-tab1" onchange="filterTab1()">
+                    <option value="todos">Licenças (Todas)</option>
+                    <option value="business standard">Business Standard</option>
+                    <option value="business starter">Business Starter</option>
+                    <option value="sem custo">Sem Custo ($0)</option>
+                </select>
+
+                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-status-tab1" onchange="filterTab1()">
+                    <option value="todos">Status da Conta (Todos)</option>
+                    <option value="ativo">🟢 Ativo</option>
+                    <option value="suspenso">🔴 Suspenso</option>
+                    <option value="alias">🔵 Alias</option>
+                    <option value="voluntário">🟡 Voluntário</option>
+                </select>
+
+                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab1()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
                     <i class="ri-refresh-line"></i> Limpar
                 </button>
             </div>
@@ -299,39 +336,39 @@
                     <tr>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <div class="avatar-sm bg-light rounded-circle text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                <div class="avatar-sm bg-light rounded-circle text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; font-size: 0.85em;">
                                     {{ c.nome|slice:":1" }}
                                 </div>
                                 <div>
-                                    <strong class="d-block text-dark">{{ c.nome }}</strong>
-                                    <small class="text-muted font-monospace">{{ c.email }}</small>
+                                    <strong class="d-block text-dark" style="font-size: 0.9em;">{{ c.nome }}</strong>
+                                    <small class="text-muted font-monospace" style="font-size: 0.78em;">{{ c.email }}</small>
                                 </div>
                             </div>
                         </td>
                         <td><span class="badge bg-light text-dark border"><i class="ri-folder-line me-1 text-primary"></i> {{ c.ou }}</span></td>
-                        <td><span class="fw-semibold text-secondary" style="font-size: 0.88em;">{{ c.licenca }}</span></td>
+                        <td><span class="fw-semibold text-secondary" style="font-size: 0.85em;">{{ c.licenca }}</span></td>
                         <td>
                             {% if c.mfa %}
-                                <span class="badge bg-success-subtle text-success fw-bold px-3 py-2" style="border-radius: 20px;">
-                                    <i class="ri-checkbox-circle-fill me-1"></i> Ativado (2FA)
+                                <span class="badge bg-success-subtle text-success fw-bold px-2 py-1" style="border-radius: 20px; font-size: 0.78em;">
+                                    <i class="ri-checkbox-circle-fill me-1"></i> 2FA Ativado
                                 </span>
                             {% else %}
-                                <span class="badge bg-danger-subtle text-danger fw-bold px-3 py-2" style="border-radius: 20px;">
-                                    <i class="ri-close-circle-fill me-1"></i> Pendente
+                                <span class="badge bg-danger-subtle text-danger fw-bold px-2 py-1" style="border-radius: 20px; font-size: 0.78em;">
+                                    <i class="ri-close-circle-fill me-1"></i> 2FA Pendente
                                 </span>
                             {% endif %}
                         </td>
                         <td>
-                            <span class="badge bg-{{ c.tipo_badge }} px-3 py-2 fw-bold" style="border-radius: 12px;">
+                            <span class="badge bg-{{ c.tipo_badge }} px-2 py-1 fw-bold" style="border-radius: 8px; font-size: 0.78em;">
                                 {{ c.status }}
                             </span>
                         </td>
                         <td class="text-center">
                             <div class="btn-group">
-                                <a href="{% url 'dashboard:simular_acao' 'auditoria_mfa' %}" class="btn btn-sm btn-light border" title="Notificar Usuário via WhatsApp">
+                                <a href="{% url 'dashboard:simular_acao' 'auditoria_mfa' %}" class="btn btn-xs btn-light border py-1 px-2" title="Notificar via WhatsApp">
                                     <i class="ri-whatsapp-line text-success"></i>
                                 </a>
-                                <button class="btn btn-sm btn-light border" onclick="alert('Alterando licença do usuário no Google Admin...');">
+                                <button class="btn btn-xs btn-light border py-1 px-2" onclick="alert('Configurando licença no Google Admin...');">
                                     <i class="ri-settings-3-line text-primary"></i>
                                 </button>
                             </div>
@@ -348,45 +385,52 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-hard-drive-2-line me-2 text-info"></i> 2. Soberania de Dados & Alertas de Cota de Armazenamento</h5>
-                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Drive API v3 (drive_v3)</code>.</p>
+                <p class="text-muted mb-0" style="font-size: 0.85em;">Dados hipotéticos da <code>Google Drive API v3 (drive_v3)</code>.</p>
             </div>
             <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-danger btn-sm fw-bold" style="border-radius: 8px;">
                 <i class="ri-shield-flash-line me-1"></i> Simular Transferência de Custódia
             </a>
         </div>
 
-        <!-- BARRA DE PESQUISA E FILTROS DA GUIA 2 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="position-relative flex-grow-1" style="max-width: 380px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 12px; top: 10px; font-size: 1.1em;"></i>
-                <input type="text" class="form-control form-control-sm ps-5 bg-white border" id="search-tab2" onkeyup="filterTab2()" placeholder="Buscar por conta ou drive..." style="height: 38px; border-radius: 8px;">
+        <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 2 -->
+        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="position-relative flex-grow-1" style="max-width: 260px;">
+                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
+                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab2" onkeyup="filterTab2()" placeholder="Buscar conta ou drive...">
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm bg-white border" id="filter-cota-tab2" onchange="filterTab2()" style="height: 38px; border-radius: 8px; font-size: 0.88em;">
+                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-cota-tab2" onchange="filterTab2()">
                     <option value="todos">Status de Cota (Todos)</option>
                     <option value="alerta">🔴 Alerta de Cota (>80%)</option>
                     <option value="normal">🟢 Dentro do Limite (<80%)</option>
                 </select>
-                <button class="btn btn-sm btn-light border d-flex align-items-center gap-1" onclick="resetTab2()" style="height: 38px; border-radius: 8px;">
+
+                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-limite-tab2" onchange="filterTab2()">
+                    <option value="todos">Limites de Alocação (Todos)</option>
+                    <option value="50">Até 50 GB</option>
+                    <option value="100">Até 100 GB</option>
+                </select>
+
+                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab2()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
                     <i class="ri-refresh-line"></i> Limpar
                 </button>
             </div>
         </div>
 
-        <div class="row g-4 mb-4" id="grid-tab2">
+        <div class="row g-3 mb-4" id="grid-tab2">
             {% for c in contas_hipoteticas %}
             {% if c.cota_max_gb > 0 %}
-            <div class="col-md-6 drive-card-item" data-cota-status="{% if c.cota_pct >= 80 %}alerta{% else %}normal{% endif %}">
+            <div class="col-md-6 drive-card-item" data-cota-status="{% if c.cota_pct >= 80 %}alerta{% else %}normal{% endif %}" data-cota-limite="{{ c.cota_max_gb }}">
                 <div class="p-3 border rounded-3 bg-light shadow-sm">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <strong class="text-dark card-title-text"><i class="ri-user-3-line me-1 text-primary"></i> {{ c.nome }}</strong>
                         <span class="badge bg-{{ c.tipo_badge }} fw-bold">{{ c.cota_gb }} GB / {{ c.cota_max_gb }} GB ({{ c.cota_pct }}%)</span>
                     </div>
-                    <div class="progress mb-2" style="height: 10px; border-radius: 10px;">
+                    <div class="progress mb-2" style="height: 8px; border-radius: 8px;">
                         <div class="progress-bar bg-{{ c.tipo_badge }}" role="progressbar" style="width: {{ c.cota_pct }}%;" aria-valuenow="{{ c.cota_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                     <div class="d-flex align-items-center justify-content-between">
-                        <small class="text-muted" style="font-size: 0.8em;">Limite de Alerta: 80% ({{ c.cota_max_gb|add:0 }} GB)</small>
+                        <small class="text-muted" style="font-size: 0.78em;">Limite de Alerta: 80% ({{ c.cota_max_gb|add:0 }} GB)</small>
                         {% if c.cota_pct >= 80 %}
                             <a href="{% url 'dashboard:simular_acao' 'alerta_80_cota' %}" class="btn btn-xs btn-outline-danger py-1 px-2 fw-bold" style="font-size: 0.75em;">
                                 <i class="ri-alarm-warning-line me-1"></i> Disparar Alerta WhatsApp
@@ -402,21 +446,18 @@
         </div>
 
         <!-- SIMULADOR DE CUSTÓDIA DE ARQUIVOS -->
-        <div class="p-4 border rounded-3 bg-white shadow-sm">
-            <h6 class="fw-bold text-dark mb-2"><i class="ri-share-forward-fill text-primary me-2"></i> Formulário de Simulação de Transferência Soberana de Arquivos</h6>
-            <p class="text-muted mb-3" style="font-size: 0.88em;">Transfere a propriedade de todas as pastas e arquivos de uma conta para o e-mail de custódia institucional (`fvier@cdc.org.br`).</p>
-            <div class="row g-3 align-items-center">
+        <div class="p-3 border rounded-3 bg-white shadow-sm">
+            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.92em;"><i class="ri-share-forward-fill text-primary me-1"></i> Simulação de Custódia Soberana de Arquivos</h6>
+            <p class="text-muted mb-2" style="font-size: 0.82em;">Transfere a propriedade de todas as pastas de ex-colaboradores para o e-mail de custódia (`fvier@cdc.org.br`).</p>
+            <div class="row g-2 align-items-center">
                 <div class="col-md-5">
-                    <label class="form-label text-muted fw-semibold mb-1" style="font-size: 0.82em;">Conta Origem (Ex-Colaborador)</label>
-                    <input type="text" class="form-control" value="joabsilva@cdc.org.br (Joab da Silva)" readonly>
+                    <input type="text" class="form-control form-control-sm" value="joabsilva@cdc.org.br (Joab da Silva)" readonly>
                 </div>
                 <div class="col-md-5">
-                    <label class="form-label text-muted fw-semibold mb-1" style="font-size: 0.82em;">Conta Destino (Custódia Soberana CDC)</label>
-                    <input type="text" class="form-control" value="fvier@cdc.org.br (Fernando Vier - DataOps)" readonly>
+                    <input type="text" class="form-control form-control-sm" value="fvier@cdc.org.br (Fernando Vier - DataOps)" readonly>
                 </div>
                 <div class="col-md-2 d-grid">
-                    <label class="form-label mb-1" style="visibility: hidden;">Ação</label>
-                    <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-success fw-bold">
+                    <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-sm btn-success fw-bold">
                         <i class="ri-check-double-line me-1"></i> Transferir
                     </a>
                 </div>
@@ -429,26 +470,26 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-team-line me-2 text-success"></i> 3. Auditoria de Grupos do Workspace & Vazamento de Membros</h5>
-                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Groups API</code>.</p>
+                <p class="text-muted mb-0" style="font-size: 0.85em;">Dados hipotéticos da <code>Google Groups API</code>.</p>
             </div>
             <a href="{% url 'dashboard:simular_acao' 'vazamento_grupo_joab' %}" class="btn btn-warning btn-sm fw-bold text-dark" style="border-radius: 8px;">
                 <i class="ri-user-unfollow-line me-1"></i> Remover Membro Suspenso (Caso Joab)
             </a>
         </div>
 
-        <!-- BARRA DE PESQUISA E FILTROS DA GUIA 3 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="position-relative flex-grow-1" style="max-width: 380px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 12px; top: 10px; font-size: 1.1em;"></i>
-                <input type="text" class="form-control form-control-sm ps-5 bg-white border" id="search-tab3" onkeyup="filterTab3()" placeholder="Buscar por grupo ou responsável..." style="height: 38px; border-radius: 8px;">
+        <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 3 -->
+        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="position-relative flex-grow-1" style="max-width: 260px;">
+                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
+                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab3" onkeyup="filterTab3()" placeholder="Buscar grupo ou responsável...">
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm bg-white border" id="filter-status-tab3" onchange="filterTab3()" style="height: 38px; border-radius: 8px; font-size: 0.88em;">
+                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-status-tab3" onchange="filterTab3()">
                     <option value="todos">Status de Segurança (Todos)</option>
                     <option value="vazamento">🔴 Com Vazamento / Alerta</option>
                     <option value="regular">🟢 Regular / Auditado</option>
                 </select>
-                <button class="btn btn-sm btn-light border d-flex align-items-center gap-1" onclick="resetTab3()" style="height: 38px; border-radius: 8px;">
+                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab3()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
                     <i class="ri-refresh-line"></i> Limpar
                 </button>
             </div>
@@ -463,7 +504,7 @@
                         <th>Quantidade de Membros</th>
                         <th>Dono / Responsável</th>
                         <th>Status de Segurança</th>
-                        <th class="text-center">Ação</th>
+                        <th class="text-center">Ação Operacional</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -474,7 +515,7 @@
                         <td>fvier@cdc.org.br</td>
                         <td><span class="badge bg-danger">⚠️ Vazamento Detectado</span></td>
                         <td class="text-center">
-                            <a href="{% url 'dashboard:simular_acao' 'vazamento_grupo_joab' %}" class="btn btn-sm btn-warning fw-bold py-1 px-3">
+                            <a href="{% url 'dashboard:simular_acao' 'vazamento_grupo_joab' %}" class="btn btn-xs btn-warning fw-bold py-1 px-2">
                                 Corrigir Grupo
                             </a>
                         </td>
@@ -485,7 +526,7 @@
                         <td>5 membros</td>
                         <td>adrianasantos@cdc.org.br</td>
                         <td><span class="badge bg-success">🟢 Regular</span></td>
-                        <td class="text-center"><button class="btn btn-sm btn-light border" disabled>Auditado</button></td>
+                        <td class="text-center"><button class="btn btn-xs btn-light border" disabled>Auditado</button></td>
                     </tr>
                     <tr data-status="regular">
                         <td><strong>Presidência & Coordenação</strong></td>
@@ -493,7 +534,7 @@
                         <td>3 membros</td>
                         <td>ananery@cdc.org.br</td>
                         <td><span class="badge bg-success">🟢 Regular</span></td>
-                        <td class="text-center"><button class="btn btn-sm btn-light border" disabled>Auditado</button></td>
+                        <td class="text-center"><button class="btn btn-xs btn-light border" disabled>Auditado</button></td>
                     </tr>
                     <tr data-status="regular">
                         <td><strong>Equipe de Voluntários</strong></td>
@@ -502,7 +543,7 @@
                         <td>fvier@cdc.org.br</td>
                         <td><span class="badge bg-warning text-dark">🟡 3 Expirando</span></td>
                         <td class="text-center">
-                            <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-sm btn-light border">Ver Membros</a>
+                            <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-xs btn-light border">Ver Membros</a>
                         </td>
                     </tr>
                 </tbody>
@@ -515,33 +556,33 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-key-fill me-2 text-warning"></i> 4. Aplicativos Conectados & Tokens OAuth de Terceiros</h5>
-                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Admin Reports API (OAuth Audit)</code>.</p>
+                <p class="text-muted mb-0" style="font-size: 0.85em;">Dados hipotéticos da <code>Google Admin Reports API (OAuth Audit)</code>.</p>
             </div>
             <a href="{% url 'dashboard:simular_acao' 'revogar_oauth' %}" class="btn btn-outline-danger btn-sm fw-bold" style="border-radius: 8px;">
                 <i class="ri-shield-cross-line me-1"></i> Simular Revogação de Token
             </a>
         </div>
 
-        <!-- BARRA DE PESQUISA E FILTROS DA GUIA 4 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="position-relative flex-grow-1" style="max-width: 380px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 12px; top: 10px; font-size: 1.1em;"></i>
-                <input type="text" class="form-control form-control-sm ps-5 bg-white border" id="search-tab4" onkeyup="filterTab4()" placeholder="Buscar por app ou escopo..." style="height: 38px; border-radius: 8px;">
+        <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 4 -->
+        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="position-relative flex-grow-1" style="max-width: 260px;">
+                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
+                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab4" onkeyup="filterTab4()" placeholder="Buscar app ou escopo...">
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm bg-white border" id="filter-risco-tab4" onchange="filterTab4()" style="height: 38px; border-radius: 8px; font-size: 0.88em;">
+                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-risco-tab4" onchange="filterTab4()">
                     <option value="todos">Nível de Risco (Todos)</option>
                     <option value="danger">🔴 Alto Risco</option>
                     <option value="success">🟢 Baixo Risco</option>
                     <option value="info">🔵 Interno / Bot</option>
                 </select>
-                <button class="btn btn-sm btn-light border d-flex align-items-center gap-1" onclick="resetTab4()" style="height: 38px; border-radius: 8px;">
+                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab4()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
                     <i class="ri-refresh-line"></i> Limpar
                 </button>
             </div>
         </div>
 
-        <div class="table-responsive mb-4">
+        <div class="table-responsive mb-3">
             <table class="table table-hover align-middle border" id="table-tab4">
                 <thead class="table-light">
                     <tr>
@@ -563,11 +604,11 @@
                         <td><span class="badge bg-light text-dark border">{{ app.status }}</span></td>
                         <td class="text-center">
                             {% if app.badge_risco == 'danger' %}
-                                <a href="{% url 'dashboard:simular_acao' 'revogar_oauth' %}" class="btn btn-sm btn-danger fw-bold py-1 px-3" style="border-radius: 6px;">
+                                <a href="{% url 'dashboard:simular_acao' 'revogar_oauth' %}" class="btn btn-xs btn-danger fw-bold py-1 px-2" style="border-radius: 6px;">
                                     <i class="ri-delete-bin-line me-1"></i> Revogar Token
                                 </a>
                             {% else %}
-                                <button class="btn btn-sm btn-light border text-muted" disabled>Aprovado</button>
+                                <button class="btn btn-xs btn-light border text-muted" disabled>Aprovado</button>
                             {% endif %}
                         </td>
                     </tr>
@@ -582,32 +623,32 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-time-line me-2 text-purple" style="color: #9333ea;"></i> 5. Ciclo de Vida de Voluntários & Aliases Gratuitos</h5>
-                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Lifecycle Audit</code>.</p>
+                <p class="text-muted mb-0" style="font-size: 0.85em;">Dados hipotéticos da <code>Google Lifecycle Audit</code>.</p>
             </div>
             <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-purple btn-sm fw-bold text-white" style="background: #9333ea; border-radius: 8px;">
                 <i class="ri-timer-flash-line me-1"></i> Auditar Prazos de Voluntários
             </a>
         </div>
 
-        <!-- BARRA DE PESQUISA E FILTROS DA GUIA 5 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="position-relative flex-grow-1" style="max-width: 380px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 12px; top: 10px; font-size: 1.1em;"></i>
-                <input type="text" class="form-control form-control-sm ps-5 bg-white border" id="search-tab5" onkeyup="filterTab5()" placeholder="Buscar por voluntário ou alias..." style="height: 38px; border-radius: 8px;">
+        <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 5 -->
+        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="position-relative flex-grow-1" style="max-width: 260px;">
+                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
+                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab5" onkeyup="filterTab5()" placeholder="Buscar voluntário ou alias...">
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm bg-white border" id="filter-categoria-tab5" onchange="filterTab5()" style="height: 38px; border-radius: 8px; font-size: 0.88em;">
+                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-categoria-tab5" onchange="filterTab5()">
                     <option value="todos">Categorias (Todas)</option>
                     <option value="voluntario">Voluntários</option>
                     <option value="alias">Aliases Gratuitos</option>
                 </select>
-                <button class="btn btn-sm btn-light border d-flex align-items-center gap-1" onclick="resetTab5()" style="height: 38px; border-radius: 8px;">
+                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab5()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
                     <i class="ri-refresh-line"></i> Limpar
                 </button>
             </div>
         </div>
 
-        <div class="row g-3 mb-4" id="grid-tab5">
+        <div class="row g-3 mb-3" id="grid-tab5">
             <div class="col-md-6 lifecycle-item" data-categoria="voluntario">
                 <div class="p-3 bg-light border rounded-3 shadow-sm">
                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -616,10 +657,10 @@
                     </div>
                     <small class="text-muted d-block mb-3">Vínculo de voluntariado com prazo determinado até 24/08/2026.</small>
                     <div class="d-flex gap-2">
-                        <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-sm btn-outline-primary fw-bold" style="border-radius: 6px;">
+                        <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-xs btn-outline-primary fw-bold" style="border-radius: 6px;">
                             <i class="ri-calendar-event-line me-1"></i> Prorrogar Vínculo
                         </a>
-                        <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-sm btn-outline-danger fw-bold" style="border-radius: 6px;">
+                        <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-xs btn-outline-danger fw-bold" style="border-radius: 6px;">
                             <i class="ri-user-unfollow-line me-1"></i> Encerrar Acesso
                         </a>
                     </div>
@@ -633,7 +674,7 @@
                         <span class="badge bg-info text-white fw-bold">Alias Ativo (Sem Custo)</span>
                     </div>
                     <small class="text-muted d-block mb-3">E-mail `paterson.silva@cdc.org.br` convertido com sucesso para alias da caixa setorial `projetos@cdc.org.br`.</small>
-                    <a href="{% url 'dashboard:simular_acao' 'executar_alias_paterson' %}" class="btn btn-sm btn-outline-info fw-bold" style="border-radius: 6px;">
+                    <a href="{% url 'dashboard:simular_acao' 'executar_alias_paterson' %}" class="btn btn-xs btn-outline-info fw-bold" style="border-radius: 6px;">
                         <i class="ri-checkbox-circle-line me-1"></i> Verificação de Custos
                     </a>
                 </div>
@@ -643,7 +684,7 @@
         <div class="p-3 bg-success-subtle border border-success rounded-3 text-success">
             <div class="d-flex align-items-center gap-2">
                 <i class="ri-money-dollar-circle-fill fs-20"></i>
-                <div>
+                <div style="font-size: 0.88em;">
                     <strong>Economia Estimada de Licenciamento</strong>: 3 contas convertidas para aliases gratuitos reduziram o custo recorrente do Workspace em <strong>R$ 1.840,00/ano</strong> para o CDC.
                 </div>
             </div>
@@ -657,9 +698,9 @@
     <div class="d-flex align-items-center justify-content-between" style="font-size: 0.88em; color: #475569;">
         <div>
             <i class="ri-information-fill text-primary me-1"></i>
-            <span><strong>Filtros em Tempo Real Ativos</strong>: Digite na barra de pesquisa de cada guia para filtrar os dados hipotéticos instantaneamente.</span>
+            <span><strong>DataOps Filter Toolbar</strong>: Filtros otimizados sem barra de rolagem nas 5 guias do Google Chrome.</span>
         </div>
-        <span class="badge bg-primary-subtle text-primary border">Filtros Dinâmicos</span>
+        <span class="badge bg-primary-subtle text-primary border">No Scrollbar 100% Fit</span>
     </div>
 </div>
 {% endblock %}
@@ -667,7 +708,6 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Alternador de guias do Chrome
         const tabs = document.querySelectorAll('.chrome-tab-item');
         const panes = document.querySelectorAll('.tab-pane-custom');
 
@@ -688,11 +728,13 @@
         });
     });
 
-    // FUNÇÕES DE PESQUISA E FILTRO TEMPO REAL POR GUIA
+    // FUNÇÕES DE PESQUISA E FILTROS AVANÇADOS POR GUIA
     function filterTab1() {
         const query = document.getElementById('search-tab1').value.toLowerCase().trim();
         const ouFilter = document.getElementById('filter-ou-tab1').value.toLowerCase();
         const mfaFilter = document.getElementById('filter-mfa-tab1').value.toLowerCase();
+        const licencaFilter = document.getElementById('filter-licenca-tab1').value.toLowerCase();
+        const statusFilter = document.getElementById('filter-status-tab1').value.toLowerCase();
         
         const rows = document.querySelectorAll('#table-tab1 tbody tr');
         rows.forEach(row => {
@@ -700,32 +742,43 @@
             const matchesQuery = !query || text.includes(query);
             const matchesOu = ouFilter === 'todos' || text.includes(ouFilter);
             const matchesMfa = mfaFilter === 'todos' || text.includes(mfaFilter);
-            row.style.display = (matchesQuery && matchesOu && matchesMfa) ? '' : 'none';
+            const matchesLicenca = licencaFilter === 'todos' || text.includes(licencaFilter);
+            const matchesStatus = statusFilter === 'todos' || text.includes(statusFilter);
+
+            row.style.display = (matchesQuery && matchesOu && matchesMfa && matchesLicenca && matchesStatus) ? '' : 'none';
         });
     }
     function resetTab1() {
         document.getElementById('search-tab1').value = '';
         document.getElementById('filter-ou-tab1').value = 'todos';
         document.getElementById('filter-mfa-tab1').value = 'todos';
+        document.getElementById('filter-licenca-tab1').value = 'todos';
+        document.getElementById('filter-status-tab1').value = 'todos';
         filterTab1();
     }
 
     function filterTab2() {
         const query = document.getElementById('search-tab2').value.toLowerCase().trim();
         const cotaFilter = document.getElementById('filter-cota-tab2').value;
+        const limiteFilter = document.getElementById('filter-limite-tab2').value;
         const cards = document.querySelectorAll('#grid-tab2 .drive-card-item');
 
         cards.forEach(card => {
             const text = card.innerText.toLowerCase();
             const cotaStatus = card.getAttribute('data-cota-status');
+            const cotaLimite = card.getAttribute('data-cota-limite');
+
             const matchesQuery = !query || text.includes(query);
             const matchesCota = cotaFilter === 'todos' || cotaStatus === cotaFilter;
-            card.style.display = (matchesQuery && matchesCota) ? '' : 'none';
+            const matchesLimite = limiteFilter === 'todos' || cotaLimite === limiteFilter;
+
+            card.style.display = (matchesQuery && matchesCota && matchesLimite) ? '' : 'none';
         });
     }
     function resetTab2() {
         document.getElementById('search-tab2').value = '';
         document.getElementById('filter-cota-tab2').value = 'todos';
+        document.getElementById('filter-limite-tab2').value = 'todos';
         filterTab2();
     }
 
