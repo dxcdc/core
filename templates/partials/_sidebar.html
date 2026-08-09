@@ -21,7 +21,7 @@
             Navegação Principal
         </div>
         
-        <ul class="nav nav-pills flex-column mb-4 gap-1">
+        <ul class="nav nav-pills flex-column mb-4 gap-1" style="list-style: none; padding-left: 0; margin-left: 0;">
             <li class="nav-item">
                 <a href="{% url 'dashboard:index' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'index' %}active{% endif %}" style="border-radius: 8px; font-weight: 600; color: {% if request.resolver_match.url_name == 'index' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'index' %}#2563eb{% else %}transparent{% endif %};">
                     <i class="ri-dashboard-3-line fs-18"></i>
@@ -35,33 +35,34 @@
             Módulos de Operação
         </div>
 
+        <ul class="nav nav-pills flex-column mb-4 gap-1" style="list-style: none; padding-left: 0; margin-left: 0;">
             <li class="nav-item">
                 <a href="{% url 'dashboard:workspace' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'workspace' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'workspace' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'workspace' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-google-line fs-18 text-info" style="color: #0284c7;"></i>
+                    <i class="ri-google-line fs-18" style="color: {% if request.resolver_match.url_name == 'workspace' %}#ffffff{% else %}#0284c7{% endif %};"></i>
                     <span>Google Workspace</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{% url 'dashboard:infra' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'infra' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'infra' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'infra' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-server-line fs-18 text-primary"></i>
+                    <i class="ri-server-line fs-18" style="color: {% if request.resolver_match.url_name == 'infra' %}#ffffff{% else %}#2563eb{% endif %};"></i>
                     <span>Infraestrutura & Docker</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{% url 'dashboard:vpn' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'vpn' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'vpn' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'vpn' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-shield-keyhole-line fs-18 text-purple" style="color: #9333ea;"></i>
+                    <i class="ri-shield-keyhole-line fs-18" style="color: {% if request.resolver_match.url_name == 'vpn' %}#ffffff{% else %}#9333ea{% endif %};"></i>
                     <span>VPN & Mapa por Projetos</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{% url 'dashboard:cofre' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'cofre' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'cofre' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'cofre' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-key-2-line fs-18 text-success" style="color: #16a34a;"></i>
+                    <i class="ri-key-2-line fs-18" style="color: {% if request.resolver_match.url_name == 'cofre' %}#ffffff{% else %}#16a34a{% endif %};"></i>
                     <span>Cofre de Segredos</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{% url 'dashboard:ferramentas' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'ferramentas' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'ferramentas' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'ferramentas' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-tools-line fs-18 text-warning" style="color: #d97706;"></i>
+                    <i class="ri-tools-line fs-18" style="color: {% if request.resolver_match.url_name == 'ferramentas' %}#ffffff{% else %}#d97706{% endif %};"></i>
                     <span>Canivete de Ferramentas</span>
                 </a>
             </li>
@@ -72,7 +73,7 @@
             Governança & Documentação
         </div>
 
-        <ul class="nav nav-pills flex-column gap-1">
+        <ul class="nav nav-pills flex-column gap-1" style="list-style: none; padding-left: 0; margin-left: 0;">
             <li class="nav-item">
                 <a href="{% url 'dashboard:landing' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3" style="border-radius: 8px; font-weight: 500; color: #475569;">
                     <i class="ri-earth-line fs-18 text-info" style="color: #0284c7;"></i>
@@ -81,7 +82,7 @@
             </li>
             <li class="nav-item">
                 <a href="{% url 'dashboard:governanca' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'governanca' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'governanca' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'governanca' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-book-open-line fs-18"></i>
+                    <i class="ri-book-open-line fs-18" style="color: {% if request.resolver_match.url_name == 'governanca' %}#ffffff{% else %}#475569{% endif %};"></i>
                     <span>Diretrizes & ADRs CDC</span>
                 </a>
             </li>
