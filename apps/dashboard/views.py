@@ -524,14 +524,14 @@ def integracoes_view(request):
             'badge_status': 'success',
             'endpoint': 'https://vpn.cdc.org.br:51820',
             'campos': [
-                {'name': 'vpn_endpoint', 'label': 'Endpoint WireGuard', 'value': '76.13.227.135:51820'},
+                {'name': 'vpn_endpoint', 'label': 'Endpoint WireGuard', 'value': 'vpn.cdc.org.br:51820'},
                 {'name': 'api_secret', 'label': 'WireGuard Management Key', 'value': 'wg_sec_83921734912'},
             ],
             'endpoints_detalhados': [
                 {
                     'metodo': 'GET / POST',
                     'nome': '1. WireGuard Peer Manager API',
-                    'url': 'https://76.13.227.135:51820/api/v1/peers',
+                    'url': 'https://vpn.cdc.org.br:51820/api/v1/peers',
                     'descricao': 'Geração automatizada de arquivos .conf de VPN para protegidos dos programas sociais.',
                     'parametros': 'project_id, user_email',
                     'status': 'Ativo (HTTP 200 OK)'
@@ -547,7 +547,7 @@ def integracoes_view(request):
             'descricao': 'Armazenamento persistente seguro para chaves SSH, credenciais criptografadas e logs de auditoria do CDC Core.',
             'status': 'Conectado',
             'badge_status': 'success',
-            'endpoint': '76.13.227.135:5432',
+            'endpoint': 'db.internal.cdc.org.br:5432',
             'campos': [
                 {'name': 'db_name', 'label': 'Nome do Banco', 'value': 'cdc_core_db'},
                 {'name': 'db_user', 'label': 'Usuário DataOps', 'value': 'dxcdc'},
@@ -556,7 +556,7 @@ def integracoes_view(request):
                 {
                     'metodo': 'SELECT / INSERT',
                     'nome': '1. PostgreSQL Connection Pool',
-                    'url': 'postgresql://dxcdc@76.13.227.135:5432/cdc_core_db',
+                    'url': 'postgresql://dxcdc@db.internal.cdc.org.br:5432/cdc_core_db',
                     'descricao': 'Banco de dados relacional com criptografia AES-256 no repouso.',
                     'parametros': 'sslmode=require',
                     'status': 'Ativo (HTTP 200 OK)'

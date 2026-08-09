@@ -19,7 +19,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-u(fyrn(z%fhd1w*jgu(3y5w^5h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = ['core.cdc.org.br', '*.cdc.org.br', 'localhost', '127.0.0.1', '76.13.227.135'] if not DEBUG else ['*']
+allowed_hosts_env = os.getenv('ALLOWED_HOSTS', 'core.cdc.org.br,*.cdc.org.br,localhost,127.0.0.1')
+ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_env.split(',') if h.strip()] if not DEBUG else ['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://core.cdc.org.br',
