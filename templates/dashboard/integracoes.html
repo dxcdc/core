@@ -5,25 +5,38 @@
 
 {% block extra_css %}
 <style>
-    /* CHROME-STYLE TAB STYLING FOR API SERVICES */
+    /* CHROME-STYLE TAB STYLING FOR API SERVICES (SEM BARRA DE ROLAGEM) */
     .nav-tabs-chrome {
         border-bottom: 2px solid #e2e8f0;
-        gap: 4px;
-        overflow-x: auto;
+        gap: 3px;
+        display: flex;
         flex-wrap: nowrap;
-        white-space: nowrap;
+        overflow-x: hidden;
+        width: 100%;
+    }
+    .nav-tabs-chrome .nav-item {
+        flex: 1 1 0;
+        min-width: 0;
+        text-align: center;
     }
     .nav-tabs-chrome .nav-link {
         border: 1px solid #e2e8f0;
         border-bottom: none;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
         background: #f8fafc;
         color: #64748b;
         font-weight: 600;
-        font-size: 0.86em;
-        padding: 8px 16px;
+        font-size: 0.79em;
+        padding: 7px 8px;
         transition: all 0.2s ease;
+        width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .nav-tabs-chrome .nav-link:hover {
         background: #ffffff;
