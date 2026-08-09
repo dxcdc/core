@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Title Meta -->
+  <meta charset="utf-8"/>
+  <title>Getting Started | Larkon - Responsive Admin Dashboard Template</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description"/>
+  <meta content="Techzaa" name="author"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <!-- App favicon -->
+  <link rel="shortcut icon" href="assets/images/favicon.ico">
+
+  <!-- Vendor css (Require in all Page) -->
+  <link href="assets/css/vendor.min.css" rel="stylesheet" type="text/css"/>
+
+  <!-- App css (Require in all Page) -->
+  <link href="assets/css/app.min.css" rel="stylesheet" type="text/css"/>
+
+  <!-- Theme Config js (Require in all Page) -->
+  <script src="assets/js/config.js"></script>
+</head>
+
+<body>
+
+<!-- START Wrapper -->
+<div class="wrapper">
+
+  <!-- ========== App Menu Start ========== -->
+  <div class="main-nav">
+    <!-- Sidebar Logo -->
+    <div class="logo-box">
+      <a href="./index.html" class="logo-dark">
+        <img src="assets/images/logo-dark.png" class="logo-lg" alt="logo dark">
+      </a>
+
+      <a href="./index.html" class="logo-light">
+        <img src="assets/images/logo-light.png" class="logo-lg" alt="logo light">
+      </a>
+    </div>
+
+
+    <div class="scrollbar">
+
+      <ul class="navbar-nav" id="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link menu-link" href="./index.html">
+            <span class="nav-icon"><i class="bx bx-file"></i></span>
+            <span class="nav-text"> Getting Started </span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link menu-link" href="./introduction.html">
+            <span class="nav-icon"><i class="bx bx-book-open"></i></span>
+            <span class="nav-text"> Introduction </span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link menu-link" href="./customization.html">
+            <span class="nav-icon"><i class="bx bx-cog"></i></span>
+            <span class="nav-text"> Customization </span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link menu-link" href="./change-log.html">
+            <span class="nav-icon"><i class="bx bx-history"></i></span>
+            <span class="nav-text"> Change Log </span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="swipe-open"></div>
+  </div>
+  <!-- ========== App Menu End ========== -->
+
+  <!-- ==================================================== -->
+  <!-- Start right Content here -->
+  <!-- ==================================================== -->
+
+  <div class="page-content">
+
+    <!-- Start Container -->
+    <div class="container">
+
+      <!-- ========== Page Title Start ========== -->
+      <div class="row">
+        <div class="col-12">
+          <div class="page-title-box">
+            <h4 class="mb-0">Getting Started</h4>
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="javascript: void(0);">Documentation</a></li>
+              <li class="breadcrumb-item active">Getting Started</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <!-- ========== Page Title End ========== -->
+
+      <div class="row">
+        <div class="col-xl-12">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Prerequisites</h5>
+              <p>
+                We are using
+                <a href="https://gulpjs.com/" target="_blank" class="text-primary">gulp</a>
+                which allows to have complete automation for build flow. In case if you
+                don't know - Gulp is a toolkit for automating painful or time-consuming
+                tasks in development workflow, so you can stop messing around and build
+                something. You can read it more about it
+                <a href="https://gulpjs.com/" target="_blank" class="text-primary">here</a>.
+                Please follow below steps to install and setup all prerequisites:
+              </p>
+
+              <!-- Prerequisites -->
+
+              <p>Please follow below steps to install and setup all prerequisites:</p>
+
+              <ul>
+                <li class="mb-2">
+                  <h5>Node.js</h5>
+                  <p>
+                    In order to use build tools you will need to download
+                    and install Node.js. If you do not have Node.js installed
+                    already,
+                    you can get it by downloading the package installer from the
+                    official website. Please download the stable version of Node.js
+                    (LTS).
+                  </p>
+                  <a href="https://nodejs.org/" target="_blank" class="text-primary">Download Node.js</a>
+                </li>
+                <li>
+                  <h5>Gulp &amp; Gulp CLI</h5>
+                  <p>
+                    Make sure to have the
+                    <a href="https://gulpjs.com/" target="_blank" class="text-primary">Gulp</a>
+                    installed &amp; running in your computer. If you already have
+                    installed gulp on your computer, you can skip this step. In order
+                    to install, just run command
+                    <code>npm install -g gulp@4.0.2</code> from your terminal.
+                  </p>
+                </li>
+                <li>
+                  <h5>Python</h5>
+                  <p>Make sure to have the <a class="text-primary"
+                                              href="https://www.python.org/downloads/" target="_blank">Python</a>
+                    installed &amp; running in your computer. If you already have installed Python
+                    on your computer, you can skip this step. Please use Python version 3 or if
+                    you are using python version
+                    2 then make sure to run all the below commands with python insted of
+                    python3.</p>
+                  <p class="mt-2">For windows</p>
+                  <ul class="ps-8 mb-3">
+                    <li>Download python from windows store</li>
+                    <li>Select the Python's version to download.</li>
+                    <li>Click on the Install Now</li>
+                    <li>Installation in Process</li>
+                  </ul>
+                  <p class="mt-2">For Linux</p>
+                  <ul class="ps-8 mb-3">
+                    <li><code>sudo apt update</code></li>
+                    <li><code>sudo apt install python3</code></li>
+                  </ul>
+                </li>
+                <li>
+                  <h5>Virtualenv</h5>
+                  <p>Make sure to have the <code>virtualenv</code> installed globally &amp;
+                    running on your computer. If you already have installed on your computer,
+                    you can skip this step.</p>
+                  <p>
+                  <ul class="ps-8">
+                    <li>
+                      Virtualenv installation command for linux &amp; mac os
+                      <br>
+                      <code>python3 -m pip install --user virtualenv</code><br></li>
+                    <li>Virtualenv installation command for Windows<br>
+                      <code>py -m pip install --user virtualenv</code>
+                      <br></li>
+                  </ul>
+                </li>
+              </ul>
+
+            </div> <!-- end card body -->
+          </div> <!-- end card -->
+        </div> <!-- end col -->
+
+
+      </div> <!-- end row -->
+
+      <div class="row">
+        <div class="col-xl-12">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Installation</h5>
+              <p>To setup, follow the below mentioned steps:</p>
+              <p>You can run the following commands to run project locally or build for production
+                use:</p>
+              <p>You can run this app following package manager: <strong>Bun</strong>,
+                <strong>Yarn</strong> or <strong>NPM</strong></p>
+
+              <div>
+                <h5>1. Bun</h5>
+                <p class="mb-2">If you don't have <strong>bun</strong> installed on your PC, use the <code>npm i
+                  -g bun</code> or <code>sudo npm i -g
+                  bun </code> to install</p>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                    <tr>
+                      <th style="width: 20%;">Command</th>
+                      <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <td>
+                        <code>bun i</code><br>
+                      </td>
+                      <td>
+                        This would install all required dependencies
+                        in <code>node_modules</code> folder.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>bun dev</code>
+                      </td>
+                      <td>
+                        Runs the project locally, starts the development server.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>bun run build</code>
+                      </td>
+                      <td>It bundles assets into the static directory. Your app is now ready to be
+                        deployed. We recommend to run this command before starting django server.
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div>
+                <h5>2. Yarn</h5>
+                <p class="mb-2">If you don't have <strong>yarn</strong> installed on your PC, use the next
+                  command <code>npm i -g yarn</code> or <code>sudo npm i -g yarn </code></p>
+                <div class="table-responsive mt-3">
+                  <table class="table">
+                    <thead>
+                    <tr>
+                      <th style="width: 20%;">Command</th>
+                      <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <td>
+                        <code>yarn</code><br>
+                      </td>
+                      <td>
+                        This would install all required dependencies
+                        in <code>node_modules</code> folder.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>yarn dev</code>
+                      </td>
+                      <td>
+                        Runs the project locally, starts the development server.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>yarn build</code>
+                      </td>
+                      <td>It bundles assets into the static directory. Your app is now ready to be
+                        deployed. We recommend to run this command before starting django server.
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div>
+                <h5>3. NPM</h5>
+                <p class="mb-2"><strong>npm</strong> comes preinstalled when you install Nodejs </p>
+                <div class="table-responsive mt-3">
+                  <table class="table">
+                    <thead>
+                    <tr>
+                      <th style="width: 20%;">Command</th>
+                      <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <td>
+                        <code>npm i</code> or <code>npm i --force</code><br>
+                      </td>
+                      <td>This would install all required dependencies in <code>node_modules</code>
+                        folder.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>npm run dev</code>
+                      </td>
+                      <td>Runs the project locally, starts the development server.</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>npm run build</code>
+                      </td>
+                      <td>It bundles assets into the static directory. Your app is now ready to be
+                        deployed. We recommend to run this command before starting django server.
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div>
+                <p class="mb-2">To spin up the Django development server, follow the
+                  below mentioned
+                  steps in a separate terminal:</p>
+                <div class="table-responsive mt-3">
+                  <table class="table">
+                    <thead>
+                    <tr>
+                      <th style="width: 30%;">Command</th>
+                      <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <td>
+                        <code>python3 -m venv environment_name</code><br>
+                      </td>
+                      <td>
+                        Create Virtual Environment on <strong>Linux</strong> &
+                        <strong>macOS</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>python -m venv environment_name</code><br>
+                      </td>
+                      <td>
+                        Create Virtual Environment on <strong>Windows OS</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>source environment_name/bin/activate</code><br>
+                      </td>
+                      <td>
+                        Activate Environment on <strong>Linux</strong> & <strong>macOS</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>environment_name/Scripts/activate</code><br>
+                      </td>
+                      <td>
+                        Activate Environment on <strong>Windows OS</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>pip install -r requirements/local.txt</code><br>
+                      </td>
+                      <td>
+                        This would install all the required python dependencies.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>python3 manage.py migrate</code><br>
+                      </td>
+                      <td>
+                        Run the migration to sync the database on <strong>Linux</strong> &
+                        <strong>macOS</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>python manage.py migrate</code><br>
+                      </td>
+                      <td>
+                        Run the migration to sync the database on <strong>Windows OS</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>python3 manage.py runserver</code><br>
+                      </td>
+                      <td>
+                        Starts the local server on localhost:8000 on <strong>Linux</strong> &
+                        <strong>macOS</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>python manage.py runserver</code><br>
+                      </td>
+                      <td>
+                        Starts the local server on localhost:8000 on <strong>Windows OS</strong>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div>
+                <p><strong>Note: </strong></p>
+                <ul class="ps-8">
+                  <li class="">
+                    During Development, keep the Vite's development server running through any of the
+                    above
+                    <code>dev</code> commands and then run the python's
+                    <code>runserver</code> command in a separate terminal.
+                  </li>
+                  <li class="pt-2">
+                    For Production, create a production build with any of the above
+                    <code>build</code> commands and then run the python's
+                    <code>runserver</code> command.
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+    <!-- End Container Fluid -->
+
+    <!-- ========== Footer Start ========== -->
+    <footer class="footer">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12 footer-links text-center">
+            <script>document.write(new Date().getFullYear())</script> &copy; Larkon. Crafted by <a
+            href="" class="fw-semibold" target="_blank">Techzaa</a>
+          </div>
+
+        </div>
+      </div>
+    </footer>
+    <!-- ========== Footer End ========== -->
+
+  </div>
+  <!-- ==================================================== -->
+  <!-- End Page Content -->
+  <!-- ==================================================== -->
+
+</div>
+<!-- END Wrapper -->
+
+<!-- Vendor Javascript (Require in all Page) -->
+<script src="assets/js/vendor.js"></script>
+
+<!-- App Javascript (Require in all Page) -->
+<script src="assets/js/app.js"></script>
+
+</body>
+
+</html>

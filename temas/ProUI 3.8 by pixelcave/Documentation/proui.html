@@ -1,0 +1,1357 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+
+        <title>ProUI Docs by pixelcave</title>
+
+        <meta name="description" content="ProUI documentation template created by pixelcave">
+        <meta name="author" content="pixelcave">
+        <meta name="robots" content="noindex, nofollow">
+
+        <!-- Icons -->
+        <link rel="shortcut icon" href="assets/media/favicons/favicon.png">
+        <link rel="icon" type="image/png" sizes="192x192" href="assets/media/favicons/favicon-192x192.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="assets/media/favicons/apple-touch-icon-180x180.png">
+
+        <!-- Stylesheets -->
+        <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,400i,600,700" rel="stylesheet">
+        <link rel="stylesheet" href="assets/css/pixelcave.docs.min.css">
+    </head>
+    <body>
+        <!-- Page Container -->
+        <div id="page-container" class="sidebar-o side-scroll">
+            <!-- Sidebar -->
+            <nav id="sidebar">
+                <!-- Sidebar Content -->
+                <div class="sidebar-content">
+                    <div class="content-side content-side-full pos-relative">
+                        <!-- Close Sidebar, Visible only on mobile screens -->
+                        <div class="pos-absolute pos-top-right d-lg-none">
+                            <a class="d-inline-block text-danger m-3" href="javascript:void(0)" data-toggle="layout" data-action="sidebar_close">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                        <!-- END Close Sidebar -->
+
+                        <!-- Side Header -->
+                        <div class="mb-3">
+                            <h1 class="font-size-lg font-w700 mb-2">
+                                ProUI <a href="">Docs</a>
+                            </h1>
+                            <div class="font-size-sm font-w600 text-muted">v3.8 - May 18, 2017</div>
+                        </div>
+                        <!-- END Side Header -->
+
+                        <!-- Side Navigation -->
+                        <ul class="nav-main">
+                            <li class="nav-main-heading">Template</li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-changelog" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-list text-primary"></i>
+                                    <span class="nav-main-link-name">Changelog</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-heading">Intro</li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-package" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-briefcase text-muted"></i>
+                                    <span class="nav-main-link-name">Package</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-bootstrap" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-rocket text-muted"></i>
+                                    <span class="nav-main-link-name">Bootstrap</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-heading">Structure</li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-html" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-code text-info"></i>
+                                    <span class="nav-main-link-name">HTML</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-css" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-code text-info"></i>
+                                    <span class="nav-main-link-name">CSS</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-less" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-code text-info"></i>
+                                    <span class="nav-main-link-name">Less</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-javascript" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-code text-info"></i>
+                                    <span class="nav-main-link-name">JavaScript</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-heading">More</li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-tips" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-thumbs-up text-warning"></i>
+                                    <span class="nav-main-link-name">Quick Tips</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-retina" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-eye text-warning"></i>
+                                    <span class="nav-main-link-name">Retina</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-credits" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-link text-warning"></i>
+                                    <span class="nav-main-link-name">Credits</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-heading">Pixelcave</li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#section-thankyou" data-toggle="scroll-to" data-offset="50">
+                                    <i class="nav-main-link-icon fa fa-heart text-danger"></i>
+                                    <span class="nav-main-link-name">Thank you</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="https://pixelcave.com">
+                                    <i class="nav-main-link-icon fa fa-globe text-danger"></i>
+                                    <span class="nav-main-link-name">pixelcave.com</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- END Side Navigation -->
+                    </div>
+                </div>
+                <!-- Sidebar Content -->
+            </nav>
+            <!-- END Sidebar -->
+
+            <!-- Main Container -->
+            <main id="main-container">
+                <!-- Toggle Sidebar -->
+                <div class="pos-fixed pos-ontop-content d-print-none">
+                    <button type="button" class="btn btn-secondary pos-absolute pos-top-left m-1 m-lg-3" data-toggle="layout" data-action="sidebar_toggle">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+                <!-- END Toggle Sidebar -->
+
+                <!-- Pixelcave Links -->
+                <div class="content d-print-none">
+                    <div class="row text-center py-5">
+                        <div class="col-6 col-md-3 py-3 invisible" data-toggle="appear" data-class="animated fadeInDown">
+                            <a class="item item-danger" href="https://pixelcave.com/#subscribe">
+                                <div class="item-icon">
+                                    <i class="fa fa-envelope-open"></i>
+                                </div>
+                                <div class="item-text">
+                                    Subscribe to our news
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3 py-3 invisible" data-toggle="appear" data-class="animated fadeInDown" data-timeout="200">
+                            <a class="item item-success" href="https://pixelcave.com">
+                                <div class="item-icon">
+                                    <i class="fa fa-briefcase"></i>
+                                </div>
+                                <div class="item-text">
+                                    Check out more projects
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3 py-3 invisible" data-toggle="appear" data-class="animated fadeInDown" data-timeout="400">
+                            <a class="item item-twitter" href="https://twitter.com/pixelcave">
+                                <div class="item-icon">
+                                    <i class="fab fa-twitter"></i>
+                                </div>
+                                <div class="item-text">
+                                    Find us on Twitter
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3 py-3 invisible" data-toggle="appear" data-class="animated fadeInDown" data-timeout="600">
+                            <a class="item item-facebook" href="https://facebook.com/pixelcave">
+                                <div class="item-icon">
+                                    <i class="fab fa-facebook"></i>
+                                </div>
+                                <div class="item-text">
+                                    Find us on Facebook
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- END Pixelcave Links -->
+
+                <!-- Page Content -->
+                <div class="content">
+                    <!-- Changelog -->
+                    <h2 id="section-changelog" class="mt-0">Changelog</h2>
+                    <div class="accordion" id="changelog">
+                        <!-- Update 3.8 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    3.8 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">May 18, 2017</div>
+                            </div>
+                        </div>
+                        <!-- END Update 3.8 -->
+
+                        <!-- Update 3.7 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    3.7 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">January 12, 2017</div>
+                            </div>
+                        </div>
+                        <!-- END Update 3.7 -->
+
+                        <!-- Update 3.6 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    3.6 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">September 27, 2016</div>
+                            </div>
+                        </div>
+                        <!-- END Update 3.6 -->
+
+                        <!-- Update 3.5 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    3.5 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">February 12, 2016</div>
+                            </div>
+                        </div>
+                        <!-- END Update 3.5 -->
+
+                        <!-- Update 3.4 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    3.4 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">October 10, 2015</div>
+                            </div>
+                        </div>
+                        <!-- END Update 3.4 -->
+
+                        <!-- Update 3.3 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    3.3 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">July 11, 2015</div>
+                            </div>
+                        </div>
+                        <!-- END Update 3.3 -->
+
+                        <!-- Update 3.2 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    3.2 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">April 8, 2015</div>
+                            </div>
+                        </div>
+                        <!-- END Update 3.2 -->
+
+                        <!-- Update 3.1 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    3.1 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">January 24, 2015</div>
+                            </div>
+                        </div>
+                        <!-- END Update 3.1 -->
+
+                        <!-- Update 3.0 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    3.0 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">November 12, 2014</div>
+                            </div>
+                        </div>
+                        <!-- END Update 3.0 -->
+
+                        <!-- Update 2.2 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    2.2 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">September 10, 2014</div>
+                            </div>
+                        </div>
+                        <!-- END Update 2.2 -->
+
+                        <!-- Update 2.1 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    2.1 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">July 5, 2014</div>
+                            </div>
+                        </div>
+                        <!-- END Update 2.1 -->
+
+                        <!-- Update 2.0 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    2.0 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">May 16, 2014</div>
+                            </div>
+                        </div>
+                        <!-- END Update 2.0 -->
+
+                        <!-- Update 1.4 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    1.4 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">May 1, 2014</div>
+                            </div>
+                        </div>
+                        <!-- END Update 1.4 -->
+
+                        <!-- Update 1.3 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    1.3 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">April 9, 2014</div>
+                            </div>
+                        </div>
+                        <!-- END Update 1.3 -->
+
+                        <!-- Update 1.2 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    1.2 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">March 13, 2014</div>
+                            </div>
+                        </div>
+                        <!-- END Update 1.2 -->
+
+                        <!-- Update 1.1 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    1.1 Update
+                                </h5>
+                                <div class="font-size-sm text-muted">February 19, 2014</div>
+                            </div>
+                        </div>
+                        <!-- END Update 1.1 -->
+
+                        <!-- Release 1.0 -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    1.0 Release
+                                </h5>
+                                <div class="font-size-sm text-muted">February 5, 2014</div>
+                            </div>
+                        </div>
+                        <!-- END Release 1.0 -->
+                    </div>
+                    <!-- END Changelog -->
+
+                    <!-- Package -->
+                    <h2 id="section-package">Package</h2>
+                    <p>
+                        Let's have a look at the contents of the current package:
+                    </p>
+                    <ul class="fa-ul">
+                        <li>
+                            <i class="far fa-folder fa-li"></i>
+                            <code>01 - ProUI Backend Template</code>
+                            <ul class="fa-ul">
+                                <li>
+                                    <i class="far fa-folder fa-li"></i>
+                                    <code>01 - Get Started Version</code>
+                                    <div>
+                                        Includes the Get Started version. It is a helpful version to get you started designing and building your project.
+                                    </div>
+                                </li>
+                                <li>
+                                    <i class="far fa-folder fa-li"></i>
+                                    <code>02 - PHP Version</code>
+                                    <div>
+                                        Includes the abstract PHP version. This version can come really handy as a starting point if you would like to build a custom PHP application. It can help you in many ways:
+                                    </div>
+                                    <ul class="fa-ul">
+                                        <li>
+                                            <i class="fa fa-angle-right fa-li"></i> <strong>Templating</strong><br>Common code used only once and included in each page (files in <code>/inc</code> folder).
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-angle-right fa-li"></i> <strong>Main Navigation Auto Creation</strong><br>In the <code>/inc/config.php</code> file you can alter the <code>$primary_nav[]</code> array accordingly and the main navigation will be auto created for you on the fly.
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-angle-right fa-li"></i> <strong>Variables</strong><br>In the <code>/inc/config.php</code> file you can also set some variables that are used to change the available template features such as active theme color, header color, fixed header &amp; sidebar and even more
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-angle-right fa-li"></i> <strong>Demo Tasks</strong><br>Some code used for demonstration purposes, eg creating table rows with dummy content.
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <i class="far fa-folder fa-li"></i>
+                                    <code>03 - HTML Version</code>
+                                    <div>
+                                        Includes the abstract HTML version. This version can be used with any server side language/framework you prefer or currently working with.
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <i class="far fa-folder fa-li"></i>
+                            <code>02 - ProUI Email Templates</code>
+                            <div>
+                                Includes various email templates which could be used for your transactional emails.
+                            </div>
+                        </li>
+                        <li>
+                            <i class="far fa-folder fa-li"></i>
+                            <code>03 - PSDs</code>
+                            <div>
+                                Includes PSD files for Glyphicons Pro and for <strong>ProUI</strong> various pages.
+                            </div>
+                        </li><li>
+                            <i class="far fa-folder fa-li"></i>
+                            <code>Documentation</code>
+                            <div>
+                                Of course, it includes current documentation!
+                            </div>
+                        </li>
+                    </ul>
+                    <!-- END Package -->
+
+                    <!-- Bootstrap -->
+                    <h2 id="section-bootstrap">Bootstrap</h2>
+                    <p>
+                        <a href="https://getbootstrap.com/">Bootstrap</a> is one of the most popular front-end frameworks at the moment and is full of features. It is easy to use and it offers a large variety of CSS as well as Javascript components.
+                    </p>
+                    <p>
+                        <strong>ProUI</strong> was built on top of this framework and it extends it to a large degree featuring smart navigation components as well as integration of many popular jQuery plugins such as FullCalendar and Datatables. It has its own unique, clean and fresh style and supports all of the features the Bootstrap framework has to offer. Attention to detail was given, so that every feature to feel part of the theme template not just another feature.
+                    </p>
+                    <p>
+                        If you are unfamiliar with the framework, its official website will help you out a lot but if you just want to start quickly, you can easily replicate any feature or component we already present in <strong>ProUI</strong>. What is vital to know, is that the two files the framework consists of (required for <strong>ProUI</strong>), are the following.
+                    </p>
+                    <ul class="fa-ul">
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/css/bootstrap.css</code> <em>(unaltered, original framework)</em>
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/js/vendor/bootstrap.min.js</code> <em>(unaltered, original framework)</em>
+                        </li>
+                    </ul>
+                    <p>
+                        The above files include all the features the framework has, except for the default Glyphicons set. Those were not included because <a href="https://glyphicons.com">Glyphicons PRO ($59)</a> and <a href="https://fontawesome.com/v4.7.0/">FontAwesome</a> were used (superior, font-based icon solutions).
+                    </p>
+                    <!-- END Bootstrap -->
+
+                    <!-- HTML -->
+                    <h2 id="section-html">HTML</h2>
+                    <p>
+                        <strong>ProUI</strong> layout is clean and simple but at the same time powerful and flexible. To get started quicky, you can use the blank page <code>page_ready_blank.php (.html)</code>, created for this reason.
+                    </p>
+                    <p>
+                        There are many available options you can set, such as header/sidebar position (fixed or static), footer position (fixed or static), partial hoverable sidebars and even more. If you are using the PHP version, you don't have to alter the classes directly since you can just set these options from the <code>/inc/config.php</code> file.
+                    </p>
+                    <pre class="pre-sh"><code class="html">&lt;!-- Body --&gt;
+&lt;!-- In the PHP version you can set the following options from inc/config file --&gt;
+&lt;body&gt;
+    &lt;!-- Page Wrapper --&gt;
+    &lt;!--
+    Available classes:
+
+    'page-loading'      enables page preloader
+    --&gt;
+    &lt;div id=&quot;page-wrapper&quot;&gt;
+        &lt;!-- Page Container --&gt;
+        &lt;!-- In the PHP version you can set the following options from inc/config file --&gt;
+        &lt;!--
+        Available #page-container classes:
+
+        '' (None)                                       for a full main and alternative sidebar hidden by default (&gt; 991px)
+
+        'sidebar-visible-lg'                            for a full main sidebar visible by default (&gt; 991px)
+        'sidebar-partial'                               for a partial main sidebar which opens on mouse hover, hidden by default (&gt; 991px)
+        'sidebar-partial sidebar-visible-lg'            for a partial main sidebar which opens on mouse hover, visible by default (&gt; 991px)
+        'sidebar-mini sidebar-visible-lg-mini'          for a mini main sidebar with a flyout menu, enabled by default (> 991px + Best with static layout)
+        'sidebar-mini sidebar-visible-lg'               for a mini main sidebar with a flyout menu, disabled by default (> 991px + Best with static layout)
+
+        'sidebar-alt-visible-lg'                        for a full alternative sidebar visible by default (&gt; 991px)
+        'sidebar-alt-partial'                           for a partial alternative sidebar which opens on mouse hover, hidden by default (&gt; 991px)
+        'sidebar-alt-partial sidebar-alt-visible-lg'    for a partial alternative sidebar which opens on mouse hover, visible by default (&gt; 991px)
+
+        'sidebar-partial sidebar-alt-partial'           for both sidebars partial which open on mouse hover, hidden by default (&gt; 991px)
+
+        'sidebar-no-animations'                         add this as extra for disabling sidebar animations on large screens (&gt; 991px) - Better performance with heavy pages!
+
+        'style-alt'                                     for an alternative main style (without it: the default style)
+        'footer-fixed'                                  for a fixed footer (without it: a static footer)
+
+        'disable-menu-autoscroll'                       add this to disable the main menu auto scrolling when opening a submenu
+
+        'header-fixed-top'                              has to be added only if the class 'navbar-fixed-top' was added on header.navbar
+        'header-fixed-bottom'                           has to be added only if the class 'navbar-fixed-bottom' was added on header.navbar
+
+        'enable-cookies'                                enables cookies for remembering active color theme when changed from the sidebar links
+        --&gt;
+        &lt;div id=&quot;page-container&quot; class=&quot;sidebar-partial sidebar-visible-lg sidebar-no-animations&quot;&gt;
+            &lt;!-- Alternative Sidebar --&gt;
+            &lt;div id=&quot;sidebar-alt&quot;&gt;
+                Alternative Sidebar Content
+            &lt;/div&gt;
+            &lt;!-- END Alternative Sidebar --&gt;
+
+            &lt;!-- Main Sidebar --&gt;
+            &lt;div id=&quot;sidebar&quot;&gt;
+                Main Sidebar Content
+            &lt;/div&gt;
+            &lt;!-- END Main Sidebar --&gt;
+
+            &lt;!-- Main Container --&gt;
+            &lt;div id=&quot;main-container&quot;&gt;
+                &lt;!-- Header --&gt;
+                &lt;!-- In the PHP version you can set the following options from inc/config file --&gt;
+                &lt;!--
+                Available header.navbar classes:
+
+                'navbar-default'            for the default light header
+                'navbar-inverse'            for an alternative dark header
+
+                'navbar-fixed-top'          for a top fixed header (fixed sidebars with scroll will be auto initialized, functionality can be found in js/app.js - handleSidebar())
+                    'header-fixed-top'      has to be added on #page-container only if the class 'navbar-fixed-top' was added
+
+                'navbar-fixed-bottom'       for a bottom fixed header (fixed sidebars with scroll will be auto initialized, functionality can be found in js/app.js - handleSidebar()))
+                    'header-fixed-bottom'   has to be added on #page-container only if the class 'navbar-fixed-bottom' was added
+                --&gt;
+                &lt;header class=&quot;navbar navbar-default&quot;&gt;
+                    Header Content
+                &lt;/header&gt;
+                &lt;!-- END Header --&gt;
+
+                &lt;!-- Page Content --&gt;
+                &lt;div id=&quot;page-content&quot;&gt;
+                    Main Content
+                &lt;/div&gt;
+                &lt;!-- END Page Content --&gt;
+
+                &lt;!-- Footer --&gt;
+                &lt;footer&gt;
+                    Footer Content
+                &lt;/footer&gt;
+                &lt;!-- END Footer --&gt;
+            &lt;/div&gt;
+            &lt;!-- END Main Container --&gt;
+        &lt;/div&gt;
+        &lt;!-- END Page Container --&gt;
+    &lt;/div&gt;
+    &lt;!-- END Page Wrapper --&gt;
+&lt;/body&gt;
+&lt;!-- END Body --&gt;</code></pre>
+                    <!-- END HTML -->
+
+                    <!-- CSS -->
+                    <h2 id="section-css">CSS</h2>
+                    <div class="alert alert-info">
+                        If you are planning on using CSS, then you can freely remove <code>/less</code> folder from your project without further changes. If you would like to use LessCSS, then please skip this section and have a look at the next one!
+                    </div>
+                    <p>
+                        Below, you can have a look at the CSS files along with their description.
+                    </p>
+                    <ul class="fa-ul">
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/css/fonts/</code><br>
+                            Folder that contains the fonts used in <code>/css/plugins.css</code> by Glyphicons PRO and Font Awesome
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/css/themes/</code><br>
+                            Folder that contains all the available themes. Just include the one of your choice after the <code>main.css</code> and before the <code>themes.css</code>. To create your own, simply copy-paste one of the existing, give it a new name and alter the colors to match your preference. If you would like the new color to be available for individual elements, add your new color theme to the <code>themes.css</code> file, the same way we did (check the file). If you are using the PHP version remember that you can set an active theme from the <code>/inc/config.php</code> file.
+                            <ul class="fa-ul">
+                                <li><i class="fa fa-check fa-li"></i><code>amethyst.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>autumn.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>blackberry.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>coral.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>emerald.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>fancy.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>fire.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>flatie.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>forest.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>lake.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>modern.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>night.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>spring.css</code></li>
+                                <li><i class="fa fa-check fa-li"></i><code>waterlily.css</code></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/css/bootstrap.min.css</code><br>
+                            The Bootstrap framework in its original form, unaltered.
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/css/plugins.css</code><br>
+                            Styles used for the following plugins. Their original style is altered to match with <strong>ProUI</strong> design.
+                            <ul class="fa-ul">
+                                <li><i class="fa fa-check fa-li"></i>Font Awesome</li>
+                                <li><i class="fa fa-check fa-li"></i>Glyphicons PRO</li>
+                                <li><i class="fa fa-check fa-li"></i>FullCalendar</li>
+                                <li><i class="fa fa-check fa-li"></i>Dropzone.js</li>
+                                <li><i class="fa fa-check fa-li"></i>Chosen</li>
+                                <li><i class="fa fa-check fa-li"></i>Datepicker for Bootstrap</li>
+                                <li><i class="fa fa-check fa-li"></i>Bootstrap Colorpicker</li>
+                                <li><i class="fa fa-check fa-li"></i>PRISM.js</li>
+                                <li><i class="fa fa-check fa-li"></i>Magnific Popup CSS</li>
+                                <li><i class="fa fa-check fa-li"></i>Datatables</li>
+                                <li><i class="fa fa-check fa-li"></i>Easy Pie Chart</li>
+                                <li><i class="fa fa-check fa-li"></i>CSS3 ANIMATION CHEAT SHEET</li>
+                                <li><i class="fa fa-check fa-li"></i>Bootstrap Timepicker</li>
+                                <li><i class="fa fa-check fa-li"></i>jQuery Tags Input</li>
+                                <li><i class="fa fa-check fa-li"></i>Slider for Bootstrap</li>
+                                <li><i class="fa fa-check fa-li"></i>Nprogress</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/css/main.css</code><br>
+                            This is the main stylesheet of <strong>ProUI</strong>. The styles for the layout, <strong>ProUI</strong> elements, as well as the overwrite and extension of Bootstrap styles can be found here. Below, the sections of the file are presented.
+                            <ul class="fa-ul">
+                                <li><i class="fa fa-check fa-li"></i>MAIN LAYOUT</li>
+                                <li><i class="fa fa-check fa-li"></i>HEADER</li>
+                                <li><i class="fa fa-check fa-li"></i>SIDEBARS/NAVIGATION</li>
+                                <li><i class="fa fa-check fa-li"></i>MAIN CONTENT</li>
+                                <li><i class="fa fa-check fa-li"></i>PAGES</li>
+                                <li><i class="fa fa-check fa-li"></i>BOOTSTRAP OVERWRITE/EXTEND STYLES</li>
+                                <li><i class="fa fa-check fa-li"></i>HELPERS</li>
+                                <li><i class="fa fa-check fa-li"></i>THEMES</li>
+                                <li><i class="fa fa-check fa-li"></i>RESPONSIVE</li>
+                                <li><i class="fa fa-check fa-li"></i>RETINA</li>
+                                <li><i class="fa fa-check fa-li"></i>PRINT</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/css/themes.css</code><br>
+                            This is the themes stylesheet. You must include it last, after all other stylesheets. The classes included in this file can be used to alter the color, the background color or the border color of an element individually. It contains main colors of all the available themes.
+                        </li>
+                    </ul>
+                    <p>
+                        In the main stylesheet we have commented the code the following way, so that you can navigate and find the section you want easily. We also added some shortcodes for each section at the beginning, so that you can search them in the file and find them fast.
+                    </p>
+                    <pre class="pre-sh"><code class="css">/*
+=================================================================
+(#shortcode) SECTION
+=================================================================
+*/
+
+/* Sub section 1 */
+selector {
+}
+
+/* Sub section 2 */
+selector {
+}
+
+/*
+=================================================================
+(#shortcode) SECTION
+=================================================================
+*/
+
+/* Sub section 1 */
+selector {
+}
+
+/* Sub section 2 */
+selector {
+}</code></pre>
+                    <p>
+                        If you would like to edit a specific section of <strong>ProUI</strong>, simply find the appropriate label in <code>/css/plugins.css</code> or <code>/css/main.css</code> files and change it to your own needs. Even better, we would suggest creating and including in the template a new CSS file named <code>custom.css</code> and apply your style overwrites there. This way, it will be easier for you to update the template's files when we release an updated version.
+                    </p>
+                    <!-- END CSS -->
+
+                    <!-- CSS Class Reference -->
+                    <h2 id="section-css-class-reference">CSS Class Reference</h2>
+                    <p>
+                        Here you can find a quick reference of many useful CSS classes available in <strong>ProUI</strong>. For more details, you can have a look at the official Bootstrap CSS guide at <a href="http://getbootstrap.com/css/">http://getbootstrap.com/css/</a>
+                    </p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="text-uppercase">
+                                    <th style="width: 220px;">Class</th>
+                                    <th colspan="4">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="table-active" colspan="5"><strong>Layout</strong></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        Extra small devices<br>
+                                        <small class="text-muted">Phones (&lt;768px)</small>
+                                    </td>
+                                    <td>
+                                        Small devices<br>
+                                        <small class="text-muted">Tablets (&ge;768px)</small>
+                                    </td>
+                                    <td>
+                                        Medium devices<br>
+                                        <small class="text-muted">Desktops (&ge;992px)</small>
+                                    </td>
+                                    <td>
+                                        Large devices<br>
+                                        <small class="text-muted">Desktops (&ge;1200px)</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>.visible-xs</code></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.visible-sm</code></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.visible-md</code></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.visible-lg</code></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.hidden-xs</code></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.hidden-sm</code></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.hidden-md</code></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.hidden-lg</code></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td class="table-success"><i class="fa fa-check text-success"></i></td>
+                                    <td><i class="fa fa-times text-danger"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.pull-left</code></td>
+                                    <td colspan="4">Floats the element left</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.pull-right</code></td>
+                                    <td colspan="4">Floats the element right</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.clearfix</code></td>
+                                    <td colspan="4">Clears all floats in the element</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.content-float</code></td>
+                                    <td colspan="4">Puts margin (right or left + bottom) in floated child elements (with <code>.pull-left</code> or <code>.pull-right</code> classes). Useful for paragraphs with floated images.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.center-block</code></td>
+                                    <td colspan="4">Centers a block element with a specific width inside its container.</td>
+                                </tr>
+                            </tbody>
+                            <tbody>
+                                <tr>
+                                    <td class="table-active" colspan="5"><strong>Text</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.text-*</code></td>
+                                    <td colspan="4">Aligns the text (available options: <code>left</code> <code>center</code> <code>right</code> <code>justify</code>)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.h1</code></td>
+                                    <td colspan="4">Adjusts text to match with <code>&lt;h1&gt;</code> tag</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.h2</code></td>
+                                    <td colspan="4">Adjusts text to match with <code>&lt;h2&gt;</code> tag</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.h3</code></td>
+                                    <td colspan="4">Adjusts text to match with <code>&lt;h3&gt;</code> tag</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.h4</code></td>
+                                    <td colspan="4">Adjusts text to match with <code>&lt;h4&gt;</code> tag</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.h5</code></td>
+                                    <td colspan="4">Adjusts text to match with <code>&lt;h5&gt;</code> tag</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.h6</code></td>
+                                    <td colspan="4">Adjusts text to match with <code>&lt;h6&gt;</code> tag</td>
+                                </tr>
+                            </tbody>
+                            <tbody>
+                                <tr>
+                                    <td class="table-active" colspan="5"><strong>Color Themes</strong> Replace <code>*</code> with: <code>default</code> <code>amethyst</code> <code>autumn</code> <code>blackberry</code> <code>coral</code> <code>emerald</code> <code>fancy</code> <code>fire</code> <code>flatie</code> <code>forest</code> <code>lake</code> <code>modern</code> <code>night</code> <code>spring</code> <code>waterlily</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-color</code></td>
+                                    <td colspan="4">Sets the text color to the main color of the active theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-color-dark</code></td>
+                                    <td colspan="4">Sets the text color to the main dark color of the active theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-color-*</code></td>
+                                    <td colspan="4">Sets the text color to the main color of a specific theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-color-dark-*</code></td>
+                                    <td colspan="4">Sets the text color to the main dark color of a specific theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-border</code></td>
+                                    <td colspan="4">Sets the border color to the main color of the active theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-border-dark</code></td>
+                                    <td colspan="4">Sets the border color to the main dark color of the active theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-border-*</code></td>
+                                    <td colspan="4">Sets the border color to the main color of a specific theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-border-dark-*</code></td>
+                                    <td colspan="4">Sets the border color to the main dark color of a specific theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-background</code></td>
+                                    <td colspan="4">Sets the background color to the main color of the active theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-background-dark</code></td>
+                                    <td colspan="4">Sets the background color to the main dark color of the active theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-background-*</code></td>
+                                    <td colspan="4">Sets the background color to the main color of a specific theme</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.themed-background-dark-*</code></td>
+                                    <td colspan="4">Sets the background color to the main dark color of a specific theme</td>
+                                </tr>
+                            <tbody>
+                            </tbody>
+                                <tr>
+                                    <td class="table-active" colspan="5"><strong>Contextual Colors</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.text-primary</code></td>
+                                    <td colspan="4">Sets the text color to the main color of the active theme. Can be used on <code>&lt;a&gt;</code> elements.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.text-warning</code></td>
+                                    <td colspan="4">Sets the text color to an orange one. Can be used on <code>&lt;a&gt;</code> elements.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.text-danger</code></td>
+                                    <td colspan="4">Sets the text color to a red one. Can be used on <code>&lt;a&gt;</code> elements.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.text-info</code></td>
+                                    <td colspan="4">Sets the text color to a blue one. Can be used on <code>&lt;a&gt;</code> elements.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.text-success</code></td>
+                                    <td colspan="4">Sets the text color to a green one. Can be used on <code>&lt;a&gt;</code> elements.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.text-muted</code></td>
+                                    <td colspan="4">Sets the text color to a grey one. Can be used on <code>&lt;a&gt;</code> elements.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.text-light</code></td>
+                                    <td colspan="4">Sets the text color to white. Can be used on <code>&lt;a&gt;</code> elements.</td>
+                                </tr>
+                            <tbody>
+                            </tbody>
+                                <tr>
+                                    <td class="table-active" colspan="5"><strong>Helpers</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.push</code></td>
+                                    <td colspan="4">Pushes the element by adding a bottom margin (15px).</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.push-bit</code></td>
+                                    <td colspan="4">Pushes the element by adding a bottom margin (10px).</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.remove-margin</code></td>
+                                    <td colspan="4">Removes the margin from an element.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.remove-padding</code></td>
+                                    <td colspan="4">Removes the padding from an element.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.visible-lt-ie10</code></td>
+                                    <td colspan="4">Makes the element visible only in IE9.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>.hidden-lt-ie10</code></td>
+                                    <td colspan="4">Hides the element in IE9.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- END CSS Class Reference -->
+
+                    <!-- CSS -->
+                    <h2 id="section-less">Less</h2>
+                    <div class="alert alert-info">
+                        <p class="mb-0">
+                            If you are planning on using LessCSS, then you can freely remove <code>/css</code> folder from your project but you will also have to replace the following HTML markup - found in the <code>&lt;head&gt;</code> tag (<strong>PHP version:</strong> in <code>template_start.php</code> - <strong>HTML version:</strong> in <code>.html</code> files)..
+                        </p>
+                        <pre class="pre-sh"><code class="html">&lt;!-- Stylesheets --&gt;
+&lt;!-- Bootstrap is included in its original form, unaltered --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;css/bootstrap.min.css&quot;&gt;
+
+&lt;!-- Related styles of various icon packs and plugins --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;css/plugins.css&quot;&gt;
+
+&lt;!-- The main stylesheet of this template. All Bootstrap overwrites are defined in here --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;css/main.css&quot;&gt;
+
+&lt;!-- Include a specific file here from css/themes/ folder to alter the default theme of the template --&gt;
+
+&lt;!-- The themes stylesheet of this template (for using specific theme color in individual elements - must included last) --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;css/themes.css&quot;&gt;
+&lt;!-- END Stylesheets --&gt;</code></pre>
+                        <p class="mb-0">
+                            ..with this one:
+                        </p>
+                        <pre class="pre-sh"><code class="html">&lt;!-- LessCSS --&gt;
+&lt;!-- All styles imported in styles.less --&gt;
+&lt;link rel=&quot;stylesheet/less&quot; href=&quot;less/styles.less&quot;&gt;
+
+&lt;!-- LessCSS Parser - Great for development - Pre-compiled CSS recommended for production --&gt;
+&lt;script src=&quot;less/js/less.min.js&quot;&gt;&lt;/script&gt;
+&lt;!-- END LessCSS --&gt;</code></pre>
+                    </div>
+                    <div class="alert alert-warning">
+                        <h4 class="mb-2">
+                            <i class="fa fa-arrow-right"></i> <strong>Reminder</strong>
+                        </h4>
+                        <p>
+                            Have in mind that you will have to change the active color theme from <code>/less/styles.less</code> file. Changing it from PHP variables (in PHP version) or from the color preview buttons (in sidebar, under user info) won't work!
+                        </p>
+                        <h4 class="mb-2">
+                            <i class="fa fa-arrow-right"></i> <strong>Usage</strong>
+                        </h4>
+                        <p class="mb-0">
+                            It is highly recommended to use LessCSS only for development. When it is ready for production, a minified CSS should be exported and included for best performance. If you would like to learn more about using Less, you could check out its official page at <a href="http://lesscss.org/usage/">http://lesscss.org/usage/</a>
+                        </p>
+                    </div>
+                    <p>
+                        <a href="http://lesscss.org/">Less</a> is a CSS pre-processor, meaning that it extends the CSS language, adding features that allow variables, mixins, functions and many other techniques that allow you to make CSS that is more maintainable, themable and extendable. Less support was added in <strong>ProUI</strong> mainly for providing useful variables, so it's easier to update main aspects of the template, and also for providing a more modular approach.
+                    </p>
+                    <p>
+                        Below, you can see the files along with their description in the <code>/less</code> folder:
+                    </p>
+                    <ul class="fa-ul">
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/less/js/</code><br>
+                             Folder that contains Less to CSS JS parser. It was added here for consistency. This way, if someone isn't interested in LessCSS, he would have to only remove the <code>/less</code> folder.
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/less/fonts/</code><br>
+                            Folder that contains the fonts used in <code>/less/plugins/font_awesome.less</code> and <code>/less/plugins/glyphicons.less</code> by Font Awesome and Glyphicons PRO.
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/less/plugins/</code><br>
+                            Folder that contains styles of various plugins. Their original style is altered to match with <strong>ProUI</strong> design.
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/less/main/</code><br>
+                            Folder that contains all main styles of the template.
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/less/themes/</code><br>
+                            Folder that contains all the available color themes. Each file contains predefined variables with the colors of each theme. A file can be imported in <code>/less/styles.less</code> to change the active color theme by overwriting the default variables which are set in <code>/less/variables.less</code>.
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/less/bootstrap.less</code><br>
+                            Folder that contains the Bootstrap framework (Compiled CSS version).
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/less/variables.less</code><br>
+                            This is the variables file. From here you can set various variables to easily change the colors or other template options.
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/less/themes.less</code><br>
+                            This is the themes file. It contains classes that can be used to alter the color, the background color or the border color of an element individually. It contains main colors of all the available themes.
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/less/styles.less</code><br>
+                            This is the only Less file that needs to be included in the template since it imports all required files. Here you can import a separate color theme file from <code>/less/themes/</code> folder, to overwrite the default color variables and change the active color theme.
+                        </li>
+                    </ul>
+                    <!-- END Less -->
+
+                    <!-- JavaScript -->
+                    <h2 id="section-javascript">JavaScript</h2>
+                    <p>
+                        Below, you can see the JavaScript files along with their description.
+                    </p>
+                    <ul class="fa-ul">
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/js/helpers/ckeditor/*</code><br>
+                            Required for using the CKEditor on a textarea. This folder contains all plugin's related files. You just have to include the ckeditor.js file in the page you would like to use it. You can check the form components page where we've icluded an example
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/js/helpers/gmaps.min.js</code><br>
+                            Required for Google Maps functionality, must be included along with the Google Maps API to use the maps
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/js/vendor/bootstrap.min.js</code><br>
+                            JavaScript components of Bootstrap framework
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/js/vendor/jquery.min.js</code><br>
+                            The popular JavaScript library that greatly reduces the amount of code you must write. This is the local file and is only included in case the version from google apis cannot be loaded for some reason (eg working local without a network connection available)
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/js/vendor/modernizr.min.js</code><br>
+                            Modernizr, a browser feature detection library
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/js/plugins.js</code><br>
+                            All JavaScript plugins minimized and included in a single file. If you are not planning on using most of the plugins throughout your app, it is recommended to remove the plugins that you don't need (if you do, make sure you also remove plugin related code from <code>js/app.js</code> and <code>css/plugins.css</code> or code in a page that is used). Furthermore, if for example you are only going to use a plugin in one page, it's better to remove it, put it in a seperate file and include only in the page you need it. This way you won't load a plugin you won't use in most pages.
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/js/app.js</code><br>
+                            Initialization of various plugins as well as JavaScript code used in <strong>ProUI</strong> features such as main navigation and sidebar functionality
+                        </li>
+                        <li>
+                            <i class="fa fa-angle-right fa-li"></i><code>/js/pages/*</code><br>
+                            Here you will find all the JavaScript files used in various pages throughout the template. They contain code used only in specific pages. This way the JS code is completely separated from the HTML Markup.
+                        </li>
+                    </ul>
+                    <p>
+                        There are a lot of examples in <strong>ProUI</strong> but you can check out their websites where you could find more examples. At last, all JavaScript files are included at the bottom of the page (<code>/inc/template_scripts.php</code> for the PHP version), except from the <code>/js/vendor/modernizr.min.js</code> which needs to be loaded in the <code>&lt;head&gt;</code> tag (<code>/inc/template_start.php</code> for the PHP version).
+                    </p>
+                    <!-- END JavaScript -->
+
+                    <!-- Quick Tips -->
+                    <h2 id="section-tips">Quick Tips</h2>
+                    <h3>Mobile First</h3>
+                    <p>
+                        The default CSS styles work great in mobiles. The responsive CSS code alter the styles in larger resolutions.
+                    </p>
+
+                    <h3>Border-Box</h3>
+                    <p>
+                        The Bootstrap framework make use of the border-box CSS model. That means that if you want to alter the width of an element with CSS, you can do it without worrying about the padding or the border size of that element (they will be adjusted to the width you will set).
+                    </p>
+
+                    <h3>User Avatars</h3>
+                    <p>
+                        All avatars used in the online demo are not available for commercial use, so we couldn't include them in the final package (they can only  be used for demostration). If you would like them for mockup purposes, you can either replace the images in <code>img/placeholders/avatars/</code> folder with avatars from <a href="https://uifaces.com/">uifaces.com</a> or you can contact us to send you the ones We've used in the online demo (also from uifaces.com). Have in mind that they can only be used for demo purposes (mockup or online).
+                    </p>
+
+                    <h3>User Names</h3>
+                    <p>
+                        All user names used in the template are fictional and only used for demostration. They were randomly generated at <a href="https://uinames.com/">uinames.com</a>, so if you are in need of random names for your mockups it is a great choice.
+                    </p>
+
+                    <h3>Favicons</h3>
+                    <p>
+                        If you would like to auto create your favicons from your image/logo, you can use the free service at <a href="https://realfavicongenerator.net">https://realfavicongenerator.net</a>
+                    </p>
+                    <!-- END Quick Tips -->
+
+                    <!-- Retina -->
+                    <h2 id="section-retina">Retina</h2>
+                    <p>
+                        The UI will look crispy clear on retina screens and if you would like your images to look great, too, then you will have to use the <code>srcset</code> attribute of the <code>&lt;img&gt;</code> element. For example, if you have a regular image <code>img/my_image.jpg</code> and its retina version <code>img/my_image@2x.jpg</code> you will have to use the following markup:
+                    </p>
+                    <p>
+                        <code>&lt;img src="img/my_image.jpg" srcset="img/my_image@2x.jpg 2x" alt="Image Description"&gt;</code>
+                    </p>
+                    <p>
+                        The browser will auto select the best version and load it accordingly. Older browsers will ignore the <code>srcset</code> attribute and will load the regular image as usual.
+                    </p>
+                    <!-- END Retina -->
+
+                    <!-- Credits -->
+                    <h2 id="section-credits">Credits</h2>
+                    <p>
+                        We’ve used the following resources as listed. Special thanks to all the authors for their hard work!
+                    </p>
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Frameworks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://getbootstrap.com/">Bootstrap</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://www.justinaguilar.com/animations/index.html">CSS3 Animation Cheat Sheet</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Fonts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://www.google.com/fonts/specimen/Open+Sans">Google Web Fonts (Open Sans)</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Icons</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://glyphicons.com">Glyphicons (PRO License acquired - for use with this template)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://fontawesome.com/v4.7.0/">Font Awesome</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Images</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://picjumbo.com/">Picjumbo</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Scripts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://jquery.com">jQuery</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://jqueryui.com">jQueryUI</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://modernizr.com">Modernizr</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://j.mp/respondjs">Respond.js</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.flotcharts.org">Flot Charts</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.datatables.net">Datatables</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://arshaw.com/fullcalendar">FullCalendar</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://momentjs.com">MomentJS</a> (used by FullCalendar plugin)</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.dropzonejs.com">Dropzone.js</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/harvesthq/chosen">Chosen</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/rochal/jQuery-slimScroll">Slimscroll</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://eternicode.github.io/bootstrap-datepicker/">Datepicker for Bootstrap</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/jzaefferer/jquery-validation">jQuery Validation</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://prismjs.com">Prism.js</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://dimsemenov.com/plugins/magnific-popup/">Magnific Popup</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/rendro/easy-pie-chart/">Easy Pie Charts</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://jdewit.github.io/bootstrap-timepicker/">Bootstrap Timepicker</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://www.thecodemine.org">Form Wizard</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://omnipotent.net/jquery.sparkline">jQuery Sparkline</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/mathiasbynens/jquery-placeholder">HTML5 Placeholder jQuery Plugin</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://digitalbush.com/projects/masked-input-plugin">Masked Input plugin for jQuery</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/xoxco/jQuery-Tags-Input">jQuery Tags Input</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/seiyria/bootstrap-slider">Boostrap Slider</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://ckeditor.com">CKEditor</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://hpneo.github.io/gmaps/">Gmaps.js</a></td>
+                            </tr>
+                            <tr class="thead-light">
+                                <th>v1.1</th>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/rstacruz/nprogress">Nprogress</a></td>
+                            </tr>
+                            <tr class="thead-light">
+                                <th>v1.3</th>
+                            </tr>
+                            <tr>
+                                <td><a href="https://ivaynberg.github.io/select2/">Select2</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://ifightcrime.github.io/bootstrap-growl/">Bootstrap-growl</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://lesscss.org/">LESS.js</a></td>
+                            </tr>
+                            <tr class="thead-light">
+                                <th>v3.1</th>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/hilios/jQuery.countdown">Countdown.js</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/js-cookie/js-cookie">JS Cookie</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/itsjavi/bootstrap-colorpicker/">Bootstrap Colorpicker</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/bassjobsen/Bootstrap-3-Typeahead">Bootstrap Typeahead</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- END Credits -->
+
+                    <!-- Thank You -->
+                    <h2 id="section-thankyou">Thank You!</h2>
+                    <p>
+                        Thank you so much for supporting our work by choosing one of our products! We wish you all the best with your upcoming projects and endeavours in life! If you would like to check out more of our products, be sure to visit <a href="https://pixelcave.com">our website</a>.
+                    </p>
+                    <p>
+                        <strong>Have a great day and happy coding!</strong>
+                    </p>
+                    <!-- END Thank You -->
+                </div>
+                <!-- END Page Content -->
+
+                <!-- Pixelcave Logo -->
+                <div class="overflow-hidden py-6 bg-body-light text-center">
+                    <img class="img-fluid invisible" src="assets/media/various/pixelcave-logo.png" alt="pixelcave logo" data-toggle="appear" data-class="animated fadeInDown">
+                </div>
+                <!-- END Pixelcave Logo -->
+            </main>
+            <!-- END Main Container -->
+
+            <!-- Footer -->
+            <footer id="page-footer">
+                <div class="content content-full font-size-sm d-flex flex-column flex-sm-row justify-content-sm-between text-center text-sm-left">
+                    <div class="py-2 py-sm-0">
+                        <strong>Docs</strong> &copy; <span data-toggle="year-copy">2014</span>
+                    </div>
+                    <div class="py-2 py-sm-0">
+                        Crafted with <i class="fa fa-heart text-danger"></i> by <a class="font-w600" href="https://pixelcave.com">pixelcave</a>
+                    </div>
+                </div>
+            </footer>
+            <!-- END Footer -->
+        </div>
+        <!-- END Page Container -->
+
+        <!-- Docs JS -->
+        <script src="assets/js/pixelcave.docs.min.js"></script>
+    </body>
+</html>

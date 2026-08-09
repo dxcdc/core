@@ -1,0 +1,85 @@
+//
+// pixelcave.docs UI Framework
+// --------------------------------------------------
+
+// Bootstrap functions
+@import 'bootstrap/functions';
+
+// Custom Bootstrap variables overrides
+@import 'pixelcave.docs/variables-bootstrap';
+
+// Bootstrap variables
+@import 'bootstrap/variables';
+
+// Bootstrap mixins
+@import 'bootstrap/mixins';
+
+// Custom mixins and Bootstrap overrides
+@import 'pixelcave.docs/mixins';
+
+// Bootstrap components (original)
+@import 'bootstrap/reboot';
+@import 'bootstrap/type';
+@import 'bootstrap/images';
+@import 'bootstrap/code';
+@import 'bootstrap/grid';
+@import 'bootstrap/tables';
+//@import 'bootstrap/forms';
+@import 'bootstrap/buttons';
+@import 'bootstrap/transitions';
+//@import 'bootstrap/dropdown';
+//@import 'bootstrap/button-group';
+//@import 'bootstrap/input-group';
+//@import 'bootstrap/custom-forms';
+@import 'bootstrap/nav';
+//@import 'bootstrap/navbar';
+@import 'bootstrap/card';
+//@import 'bootstrap/breadcrumb';
+//@import 'bootstrap/pagination';
+//@import 'bootstrap/badge';
+//@import 'bootstrap/jumbotron';
+@import 'bootstrap/alert';
+//@import 'bootstrap/progress';
+//@import 'bootstrap/media';
+//@import 'bootstrap/list-group';
+//@import 'bootstrap/close';
+//@import 'bootstrap/modal';
+@import 'bootstrap/tooltip';
+//@import 'bootstrap/popover';
+//@import 'bootstrap/carousel';
+@import 'bootstrap/utilities';
+@import 'bootstrap/print';
+
+// Custom variables
+@import 'pixelcave.docs/variables';
+
+// Extend Bootstrap styles and override the ones..
+// ..we can't alter with the provided variables
+@import 'pixelcave.docs/print';
+@import 'pixelcave.docs/reboot';
+@import 'pixelcave.docs/type';
+@import 'pixelcave.docs/tables';
+@import 'pixelcave.docs/buttons';
+
+// pixelcave.docs layout
+@import 'pixelcave.docs/layout';
+@import 'pixelcave.docs/sidebar';
+@import 'pixelcave.docs/layout-variations';
+
+// pixelcave.docs components
+@import 'pixelcave.docs/nav-main';
+@import 'pixelcave.docs/item';
+
+// Utilities and themes
+@import 'pixelcave.docs/utilities';
+
+// Third party components
+@import 'vendor/animate';
+@import 'vendor/fontawesome/fontawesome';
+@import 'vendor/fontawesome/regular';
+@import 'vendor/fontawesome/solid';
+@import 'vendor/fontawesome/brands';
+
+// Third party plugins
+@import 'vendor/highlightjs';
+@import 'vendor/simplebar';

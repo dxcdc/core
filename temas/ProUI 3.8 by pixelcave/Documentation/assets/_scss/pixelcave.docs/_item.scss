@@ -1,0 +1,123 @@
+//
+// Item
+// --------------------------------------------------
+
+.item {
+    display: inline-block;
+    text-align: center;
+
+    .item-icon {
+        margin: 15px auto;
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        font-size: 21px;
+        color: $white;
+        background-color: theme-color("primary");
+        border-radius: 30px;
+        transition: transform .2s ease-out, box-shadow .2s ease-out;
+        will-change: transform, box-shadow;
+    }
+
+    .item-text {
+        font-weight: 600;
+    }
+
+    @include hover-focus {
+        .item-icon {
+            color: $white;
+            background-color: darken(theme-color("primary"), 12%);
+            box-shadow: 0 -5px 30px rgba(theme-color("primary"), .4);
+            transform: translateY(4px);
+        }
+
+        .item-text {
+            color: darken(theme-color("primary"), 12%);
+            text-decoration: underline;
+        }
+    }
+
+    &.item-success {
+        .item-icon {
+            background-color: theme-color("success");
+        }
+
+        .item-text {
+            color: theme-color("success");
+        }
+
+        @include hover-focus {
+            .item-icon {
+                background-color: darken(theme-color("success"), 12%);
+                box-shadow: 0 -5px 30px rgba(theme-color("success"), .4);
+            }
+
+            .item-text {
+                color: darken(theme-color("success"), 12%);
+            }
+        }
+    }
+
+    &.item-danger {
+        .item-icon {
+            background-color: theme-color("danger");
+        }
+
+        .item-text {
+            color: theme-color("danger");
+        }
+
+        @include hover-focus {
+            .item-icon {
+                background-color: darken(theme-color("danger"), 12%);
+                box-shadow: 0 -5px 30px rgba(theme-color("danger"), .4);
+            }
+
+            .item-text {
+                color: darken(theme-color("danger"), 12%);
+            }
+        }
+    }
+
+    &.item-twitter {
+        .item-icon {
+            background-color: $brand-twitter;
+        }
+
+        .item-text {
+            color: $brand-twitter;
+        }
+
+        @include hover-focus {
+            .item-icon {
+                background-color: darken($brand-twitter, 12%);
+                box-shadow: 0 -5px 30px rgba($brand-twitter, .4);
+            }
+
+            .item-text {
+                color: darken($brand-twitter, 12%);
+            }
+        }
+    }
+
+    &.item-facebook {
+        .item-icon {
+            background-color: $brand-facebook;
+        }
+
+        .item-text {
+            color: $brand-facebook;
+        }
+
+        @include hover-focus {
+            .item-icon {
+                background-color: darken($brand-facebook, 12%);
+                box-shadow: 0 -5px 30px rgba($brand-facebook, .4);
+            }
+
+            .item-text {
+                color: darken($brand-facebook, 12%);
+            }
+        }
+    }
+}

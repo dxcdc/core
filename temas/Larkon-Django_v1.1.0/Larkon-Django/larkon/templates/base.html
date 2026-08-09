@@ -1,0 +1,28 @@
+{% load static i18n %}
+<!DOCTYPE html >
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" {% block html_attribute %}{% endblock html_attribute %}>
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+  <title>
+    {% block title %}{% endblock title %} | Larkon - Admin & Dashboard Template
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A fully responsive premium admin dashboard template"/>
+  <meta name="author" content="Techzaa"/>
+  <link rel="shortcut icon" href="{% static '/images/favicon.ico' %}">
+  {% block css %}
+    {% block extra_css %} {% endblock extra_css %}
+    {% include 'partials/head-css.html' %}
+  {% endblock css %}
+</head>
+<body {% block body_attribute %}{% endblock body_attribute %}>
+{% block preloader %}{% endblock %}
+{% block content %}{% endblock content %}
+{% block javascript %}
+  {% include 'partials/vendor-scripts.html' %}
+  {% block extra_javascript %} {% endblock extra_javascript %}
+{% endblock javascript %}
+</body>
+</html>

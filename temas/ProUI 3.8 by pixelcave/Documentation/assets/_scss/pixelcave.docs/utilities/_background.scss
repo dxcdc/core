@@ -1,0 +1,77 @@
+//
+// Background
+// --------------------------------------------------
+
+// Black/White with opacity
+.bg-black-op {
+    background-color: rgba(0,0,0,.5) !important;
+
+    &-5 { background-color: rgba(0,0,0,.05) !important; }
+    &-10 { background-color: rgba(0,0,0,.1) !important; }
+    &-25 { background-color: rgba(0,0,0,.25) !important; }
+    &-75 { background-color: rgba(0,0,0,.75) !important; }
+    &-90 { background-color: rgba(0,0,0,.9) !important; }
+    &-95 { background-color: rgba(0,0,0,.95) !important; }
+}
+
+.bg-white-op {
+    background-color: rgba(255,255,255,.5) !important;
+
+    &-5 { background-color: rgba(255,255,255,.05) !important; }
+    &-10 { background-color: rgba(255,255,255,.1) !important; }
+    &-25 { background-color: rgba(255,255,255,.25) !important; }
+    &-75 { background-color: rgba(255,255,255,.75) !important; }
+    &-90 { background-color: rgba(255,255,255,.9) !important; }
+    &-95 { background-color: rgba(255,255,255,.95) !important; }
+}
+
+// Image Background
+.bg-image {
+    background-position: 0% 50%;
+    background-size: cover;
+
+    &-top { background-position-y: 0%; }
+    &-bottom { background-position-y: 100%; }
+
+    @include media-breakpoint-up(xl) {
+        &-fixed { background-attachment: fixed; }
+    }
+}
+
+// Pattern Image
+.bg-pattern {
+    background-repeat: repeat;
+}
+
+// Video Background
+.bg-video {
+    width: 100%;
+    transform: translateZ(0);
+}
+
+// Contextual colors
+@include bg-variant('.bg-primary-op', rgba(theme-color("primary"), .75));
+@include bg-variant('.bg-primary-dark', theme-color("primary-dark"));
+@include bg-variant('.bg-primary-dark-op', rgba(theme-color("primary-dark"), .8));
+@include bg-variant('.bg-primary-darker', theme-color("primary-darker"));
+@include bg-variant('.bg-primary-light', theme-color("primary-light"));
+@include bg-variant('.bg-primary-lighter', theme-color("primary-lighter"));
+
+@include bg-variant('.bg-success-light', theme-color("success-light"));
+@include bg-variant('.bg-warning-light', theme-color("warning-light"));
+@include bg-variant('.bg-info-light', theme-color("info-light"));
+@include bg-variant('.bg-danger-light', theme-color("danger-light"));
+
+@include bg-variant('.bg-body', $body-bg);
+@include bg-variant('.bg-body-light', $body-bg-light);
+@include bg-variant('.bg-body-dark', $body-bg-dark);
+@include bg-variant('.bg-muted', gray("600"));
+
+@include bg-variant('.bg-white', $white);
+@include bg-variant('.bg-black', $black);
+
+@include bg-variant('.bg-gray', gray("400"));
+@include bg-variant('.bg-gray-dark', gray("600"));
+@include bg-variant('.bg-gray-darker', gray("800"));
+@include bg-variant('.bg-gray-light', gray("200"));
+@include bg-variant('.bg-gray-lighter', gray("100"));

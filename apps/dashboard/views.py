@@ -101,6 +101,140 @@ def vpn_view(request):
     return render(request, 'dashboard/vpn_mapa.html', context)
 
 @login_required(login_url='dashboard:login')
+def workspace_view(request):
+    """Renderiza o módulo Google Workspace com dados hipotéticos e sessões operacionais do CDC."""
+    usuarios_workspace = UsuarioDataOps.objects.all()
+    grupos_workspace = GrupoWorkspace.objects.all()
+    logs_workspace = LogAuditoria.objects.all()[:10]
+
+    # Dados hipotéticos organizados por sessão
+    contas_hipoteticas = [
+        {
+            'nome': 'Fernando Vier',
+            'email': 'fvier@cdc.org.br',
+            'ou': '/TransformacaoDigital',
+            'licenca': 'Business Standard',
+            'mfa': True,
+            'status': 'Ativo',
+            'cota_gb': 12.4,
+            'cota_max_gb': 100.0,
+            'cota_pct': 12.4,
+            'tipo_badge': 'success'
+        },
+        {
+            'nome': 'Ana Nery',
+            'email': 'ananery@cdc.org.br',
+            'ou': '/Presidencia',
+            'licenca': 'Business Standard',
+            'mfa': True,
+            'status': 'Ativo',
+            'cota_gb': 8.5,
+            'cota_max_gb': 100.0,
+            'cota_pct': 8.5,
+            'tipo_badge': 'success'
+        },
+        {
+            'nome': 'Adriana Santos',
+            'email': 'adrianasantos@cdc.org.br',
+            'ou': '/CoordenacaoInstitucional',
+            'licenca': 'Business Starter',
+            'mfa': False,
+            'status': 'Alerta Cota 96%',
+            'cota_gb': 48.07,
+            'cota_max_gb': 50.0,
+            'cota_pct': 96.1,
+            'tipo_badge': 'danger'
+        },
+        {
+            'nome': 'Joab da Silva',
+            'email': 'joabsilva@cdc.org.br',
+            'ou': '/ExColaboradores',
+            'licenca': 'Nenhuma (Sem Custo)',
+            'mfa': False,
+            'status': 'Suspenso / Vazamento em Grupo',
+            'cota_gb': 0.0,
+            'cota_max_gb': 0.0,
+            'cota_pct': 0.0,
+            'tipo_badge': 'danger'
+        },
+        {
+            'nome': 'Paterson Silva',
+            'email': 'paterson.silva@cdc.org.br',
+            'ou': '/Projetos',
+            'licenca': 'Alias Gratuito',
+            'mfa': False,
+            'status': 'Alias (projetos@cdc.org.br)',
+            'cota_gb': 0.0,
+            'cota_max_gb': 0.0,
+            'cota_pct': 0.0,
+            'tipo_badge': 'info'
+        },
+        {
+            'nome': 'Maria Oliveira',
+            'email': 'maria.voluntaria@cdc.org.br',
+            'ou': '/Voluntarios/PROVITA',
+            'licenca': 'Business Starter',
+            'mfa': True,
+            'status': 'Voluntária (Vence em 15 dias)',
+            'cota_gb': 4.2,
+            'cota_max_gb': 30.0,
+            'cota_pct': 14.0,
+            'tipo_badge': 'warning'
+        }
+    ]
+
+    apps_oauth = [
+        {
+            'nome': 'Canva Pro Workspace',
+            'escopo': 'profile, email',
+            'risco': 'Baixo',
+            'badge_risco': 'success',
+            'usuarios': 14,
+            'status': 'Aprovado'
+        },
+        {
+            'nome': 'Zoom Video Communications',
+            'escopo': 'calendar, profile',
+            'risco': 'Baixo',
+            'badge_risco': 'success',
+            'usuarios': 8,
+            'status': 'Aprovado'
+        },
+        {
+            'nome': 'PDF Converter Unverified App',
+            'escopo': 'drive.readonly, drive.file (Acesso total a arquivos)',
+            'risco': 'Alto (Suspeito)',
+            'badge_risco': 'danger',
+            'usuarios': 1,
+            'status': 'Pendente de Revogação'
+        },
+        {
+            'nome': 'n8n Automation Bot',
+            'escopo': 'admin.directory, drive (Service Account)',
+            'risco': 'Interno',
+            'badge_risco': 'info',
+            'usuarios': 1,
+            'status': 'Confiável'
+        }
+    ]
+
+    context = {
+        'usuarios_workspace': usuarios_workspace,
+        'grupos_workspace': grupos_workspace,
+        'logs_workspace': logs_workspace,
+        'contas_hipoteticas': contas_hipoteticas,
+        'apps_oauth': apps_oauth,
+        'stats_workspace': {
+            'total_contas': 48,
+            'cota_usada_total': '248.5 GB',
+            'cota_max_total': '1.5 TB',
+            'taxa_mfa': '89.5%',
+            'grupos_ativos': 8
+        }
+    }
+    return render(request, 'dashboard/workspace.html', context)
+
+@login_required(login_url='dashboard:login')
 def cofre_view(request):
     """Renderiza o Cofre de Segredos & Credenciais do CDC."""
     segredos = [

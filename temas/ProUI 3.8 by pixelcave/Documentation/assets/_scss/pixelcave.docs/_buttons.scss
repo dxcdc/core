@@ -1,0 +1,25 @@
+//
+// Buttons
+// --------------------------------------------------
+
+.btn {
+    font-family: $font-family-base;
+
+    &.btn-square {
+        border-radius: 0;
+    }
+
+    &.btn-rounded {
+        border-radius: 2rem;
+    }
+
+    .si,
+    .fa {
+        position: relative;
+        top: 1px;
+    }
+}
+
+.btn-secondary {
+    @include button-variant($body-bg, $body-bg);
+}

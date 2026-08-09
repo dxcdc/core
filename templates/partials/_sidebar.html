@@ -35,7 +35,12 @@
             Módulos de Operação
         </div>
 
-        <ul class="nav nav-pills flex-column mb-4 gap-1">
+            <li class="nav-item">
+                <a href="{% url 'dashboard:workspace' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'workspace' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'workspace' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'workspace' %}#2563eb{% else %}transparent{% endif %};">
+                    <i class="ri-google-line fs-18 text-info" style="color: #0284c7;"></i>
+                    <span>Google Workspace</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{% url 'dashboard:infra' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'infra' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'infra' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'infra' %}#2563eb{% else %}transparent{% endif %};">
                     <i class="ri-server-line fs-18 text-primary"></i>

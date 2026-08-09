@@ -1,0 +1,50 @@
+//
+// Text
+// --------------------------------------------------
+
+// Font weight
+.font-w300 { font-weight: 300 !important; }
+.font-w400 { font-weight: 400 !important; }
+.font-w600 { font-weight: 600 !important; }
+.font-w700 { font-weight: 700 !important; }
+
+// Font sizes
+.font-size-base { font-size: $font-size-base  !important; }
+.font-size-xl { font-size: $font-size-xl !important; }
+.font-size-lg { font-size: $font-size-lg !important; }
+.font-size-md { font-size: $font-size-md !important; }
+.font-size-sm { font-size: $font-size-sm !important; }
+.font-size-xs { font-size: $font-size-xs !important; }
+
+// Contextual colors
+@include text-emphasis-variant('.text-primary-dark', theme-color("primary-dark"));
+@include text-emphasis-variant('.text-primary-darker',theme-color("primary-darker"));
+@include text-emphasis-variant('.text-primary-light', theme-color("primary-light"));
+@include text-emphasis-variant('.text-primary-lighter', theme-color("primary-lighter"));
+
+@include text-emphasis-variant('.text-success-light', theme-color("success-light"));
+@include text-emphasis-variant('.text-warning-light', theme-color("warning-light"));
+@include text-emphasis-variant('.text-info-light', theme-color("info-light"));
+@include text-emphasis-variant('.text-danger-light', theme-color("danger-light"));
+
+@include text-emphasis-variant('.text-body-bg', $body-bg);
+@include text-emphasis-variant('.text-body-bg-dark', $body-bg-dark);
+@include text-emphasis-variant('.text-body-bg-light', $body-bg-light);
+@include text-emphasis-variant('.text-body-color', $body-color);
+@include text-emphasis-variant('.text-body-color-dark', $body-color-dark);
+@include text-emphasis-variant('.text-body-color-light', $body-color-light);
+
+@include text-emphasis-variant('.text-muted', $text-muted);
+@include text-emphasis-variant('.text-white', $white);
+@include text-emphasis-variant('.text-white-op', rgba($white,.8));
+@include text-emphasis-variant('.text-black', $black);
+@include text-emphasis-variant('.text-black-op', rgba($black,.5));
+
+@include text-emphasis-variant('.text-gray', gray("400"));
+@include text-emphasis-variant('.text-gray-dark', gray("600"));
+@include text-emphasis-variant('.text-gray-darker', gray("800"));
+@include text-emphasis-variant('.text-gray-light', gray("200"));
+@include text-emphasis-variant('.text-gray-lighter', gray("100"));
+
+@include text-emphasis-variant('.text-twitter', $brand-twitter);
+@include text-emphasis-variant('.text-facebook', $brand-facebook);

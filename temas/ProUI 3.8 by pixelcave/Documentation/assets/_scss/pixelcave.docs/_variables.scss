@@ -1,0 +1,54 @@
+//
+// pixelcave.docs variables
+// --------------------------------------------------
+
+
+// Colors
+
+$theme-colors: map-merge((
+    "primary-light":        lighten($primary, 15%),
+    "primary-lighter":      lighten($primary, 30%),
+    "primary-dark":         $gray-800,
+    "primary-darker":       $gray-900,
+    "success-light":        #e4f2d9,
+    "info-light":           #e3f4fc,
+    "warning-light":        #fcf7e6,
+    "danger-light":         #fae9e8
+), $theme-colors);
+
+$brand-twitter:             #1da1f2 !default;
+$brand-facebook:            #3b5998 !default;
+
+$body-bg-dark:              darken($body-bg, 4%) !default;
+$body-bg-light:             lighten($body-bg, 1.5%) !default;
+
+$body-color-dark:           $gray-900 !default;
+$body-color-light:          $body-bg-dark !default;
+
+
+// Fonts
+
+$font-size-root:                    16px;
+$enable-text-optimize-legibility:   true; // you can set it to false to increase rendering performance
+
+
+// Sidebar
+
+$sidebar-bg:                $body-bg !default;
+$sidebar-width:             280px !default;
+$sidebar-width-mobile:      260px !default;
+
+$side-transition:           .6s cubic-bezier(.215,.61,.355,1) !default;
+
+
+// Layout Spaces
+
+$space-base:                30px !default;           // Content padding
+$space-mobile:              15px !default;           // Content padding in mobile
+$space-side:                40px !default;           // Content padding inside content
+$space-content:             860px !default;          // Content max width
+
+
+// Third Party
+
+$fa-font-path:                "../fonts/fontawesome" !default;

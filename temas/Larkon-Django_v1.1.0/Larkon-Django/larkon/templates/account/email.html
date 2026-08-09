@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static i18n account crispy_forms_tags %}
+{% block html_attribute %}class="h-100"{% endblock html_attribute %}
+{% block title %}Account{% endblock title %}
+{% block body_attribute %}class="h-100"{% endblock body_attribute %}
+{% block content %}
+  <div class="d-flex flex-column h-100 p-3">
+    <div class="d-flex flex-column flex-grow-1">
+      <div class="row h-100">
+        <div class="col-xxl-7">
+          <div class="row justify-content-center h-100">
+            <div class="col-lg-6 py-lg-5">
+              <div class="d-flex flex-column h-100 justify-content-center">
+                <div class="auth-logo mb-4">
+                  <a href="/" class="logo-dark">
+                    <img src="{% static '/images/logo-dark.png' %}" height="24" alt="logo dark">
+                  </a>
+                  <a href="/" class="logo-light">
+                    <img src="{% static '/images/logo-light.png' %}" height="24" alt="logo light">
+                  </a>
+                </div>
+                <h2 class="fw-bold fs-24">E-mail Addresses</h2>
+                {% if user.emailaddress_set.all %}
+                  <p
+                    class="text-muted mt-1 mb-04">The following e-mail addresses are associated with your account:</p>
+                  <form action="{% url 'account_email' %}" class="email_list" method="post">
+                    {% csrf_token %}
+                    <fieldset class="blockLabels">
+                      {% for emailaddress in user.emailaddress_set.all %}
+                        <div class="radio">
+                          <label for="email_radio_{{ forloop.counter }}"
+                                 class="{% if emailaddress.primary %}primary_email{% endif %}">
+                            <input id="email_radio_{{ forloop.counter }}" type="radio" name="email"
+                                   {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked="checked"{% endif %}
+                                   value="{{ emailaddress.email }}"/>
+                            {{ emailaddress.email }}
+                            {% if emailaddress.verified %}
+                              <span class="verified">Verified</span>
+                            {% else %}
+                              <span class="unverified">Unverified</span>
+                            {% endif %}
+                            {% if emailaddress.primary %}<span class="primary">Primary</span>{% endif %}
+                          </label>
+                        </div>
+                      {% endfor %}
+                      <div class="form-group mt-2">
+                        <button class="secondaryAction btn btn-soft-primary" type="submit"
+                                name="action_primary">{% trans 'Make Primary' %}</button>
+                        <button class="secondaryAction btn btn-soft-primary" type="submit"
+                                name="action_send">{% trans 'Re-send Verification' %}</button>
+                        <button class="primaryAction btn btn-soft-primary" type="submit"
+                                name="action_remove">{% trans 'Remove' %}</button>
+                      </div>
+                    </fieldset>
+                  </form>
+                {% else %}
+                  <p class="text-muted mt-1 mb-04">
+                    <strong>Warning:</strong> You currently do not have any e-mail address set up. You
+                    should really add an e-mail address so you can receive notifications, reset your password, etc.
+                  </p>
+                {% endif %}
+                <h2 class="fw-bold fs-24 mt-4">Add E-mail Address</h2>
+                <form method="post" action="{% url 'account_email' %}" class="add_email">
+                  {% csrf_token %}
+                  {{ form|crispy }}
+                  <button class="btn btn-soft-primary" name="action_add" type="submit">{% trans "Add E-mail" %}</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xxl-5 d-none d-xxl-flex">
+          <div class="card h-100 mb-0 overflow-hidden">
+            <div class="d-flex flex-column h-100">
+              <img src="{% static '/images/small/img-10.jpg' %}" alt="" class="w-100 h-100">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block extra_javascript %}
+  {{ block.super }}
+  <script type="text/javascript">
+    window.addEventListener('DOMContentLoaded', function () {
+      const message = "{% trans 'Do you really want to remove the selected e-mail address?' %}";
+      const actions = document.getElementsByName('action_remove');
+      if (actions.length) {
+        actions[0].addEventListener("click", function (e) {
+          if (!confirm(message)) {
+            e.preventDefault();
+          }
+        });
+      }
+    });
+    $('.form-group').removeClass('row');
+  </script>
+{% endblock extra_javascript %}

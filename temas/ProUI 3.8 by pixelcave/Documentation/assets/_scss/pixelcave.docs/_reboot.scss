@@ -1,0 +1,29 @@
+//
+// Reboot
+// --------------------------------------------------
+
+// Document
+html {
+    height: 100%;
+    font-size: $font-size-root;
+}
+
+// Body
+body {
+    height: 100%;
+    @if $enable-text-optimize-legibility {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+// Code
+pre {
+    margin-bottom: $paragraph-margin-bottom;
+}
+
+b,
+strong {
+    font-weight: $font-weight-bold;
+}

@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Google Workspace DataOps | CDC Core{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">
+            <i class="ri-google-line text-info me-2"></i> Gestão do Google Workspace (@cdc.org.br)
+        </h3>
+        <p class="text-muted mb-0" style="font-size: 0.95em;">
+            Painel operacional hipotético de Soberania de Dados, Custódia de Arquivos, Grupos e Segurança OAuth
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'dashboard:simular_acao' 'auditoria_mfa' %}" class="btn btn-outline-primary btn-sm fw-bold d-flex align-items-center gap-1" style="border-radius: 8px;">
+            <i class="ri-refresh-line fs-16"></i> Sincronizar com APIs do Google
+        </a>
+        <button class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-1" onclick="alert('Modo de Simulação Hipotética Ativo: Pronto para conectar as chaves do Google Workspace Service Account!');" style="border-radius: 8px;">
+            <i class="ri-key-2-line fs-16"></i> Credenciais da Service Account
+        </button>
+    </div>
+</div>
+
+<!-- Notification Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 mb-4 shadow-sm" role="alert" style="border-radius: 10px;">
+            <i class="ri-checkbox-circle-fill me-2 fs-16"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- CARDS DE METRICAS DE ESPAÇO E SEGURANÇA DO WORKSPACE -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">TOTAL DE CONTAS</span>
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.6em;">{{ stats_workspace.total_contas }}</h3>
+                    <small class="text-success fw-bold" style="font-size: 0.78em;"><i class="ri-building-line"></i> Domínio @cdc.org.br</small>
+                </div>
+                <div class="p-3 bg-primary-subtle text-primary rounded-3 fs-24">
+                    <i class="ri-user-shared-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">USO DE DRIVE TOTAL</span>
+                    <h3 class="fw-bold text-primary mb-0" style="font-size: 1.6em;">{{ stats_workspace.cota_usada_total }}</h3>
+                    <small class="text-muted" style="font-size: 0.78em;">de {{ stats_workspace.cota_max_total }} alocados</small>
+                </div>
+                <div class="p-3 bg-info-subtle text-info rounded-3 fs-24">
+                    <i class="ri-hard-drive-2-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">MFA / 2FA ATIVADO</span>
+                    <h3 class="fw-bold text-success mb-0" style="font-size: 1.6em;">{{ stats_workspace.taxa_mfa }}</h3>
+                    <small class="text-success fw-bold" style="font-size: 0.78em;"><i class="ri-shield-check-line"></i> Alto nível de proteção</small>
+                </div>
+                <div class="p-3 bg-success-subtle text-success rounded-3 fs-24">
+                    <i class="ri-shield-user-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">GRUPOS SETORIAIS</span>
+                    <h3 class="fw-bold text-purple mb-0" style="font-size: 1.6em; color: #9333ea;">{{ stats_workspace.grupos_ativos }}</h3>
+                    <small class="text-muted" style="font-size: 0.78em;">Comunicação e permissões</small>
+                </div>
+                <div class="p-3 bg-purple-subtle text-purple rounded-3 fs-24" style="background: #f3e8ff; color: #9333ea;">
+                    <i class="ri-group-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NAVEGAÇÃO ENTRE SESSÕES OPERACIONAIS -->
+<div class="card card-lahomes border-0 p-4 mb-4" style="background: #ffffff; border-radius: 16px;">
+    
+    <ul class="nav nav-tabs nav-tabs-lahomes border-bottom mb-4" id="workspaceTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold py-3 px-4" id="sessao-usuarios-tab" data-bs-toggle="tab" data-bs-target="#sessao-usuarios" type="button" role="tab">
+                <i class="ri-user-line me-1 text-primary"></i> 1. Usuários & OUs (Directory API)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-3 px-4" id="sessao-drive-tab" data-bs-toggle="tab" data-bs-target="#sessao-drive" type="button" role="tab">
+                <i class="ri-folder-shared-line me-1 text-info"></i> 2. Cotas & Custódia de Drive
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-3 px-4" id="sessao-grupos-tab" data-bs-toggle="tab" data-bs-target="#sessao-grupos" type="button" role="tab">
+                <i class="ri-team-line me-1 text-success"></i> 3. Grupos & Auditoria de Membros
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-3 px-4" id="sessao-oauth-tab" data-bs-toggle="tab" data-bs-target="#sessao-oauth" type="button" role="tab">
+                <i class="ri-key-fill me-1 text-warning"></i> 4. Tokens & Apps OAuth
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-3 px-4" id="sessao-lifecycle-tab" data-bs-toggle="tab" data-bs-target="#sessao-lifecycle" type="button" role="tab">
+                <i class="ri-time-line me-1 text-purple" style="color: #9333ea;"></i> 5. Ciclo de Vida de Voluntários
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="workspaceTabsContent">
+        
+        <!-- SESSÃO 1: DIRETÓRIO DE USUÁRIOS E UNIDADES ORGANIZACIONAIS -->
+        <div class="tab-pane fade show active" id="sessao-usuarios" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1"><i class="ri-shield-user-line me-2 text-primary"></i> Usuários, Unidades Organizacionais (OUs) e Licenciamento</h5>
+                    <small class="text-muted">Gestão centralizada de e-mails corporativos (`@cdc.org.br`), cargos e verificação de 2FA/MFA.</small>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" onclick="alert('Exportando tabela de usuários do Workspace em JSON...');">
+                    <i class="ri-download-2-line me-1"></i> Exportar Dados
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Usuário / E-mail</th>
+                            <th>Unidade Organizacional (OU)</th>
+                            <th>Tipo de Licença</th>
+                            <th>Status de MFA (2FA)</th>
+                            <th>Status da Conta</th>
+                            <th class="text-center">Ações Operacionais</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in contas_hipoteticas %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-sm bg-light rounded-circle text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                        {{ c.nome|slice:":1" }}
+                                    </div>
+                                    <div>
+                                        <strong class="d-block text-dark">{{ c.nome }}</strong>
+                                        <small class="text-muted font-monospace">{{ c.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border"><i class="ri-folder-line me-1 text-primary"></i> {{ c.ou }}</span></td>
+                            <td><span class="fw-semibold text-secondary" style="font-size: 0.88em;">{{ c.licenca }}</span></td>
+                            <td>
+                                {% if c.mfa %}
+                                    <span class="badge bg-success-subtle text-success fw-bold px-3 py-2" style="border-radius: 20px;">
+                                        <i class="ri-checkbox-circle-fill me-1"></i> Ativado (2FA)
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger fw-bold px-3 py-2" style="border-radius: 20px;">
+                                        <i class="ri-close-circle-fill me-1"></i> Pendente
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ c.tipo_badge }} px-3 py-2 fw-bold" style="border-radius: 12px;">
+                                    {{ c.status }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a href="{% url 'dashboard:simular_acao' 'auditoria_mfa' %}" class="btn btn-sm btn-light border" title="Notificar Usuário">
+                                        <i class="ri-whatsapp-line text-success"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-light border" onclick="alert('Redirecionando para alteração de licença no Google Workspace Admin...');">
+                                        <i class="ri-settings-3-line text-primary"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SESSÃO 2: COTAS E CUSTÓDIA DE DRIVE -->
+        <div class="tab-pane fade" id="sessao-drive" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1"><i class="ri-hard-drive-2-line me-2 text-info"></i> Soberania de Dados & Alertas de Cota de Armazenamento (Drive API)</h5>
+                    <small class="text-muted">Monitoramento em tempo real do limite de 80% e transferência soberana de arquivos para contas institucionais.</small>
+                </div>
+                <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-danger btn-sm fw-bold" style="border-radius: 8px;">
+                    <i class="ri-shield-flash-line me-1"></i> Simular Transferência de Custódia
+                </a>
+            </div>
+
+            <div class="row g-4">
+                {% for c in contas_hipoteticas %}
+                {% if c.cota_max_gb > 0 %}
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-3 bg-light shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <strong class="text-dark"><i class="ri-user-3-line me-1 text-primary"></i> {{ c.nome }}</strong>
+                            <span class="badge bg-{{ c.tipo_badge }} fw-bold">{{ c.cota_gb }} GB / {{ c.cota_max_gb }} GB ({{ c.cota_pct }}%)</span>
+                        </div>
+                        <div class="progress mb-2" style="height: 10px; border-radius: 10px;">
+                            <div class="progress-bar bg-{{ c.tipo_badge }}" role="progressbar" style="width: {{ c.cota_pct }}%;" aria-valuenow="{{ c.cota_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <small class="text-muted" style="font-size: 0.8em;">Limite de Alerta: 80% ({{ c.cota_max_gb|add:0 }} GB)</small>
+                            {% if c.cota_pct >= 80 %}
+                                <a href="{% url 'dashboard:simular_acao' 'alerta_80_cota' %}" class="btn btn-xs btn-outline-danger py-1 px-2 fw-bold" style="font-size: 0.75em;">
+                                    <i class="ri-alarm-warning-line me-1"></i> Disparar Alerta WhatsApp
+                                </a>
+                            {% else %}
+                                <small class="text-success fw-bold" style="font-size: 0.78em;"><i class="ri-checkbox-circle-line me-1"></i> Dentro do limite</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- SESSÃO 3: GRUPOS E AUDITORIA DE INTEGRIDADE -->
+        <div class="tab-pane fade" id="sessao-grupos" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1"><i class="ri-team-line me-2 text-success"></i> Auditoria de Grupos do Workspace & Vazamento de Membros</h5>
+                    <small class="text-muted">Varredura automática para identificar ex-colaboradores suspensos que continuam vinculados a grupos corporativos.</small>
+                </div>
+                <a href="{% url 'dashboard:simular_acao' 'vazamento_grupo_joab' %}" class="btn btn-warning btn-sm fw-bold text-dark" style="border-radius: 8px;">
+                    <i class="ri-user-unfollow-line me-1"></i> Remover Membro Suspenso (Caso Joab)
+                </a>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card border border-warning p-3 rounded-3 shadow-sm bg-warning-subtle">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="fw-bold text-dark mb-0"><i class="ri-group-line me-1 text-warning"></i> projetos@cdc.org.br</h6>
+                            <span class="badge bg-danger">1 Alerta Crítico</span>
+                        </div>
+                        <p class="text-muted mb-2" style="font-size: 0.85em;">Grupo de comunicação dos Projetos de Proteção (PROVITA, PPCAM, PPDDH)</p>
+                        <div class="p-2 bg-white rounded border">
+                            <small class="d-block text-danger fw-bold mb-1"><i class="ri-error-warning-fill me-1"></i> Membro Suspenso Detectado: Joab da Silva (joabsilva@cdc.org.br)</small>
+                            <small class="text-muted">Risco: Recebimento indevido de mensagens institucionais após desligamento.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border p-3 rounded-3 shadow-sm bg-light">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="fw-bold text-dark mb-0"><i class="ri-group-line me-1 text-primary"></i> financeiro@cdc.org.br</h6>
+                            <span class="badge bg-success">100% Regular</span>
+                        </div>
+                        <p class="text-muted mb-2" style="font-size: 0.85em;">Acesso exclusivo à equipe de Tesouraria e Prestação de Contas</p>
+                        <div class="p-2 bg-white rounded border">
+                            <small class="d-block text-success fw-bold"><i class="ri-checkbox-circle-fill me-1"></i> 5 Membros Ativos — Todos com 2FA Obrigatório ativado</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SESSÃO 4: TOKENS E APPS OAUTH DE TERCEIROS -->
+        <div class="tab-pane fade" id="sessao-oauth" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1"><i class="ri-key-fill me-2 text-warning"></i> Aplicativos Conectados & Tokens OAuth (Reports API)</h5>
+                    <small class="text-muted">Controle de acesso de terceiros às contas do Workspace para prevenção de vazamento de dados via APIs não autorizadas.</small>
+                </div>
+                <a href="{% url 'dashboard:simular_acao' 'revogar_oauth' %}" class="btn btn-outline-danger btn-sm fw-bold" style="border-radius: 8px;">
+                    <i class="ri-shield-cross-line me-1"></i> Simular Revogação de Token
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Aplicativo / Ferramenta</th>
+                            <th>Escopos Solicitados</th>
+                            <th>Nível de Risco</th>
+                            <th>Usuários Conectados</th>
+                            <th>Status de Aprovação</th>
+                            <th class="text-center">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in apps_oauth %}
+                        <tr>
+                            <td><strong>{{ app.nome }}</strong></td>
+                            <td><code class="text-dark">{{ app.escopo }}</code></td>
+                            <td><span class="badge bg-{{ app.badge_risco }} fw-bold">{{ app.risco }}</span></td>
+                            <td>{{ app.usuarios }} usuário(s)</td>
+                            <td><span class="badge bg-light text-dark border">{{ app.status }}</span></td>
+                            <td class="text-center">
+                                {% if app.badge_risco == 'danger' %}
+                                    <a href="{% url 'dashboard:simular_acao' 'revogar_oauth' %}" class="btn btn-sm btn-danger fw-bold py-1 px-3" style="border-radius: 6px;">
+                                        <i class="ri-delete-bin-line me-1"></i> Revogar
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-light border text-muted" disabled>Aprovado</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SESSÃO 5: CICLO DE VIDA DE VOLUNTÁRIOS E ALIASES -->
+        <div class="tab-pane fade" id="sessao-lifecycle" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1"><i class="ri-time-line me-2 text-purple" style="color: #9333ea;"></i> Ciclo de Vida de Voluntários & Aliases Gratuitos</h5>
+                    <small class="text-muted">Automação de encerramento de acessos temporários de voluntários e retenção de licenças via alias sem custo.</small>
+                </div>
+                <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-purple btn-sm fw-bold text-white" style="background: #9333ea; border-radius: 8px;">
+                    <i class="ri-timer-flash-line me-1"></i> Auditar Prazos de Voluntários
+                </a>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 bg-light border rounded-3 shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <strong class="text-dark"><i class="ri-user-heart-line me-1 text-danger"></i> Maria Oliveira (PROVITA)</strong>
+                            <span class="badge bg-warning text-dark fw-bold">Vence em 15 dias</span>
+                        </div>
+                        <small class="text-muted d-block mb-3">Vínculo de voluntariado com prazo determinado até 24/08/2026.</small>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-sm btn-outline-primary fw-bold" style="border-radius: 6px;">
+                                <i class="ri-calendar-event-line me-1"></i> Prorrogar Vínculo
+                            </a>
+                            <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-sm btn-outline-danger fw-bold" style="border-radius: 6px;">
+                                <i class="ri-user-unfollow-line me-1"></i> Encerrar Acesso
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 bg-light border rounded-3 shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <strong class="text-dark"><i class="ri-mail-volume-line me-1 text-info"></i> Paterson Silva (Projetos)</strong>
+                            <span class="badge bg-info text-white fw-bold">Alias Ativo (Sem Custo)</span>
+                        </div>
+                        <small class="text-muted d-block mb-3">E-mail `paterson.silva@cdc.org.br` convertido com sucesso para alias da caixa setorial `projetos@cdc.org.br`.</small>
+                        <a href="{% url 'dashboard:simular_acao' 'executar_alias_paterson' %}" class="btn btn-sm btn-outline-info fw-bold" style="border-radius: 6px;">
+                            <i class="ri-checkbox-circle-line me-1"></i> Verificação de Custos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- RODAPÉ INFORMATIVO DE INTEGRAÇÃO COM AS APIS -->
+<div class="p-3 rounded-3 border bg-light">
+    <div class="d-flex align-items-center justify-content-between" style="font-size: 0.88em; color: #475569;">
+        <div>
+            <i class="ri-information-fill text-primary me-1"></i>
+            <span><strong>Pronto para APIs Reais</strong>: As 5 sessões acima estão preparadas com estruturas hipotéticas idênticas aos payloads das APIs oficiais da Google Admin SDK.</span>
+        </div>
+        <span class="badge bg-primary-subtle text-primary border">SDK Ready</span>
+    </div>
+</div>
+{% endblock %}

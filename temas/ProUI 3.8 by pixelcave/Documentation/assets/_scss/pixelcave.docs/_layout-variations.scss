@@ -1,0 +1,12 @@
+//
+// Layout Variations
+// --------------------------------------------------
+
+#page-container {
+    // Sidebar and side overlay related
+    @include media-breakpoint-up(lg) {
+        &.sidebar-o {
+            padding-left: $sidebar-width;
+        }
+    }
+}

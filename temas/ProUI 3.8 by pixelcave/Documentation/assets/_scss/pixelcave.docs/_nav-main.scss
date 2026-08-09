@@ -1,0 +1,58 @@
+//
+// Main Navigation
+// --------------------------------------------------
+
+.nav-main {
+    @include list-unstyled;
+}
+
+// Headings
+.nav-main-heading {
+    padding-top: 1.75rem;
+    padding-bottom: .375rem;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: darken($sidebar-bg, 33%);
+    text-transform: uppercase;
+    letter-spacing: .0625rem;
+}
+
+.nav-main-item {
+    // Fixing flexbox IE10-11 bug, so we can use min-height in links and align their content vertically
+    display: flex;
+    flex-direction: column;
+}
+
+// Default links
+.nav-main-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: .25rem .625rem .25rem .25rem;
+    margin: 1px 0;
+    min-height: 2rem;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: lighten($body-color, 10%);
+    line-height: 1rem;
+
+    .nav-main-link-icon {
+        flex: 0 0 auto;
+        display: inline-block;
+        margin-right: .625rem;
+        min-width: 1rem;
+        text-align: center;
+        color: $body-color;
+    }
+
+    .nav-main-link-name {
+        flex: 1 1 auto;
+        display: inline-block;
+        max-width: 100%;
+    }
+
+    &:hover,
+    &.active {
+        color: darken($sidebar-bg, 90%);
+    }
+}

@@ -1,0 +1,46 @@
+//
+// Typography
+// --------------------------------------------------
+
+// Headings
+h2 { margin: 6rem 0 2.5rem; }
+h3 { margin: 3rem 0 .75rem; }
+
+// Emphasis
+small,
+.small {
+    font-weight: inherit;
+}
+
+// Transformations
+.text-uppercase {
+    letter-spacing: .0625rem;
+}
+
+// Main Content
+.content {
+    p {
+        font-size: $font-size-base;
+        line-height: 1.8;
+    }
+
+    ul, ol {
+        font-size: $font-size-base;
+        line-height: 1.8;
+        margin-bottom: $paragraph-margin-bottom;
+
+        li {
+            margin-bottom: .75rem;
+        }
+
+        ul, ol {
+            margin-top: .75rem;
+            margin-bottom: .75rem;
+        }
+    }
+}
+
+// Code
+pre.pre-sh code.pwrap {
+    white-space: pre-wrap;
+}

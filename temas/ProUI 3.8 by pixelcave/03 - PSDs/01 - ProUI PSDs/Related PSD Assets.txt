@@ -1,0 +1,3 @@
+Fonts
+http://fontawesome.io/
+http://www.fontsquirrel.com/fonts/open-sans

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static i18n account crispy_forms_tags %}
+{% block html_attribute %}class="h-100"{% endblock html_attribute %}
+{% block title %}Confirm E-mail Address{% endblock title %}
+{% block body_attribute %}class="h-100"{% endblock body_attribute %}
+{% block content %}
+  <div class="d-flex flex-column h-100 p-3">
+    <div class="d-flex flex-column flex-grow-1">
+      <div class="row h-100">
+        <div class="col-xxl-7">
+          <div class="row justify-content-center h-100">
+            <div class="col-lg-6 py-lg-5">
+              <div class="d-flex flex-column h-100 justify-content-center">
+                <div class="auth-logo mb-4">
+                  <a href="/" class="logo-dark">
+                    <img src="{% static '/images/logo-dark.png' %}" height="24" alt="logo dark">
+                  </a>
+                  <a href="/" class="logo-light">
+                    <img src="{% static '/images/logo-light.png' %}" height="24" alt="logo light">
+                  </a>
+                </div>
+                <h2 class="fw-bold fs-24">Confirm E-mail Address</h2>
+                {% if confirmation %}
+                  {% user_display confirmation.email_address.user as user_display %}
+                  <p class="text-muted mt-1 mb-04">{% blocktrans with confirmation.email_address.email as email %}Please
+                    confirm that
+                    <a href="mailto:{{ email }}">{{ email }}</a> is an e-mail address for user {{ user_display }}
+                    .{% endblocktrans %}</p>
+                  <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+                    {% csrf_token %}
+                    <button class="btn btn-soft-primary" type="submit">{% trans 'Confirm' %}</button>
+                  </form>
+                {% else %}
+                  {% url 'account_email' as email_url %}
+                  <p class="text-muted mt-1 mb-04">This e-mail confirmation link expired or is invalid.
+                    Please
+                    <a href="{{ email_url }}">issue a new e-mail confirmation request</a>.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xxl-5 d-none d-xxl-flex">
+          <div class="card h-100 mb-0 overflow-hidden">
+            <div class="d-flex flex-column h-100">
+              <img src="{% static '/images/small/img-10.jpg' %}" alt="" class="w-100 h-100">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

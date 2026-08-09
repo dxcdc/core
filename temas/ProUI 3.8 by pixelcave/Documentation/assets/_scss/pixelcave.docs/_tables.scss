@@ -1,0 +1,48 @@
+//
+// Tables
+// --------------------------------------------------
+
+.table {
+    thead th {
+        font-weight: $font-weight-bold;
+    }
+}
+
+.table-vcenter {
+    th,
+    td {
+        vertical-align: middle;
+    }
+}
+
+// Table tools
+.js-table-checkable tbody tr,
+.js-table-sections-header > tr {
+    cursor: pointer;
+}
+
+.js-table-sections-header {
+    &:hover {
+        background-color: $body-bg-light;
+    }
+
+    > tr > td:first-child > i {
+        transition: transform .15s ease-out;
+    }
+
+    + tbody {
+        display: none;
+    }
+
+    &.show {
+        background-color: $body-bg-light;
+        
+        > tr > td:first-child > i {
+            transform: rotate(90deg);
+        }
+
+        + tbody {
+            display: table-row-group;
+        }
+    }
+}
