@@ -1,178 +1,225 @@
 {% load static %}
-<aside class="sidebar-lahomes" style="width: 250px; min-width: 250px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; color: #f8fafc; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+<style>
+    /* RESET & OVERRIDES FOR DARK SIDEBAR TO ELIMINATE BOOTSTRAP WHITE BOX GLITCHES */
+    .sidebar-lahomes,
+    .sidebar-lahomes * {
+        box-sizing: border-box;
+    }
+
+    .sidebar-lahomes .nav-link,
+    .sidebar-lahomes .sidebar-toggle-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        color: #cbd5e1;
+        text-decoration: none;
+        transition: all 0.2s ease-in-out;
+        border-radius: 8px;
+    }
+
+    /* HOVER STATE FOR SIDEBAR ITEMS */
+    .sidebar-lahomes .nav-link:hover,
+    .sidebar-lahomes .sidebar-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.07) !important;
+        color: #ffffff !important;
+    }
+
+    /* MODERN ACTIVE ITEM STATE (SOFT TRANSLUCENT GLOW - NO HARSH WHITE/BLUE RECTANGLES) */
+    .sidebar-lahomes .nav-link.active-item {
+        background: rgba(37, 99, 235, 0.2) !important;
+        border: 1px solid rgba(59, 130, 246, 0.4) !important;
+        color: #60a5fa !important;
+        font-weight: 700 !important;
+    }
+
+    .sidebar-lahomes .sidebar-toggle-btn.active-dropdown {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border: 1px solid rgba(51, 65, 85, 0.8) !important;
+        color: #ffffff !important;
+    }
+
+    /* GUARANTEED ICON MARGIN SPACING */
+    .sidebar-lahomes i.menu-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        margin-right: 12px !important;
+        flex-shrink: 0;
+    }
+</style>
+
+<aside class="sidebar-lahomes" style="width: 260px; min-width: 260px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; color: #f8fafc; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
     
     <!-- Sidebar Brand Header (Compacto & Elegante) -->
-    <div class="sidebar-brand-box px-3 py-3 d-flex align-items-center" style="border-bottom: 1px solid #1e293b; height: 64px;">
-        <a href="{% url 'dashboard:index' %}" class="d-flex align-items-center gap-2.5 text-decoration-none">
-            <img src="{% static 'img/cdc_logo_icon.png' %}" alt="CDC Logo" style="height: 34px;">
+    <div class="sidebar-brand-box px-4 py-3 d-flex align-items-center" style="border-bottom: 1px solid #1e293b; height: 70px;">
+        <a href="{% url 'dashboard:index' %}" class="d-flex align-items-center gap-3 text-decoration-none">
+            <img src="{% static 'img/cdc_logo_icon.png' %}" alt="CDC Logo" style="height: 38px;">
             <div class="d-flex flex-column">
-                <span style="color: #ffffff; font-size: 1.05em; font-weight: 800; letter-spacing: -0.2px; line-height: 1.1;">CDC Core</span>
-                <small style="color: #64748b; font-size: 0.68em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">Operações CDC</small>
+                <span style="color: #ffffff; font-size: 1.15em; font-weight: 800; letter-spacing: -0.2px; line-height: 1.1;">CDC Core</span>
+                <small style="color: #64748b; font-size: 0.7em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Operações CDC</small>
             </div>
         </a>
     </div>
 
     <!-- Sidebar Menu Content Wrapper -->
-    <div class="sidebar-menu-wrapper px-2.5 py-3" style="flex-grow: 1; overflow-y: auto;">
+    <div class="sidebar-menu-wrapper px-3 py-4" style="flex-grow: 1; overflow-y: auto;">
         
         <!-- SEÇÃO 1: VISÃO GERAL -->
-        <div class="text-uppercase fw-bold mb-1.5 px-3" style="font-size: 0.66em; letter-spacing: 1px; color: #64748b !important;">
+        <div class="text-uppercase fw-bold mb-2 px-3" style="font-size: 0.68em; letter-spacing: 1.2px; color: #64748b !important;">
             VISÃO GERAL
         </div>
         
-        <ul class="nav nav-pills flex-column mb-3 gap-1" style="list-style: none; padding-left: 0; margin-left: 0;">
+        <ul class="nav flex-column mb-4 gap-1.5" style="list-style: none; padding-left: 0; margin-left: 0;">
             <li class="nav-item">
-                <a href="{% url 'dashboard:landing' %}" class="nav-link d-flex align-items-center gap-2.5 py-1.5 px-3 {% if request.resolver_match.url_name == 'landing' %}active-dark-item{% endif %}" style="border-radius: 6px; font-size: 0.83em; font-weight: 600; color: {% if request.resolver_match.url_name == 'landing' %}#ffffff{% else %}#cbd5e1{% endif %}; background: {% if request.resolver_match.url_name == 'landing' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-home-4-line fs-16" style="color: {% if request.resolver_match.url_name == 'landing' %}#ffffff{% else %}#38bdf8{% endif %};"></i>
+                <a href="{% url 'dashboard:landing' %}" class="nav-link py-2.5 px-3 d-flex align-items-center {% if request.resolver_match.url_name == 'landing' %}active-item{% endif %}">
+                    <i class="ri-home-4-line menu-icon fs-18 text-info"></i>
                     <span>Início</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{% url 'dashboard:index' %}" class="nav-link d-flex align-items-center gap-2.5 py-1.5 px-3 {% if request.resolver_match.url_name == 'index' %}active-dark-item{% endif %}" style="border-radius: 6px; font-size: 0.83em; font-weight: 600; color: {% if request.resolver_match.url_name == 'index' %}#ffffff{% else %}#cbd5e1{% endif %}; background: {% if request.resolver_match.url_name == 'index' %}#2563eb{% else %}transparent{% endif %};">
-                    <i class="ri-line-chart-line fs-16" style="color: {% if request.resolver_match.url_name == 'index' %}#ffffff{% else %}#4ade80{% endif %};"></i>
+                <a href="{% url 'dashboard:index' %}" class="nav-link py-2.5 px-3 d-flex align-items-center {% if request.resolver_match.url_name == 'index' %}active-item{% endif %}">
+                    <i class="ri-line-chart-line menu-icon fs-18 text-success"></i>
                     <span>Dashboard DataOps</span>
                 </a>
             </li>
         </ul>
 
-        <!-- SEÇÃO 2: MÓDULOS DE OPERAÇÃO (MENU RETRÁTIL COM SETA INDICADORA) -->
-        <div class="sidebar-dropdown-group mb-2.5">
-            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between py-2 px-3 text-start border-0 sidebar-toggle-btn" data-bs-toggle="collapse" data-bs-target="#dropdown-modulos" aria-expanded="{% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}true{% else %}false{% endif %}" style="border-radius: 6px; font-size: 0.84em; font-weight: 700; color: #ffffff; background: {% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}#1e293b{% else %}#1e293b90{% endif %};">
-                <div class="d-flex align-items-center gap-2.5">
-                    <i class="ri-settings-4-line fs-16 text-primary"></i>
-                    <span>Módulos de Operação</span>
-                </div>
-                <!-- INDICATIVO DE EXPANSÃO: SETA PARA BAIXO (CHEVRON DOWN) -->
-                <i class="ri-arrow-down-s-line fs-18 dropdown-chevron text-white-50" style="transition: transform 0.2s ease;"></i>
-            </button>
-
-            <!-- SUB-ITENS COMPACTOS -->
-            <div class="collapse {% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}show{% endif %} mt-1" id="dropdown-modulos">
-                <ul class="nav flex-column ps-3 gap-0.5" style="list-style: none; border-left: 1px solid #334155; margin-left: 14px;">
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:workspace' %}" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: {% if request.resolver_match.url_name == 'workspace' %}#38bdf8{% else %}#94a3b8{% endif %};">
-                            <i class="ri-google-line fs-15 text-info"></i>
-                            <span>Google Workspace</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:infra' %}" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: {% if request.resolver_match.url_name == 'infra' %}#38bdf8{% else %}#94a3b8{% endif %};">
-                            <i class="ri-server-line fs-15 text-primary"></i>
-                            <span>Infraestrutura & Docker</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:vpn' %}" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: {% if request.resolver_match.url_name == 'vpn' %}#38bdf8{% else %}#94a3b8{% endif %};">
-                            <i class="ri-shield-keyhole-line fs-15 text-purple" style="color: #c084fc;"></i>
-                            <span>VPN & Mapa por Projetos</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:cofre' %}" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: {% if request.resolver_match.url_name == 'cofre' %}#38bdf8{% else %}#94a3b8{% endif %};">
-                            <i class="ri-key-2-line fs-15 text-success"></i>
-                            <span>Cofre de Segredos</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:ferramentas' %}" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: {% if request.resolver_match.url_name == 'ferramentas' %}#38bdf8{% else %}#94a3b8{% endif %};">
-                            <i class="ri-tools-line fs-15 text-warning"></i>
-                            <span>Canivete de Ferramentas</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- SEÇÃO 3: GOVERNANÇA & DOCUMENTAÇÃO (MENU RETRÁTIL COM SETA INDICADORA) -->
-        <div class="sidebar-dropdown-group mb-2.5">
-            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between py-2 px-3 text-start border-0 sidebar-toggle-btn" data-bs-toggle="collapse" data-bs-target="#dropdown-governanca" aria-expanded="{% if request.resolver_match.url_name == 'governanca' %}true{% else %}false{% endif %}" style="border-radius: 6px; font-size: 0.84em; font-weight: 700; color: #ffffff; background: {% if request.resolver_match.url_name == 'governanca' %}#1e293b{% else %}#1e293b90{% endif %};">
-                <div class="d-flex align-items-center gap-2.5">
-                    <i class="ri-book-open-line fs-16 text-warning"></i>
-                    <span>Governança & Docs</span>
-                </div>
-                <!-- INDICATIVO DE EXPANSÃO: SETA PARA BAIXO (CHEVRON DOWN) -->
-                <i class="ri-arrow-down-s-line fs-18 dropdown-chevron text-white-50" style="transition: transform 0.2s ease;"></i>
-            </button>
-
-            <!-- SUB-ITENS COMPACTOS -->
-            <div class="collapse {% if request.resolver_match.url_name == 'governanca' %}show{% endif %} mt-1" id="dropdown-governanca">
-                <ul class="nav flex-column ps-3 gap-0.5" style="list-style: none; border-left: 1px solid #334155; margin-left: 14px;">
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:governanca' %}" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: {% if request.resolver_match.url_name == 'governanca' %}#38bdf8{% else %}#94a3b8{% endif %};">
-                            <i class="ri-file-text-line fs-15 text-info"></i>
-                            <span>Diretrizes & ADRs CDC</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:governanca' %}#lgpd" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: #94a3b8;">
-                            <i class="ri-shield-user-line fs-15 text-danger"></i>
-                            <span>Proteção de Dados & LGPD</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:governanca' %}#auditoria" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: #94a3b8;">
-                            <i class="ri-history-line fs-15 text-success"></i>
-                            <span>Trilha de Auditoria</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:governanca' %}#processos" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: #94a3b8;">
-                            <i class="ri-file-list-3-line fs-15 text-warning"></i>
-                            <span>Matriz RACI & POPs</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- SEÇÃO 4: INTEGRAÇÕES & CONEXÕES (ÚLTIMA SESSÃO - MENU RETRÁTIL COM SETA INDICADORA) -->
+        <!-- SEÇÃO 2: MÓDULOS DE OPERAÇÃO (MENU RETRÁTIL COM SETA E ESPAÇAMENTO CORRETO) -->
         <div class="sidebar-dropdown-group mb-3">
-            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between py-2 px-3 text-start border-0 sidebar-toggle-btn" data-bs-toggle="collapse" data-bs-target="#dropdown-integracoes" aria-expanded="{% if request.resolver_match.url_name == 'integracoes' %}true{% else %}false{% endif %}" style="border-radius: 6px; font-size: 0.84em; font-weight: 700; color: #ffffff; background: {% if request.resolver_match.url_name == 'integracoes' %}#1e293b{% else %}#1e293b90{% endif %};">
-                <div class="d-flex align-items-center gap-2.5">
-                    <i class="ri-plug-line fs-16 text-info"></i>
-                    <span>Central de Integrações</span>
+            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between py-2.5 px-3 text-start sidebar-toggle-btn {% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}active-dropdown{% endif %}" data-bs-toggle="collapse" data-bs-target="#dropdown-modulos" aria-expanded="{% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}true{% else %}false{% endif %}">
+                <div class="d-flex align-items-center">
+                    <i class="ri-settings-4-line menu-icon fs-18 text-primary"></i>
+                    <span style="font-weight: 700; font-size: 0.88em;">Módulos de Operação</span>
                 </div>
-                <!-- INDICATIVO DE EXPANSÃO: SETA PARA BAIXO (CHEVRON DOWN) -->
-                <i class="ri-arrow-down-s-line fs-18 dropdown-chevron text-white-50" style="transition: transform 0.2s ease;"></i>
+                <!-- SETA COM ESPAÇAMENTO E ROTAÇÃO -->
+                <i class="ri-arrow-down-s-line fs-18 dropdown-chevron text-white-50" style="transition: transform 0.25 ease; margin-right: 0 !important; width: auto;"></i>
             </button>
 
-            <!-- SUB-ITENS COMPACTOS -->
-            <div class="collapse {% if request.resolver_match.url_name == 'integracoes' %}show{% endif %} mt-1" id="dropdown-integracoes">
-                <ul class="nav flex-column ps-3 gap-0.5" style="list-style: none; border-left: 1px solid #334155; margin-left: 14px;">
+            <!-- SUB-ITENS DOS MÓDULOS -->
+            <div class="collapse {% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}show{% endif %} mt-1.5" id="dropdown-modulos">
+                <ul class="nav flex-column ps-3 gap-1" style="list-style: none; border-left: 1px solid #334155; margin-left: 16px;">
                     <li class="nav-item">
-                        <a href="{% url 'dashboard:integracoes' %}" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: {% if request.resolver_match.url_name == 'integracoes' %}#38bdf8{% else %}#94a3b8{% endif %};">
-                            <i class="ri-dashboard-line fs-15 text-primary"></i>
-                            <span>Painel de Conectores</span>
+                        <a href="{% url 'dashboard:workspace' %}" class="nav-link py-2 px-2.5 d-flex align-items-center {% if request.resolver_match.url_name == 'workspace' %}active-item{% endif %}">
+                            <i class="ri-google-line menu-icon fs-16 text-info"></i>
+                            <span style="font-size: 0.84em;">Google Workspace</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'dashboard:integracoes' %}#google-workspace" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: #94a3b8;">
-                            <i class="ri-google-line fs-15 text-info"></i>
-                            <span>API Google Workspace</span>
+                        <a href="{% url 'dashboard:infra' %}" class="nav-link py-2 px-2.5 d-flex align-items-center {% if request.resolver_match.url_name == 'infra' %}active-item{% endif %}">
+                            <i class="ri-server-line menu-icon fs-16 text-primary"></i>
+                            <span style="font-size: 0.84em;">Infraestrutura & Docker</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'dashboard:integracoes' %}#whatsapp-evolution" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: #94a3b8;">
-                            <i class="ri-whatsapp-line fs-15 text-success"></i>
-                            <span>API WhatsApp Evolution</span>
+                        <a href="{% url 'dashboard:vpn' %}" class="nav-link py-2 px-2.5 d-flex align-items-center {% if request.resolver_match.url_name == 'vpn' %}active-item{% endif %}">
+                            <i class="ri-shield-keyhole-line menu-icon fs-16" style="color: #c084fc;"></i>
+                            <span style="font-size: 0.84em;">VPN & Mapa por Projetos</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'dashboard:integracoes' %}#ongsys-api" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: #94a3b8;">
-                            <i class="ri-heart-pulse-line fs-15 text-danger"></i>
-                            <span>API ONGSYS v1</span>
+                        <a href="{% url 'dashboard:cofre' %}" class="nav-link py-2 px-2.5 d-flex align-items-center {% if request.resolver_match.url_name == 'cofre' %}active-item{% endif %}">
+                            <i class="ri-key-2-line menu-icon fs-16 text-success"></i>
+                            <span style="font-size: 0.84em;">Cofre de Segredos</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'dashboard:integracoes' %}#sefaz-nfe" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: #94a3b8;">
-                            <i class="ri-file-text-line fs-15 text-warning"></i>
-                            <span>API SEFAZ & NF-e</span>
+                        <a href="{% url 'dashboard:ferramentas' %}" class="nav-link py-2 px-2.5 d-flex align-items-center {% if request.resolver_match.url_name == 'ferramentas' %}active-item{% endif %}">
+                            <i class="ri-tools-line menu-icon fs-16 text-warning"></i>
+                            <span style="font-size: 0.84em;">Canivete de Ferramentas</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 3: GOVERNANÇA & DOCUMENTAÇÃO (MENU RETRÁTIL) -->
+        <div class="sidebar-dropdown-group mb-3">
+            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between py-2.5 px-3 text-start sidebar-toggle-btn {% if request.resolver_match.url_name == 'governanca' %}active-dropdown{% endif %}" data-bs-toggle="collapse" data-bs-target="#dropdown-governanca" aria-expanded="{% if request.resolver_match.url_name == 'governanca' %}true{% else %}false{% endif %}">
+                <div class="d-flex align-items-center">
+                    <i class="ri-book-open-line menu-icon fs-18 text-warning"></i>
+                    <span style="font-weight: 700; font-size: 0.88em;">Governança & Docs</span>
+                </div>
+                <i class="ri-arrow-down-s-line fs-18 dropdown-chevron text-white-50" style="transition: transform 0.25s ease; margin-right: 0 !important; width: auto;"></i>
+            </button>
+
+            <!-- SUB-ITENS DA GOVERNANÇA -->
+            <div class="collapse {% if request.resolver_match.url_name == 'governanca' %}show{% endif %} mt-1.5" id="dropdown-governanca">
+                <ul class="nav flex-column ps-3 gap-1" style="list-style: none; border-left: 1px solid #334155; margin-left: 16px;">
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:governanca' %}" class="nav-link py-2 px-2.5 d-flex align-items-center {% if request.resolver_match.url_name == 'governanca' %}active-item{% endif %}">
+                            <i class="ri-file-text-line menu-icon fs-16 text-info"></i>
+                            <span style="font-size: 0.84em;">Diretrizes & ADRs CDC</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'dashboard:integracoes' %}#vpn-wireguard" class="nav-link py-1.5 px-2.5 d-flex align-items-center gap-2" style="font-size: 0.8em; font-weight: 500; color: #94a3b8;">
-                            <i class="ri-shield-keyhole-line fs-15 text-purple" style="color: #c084fc;"></i>
-                            <span>API VPN WireGuard</span>
+                        <a href="{% url 'dashboard:governanca' %}#lgpd" class="nav-link py-2 px-2.5 d-flex align-items-center">
+                            <i class="ri-shield-user-line menu-icon fs-16 text-danger"></i>
+                            <span style="font-size: 0.84em;">Proteção de Dados & LGPD</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:governanca' %}#auditoria" class="nav-link py-2 px-2.5 d-flex align-items-center">
+                            <i class="ri-history-line menu-icon fs-16 text-success"></i>
+                            <span style="font-size: 0.84em;">Trilha de Auditoria</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:governanca' %}#processos" class="nav-link py-2 px-2.5 d-flex align-items-center">
+                            <i class="ri-file-list-3-line menu-icon fs-16 text-warning"></i>
+                            <span style="font-size: 0.84em;">Matriz RACI & POPs</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 4: INTEGRAÇÕES & CONEXÕES (ÚLTIMA SESSÃO - MENU RETRÁTIL) -->
+        <div class="sidebar-dropdown-group mb-4">
+            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between py-2.5 px-3 text-start sidebar-toggle-btn {% if request.resolver_match.url_name == 'integracoes' %}active-dropdown{% endif %}" data-bs-toggle="collapse" data-bs-target="#dropdown-integracoes" aria-expanded="{% if request.resolver_match.url_name == 'integracoes' %}true{% else %}false{% endif %}">
+                <div class="d-flex align-items-center">
+                    <i class="ri-plug-line menu-icon fs-18 text-info"></i>
+                    <span style="font-weight: 700; font-size: 0.88em;">Central de Integrações</span>
+                </div>
+                <i class="ri-arrow-down-s-line fs-18 dropdown-chevron text-white-50" style="transition: transform 0.25s ease; margin-right: 0 !important; width: auto;"></i>
+            </button>
+
+            <!-- SUB-ITENS DA CENTRAL DE INTEGRAÇÕES -->
+            <div class="collapse {% if request.resolver_match.url_name == 'integracoes' %}show{% endif %} mt-1.5" id="dropdown-integracoes">
+                <ul class="nav flex-column ps-3 gap-1" style="list-style: none; border-left: 1px solid #334155; margin-left: 16px;">
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:integracoes' %}" class="nav-link py-2 px-2.5 d-flex align-items-center {% if request.resolver_match.url_name == 'integracoes' %}active-item{% endif %}">
+                            <i class="ri-dashboard-line menu-icon fs-16 text-primary"></i>
+                            <span style="font-size: 0.84em;">Painel de Conectores</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:integracoes' %}#google-workspace" class="nav-link py-2 px-2.5 d-flex align-items-center">
+                            <i class="ri-google-line menu-icon fs-16 text-info"></i>
+                            <span style="font-size: 0.84em;">API Google Workspace</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:integracoes' %}#whatsapp-evolution" class="nav-link py-2 px-2.5 d-flex align-items-center">
+                            <i class="ri-whatsapp-line menu-icon fs-16 text-success"></i>
+                            <span style="font-size: 0.84em;">API WhatsApp Evolution</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:integracoes' %}#ongsys-api" class="nav-link py-2 px-2.5 d-flex align-items-center">
+                            <i class="ri-heart-pulse-line menu-icon fs-16 text-danger"></i>
+                            <span style="font-size: 0.84em;">API ONGSYS v1</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:integracoes' %}#sefaz-nfe" class="nav-link py-2 px-2.5 d-flex align-items-center">
+                            <i class="ri-file-text-line menu-icon fs-16 text-warning"></i>
+                            <span style="font-size: 0.84em;">API SEFAZ & NF-e</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:integracoes' %}#vpn-wireguard" class="nav-link py-2 px-2.5 d-flex align-items-center">
+                            <i class="ri-shield-keyhole-line menu-icon fs-16" style="color: #c084fc;"></i>
+                            <span style="font-size: 0.84em;">API VPN WireGuard</span>
                         </a>
                     </li>
                 </ul>
@@ -181,29 +228,28 @@
 
     </div>
 
-    <!-- Sidebar Bottom User Info (Footer Compacto) -->
-    <div class="sidebar-user-box px-3 py-2.5" style="border-top: 1px solid #1e293b; background: #0b1324;">
+    <!-- Sidebar Bottom User Info (Footer Compacto Dark) -->
+    <div class="sidebar-user-box px-3 py-3" style="border-top: 1px solid #1e293b; background: #0b1324;">
         <div class="d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-2">
-                <img src="{% static 'img/placeholders/avatars/avatar2.jpg' %}" alt="avatar" class="rounded-circle" style="width: 30px; height: 30px; border: 1px solid #334155;">
+            <div class="d-flex align-items-center">
+                <img src="{% static 'img/placeholders/avatars/avatar2.jpg' %}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; border: 1px solid #334155; margin-right: 10px;">
                 <div class="d-flex flex-column">
-                    <span class="fw-bold" style="font-size: 0.82em; color: #f8fafc;">{{ user.username|default:"dxcdc" }}</span>
-                    <small class="text-muted" style="font-size: 0.68em; color: #94a3b8 !important;">Operações CDC</small>
+                    <span class="fw-bold" style="font-size: 0.84em; color: #f8fafc;">{{ user.username|default:"dxcdc" }}</span>
+                    <small class="text-muted" style="font-size: 0.7em; color: #94a3b8 !important;">Operações CDC</small>
                 </div>
             </div>
-            <a href="{% url 'dashboard:logout' %}" class="btn btn-sm p-1 border-0" title="Sair" style="color: #f87171; background: #450a0a; border-radius: 4px; line-height: 1;">
+            <a href="{% url 'dashboard:logout' %}" class="btn btn-sm p-1.5 border-0" title="Sair" style="color: #f87171; background: #450a0a; border-radius: 6px; line-height: 1;">
                 <i class="ri-logout-box-r-line fs-14"></i>
             </a>
         </div>
     </div>
 </aside>
 
-<!-- SCRIPT VANILLA JS NATIVO PARA ROTAÇÃO DAS SETAS INDICADORAS DE EXPANSÃO -->
+<!-- SCRIPT VANILLA JS NATIVO PARA ROTACIONAR AS SETAS DOS DROPDOWNS -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const toggleButtons = document.querySelectorAll('.sidebar-toggle-btn');
         
-        // Atualiza a rotação da seta com base no estado inicial do aria-expanded
         toggleButtons.forEach(btn => {
             const isExpanded = btn.getAttribute('aria-expanded') === 'true';
             const chevron = btn.querySelector('.dropdown-chevron');
