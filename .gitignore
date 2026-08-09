@@ -8,9 +8,21 @@ db.sqlite3
 media/
 staticfiles/
 .env
+.env.*
 
-# Templates source files (ignored from git tracking to keep repo lightweight)
+# Chaves de Credenciais & Segredos de Produção (LGPD & Cofre CDC)
+credentials/
+secrets/
+*.json
+!package.json
+!tsconfig.json
+*.pfx
+*.pem
+*.key
+*.crt
+*.asc
+
+# Arquivos temporários e de SO
 Templates/
 .DS_Store
 *.log
-

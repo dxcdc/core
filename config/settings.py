@@ -8,12 +8,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u(fyrn(z%fhd1w*jgu(3y5w^5hf_e=l9n#(vi)q*gvbj))88-o'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-u(fyrn(z%fhd1w*jgu(3y5w^5hf_e=l9n#(vi)q*gvbj))88-o')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['core.cdc.org.br', '*.cdc.org.br', 'localhost', '127.0.0.1', '76.13.227.135'] if not DEBUG else ['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://core.cdc.org.br',
@@ -23,6 +23,15 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# SECURITY HEADERS FOR LGPD & DATA PROTECTION
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() in ('true', '1', 't')
 
 # Application definition
 
