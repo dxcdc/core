@@ -318,7 +318,117 @@ def simular_acao(request, acao):
         )
         messages.success(request, 'Verificação concluída: Alias de Paterson Silva operando sem custos de licença!')
 
-    return redirect('dashboard:index')
+@login_required(login_url='dashboard:login')
+def integracoes_view(request):
+    """Renderiza a Central de Integrações & APIs do CDC Core com configurações e conectores."""
+    if request.method == 'POST':
+        api_name = request.POST.get('api_name', 'Google Workspace')
+        messages.success(request, f'Configurações da integração "{api_name}" salvas com sucesso! Modo de validação ativo.')
+        return redirect('dashboard:integracoes')
+
+    integracoes_list = [
+        {
+            'slug': 'google-workspace',
+            'nome': 'Google Workspace (Admin SDK)',
+            'categoria': 'Gestão & Soberania de Dados',
+            'icone': 'ri-google-line',
+            'cor_icone': 'text-primary',
+            'descricao': 'APIs Directory (v1), Drive (v3), Groups e Reports API para gestão de contas @cdc.org.br, cotas e segurança OAuth.',
+            'status': 'Simulado',
+            'badge_status': 'success',
+            'endpoint': 'https://admin.googleapis.com',
+            'campos': [
+                {'name': 'service_account_email', 'label': 'Service Account Email', 'value': 'cdc-core-service-account@cdc-core.iam.gserviceaccount.com'},
+                {'name': 'delegated_user', 'label': 'E-mail do Administrador Delegado', 'value': 'dxcdc@cdc.org.br'},
+                {'name': 'scopes', 'label': 'Escopos OAuth2 Solicitados', 'value': 'https://www.googleapis.com/auth/admin.directory.user, https://www.googleapis.com/auth/drive'},
+            ]
+        },
+        {
+            'slug': 'whatsapp-evolution',
+            'nome': 'WhatsApp Bot & Evolution API',
+            'categoria': 'Comunicação Operacional',
+            'icone': 'ri-whatsapp-line',
+            'cor_icone': 'text-success',
+            'descricao': 'Envio de alertas de 2FA pendente, notificações de estouro de cota e avisos de desligamento de voluntários.',
+            'status': 'Pendente',
+            'badge_status': 'warning',
+            'endpoint': 'https://whatsapp.cdc.org.br',
+            'campos': [
+                {'name': 'instance_name', 'label': 'Nome da Instância', 'value': 'cdc_bot_operacional'},
+                {'name': 'api_key', 'label': 'API Secret Key (Evolution API)', 'value': 'cdc_evolution_key_983f472a1'},
+                {'name': 'webhook_url', 'label': 'Webhook Receiver URL', 'value': 'https://core.cdc.org.br/api/v1/webhooks/whatsapp/'},
+            ]
+        },
+        {
+            'slug': 'ongsys-api',
+            'nome': 'ONGSYS API v1 (Projetos & Gestão)',
+            'categoria': 'Sistemas Sociais',
+            'icone': 'ri-heart-pulse-line',
+            'cor_icone': 'text-danger',
+            'descricao': 'Integração com a API da ONGSYS para sincronização de atendimentos, voluntários e beneficiários dos projetos sociais do CDC.',
+            'status': 'Aguardando Chave',
+            'badge_status': 'info',
+            'endpoint': 'https://ajuda.ongsys.com.br/api-v1',
+            'campos': [
+                {'name': 'subdominio_ongsys', 'label': 'Subdomínio ONGSYS', 'value': 'cdc.ongsys.com.br'},
+                {'name': 'app_token', 'label': 'App Access Token ONGSYS', 'value': 'ongsys_token_live_38472910'},
+                {'name': 'sync_interval', 'label': 'Intervalo de Sincronização', 'value': 'A cada 15 minutos'},
+            ]
+        },
+        {
+            'slug': 'sefaz-nfe',
+            'nome': 'SEFAZ & Nota Fiscal Eletrônica (NF-e)',
+            'categoria': 'Fiscal & Contábil',
+            'icone': 'ri-file-text-line',
+            'cor_icone': 'text-warning',
+            'descricao': 'Emissão automatizada de Notas Fiscais de Serviço (NFS-e) e consulta de certidões negativas fiscais do CDC.',
+            'status': 'Não Configurado',
+            'badge_status': 'secondary',
+            'endpoint': 'https://nfe.sefaz.gov.br',
+            'campos': [
+                {'name': 'cnpj_cdc', 'label': 'CNPJ do CDC', 'value': '00.000.000/0001-00'},
+                {'name': 'cert_file', 'label': 'Certificado Digital A1 (.pfx)', 'value': 'certificado_cdc_2026.pfx'},
+                {'name': 'ambiente', 'label': 'Ambiente SEFAZ', 'value': 'Homologação'},
+            ]
+        },
+        {
+            'slug': 'vpn-wireguard',
+            'nome': 'VPN & Servidor WireGuard REST API',
+            'categoria': 'Infraestrutura & Segurança',
+            'icone': 'ri-shield-keyhole-line',
+            'cor_icone': 'text-purple',
+            'descricao': 'Gestão de túneis criptografados, alocação de IPs e autorização de acesso para os projetos PROVITA, PPCAM e PPDDH.',
+            'status': 'Conectado',
+            'badge_status': 'success',
+            'endpoint': 'https://vpn.cdc.org.br:51820',
+            'campos': [
+                {'name': 'vpn_endpoint', 'label': 'Endpoint WireGuard', 'value': '76.13.227.135:51820'},
+                {'name': 'api_secret', 'label': 'WireGuard Management Key', 'value': 'wg_sec_83921734912'},
+            ]
+        },
+        {
+            'slug': 'postgresql-vault',
+            'nome': 'PostgreSQL & Cofre de Segredos Vault',
+            'categoria': 'Banco de Dados',
+            'icone': 'ri-database-2-line',
+            'cor_icone': 'text-dark',
+            'descricao': 'Armazenamento persistente seguro para chaves SSH, credenciais criptografadas e logs de auditoria do CDC Core.',
+            'status': 'Conectado',
+            'badge_status': 'success',
+            'endpoint': '76.13.227.135:5432',
+            'campos': [
+                {'name': 'db_name', 'label': 'Nome do Banco', 'value': 'cdc_core_db'},
+                {'name': 'db_user', 'label': 'Usuário DataOps', 'value': 'dxcdc'},
+            ]
+        }
+    ]
+
+    context = {
+        'integracoes': integracoes_list,
+        'total_ativas': 4,
+        'total_pendentes': 2,
+    }
+    return render(request, 'dashboard/integracoes.html', context)
 
 def login_view(request):
     """Processa a autenticação e renderiza a página de login."""

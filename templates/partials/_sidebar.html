@@ -43,6 +43,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{% url 'dashboard:integracoes' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'integracoes' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'integracoes' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'integracoes' %}#2563eb{% else %}transparent{% endif %};">
+                    <i class="ri-plug-line fs-18" style="color: {% if request.resolver_match.url_name == 'integracoes' %}#ffffff{% else %}#ea580c{% endif %};"></i>
+                    <span>Central de Integrações & APIs</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{% url 'dashboard:infra' %}" class="nav-link d-flex align-items-center gap-3 py-2 px-3 {% if request.resolver_match.url_name == 'infra' %}active{% endif %}" style="border-radius: 8px; font-weight: 500; color: {% if request.resolver_match.url_name == 'infra' %}#ffffff{% else %}#475569{% endif %}; background: {% if request.resolver_match.url_name == 'infra' %}#2563eb{% else %}transparent{% endif %};">
                     <i class="ri-server-line fs-18" style="color: {% if request.resolver_match.url_name == 'infra' %}#ffffff{% else %}#2563eb{% endif %};"></i>
                     <span>Infraestrutura & Docker</span>
