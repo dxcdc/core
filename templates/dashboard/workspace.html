@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <style>
-    /* CHROME TABS STYLING */
+    /* CHROME TABS BAR STYLING */
     .chrome-tabs-wrapper {
         background: #e2e8f0;
         padding: 10px 12px 0 12px;
@@ -23,7 +23,7 @@
         align-items: center;
         gap: 8px;
         padding: 10px 18px;
-        background: #d1d5db;
+        background: #cbd5e1;
         color: #475569;
         font-weight: 600;
         font-size: 0.88em;
@@ -37,7 +37,7 @@
         white-space: nowrap;
     }
     .chrome-tab-item:hover:not(.active) {
-        background: #e2e8f0;
+        background: #d1d5db;
         color: #0f172a;
     }
     .chrome-tab-item.active {
@@ -60,13 +60,13 @@
         border-radius: 10px 10px 0 0;
     }
     .chrome-tab-favicon {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
+        font-size: 13px;
     }
     .chrome-tab-close {
         font-size: 12px;
@@ -92,6 +92,12 @@
         box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
         margin-bottom: 30px;
     }
+    .tab-pane-custom {
+        display: none;
+    }
+    .tab-pane-custom.active {
+        display: block;
+    }
 </style>
 {% endblock %}
 
@@ -100,18 +106,18 @@
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h3 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.6em;">
-            <i class="ri-google-line text-info me-2"></i> Gestão do Google Workspace (@cdc.org.br)
+            <i class="ri-google-line text-info me-2"></i> Módulo Google Workspace (@cdc.org.br)
         </h3>
         <p class="text-muted mb-0" style="font-size: 0.95em;">
-            Navegue pelas guias abaixo estilo <strong>Google Chrome</strong> para visualizar as sessões operacionais com dados hipotéticos pré-preenchidos.
+            Clique em cada uma das guias <strong>Google Chrome</strong> abaixo para visualizar os dados hipotéticos completos de cada API do Google.
         </p>
     </div>
     <div class="d-flex gap-2">
         <a href="{% url 'dashboard:simular_acao' 'auditoria_mfa' %}" class="btn btn-outline-primary btn-sm fw-bold d-flex align-items-center gap-1" style="border-radius: 8px;">
-            <i class="ri-refresh-line fs-16"></i> Sincronizar com APIs do Google
+            <i class="ri-refresh-line fs-16"></i> Sincronizar APIs do Google
         </a>
         <button class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-1" onclick="alert('Modo de Simulação Hipotética Ativo: Pronto para conectar as chaves do Google Workspace Service Account!');" style="border-radius: 8px;">
-            <i class="ri-key-2-line fs-16"></i> Credenciais da Service Account
+            <i class="ri-key-2-line fs-16"></i> Credenciais Service Account
         </button>
     </div>
 </div>
@@ -190,55 +196,86 @@
 </div>
 
 <!-- BARRA DE GUIAS ESTILO GOOGLE CHROME -->
-<div class="chrome-tabs-wrapper" id="chromeTabs" role="tablist">
-    
-    <button class="chrome-tab-item active" id="tab-chrome-1" data-bs-toggle="tab" data-bs-target="#guia-usuarios" type="button" role="tab">
+<div class="chrome-tabs-wrapper" id="chromeTabsBar">
+    <button class="chrome-tab-item active" data-tab-target="#guia-usuarios">
         <span class="chrome-tab-favicon bg-primary text-white"><i class="ri-user-line"></i></span>
         <span>1. Usuários & OUs (Directory API)</span>
-        <span class="chrome-tab-close" onclick="event.stopPropagation(); alert('Guia travada para o Workspace');"><i class="ri-close-line"></i></span>
+        <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
 
-    <button class="chrome-tab-item" id="tab-chrome-2" data-bs-toggle="tab" data-bs-target="#guia-drive" type="button" role="tab">
+    <button class="chrome-tab-item" data-tab-target="#guia-drive">
         <span class="chrome-tab-favicon bg-info text-white"><i class="ri-folder-shared-line"></i></span>
         <span>2. Cotas & Custódia de Drive</span>
         <span class="badge bg-danger rounded-circle p-1 ms-1" style="width: 8px; height: 8px;" title="Alerta Cota 96%"></span>
-        <span class="chrome-tab-close" onclick="event.stopPropagation(); alert('Guia travada para o Workspace');"><i class="ri-close-line"></i></span>
+        <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
 
-    <button class="chrome-tab-item" id="tab-chrome-3" data-bs-toggle="tab" data-bs-target="#guia-grupos" type="button" role="tab">
+    <button class="chrome-tab-item" data-tab-target="#guia-grupos">
         <span class="chrome-tab-favicon bg-success text-white"><i class="ri-team-line"></i></span>
         <span>3. Grupos & Auditoria de Membros</span>
         <span class="badge bg-warning rounded-circle p-1 ms-1" style="width: 8px; height: 8px;" title="Vazamento em Grupo"></span>
-        <span class="chrome-tab-close" onclick="event.stopPropagation(); alert('Guia travada para o Workspace');"><i class="ri-close-line"></i></span>
+        <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
 
-    <button class="chrome-tab-item" id="tab-chrome-4" data-bs-toggle="tab" data-bs-target="#guia-oauth" type="button" role="tab">
+    <button class="chrome-tab-item" data-tab-target="#guia-oauth">
         <span class="chrome-tab-favicon bg-warning text-white"><i class="ri-key-fill"></i></span>
         <span>4. Tokens & Apps OAuth</span>
-        <span class="chrome-tab-close" onclick="event.stopPropagation(); alert('Guia travada para o Workspace');"><i class="ri-close-line"></i></span>
+        <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
 
-    <button class="chrome-tab-item" id="tab-chrome-5" data-bs-toggle="tab" data-bs-target="#guia-lifecycle" type="button" role="tab">
+    <button class="chrome-tab-item" data-tab-target="#guia-lifecycle">
         <span class="chrome-tab-favicon text-white" style="background: #9333ea;"><i class="ri-time-line"></i></span>
         <span>5. Ciclo de Vida de Voluntários</span>
-        <span class="chrome-tab-close" onclick="event.stopPropagation(); alert('Guia travada para o Workspace');"><i class="ri-close-line"></i></span>
+        <span class="chrome-tab-close" onclick="event.stopPropagation();"><i class="ri-close-line"></i></span>
     </button>
-
 </div>
 
-<!-- CONTEÚDO DAS GUIAS DO CHROME -->
-<div class="chrome-tab-content-box tab-content" id="chromeTabsContent">
+<!-- CONTEÚDO HIPOTÉTICO PREENCHIDO DENTRO DAS GUIAS DO CHROME -->
+<div class="chrome-tab-content-box">
     
-    <!-- GUIA CHROME 1: DIRETÓRIO DE USUÁRIOS E UNIDADES ORGANIZACIONAIS -->
-    <div class="tab-pane fade show active" id="guia-usuarios" role="tabpanel">
+    <!-- GUIA CHROME 1: DIRETÓRIO DE USUÁRIOS E UNIDADES ORGANIZACIONAIS (DIRECTORY API) -->
+    <div class="tab-pane-custom active" id="guia-usuarios">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-shield-user-line me-2 text-primary"></i> 1. Diretório de Usuários, Unidades Organizacionais (OUs) e Licenciamento</h5>
-                <small class="text-muted">Dados hipotéticos da API <code>Google Admin Directory API (directory_v1)</code>.</small>
+                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Admin Directory API (directory_v1)</code>.</p>
             </div>
-            <button class="btn btn-outline-secondary btn-sm" onclick="alert('Exportando tabela de usuários do Workspace em JSON...');">
-                <i class="ri-download-2-line me-1"></i> Exportar JSON
-            </button>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm" onclick="alert('Exportando tabela de usuários do Workspace em JSON...');">
+                    <i class="ri-download-2-line me-1"></i> Exportar JSON
+                </button>
+                <a href="{% url 'dashboard:simular_acao' 'auditoria_mfa' %}" class="btn btn-primary btn-sm fw-bold">
+                    <i class="ri-shield-keyhole-line me-1"></i> Auditar MFA Global
+                </a>
+            </div>
+        </div>
+
+        <!-- Metric Sub-Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="p-3 bg-light border rounded-3">
+                    <small class="text-muted d-block fw-semibold" style="font-size: 0.8em;">CONTAS ATIVAS</small>
+                    <strong class="text-dark fs-20">42 contas</strong>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light border rounded-3">
+                    <small class="text-muted d-block fw-semibold" style="font-size: 0.8em;">OUs CONFIGURADAS</small>
+                    <strong class="text-primary fs-20">5 Unidades</strong>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light border rounded-3">
+                    <small class="text-muted d-block fw-semibold" style="font-size: 0.8em;">SEM MFA (2FA)</small>
+                    <strong class="text-danger fs-20">5 contas pendentes</strong>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light border rounded-3">
+                    <small class="text-muted d-block fw-semibold" style="font-size: 0.8em;">ALIASES GRATUITOS</small>
+                    <strong class="text-info fs-20">3 contas mantidas</strong>
+                </div>
+            </div>
         </div>
 
         <div class="table-responsive">
@@ -302,19 +339,47 @@
         </div>
     </div>
 
-    <!-- GUIA CHROME 2: COTAS E CUSTÓDIA DE DRIVE -->
-    <div class="tab-pane fade" id="guia-drive" role="tabpanel">
+    <!-- GUIA CHROME 2: COTAS E CUSTÓDIA DE DRIVE (DRIVE API V3) -->
+    <div class="tab-pane-custom" id="guia-drive">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-hard-drive-2-line me-2 text-info"></i> 2. Soberania de Dados & Alertas de Cota de Armazenamento</h5>
-                <small class="text-muted">Dados hipotéticos da API <code>Google Drive API v3 (drive_v3)</code>.</small>
+                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Drive API v3 (drive_v3)</code>.</p>
             </div>
             <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-danger btn-sm fw-bold" style="border-radius: 8px;">
                 <i class="ri-shield-flash-line me-1"></i> Simular Transferência de Custódia
             </a>
         </div>
 
-        <div class="row g-4">
+        <!-- Metric Sub-Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="p-3 bg-light border rounded-3">
+                    <small class="text-muted d-block fw-semibold" style="font-size: 0.8em;">USO TOTAL DO DOMÍNIO</small>
+                    <strong class="text-primary fs-20">248.5 GB</strong>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light border rounded-3">
+                    <small class="text-muted d-block fw-semibold" style="font-size: 0.8em;">CONTAS ACIMA DE 80%</small>
+                    <strong class="text-danger fs-20">1 conta (Adriana 96.1%)</strong>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light border rounded-3">
+                    <small class="text-muted d-block fw-semibold" style="font-size: 0.8em;">DRIVES COMPARTILHADOS</small>
+                    <strong class="text-success fs-20">4 Drives Ativos</strong>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 bg-light border rounded-3">
+                    <small class="text-muted d-block fw-semibold" style="font-size: 0.8em;">CUSTÓDIA INSTITUCIONAL</small>
+                    <strong class="text-dark fs-20">100% Garantida</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
             {% for c in contas_hipoteticas %}
             {% if c.cota_max_gb > 0 %}
             <div class="col-md-6">
@@ -341,21 +406,43 @@
             {% endif %}
             {% endfor %}
         </div>
+
+        <!-- SIMULADOR DE CUSTÓDIA DE ARQUIVOS -->
+        <div class="p-4 border rounded-3 bg-white shadow-sm">
+            <h6 class="fw-bold text-dark mb-2"><i class="ri-share-forward-fill text-primary me-2"></i> Formulário de Simulação de Transferência Soberana de Arquivos</h6>
+            <p class="text-muted mb-3" style="font-size: 0.88em;">Transfere a propriedade de todas as pastas e arquivos de uma conta para o e-mail de custódia institucional (`fvier@cdc.org.br`).</p>
+            <div class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <label class="form-label text-muted fw-semibold mb-1" style="font-size: 0.82em;">Conta Origem (Ex-Colaborador)</label>
+                    <input type="text" class="form-control" value="joabsilva@cdc.org.br (Joab da Silva)" readonly>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label text-muted fw-semibold mb-1" style="font-size: 0.82em;">Conta Destino (Custódia Soberana CDC)</label>
+                    <input type="text" class="form-control" value="fvier@cdc.org.br (Fernando Vier - DataOps)" readonly>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <label class="form-label mb-1" style="visibility: hidden;">Ação</label>
+                    <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-success fw-bold">
+                        <i class="ri-check-double-line me-1"></i> Transferir
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- GUIA CHROME 3: GRUPOS E AUDITORIA DE INTEGRIDADE -->
-    <div class="tab-pane fade" id="guia-grupos" role="tabpanel">
+    <!-- GUIA CHROME 3: GRUPOS E AUDITORIA DE INTEGRIDADE (GROUPS API) -->
+    <div class="tab-pane-custom" id="guia-grupos">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-team-line me-2 text-success"></i> 3. Auditoria de Grupos do Workspace & Vazamento de Membros</h5>
-                <small class="text-muted">Dados hipotéticos da API <code>Google Groups API</code>.</small>
+                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Groups API</code>.</p>
             </div>
             <a href="{% url 'dashboard:simular_acao' 'vazamento_grupo_joab' %}" class="btn btn-warning btn-sm fw-bold text-dark" style="border-radius: 8px;">
                 <i class="ri-user-unfollow-line me-1"></i> Remover Membro Suspenso (Caso Joab)
             </a>
         </div>
 
-        <div class="row g-3">
+        <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <div class="card border border-warning p-3 rounded-3 shadow-sm bg-warning-subtle">
                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -383,21 +470,76 @@
                 </div>
             </div>
         </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle border">
+                <thead class="table-light">
+                    <tr>
+                        <th>Grupo de Trabalho</th>
+                        <th>E-mail do Grupo</th>
+                        <th>Quantidade de Membros</th>
+                        <th>Dono / Responsável</th>
+                        <th>Status de Segurança</th>
+                        <th class="text-center">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Projetos de Proteção</strong></td>
+                        <td><code>projetos@cdc.org.br</code></td>
+                        <td>12 membros</td>
+                        <td>fvier@cdc.org.br</td>
+                        <td><span class="badge bg-danger">⚠️ Vazamento Detectado</span></td>
+                        <td class="text-center">
+                            <a href="{% url 'dashboard:simular_acao' 'vazamento_grupo_joab' %}" class="btn btn-sm btn-warning fw-bold py-1 px-3">
+                                Corrigir Grupo
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tesouraria & Financeiro</strong></td>
+                        <td><code>financeiro@cdc.org.br</code></td>
+                        <td>5 membros</td>
+                        <td>adrianasantos@cdc.org.br</td>
+                        <td><span class="badge bg-success">🟢 Regular</span></td>
+                        <td class="text-center"><button class="btn btn-sm btn-light border" disabled>Auditado</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Presidência & Coordenação</strong></td>
+                        <td><code>presidencia@cdc.org.br</code></td>
+                        <td>3 membros</td>
+                        <td>ananery@cdc.org.br</td>
+                        <td><span class="badge bg-success">🟢 Regular</span></td>
+                        <td class="text-center"><button class="btn btn-sm btn-light border" disabled>Auditado</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Equipe de Voluntários</strong></td>
+                        <td><code>voluntarios@cdc.org.br</code></td>
+                        <td>28 membros</td>
+                        <td>fvier@cdc.org.br</td>
+                        <td><span class="badge bg-warning text-dark">🟡 3 Expirando</span></td>
+                        <td class="text-center">
+                            <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-sm btn-light border">Ver Membros</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- GUIA CHROME 4: TOKENS E APPS OAUTH DE TERCEIROS -->
-    <div class="tab-pane fade" id="guia-oauth" role="tabpanel">
+    <!-- GUIA CHROME 4: TOKENS E APPS OAUTH DE TERCEIROS (REPORTS API) -->
+    <div class="tab-pane-custom" id="guia-oauth">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-key-fill me-2 text-warning"></i> 4. Aplicativos Conectados & Tokens OAuth de Terceiros</h5>
-                <small class="text-muted">Dados hipotéticos da API <code>Google Admin Reports API (OAuth Audit)</code>.</small>
+                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Admin Reports API (OAuth Audit)</code>.</p>
             </div>
             <a href="{% url 'dashboard:simular_acao' 'revogar_oauth' %}" class="btn btn-outline-danger btn-sm fw-bold" style="border-radius: 8px;">
                 <i class="ri-shield-cross-line me-1"></i> Simular Revogação de Token
             </a>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive mb-4">
             <table class="table table-hover align-middle border">
                 <thead class="table-light">
                     <tr>
@@ -406,7 +548,7 @@
                         <th>Nível de Risco</th>
                         <th>Usuários Conectados</th>
                         <th>Status de Aprovação</th>
-                        <th class="text-center">Ação</th>
+                        <th class="text-center">Ação Operacional</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -431,21 +573,25 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="p-3 bg-light rounded border">
+            <small class="text-muted d-block"><strong>Regra de Governança (Fluxo 3)</strong>: Qualquer aplicativo que solicitar os escopos <code>drive.readonly</code> ou <code>drive.file</code> sem aprovação prévia da TI é bloqueado automaticamente pelo SDK em segundo plano.</small>
+        </div>
     </div>
 
-    <!-- GUIA CHROME 5: CICLO DE VIDA DE VOLUNTÁRIOS E ALIASES -->
-    <div class="tab-pane fade" id="guia-lifecycle" role="tabpanel">
+    <!-- GUIA CHROME 5: CICLO DE VIDA DE VOLUNTÁRIOS E ALIASES (LIFECYCLE) -->
+    <div class="tab-pane-custom" id="guia-lifecycle">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h5 class="fw-bold text-dark mb-1"><i class="ri-time-line me-2 text-purple" style="color: #9333ea;"></i> 5. Ciclo de Vida de Voluntários & Aliases Gratuitos</h5>
-                <small class="text-muted">Dados hipotéticos da API <code>Google Lifecycle Audit</code>.</small>
+                <p class="text-muted mb-0" style="font-size: 0.88em;">Simulação hipotética da resposta da <code>Google Lifecycle Audit</code>.</p>
             </div>
             <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-purple btn-sm fw-bold text-white" style="background: #9333ea; border-radius: 8px;">
                 <i class="ri-timer-flash-line me-1"></i> Auditar Prazos de Voluntários
             </a>
         </div>
 
-        <div class="row g-3">
+        <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <div class="p-3 bg-light border rounded-3 shadow-sm">
                     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -477,6 +623,15 @@
                 </div>
             </div>
         </div>
+
+        <div class="p-3 bg-success-subtle border border-success rounded-3 text-success">
+            <div class="d-flex align-items-center gap-2">
+                <i class="ri-money-dollar-circle-fill fs-20"></i>
+                <div>
+                    <strong>Economia Estimada de Licenciamento</strong>: 3 contas convertidas para aliases gratuitos reduziram o custo recorrente do Workspace em <strong>R$ 1.840,00/ano</strong> para o CDC.
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -496,12 +651,22 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Alternância ativa dinâmica de guias no estilo Chrome
-        const chromeTabs = document.querySelectorAll('.chrome-tab-item');
-        chromeTabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                chromeTabs.forEach(t => t.classList.remove('active'));
+        const tabs = document.querySelectorAll('.chrome-tab-item');
+        const panes = document.querySelectorAll('.tab-pane-custom');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetSelector = this.getAttribute('data-tab-target');
+
+                tabs.forEach(t => t.classList.remove('active'));
+                panes.forEach(p => p.classList.remove('active'));
+
                 this.classList.add('active');
+                const targetPane = document.querySelector(targetSelector);
+                if (targetPane) {
+                    targetPane.classList.add('active');
+                }
             });
         });
     });
