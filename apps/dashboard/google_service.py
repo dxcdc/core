@@ -19,6 +19,10 @@ def get_credentials_file_path():
     credentials_dir = os.path.join(settings.BASE_DIR, 'credentials')
     os.makedirs(credentials_dir, exist_ok=True)
     
+    env_custom_path = os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE')
+    if env_custom_path and os.path.exists(env_custom_path):
+        return env_custom_path
+
     possible_paths = [
         os.path.join(credentials_dir, 'google_service_account.json'),
         os.path.join(settings.BASE_DIR, 'google_service_account.json'),
@@ -29,11 +33,13 @@ def get_credentials_file_path():
             return p
     return None
 
-def test_google_workspace_connection(delegated_email='dxcdc@cdc.org.br'):
+def test_google_workspace_connection(delegated_email=None):
     """
     Testa a conexão real com a Service Account do Google Workspace.
     Retorna (sucesso: bool, mensagem: str, dados_diagnostico: dict).
     """
+    if not delegated_email:
+        delegated_email = os.getenv('GOOGLE_DELEGATED_ADMIN_EMAIL', 'dxcdc@cdc.org.br')
     creds_path = get_credentials_file_path()
     if not creds_path:
         return False, "Arquivo de chave Service Account (JSON) não encontrado. Envie a chave JSON na Central de Integrações.", {
