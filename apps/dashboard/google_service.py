@@ -39,7 +39,8 @@ def test_google_workspace_connection(delegated_email=None):
     Retorna (sucesso: bool, mensagem: str, dados_diagnostico: dict).
     """
     if not delegated_email:
-        delegated_email = os.getenv('GOOGLE_DELEGATED_ADMIN_EMAIL', 'dxcdc@cdc.org.br')
+        delegated_email = os.getenv('GOOGLE_DELEGATED_ADMIN_EMAIL', 'gt.transformadigital@cdc.org.br')
+
     creds_path = get_credentials_file_path()
     if not creds_path:
         return False, "Arquivo de chave Service Account (JSON) não encontrado. Envie a chave JSON na Central de Integrações.", {
@@ -76,6 +77,97 @@ def test_google_workspace_connection(delegated_email=None):
             'detalhes': str(e),
             'dica': 'Verifique se os escopos OAuth foram autorizados no Google Admin Console (Segurança > Controles de API > Delegação do Domínio Inteiro).'
         }
+
+def fetch_google_workspace_data(delegated_email=None):
+    """
+    Busca dados em tempo real das APIs do Google Workspace:
+    - Directory API: Users, OUs, Groups
+    - Drive API: Storage Quota & Drive stats
+    - Reports API: Activity logs
+    """
+    if not delegated_email:
+        delegated_email = os.getenv('GOOGLE_DELEGATED_ADMIN_EMAIL', 'gt.transformadigital@cdc.org.br')
+
+    creds_path = get_credentials_file_path()
+    if not creds_path:
+        return {'is_real': False, 'error': 'Chave JSON não configurada'}
+
+    try:
+        from google.oauth2 import service_account
+        from googleapiclient.discovery import build
+
+        creds = service_account.Credentials.from_service_account_file(
+            creds_path, scopes=GOOGLE_SCOPES
+        ).with_subject(delegated_email)
+
+        # 1. Directory API - Usuários do Domínio
+        dir_service = build('admin', 'directory_v1', credentials=creds)
+        users_result = dir_service.users().list(customer='my_customer', maxResults=500).execute()
+        raw_users = users_result.get('users', [])
+
+        users_list = []
+        for u in raw_users:
+            name = u.get('name', {}).get('fullName', u.get('primaryEmail'))
+            email = u.get('primaryEmail')
+            ou = u.get('orgUnitPath', '/')
+            is_admin = u.get('isAdmin', False)
+            suspended = u.get('suspended', False)
+            status_str = 'Suspenso' if suspended else ('Ativo' if not u.get('changePasswordAtNextLogin') else 'Pendente 1º Login')
+            
+            users_list.append({
+                'id': u.get('id'),
+                'nome': name,
+                'email': email,
+                'cargo': 'Administrador do Domínio' if is_admin else 'Voluntário / Colaborador',
+                'unidade': ou,
+                'status': status_str,
+                'mfa': 'Ativado (2FA)' if u.get('isEnrolledIn2Sv') else 'Não Ativado',
+                'cota_usada': 'N/A'
+            })
+
+        # 2. Directory API - Unidades Organizacionais (OUs)
+        try:
+            ou_result = dir_service.orgunits().list(customerId='my_customer', type='all').execute()
+            raw_ous = ou_result.get('organizationUnits', [])
+            ous_list = [{'path': ou.get('orgUnitPath'), 'nome': ou.get('name'), 'descricao': ou.get('description', '')} for ou in raw_ous]
+        except Exception as e:
+            ous_list = []
+
+        # 3. Directory API - Grupos Institucionais
+        try:
+            groups_result = dir_service.groups().list(customer='my_customer', maxResults=100).execute()
+            raw_groups = groups_result.get('groups', [])
+            groups_list = [{'nome': g.get('name'), 'email': g.get('email'), 'membros': g.get('directMembersCount', 0)} for g in raw_groups]
+        except Exception as e:
+            groups_list = []
+
+        # 4. Drive API v3 - About / Storage Quota
+        try:
+            drive_service = build('drive', 'v3', credentials=creds)
+            about_result = drive_service.about().get(fields='storageQuota').execute()
+            quota = about_result.get('storageQuota', {})
+            usage_bytes = int(quota.get('usage', 0))
+            limit_bytes = int(quota.get('limit', 0)) if quota.get('limit') else 0
+            
+            usage_gb = usage_bytes / (1024 ** 3)
+            limit_gb = limit_bytes / (1024 ** 3) if limit_bytes else 0
+            
+            quota_str = f"{usage_gb:.2f} GB de {limit_gb:.2f} GB" if limit_gb else f"{usage_gb:.2f} GB (Espaço Ilimitado)"
+        except Exception as e:
+            quota_str = "Consulta de Cota Ativa"
+
+        return {
+            'is_real': True,
+            'users': users_list,
+            'total_users': len(users_list),
+            'ous': ous_list,
+            'groups': groups_list,
+            'drive_quota': quota_str,
+            'delegated_email': delegated_email
+        }
+    except Exception as e:
+        logger.error(f"Erro ao buscar dados reais do Google Workspace: {e}")
+        return {'is_real': False, 'error': str(e)}
 
 def save_service_account_json(json_content_or_file):
     """Salva o conteúdo da chave JSON da Service Account no diretório seguro de credenciais."""

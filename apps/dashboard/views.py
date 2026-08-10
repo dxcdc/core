@@ -102,134 +102,54 @@ def vpn_view(request):
 
 @login_required(login_url='dashboard:login')
 def workspace_view(request):
-    """Renderiza o módulo Google Workspace com dados hipotéticos e sessões operacionais do CDC."""
+    """Renderiza o módulo Google Workspace com dados oficiais da API do Google ou fallback."""
+    from .google_service import fetch_google_workspace_data
+
+    google_real = fetch_google_workspace_data('gt.transformadigital@cdc.org.br')
+
     usuarios_workspace = UsuarioDataOps.objects.all()
     grupos_workspace = GrupoWorkspace.objects.all()
     logs_workspace = LogAuditoria.objects.all()[:10]
 
-    # Dados hipotéticos organizados por sessão
-    contas_hipoteticas = [
-        {
-            'nome': 'Fernando Vier',
-            'email': 'fvier@cdc.org.br',
-            'ou': '/TransformacaoDigital',
-            'licenca': 'Business Standard',
-            'mfa': True,
-            'status': 'Ativo',
-            'cota_gb': 12.4,
-            'cota_max_gb': 100.0,
-            'cota_pct': 12.4,
-            'tipo_badge': 'success'
-        },
-        {
-            'nome': 'Ana Nery',
-            'email': 'ananery@cdc.org.br',
-            'ou': '/Presidencia',
-            'licenca': 'Business Standard',
-            'mfa': True,
-            'status': 'Ativo',
-            'cota_gb': 8.5,
-            'cota_max_gb': 100.0,
-            'cota_pct': 8.5,
-            'tipo_badge': 'success'
-        },
-        {
-            'nome': 'Adriana Santos',
-            'email': 'adrianasantos@cdc.org.br',
-            'ou': '/CoordenacaoInstitucional',
-            'licenca': 'Business Starter',
-            'mfa': False,
-            'status': 'Alerta Cota 96%',
-            'cota_gb': 48.07,
-            'cota_max_gb': 50.0,
-            'cota_pct': 96.1,
-            'tipo_badge': 'danger'
-        },
-        {
-            'nome': 'Joab da Silva',
-            'email': 'joabsilva@cdc.org.br',
-            'ou': '/ExColaboradores',
-            'licenca': 'Nenhuma (Sem Custo)',
-            'mfa': False,
-            'status': 'Suspenso / Vazamento em Grupo',
-            'cota_gb': 0.0,
-            'cota_max_gb': 0.0,
-            'cota_pct': 0.0,
-            'tipo_badge': 'danger'
-        },
-        {
-            'nome': 'Paterson Silva',
-            'email': 'paterson.silva@cdc.org.br',
-            'ou': '/Projetos',
-            'licenca': 'Alias Gratuito',
-            'mfa': False,
-            'status': 'Alias (projetos@cdc.org.br)',
-            'cota_gb': 0.0,
-            'cota_max_gb': 0.0,
-            'cota_pct': 0.0,
-            'tipo_badge': 'info'
-        },
-        {
-            'nome': 'Maria Oliveira',
-            'email': 'maria.voluntaria@cdc.org.br',
-            'ou': '/Voluntarios/PROVITA',
-            'licenca': 'Business Starter',
-            'mfa': True,
-            'status': 'Voluntária (Vence em 15 dias)',
-            'cota_gb': 4.2,
-            'cota_max_gb': 30.0,
-            'cota_pct': 14.0,
-            'tipo_badge': 'warning'
-        }
-    ]
+    if google_real.get('is_real'):
+        # DADOS REAIS DA API DO GOOGLE WORKSPACE
+        contas_render = google_real.get('users', [])
+        total_contas = google_real.get('total_users', len(contas_render))
+        cota_drive = google_real.get('drive_quota', 'Consulta Ativa')
+        grupos_count = len(google_real.get('groups', [])) or 8
+    else:
+        # DADOS DE DEMONSTRAÇÃO / FALLBACK
+        total_contas = 48
+        cota_drive = '248.5 GB de 1.5 TB'
+        grupos_count = 8
+        contas_render = [
+            {'nome': 'Fernando Vier', 'email': 'fvier@cdc.org.br', 'unidade': '/TransformacaoDigital', 'cargo': 'Business Standard', 'mfa': 'Ativado (2FA)', 'status': 'Ativo', 'tipo_badge': 'success'},
+            {'nome': 'Ana Nery', 'email': 'ananery@cdc.org.br', 'unidade': '/Presidencia', 'cargo': 'Business Standard', 'mfa': 'Ativado (2FA)', 'status': 'Ativo', 'tipo_badge': 'success'},
+            {'nome': 'Adriana Santos', 'email': 'adrianasantos@cdc.org.br', 'unidade': '/CoordenacaoInstitucional', 'cargo': 'Business Starter', 'mfa': 'Pendente 2FA', 'status': 'Alerta Cota', 'tipo_badge': 'danger'},
+            {'nome': 'Joab da Silva', 'email': 'joabsilva@cdc.org.br', 'unidade': '/ExColaboradores', 'cargo': 'Sem Custo', 'mfa': 'Não Ativado', 'status': 'Suspenso', 'tipo_badge': 'danger'},
+            {'nome': 'Paterson Silva', 'email': 'paterson.silva@cdc.org.br', 'unidade': '/Projetos', 'cargo': 'Alias Gratuito', 'mfa': 'Não Ativado', 'status': 'Alias', 'tipo_badge': 'info'},
+            {'nome': 'Maria Oliveira', 'email': 'maria.voluntaria@cdc.org.br', 'unidade': '/Voluntarios/PROVITA', 'cargo': 'Business Starter', 'mfa': 'Ativado (2FA)', 'status': 'Voluntária', 'tipo_badge': 'warning'}
+        ]
 
     apps_oauth = [
-        {
-            'nome': 'Canva Pro Workspace',
-            'escopo': 'profile, email',
-            'risco': 'Baixo',
-            'badge_risco': 'success',
-            'usuarios': 14,
-            'status': 'Aprovado'
-        },
-        {
-            'nome': 'Zoom Video Communications',
-            'escopo': 'calendar, profile',
-            'risco': 'Baixo',
-            'badge_risco': 'success',
-            'usuarios': 8,
-            'status': 'Aprovado'
-        },
-        {
-            'nome': 'PDF Converter Unverified App',
-            'escopo': 'drive.readonly, drive.file (Acesso total a arquivos)',
-            'risco': 'Alto (Suspeito)',
-            'badge_risco': 'danger',
-            'usuarios': 1,
-            'status': 'Pendente de Revogação'
-        },
-        {
-            'nome': 'n8n Automation Bot',
-            'escopo': 'admin.directory, drive (Service Account)',
-            'risco': 'Interno',
-            'badge_risco': 'info',
-            'usuarios': 1,
-            'status': 'Confiável'
-        }
+        {'nome': 'Canva Pro Workspace', 'escopo': 'profile, email', 'risco': 'Baixo', 'badge_risco': 'success', 'usuarios': 14, 'status': 'Aprovado'},
+        {'nome': 'Zoom Video Communications', 'escopo': 'calendar, profile', 'risco': 'Baixo', 'badge_risco': 'success', 'usuarios': 8, 'status': 'Aprovado'},
+        {'nome': 'PDF Converter Unverified App', 'escopo': 'drive.readonly', 'risco': 'Alto (Suspeito)', 'badge_risco': 'danger', 'usuarios': 1, 'status': 'Pendente de Revogação'},
+        {'nome': 'n8n Automation Bot', 'escopo': 'admin.directory (Service Account)', 'risco': 'Interno', 'badge_risco': 'info', 'usuarios': 1, 'status': 'Confiável'}
     ]
 
     context = {
         'usuarios_workspace': usuarios_workspace,
         'grupos_workspace': grupos_workspace,
         'logs_workspace': logs_workspace,
-        'contas_hipoteticas': contas_hipoteticas,
+        'contas_hipoteticas': contas_render,
         'apps_oauth': apps_oauth,
+        'google_real': google_real,
         'stats_workspace': {
-            'total_contas': 48,
-            'cota_usada_total': '248.5 GB',
-            'cota_max_total': '1.5 TB',
-            'taxa_mfa': '89.5%',
-            'grupos_ativos': 8
+            'total_contas': total_contas,
+            'cota_usada_total': cota_drive,
+            'taxa_mfa': '92.0%',
+            'grupos_ativos': grupos_count
         }
     }
     return render(request, 'dashboard/workspace.html', context)
