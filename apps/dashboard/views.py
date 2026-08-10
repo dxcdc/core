@@ -365,7 +365,7 @@ def integracoes_view(request):
             'creds_exist': creds_exist,
             'campos': [
                 {'name': 'service_account_email', 'label': 'Service Account Email', 'value': google_diag.get('service_account', 'cdc-core-service-account@cdc-core.iam.gserviceaccount.com')},
-                {'name': 'delegated_user', 'label': 'E-mail do Administrador Delegado', 'value': 'dxcdc@cdc.org.br'},
+                {'name': 'delegated_user', 'label': 'E-mail do Administrador Delegado', 'value': 'gt.transformadigital@cdc.org.br'},
                 {'name': 'scopes', 'label': 'Escopos OAuth2 Solicitados', 'value': 'admin.directory.user, admin.directory.group, drive.readonly, admin.reports.audit.readonly'},
             ],
             'endpoints_detalhados': [
