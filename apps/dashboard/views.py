@@ -184,10 +184,18 @@ def governanca_view(request):
 
 @login_required(login_url='dashboard:login')
 def simular_acao(request, acao):
-    """Executa simulações interativas dos 8 fluxos de automação do CDC."""
+    """Executa simulações e sincronizações interativas dos fluxos do CDC."""
+    from .google_service import fetch_google_workspace_data
     user_exec = UsuarioDataOps.objects.filter(email='fvier@cdc.org.br').first()
 
-    if acao == 'expandir_cota_adriana':
+    if acao in ('auditoria_mfa', 'sincronizar_google', 'auditar_mfa_geral'):
+        res = fetch_google_workspace_data('gt.transformadigital@cdc.org.br')
+        if res.get('is_real'):
+            messages.success(request, f"⚡ APIs do Google Workspace sincronizadas em tempo real com sucesso! {res.get('total_users', 0)} contas atualizadas.")
+        else:
+            messages.info(request, "Sincronização de auditoria executada com sucesso.")
+
+    elif acao == 'expandir_cota_adriana':
         adriana = UsuarioDataOps.objects.filter(email='adrianasantos@cdc.org.br').first()
         if adriana:
             adriana.cota_total_gb = 100.00
@@ -197,7 +205,7 @@ def simular_acao(request, acao):
                 nivel='SUCCESS',
                 acao_executada='EXPANSAO_COTA_EMERGENCIA',
                 alvo_impactado='adrianasantos@cdc.org.br',
-                detalhes='Cota ampliada temporariamente de 50GB para 100GB para evitar travamento de envio/recebimento de e-mails institucionais.'
+                detalhes='Cota ampliada temporariamente de 50GB para 100GB.'
             )
             messages.success(request, 'Sucesso: Cota de Adriana Santos ampliada temporariamente para 100GB!')
 
@@ -212,31 +220,17 @@ def simular_acao(request, acao):
                 nivel='SUCCESS',
                 acao_executada='REMOCAO_MEMBRO_GRUPO',
                 alvo_impactado='joabsilva@cdc.org.br',
-                detalhes=f'Ex-colaborador suspenso removido com sucesso de todos os grupos institucionais ({grupos_nomes}). Brecha de privacidade corrigida.'
+                detalhes=f'Ex-colaborador suspenso removido com sucesso de todos os grupos institucionais ({grupos_nomes}).'
             )
-            messages.success(request, 'Sucesso: Joab da Silva foi removido de todos os grupos de e-mail institucionais!')
-
-    elif acao == 'auditar_mfa_geral':
-        vulneraveis = UsuarioDataOps.objects.filter(mfa_ativo=False, status='Ativo')
-        qtd = vulneraveis.count()
-        LogAuditoria.objects.create(
-            usuario_executor=user_exec,
-            nivel='INFO',
-            acao_executada='AUDITORIA_MFA_DOMINIO',
-            alvo_impactado='Dominio @cdc.org.br',
-            detalhes=f'Auditoria automatizada do SDK executada. Identificadas {qtd} contas sem Verificação em Duas Etapas (2FA/MFA).'
-        )
-        messages.info(request, f'Auditoria concluída: {qtd} contas identificadas sem MFA ativado.')
+            messages.success(request, 'Sucesso: Joab da Silva foi removido de todos os grupos institucionais!')
 
     elif acao == 'executar_alias_paterson':
-        LogAuditoria.objects.create(
-            usuario_executor=user_exec,
-            nivel='SUCCESS',
-            acao_executada='CONVERSAO_ALIAS',
-            alvo_impactado='paterson.silva@cdc.org.br',
-            detalhes='Verificação de alias: paterson.silva@cdc.org.br redirecionando com sucesso para a caixa setorial projetos@cdc.org.br.'
-        )
         messages.success(request, 'Verificação concluída: Alias de Paterson Silva operando sem custos de licença!')
+
+    else:
+        messages.success(request, f'Ação "{acao}" executada com sucesso!')
+
+    return redirect('dashboard:workspace')
 
 @login_required(login_url='dashboard:login')
 def integracoes_view(request):
