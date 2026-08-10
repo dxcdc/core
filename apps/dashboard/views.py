@@ -102,53 +102,45 @@ def vpn_view(request):
 
 @login_required(login_url='dashboard:login')
 def workspace_view(request):
-    """Renderiza o módulo Google Workspace com dados oficiais da API do Google ou fallback."""
+    """Renderiza o módulo Google Workspace utilizando EXCLUSIVAMENTE dados reais da API oficial do Google Workspace."""
     from .google_service import fetch_google_workspace_data
 
     google_real = fetch_google_workspace_data('gt.transformadigital@cdc.org.br')
 
-    usuarios_workspace = UsuarioDataOps.objects.all()
-    grupos_workspace = GrupoWorkspace.objects.all()
-    logs_workspace = LogAuditoria.objects.all()[:10]
-
     if google_real.get('is_real'):
         # DADOS REAIS DA API DO GOOGLE WORKSPACE
         contas_render = google_real.get('users', [])
-        total_contas = google_real.get('total_users', len(contas_render))
-        cota_drive = google_real.get('drive_quota', 'Consulta Ativa')
-        grupos_count = len(google_real.get('groups', [])) or 8
+        total_contas = len(contas_render)
+        cota_drive = google_real.get('drive_quota', '0.00 GB')
+        grupos_render = google_real.get('groups', [])
+        ous_render = google_real.get('ous', [])
+        grupos_count = len(grupos_render)
+        
+        mfa_atividados = sum(1 for u in contas_render if 'Ativado' in str(u.get('mfa', '')))
+        taxa_mfa = f"{(mfa_atividados / total_contas * 100):.1f}%" if total_contas > 0 else "0.0%"
     else:
-        # DADOS DE DEMONSTRAÇÃO / FALLBACK
-        total_contas = 48
-        cota_drive = '248.5 GB de 1.5 TB'
-        grupos_count = 8
-        contas_render = [
-            {'nome': 'Fernando Vier', 'email': 'fvier@cdc.org.br', 'unidade': '/TransformacaoDigital', 'ou': '/TransformacaoDigital', 'cargo': 'Business Standard', 'licenca': 'Business Standard', 'mfa': 'Ativado (2FA)', 'status': 'Ativo', 'tipo_badge': 'success'},
-            {'nome': 'Ana Nery', 'email': 'ananery@cdc.org.br', 'unidade': '/Presidencia', 'ou': '/Presidencia', 'cargo': 'Business Standard', 'licenca': 'Business Standard', 'mfa': 'Ativado (2FA)', 'status': 'Ativo', 'tipo_badge': 'success'},
-            {'nome': 'Adriana Santos', 'email': 'adrianasantos@cdc.org.br', 'unidade': '/CoordenacaoInstitucional', 'ou': '/CoordenacaoInstitucional', 'cargo': 'Business Starter', 'licenca': 'Business Starter', 'mfa': 'Pendente 2FA', 'status': 'Alerta Cota', 'tipo_badge': 'danger'},
-            {'nome': 'Joab da Silva', 'email': 'joabsilva@cdc.org.br', 'unidade': '/ExColaboradores', 'ou': '/ExColaboradores', 'cargo': 'Sem Custo', 'licenca': 'Sem Custo', 'mfa': 'Não Ativado', 'status': 'Suspenso', 'tipo_badge': 'danger'},
-            {'nome': 'Paterson Silva', 'email': 'paterson.silva@cdc.org.br', 'unidade': '/Projetos', 'ou': '/Projetos', 'cargo': 'Alias Gratuito', 'licenca': 'Alias Gratuito', 'mfa': 'Não Ativado', 'status': 'Alias', 'tipo_badge': 'info'},
-            {'nome': 'Maria Oliveira', 'email': 'maria.voluntaria@cdc.org.br', 'unidade': '/Voluntarios/PROVITA', 'ou': '/Voluntarios/PROVITA', 'cargo': 'Business Starter', 'licenca': 'Business Starter', 'mfa': 'Ativado (2FA)', 'status': 'Voluntária', 'tipo_badge': 'warning'}
-        ]
+        # SEM DADOS FICTÍCIOS - AGUARDANDO NAVEGAÇÃO E CHAVE API REAL
+        contas_render = []
+        total_contas = 0
+        cota_drive = 'Conexão Pendente'
+        grupos_render = []
+        ous_render = []
+        grupos_count = 0
+        taxa_mfa = '0.0%'
 
-    apps_oauth = [
-        {'nome': 'Canva Pro Workspace', 'escopo': 'profile, email', 'risco': 'Baixo', 'badge_risco': 'success', 'usuarios': 14, 'status': 'Aprovado'},
-        {'nome': 'Zoom Video Communications', 'escopo': 'calendar, profile', 'risco': 'Baixo', 'badge_risco': 'success', 'usuarios': 8, 'status': 'Aprovado'},
-        {'nome': 'PDF Converter Unverified App', 'escopo': 'drive.readonly', 'risco': 'Alto (Suspeito)', 'badge_risco': 'danger', 'usuarios': 1, 'status': 'Pendente de Revogação'},
-        {'nome': 'n8n Automation Bot', 'escopo': 'admin.directory (Service Account)', 'risco': 'Interno', 'badge_risco': 'info', 'usuarios': 1, 'status': 'Confiável'}
-    ]
+    logs_workspace = LogAuditoria.objects.all()[:10]
 
     context = {
-        'usuarios_workspace': usuarios_workspace,
-        'grupos_workspace': grupos_workspace,
-        'logs_workspace': logs_workspace,
         'contas_hipoteticas': contas_render,
-        'apps_oauth': apps_oauth,
+        'grupos_workspace': grupos_render,
+        'ous_workspace': ous_render,
+        'logs_workspace': logs_workspace,
+        'apps_oauth': [],
         'google_real': google_real,
         'stats_workspace': {
             'total_contas': total_contas,
             'cota_usada_total': cota_drive,
-            'taxa_mfa': '92.0%',
+            'taxa_mfa': taxa_mfa,
             'grupos_ativos': grupos_count
         }
     }

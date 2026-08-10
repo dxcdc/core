@@ -176,6 +176,21 @@
     </div>
     <span class="badge bg-success fw-bold text-white px-3 py-2" style="border-radius: 20px;">API Real HTTP 200 OK</span>
 </div>
+{% else %}
+<div class="alert alert-warning border border-warning-subtle d-flex align-items-center justify-content-between mb-4 p-3" style="border-radius: 12px; background-color: #fffbeb;">
+    <div class="d-flex align-items-center gap-3">
+        <div class="p-2 bg-warning text-dark rounded-circle fs-18">
+            <i class="ri-key-2-line"></i>
+        </div>
+        <div>
+            <strong class="text-dark d-block" style="font-size: 0.94em;">Service Account JSON Pendente de Conexão</strong>
+            <small class="text-muted" style="font-size: 0.84em;">Todos os dados fictícios foram removidos. Para carregar os dados reais do seu domínio <code>@cdc.org.br</code>, envie o arquivo JSON na Central de Integrações.</small>
+        </div>
+    </div>
+    <a href="{% url 'dashboard:integracoes' %}" class="btn btn-warning btn-sm fw-bold px-3 text-dark" style="border-radius: 8px;">
+        <i class="ri-upload-cloud-line me-1"></i> Central de Integrações
+    </a>
+</div>
 {% endif %}
 
 <!-- CARDS DE METRICAS RESUMIDAS DO WORKSPACE -->
@@ -382,6 +397,14 @@
                                     <i class="ri-settings-3-line text-primary"></i>
                                 </button>
                             </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted bg-light-subtle">
+                            <i class="ri-inbox-line fs-32 d-block mb-2 text-secondary"></i>
+                            <strong class="d-block text-dark mb-1">Nenhum dado fictício exibido.</strong>
+                            <span style="font-size: 0.85em;">Conecte sua Service Account na <a href="{% url 'dashboard:integracoes' %}" class="fw-bold">Central de Integrações & APIs</a> para sincronizar os usuários reais do seu domínio.</span>
                         </td>
                     </tr>
                     {% endfor %}
