@@ -123,12 +123,12 @@ def workspace_view(request):
         cota_drive = '248.5 GB de 1.5 TB'
         grupos_count = 8
         contas_render = [
-            {'nome': 'Fernando Vier', 'email': 'fvier@cdc.org.br', 'unidade': '/TransformacaoDigital', 'cargo': 'Business Standard', 'mfa': 'Ativado (2FA)', 'status': 'Ativo', 'tipo_badge': 'success'},
-            {'nome': 'Ana Nery', 'email': 'ananery@cdc.org.br', 'unidade': '/Presidencia', 'cargo': 'Business Standard', 'mfa': 'Ativado (2FA)', 'status': 'Ativo', 'tipo_badge': 'success'},
-            {'nome': 'Adriana Santos', 'email': 'adrianasantos@cdc.org.br', 'unidade': '/CoordenacaoInstitucional', 'cargo': 'Business Starter', 'mfa': 'Pendente 2FA', 'status': 'Alerta Cota', 'tipo_badge': 'danger'},
-            {'nome': 'Joab da Silva', 'email': 'joabsilva@cdc.org.br', 'unidade': '/ExColaboradores', 'cargo': 'Sem Custo', 'mfa': 'Não Ativado', 'status': 'Suspenso', 'tipo_badge': 'danger'},
-            {'nome': 'Paterson Silva', 'email': 'paterson.silva@cdc.org.br', 'unidade': '/Projetos', 'cargo': 'Alias Gratuito', 'mfa': 'Não Ativado', 'status': 'Alias', 'tipo_badge': 'info'},
-            {'nome': 'Maria Oliveira', 'email': 'maria.voluntaria@cdc.org.br', 'unidade': '/Voluntarios/PROVITA', 'cargo': 'Business Starter', 'mfa': 'Ativado (2FA)', 'status': 'Voluntária', 'tipo_badge': 'warning'}
+            {'nome': 'Fernando Vier', 'email': 'fvier@cdc.org.br', 'unidade': '/TransformacaoDigital', 'ou': '/TransformacaoDigital', 'cargo': 'Business Standard', 'licenca': 'Business Standard', 'mfa': 'Ativado (2FA)', 'status': 'Ativo', 'tipo_badge': 'success'},
+            {'nome': 'Ana Nery', 'email': 'ananery@cdc.org.br', 'unidade': '/Presidencia', 'ou': '/Presidencia', 'cargo': 'Business Standard', 'licenca': 'Business Standard', 'mfa': 'Ativado (2FA)', 'status': 'Ativo', 'tipo_badge': 'success'},
+            {'nome': 'Adriana Santos', 'email': 'adrianasantos@cdc.org.br', 'unidade': '/CoordenacaoInstitucional', 'ou': '/CoordenacaoInstitucional', 'cargo': 'Business Starter', 'licenca': 'Business Starter', 'mfa': 'Pendente 2FA', 'status': 'Alerta Cota', 'tipo_badge': 'danger'},
+            {'nome': 'Joab da Silva', 'email': 'joabsilva@cdc.org.br', 'unidade': '/ExColaboradores', 'ou': '/ExColaboradores', 'cargo': 'Sem Custo', 'licenca': 'Sem Custo', 'mfa': 'Não Ativado', 'status': 'Suspenso', 'tipo_badge': 'danger'},
+            {'nome': 'Paterson Silva', 'email': 'paterson.silva@cdc.org.br', 'unidade': '/Projetos', 'ou': '/Projetos', 'cargo': 'Alias Gratuito', 'licenca': 'Alias Gratuito', 'mfa': 'Não Ativado', 'status': 'Alias', 'tipo_badge': 'info'},
+            {'nome': 'Maria Oliveira', 'email': 'maria.voluntaria@cdc.org.br', 'unidade': '/Voluntarios/PROVITA', 'ou': '/Voluntarios/PROVITA', 'cargo': 'Business Starter', 'licenca': 'Business Starter', 'mfa': 'Ativado (2FA)', 'status': 'Voluntária', 'tipo_badge': 'warning'}
         ]
 
     apps_oauth = [

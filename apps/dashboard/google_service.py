@@ -113,13 +113,16 @@ def fetch_google_workspace_data(delegated_email=None):
             is_admin = u.get('isAdmin', False)
             suspended = u.get('suspended', False)
             status_str = 'Suspenso' if suspended else ('Ativo' if not u.get('changePasswordAtNextLogin') else 'Pendente 1º Login')
+            cargo_str = 'Administrador do Domínio' if is_admin else 'Voluntário / Colaborador'
             
             users_list.append({
                 'id': u.get('id'),
                 'nome': name,
                 'email': email,
-                'cargo': 'Administrador do Domínio' if is_admin else 'Voluntário / Colaborador',
+                'cargo': cargo_str,
+                'licenca': cargo_str,
                 'unidade': ou,
+                'ou': ou,
                 'status': status_str,
                 'mfa': 'Ativado (2FA)' if u.get('isEnrolledIn2Sv') else 'Não Ativado',
                 'cota_usada': 'N/A'
