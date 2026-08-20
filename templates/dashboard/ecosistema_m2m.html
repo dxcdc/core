@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ecossistema M2M | CDC Core{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estética Dark Premium para Monitoramento M2M */
+    .m2m-dashboard {
+        background-color: #0f172a;
+        color: #f8fafc;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    .m2m-header-title {
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        background: linear-gradient(90deg, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .stat-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 10px;
+        padding: 20px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        border-color: #475569;
+    }
+
+    .stat-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-top: 10px;
+    }
+
+    /* Tabela de Logs de Auditoria */
+    .audit-table-wrapper {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .table-dark-premium {
+        margin-bottom: 0;
+        color: #cbd5e1;
+    }
+    
+    .table-dark-premium th {
+        background-color: #0f172a;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #334155;
+        padding: 12px 16px;
+    }
+
+    .table-dark-premium td {
+        background-color: #1e293b;
+        border-bottom: 1px solid #334155;
+        padding: 16px;
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .table-dark-premium tbody tr:hover td {
+        background-color: #27354f;
+    }
+
+    .table-dark-premium tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .badge-m2m {
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+    .badge-success-glow {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-warning-glow {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-danger-glow {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .log-endpoint {
+        font-family: 'Courier New', Courier, monospace;
+        color: #a78bfa;
+        background: rgba(167, 139, 250, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.85em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="m2m-dashboard">
+        <!-- HEADER -->
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="m2m-header-title mb-1"><i class="ri-base-station-line me-2"></i>Ecossistema M2M</h2>
+                <p class="text-secondary mb-0" style="color: #94a3b8 !important;">Monitoramento em Tempo Real das Conexões de API Internas (Apps Satélites).</p>
+            </div>
+            <div>
+                <button class="btn btn-outline-light btn-sm rounded-pill px-3" style="border-color: #475569;">
+                    <i class="ri-refresh-line me-1"></i> Atualizar Logs
+                </button>
+            </div>
+        </div>
+
+        <!-- CARDS DE SAÚDE -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em; color: #94a3b8 !important;">Apps Conectados</span>
+                        <div class="bg-primary bg-opacity-10 rounded p-2 text-primary">
+                            <i class="ri-apps-2-line fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value text-white">1</div>
+                    <div class="mt-2 text-success" style="font-size: 0.8rem;">
+                        <i class="ri-arrow-up-line"></i> App RH Flask ativo
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em; color: #94a3b8 !important;">Requisições (24h)</span>
+                        <div class="bg-success bg-opacity-10 rounded p-2 text-success">
+                            <i class="ri-exchange-line fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value text-white">1,248</div>
+                    <div class="mt-2 text-secondary" style="font-size: 0.8rem; color: #64748b !important;">
+                        99.8% de taxa de sucesso (200 OK)
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card border-danger border-opacity-25">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.75rem; letter-spacing: 0.05em; color: #94a3b8 !important;">Webhooks Pendentes</span>
+                        <div class="bg-danger bg-opacity-10 rounded p-2 text-danger">
+                            <i class="ri-webhook-line fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value text-white">0</div>
+                    <div class="mt-2 text-success" style="font-size: 0.8rem;">
+                        <i class="ri-check-double-line"></i> Todos entregues
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOG DE AUDITORIA -->
+        <h5 class="text-white mb-3 fw-bold" style="font-size: 1.1rem;"><i class="ri-history-line me-2 text-primary"></i>Últimas Requisições (Log de Auditoria)</h5>
+        
+        <div class="audit-table-wrapper">
+            <div class="table-responsive">
+                <table class="table table-dark-premium">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Aplicação (Origem)</th>
+                            <th>Endpoint Acessado</th>
+                            <th>Método</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-secondary">Hoje, 10:45:22</td>
+                            <td><span class="text-white fw-bold"><i class="ri-server-line me-1 text-secondary"></i> App RH Flask</span> <br><small class="text-secondary">10.0.1.45</small></td>
+                            <td><span class="log-endpoint">/api/internal/workspace/data</span></td>
+                            <td><span class="badge bg-secondary bg-opacity-25 text-white">GET</span></td>
+                            <td><span class="badge-m2m badge-success-glow"><i class="ri-checkbox-circle-fill me-1"></i>200 OK</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Hoje, 10:30:05</td>
+                            <td><span class="text-white fw-bold"><i class="ri-server-line me-1 text-secondary"></i> App RH Flask</span> <br><small class="text-secondary">10.0.1.45</small></td>
+                            <td><span class="log-endpoint">/api/internal/auth/verify</span></td>
+                            <td><span class="badge bg-secondary bg-opacity-25 text-white">GET</span></td>
+                            <td><span class="badge-m2m badge-success-glow"><i class="ri-checkbox-circle-fill me-1"></i>200 OK</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Ontem, 23:14:10</td>
+                            <td><span class="text-white fw-bold"><i class="ri-spam-line me-1 text-secondary"></i> Desconhecido</span> <br><small class="text-secondary">189.45.12.8</small></td>
+                            <td><span class="log-endpoint">/api/internal/workspace/data</span></td>
+                            <td><span class="badge bg-secondary bg-opacity-25 text-white">GET</span></td>
+                            <td><span class="badge-m2m badge-danger-glow"><i class="ri-close-circle-fill me-1"></i>401 UNAUTH</span><br><small class="text-danger mt-1 d-block">X-API-Key inválida</small></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
