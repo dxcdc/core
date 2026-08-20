@@ -199,12 +199,12 @@
         <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">TOTAL DE CONTAS</span>
-                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.6em;">{{ stats_workspace.total_contas }}</h3>
-                    <small class="text-success fw-bold" style="font-size: 0.78em;"><i class="ri-building-line"></i> Domínio @cdc.org.br</small>
+                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">CONTAS SUSPENSAS</span>
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.6em;">{{ stats_workspace.contas_suspensas }}</h3>
+                    <small class="text-success fw-bold" style="font-size: 0.78em;"><i class="ri-money-dollar-circle-line"></i> Potencial economia</small>
                 </div>
-                <div class="p-3 bg-primary-subtle text-primary rounded-3 fs-24">
-                    <i class="ri-user-shared-line"></i>
+                <div class="p-3 bg-secondary-subtle text-secondary rounded-3 fs-24">
+                    <i class="ri-user-unfollow-line"></i>
                 </div>
             </div>
         </div>
@@ -214,42 +214,42 @@
         <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
+                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">SEM MFA (VULNERÁVEIS)</span>
+                    <h3 class="fw-bold text-danger mb-0" style="font-size: 1.6em;">{{ stats_workspace.contas_vulneraveis }}</h3>
+                    <small class="text-danger fw-bold" style="font-size: 0.78em;"><i class="ri-error-warning-line"></i> Exige ação imediata</small>
+                </div>
+                <div class="p-3 bg-danger-subtle text-danger rounded-3 fs-24">
+                    <i class="ri-shield-keyhole-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">ALIASES (GRATUITOS)</span>
+                    <h3 class="fw-bold text-success mb-0" style="font-size: 1.6em;">{{ stats_workspace.aliases_gratuitos }}</h3>
+                    <small class="text-success fw-bold" style="font-size: 0.78em;"><i class="ri-check-double-line"></i> Licenças não pagas</small>
+                </div>
+                <div class="p-3 bg-success-subtle text-success rounded-3 fs-24">
+                    <i class="ri-mail-volume-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
                     <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">USO DE DRIVE TOTAL</span>
-                    <h3 class="fw-bold text-primary mb-0" style="font-size: 1.6em;">{{ stats_workspace.cota_usada_total }}</h3>
-                    <small class="text-muted" style="font-size: 0.78em;">de {{ stats_workspace.cota_max_total }} alocados</small>
+                    <h3 class="fw-bold text-primary mb-0" style="font-size: 1.4em;">{{ stats_workspace.cota_usada_total }}</h3>
+                    <small class="text-muted" style="font-size: 0.78em;">Monitoramento global</small>
                 </div>
                 <div class="p-3 bg-info-subtle text-info rounded-3 fs-24">
                     <i class="ri-hard-drive-2-line"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">MFA / 2FA ATIVADO</span>
-                    <h3 class="fw-bold text-success mb-0" style="font-size: 1.6em;">{{ stats_workspace.taxa_mfa }}</h3>
-                    <small class="text-success fw-bold" style="font-size: 0.78em;"><i class="ri-shield-check-line"></i> Alto nível de proteção</small>
-                </div>
-                <div class="p-3 bg-success-subtle text-success rounded-3 fs-24">
-                    <i class="ri-shield-user-line"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card card-lahomes border-0 p-3" style="background: #ffffff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <span class="text-muted d-block fw-semibold" style="font-size: 0.82em;">GRUPOS SETORIAIS</span>
-                    <h3 class="fw-bold text-purple mb-0" style="font-size: 1.6em; color: #9333ea;">{{ stats_workspace.grupos_ativos }}</h3>
-                    <small class="text-muted" style="font-size: 0.78em;">Comunicação e permissões</small>
-                </div>
-                <div class="p-3 bg-purple-subtle text-purple rounded-3 fs-24" style="background: #f3e8ff; color: #9333ea;">
-                    <i class="ri-group-line"></i>
                 </div>
             </div>
         </div>
@@ -307,46 +307,51 @@
         </div>
 
         <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 1 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
-            <div class="position-relative flex-grow-1" style="max-width: 260px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
-                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab1" onkeyup="filterTab1()" placeholder="Buscar nome ou e-mail...">
-            </div>
-            
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-ou-tab1" onchange="filterTab1()">
-                    <option value="todos">Unidades (Todas)</option>
-                    <option value="presidencia">/Presidencia</option>
-                    <option value="transformacaodigital">/TransformacaoDigital</option>
-                    <option value="coordenacao">/Coordenacao</option>
-                    <option value="projetos">/Projetos</option>
-                    <option value="voluntarios">/Voluntarios</option>
-                </select>
-
-                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-mfa-tab1" onchange="filterTab1()">
-                    <option value="todos">Status 2FA (Todos)</option>
-                    <option value="ativado">🟢 2FA Ativado</option>
-                    <option value="pendente">🔴 2FA Pendente</option>
-                </select>
-
-                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-licenca-tab1" onchange="filterTab1()">
-                    <option value="todos">Licenças (Todas)</option>
-                    <option value="business standard">Business Standard</option>
-                    <option value="business starter">Business Starter</option>
-                    <option value="sem custo">Sem Custo ($0)</option>
-                </select>
-
-                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-status-tab1" onchange="filterTab1()">
-                    <option value="todos">Status da Conta (Todos)</option>
-                    <option value="ativo">🟢 Ativo</option>
-                    <option value="suspenso">🔴 Suspenso</option>
-                    <option value="alias">🔵 Alias</option>
-                    <option value="voluntário">🟡 Voluntário</option>
-                </select>
-
-                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab1()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
-                    <i class="ri-refresh-line"></i> Limpar
-                </button>
+        <div class="filter-bar-box mb-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-3 position-relative">
+                    <i class="ri-search-line position-absolute text-muted" style="left: 15px; top: 9px; font-size: 0.95em;"></i>
+                    <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border w-100" id="search-tab1" onkeyup="filterTab1()" placeholder="Buscar nome ou e-mail...">
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select form-select-sm filter-select-sm bg-white border w-100" id="filter-ou-tab1" onchange="filterTab1()">
+                        <option value="todos">Unidades (Todas)</option>
+                        <option value="presidencia">/Presidencia</option>
+                        <option value="transformacaodigital">/TransformacaoDigital</option>
+                        <option value="coordenacao">/Coordenacao</option>
+                        <option value="projetos">/Projetos</option>
+                        <option value="voluntarios">/Voluntarios</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select form-select-sm filter-select-sm bg-white border w-100" id="filter-mfa-tab1" onchange="filterTab1()">
+                        <option value="todos">Status 2FA (Todos)</option>
+                        <option value="ativado">🟢 2FA Ativado</option>
+                        <option value="pendente">🔴 2FA Pendente</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select form-select-sm filter-select-sm bg-white border w-100" id="filter-licenca-tab1" onchange="filterTab1()">
+                        <option value="todos">Licenças (Todas)</option>
+                        <option value="business standard">Business Standard</option>
+                        <option value="business starter">Business Starter</option>
+                        <option value="sem custo">Sem Custo ($0)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select form-select-sm filter-select-sm bg-white border w-100" id="filter-status-tab1" onchange="filterTab1()">
+                        <option value="todos">Status da Conta</option>
+                        <option value="ativo">🟢 Ativo</option>
+                        <option value="suspenso">🔴 Suspenso</option>
+                        <option value="alias">🔵 Alias</option>
+                        <option value="voluntário">🟡 Voluntário</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-grid">
+                    <button class="btn btn-sm btn-light border d-flex align-items-center justify-content-center gap-1" onclick="resetTab1()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
+                        <i class="ri-refresh-line"></i> Limpar
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -425,56 +430,58 @@
             </a>
         </div>
 
-        <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 2 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
-            <div class="position-relative flex-grow-1" style="max-width: 260px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
-                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab2" onkeyup="filterTab2()" placeholder="Buscar conta ou drive...">
+        <!-- BARRA DE FILTROS E PROGRESSO GLOBAL DA GUIA 2 -->
+        <div class="filter-bar-box mb-4">
+            <h6 class="fw-bold text-dark mb-2" style="font-size: 0.85em;">Consumo Global do Workspace</h6>
+            <div class="progress mb-3" style="height: 24px; border-radius: 8px;">
+                <div class="progress-bar bg-primary" role="progressbar" style="width: 60%; font-weight: bold;" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">Uso Total: {{ stats_workspace.cota_usada_total }}</div>
+                <div class="progress-bar bg-light text-muted" role="progressbar" style="width: 40%; font-weight: bold;" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">Espaço Disponível (Conforme Licença)</div>
             </div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-cota-tab2" onchange="filterTab2()">
-                    <option value="todos">Status de Cota (Todos)</option>
-                    <option value="alerta">🔴 Alerta de Cota (>80%)</option>
-                    <option value="normal">🟢 Dentro do Limite (<80%)</option>
-                </select>
-
-                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-limite-tab2" onchange="filterTab2()">
-                    <option value="todos">Limites de Alocação (Todos)</option>
-                    <option value="50">Até 50 GB</option>
-                    <option value="100">Até 100 GB</option>
-                </select>
-
-                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab2()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
-                    <i class="ri-refresh-line"></i> Limpar
-                </button>
+            
+            <div class="row g-2 align-items-center">
+                <div class="col-md-4 position-relative">
+                    <i class="ri-search-line position-absolute text-muted" style="left: 15px; top: 9px; font-size: 0.95em;"></i>
+                    <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border w-100" id="search-tab2" onkeyup="filterTab2()" placeholder="Buscar conta ou drive...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm filter-select-sm bg-white border w-100" id="filter-cota-tab2" onchange="filterTab2()">
+                        <option value="todos">Status de Cota (Todos)</option>
+                        <option value="alerta">🔴 Alerta de Cota (>80%)</option>
+                        <option value="normal">🟢 Dentro do Limite (<80%)</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-sm btn-light border d-flex align-items-center justify-content-center gap-1" onclick="resetTab2()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
+                        <i class="ri-refresh-line"></i> Limpar
+                    </button>
+                </div>
             </div>
         </div>
 
         <div class="row g-3 mb-4" id="grid-tab2">
             {% for c in contas_hipoteticas %}
-            {% if c.cota_max_gb > 0 %}
-            <div class="col-md-6 drive-card-item" data-cota-status="{% if c.cota_pct >= 80 %}alerta{% else %}normal{% endif %}" data-cota-limite="{{ c.cota_max_gb }}">
+            <div class="col-md-6 drive-card-item" data-cota-status="normal">
                 <div class="p-3 border rounded-3 bg-light shadow-sm">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <strong class="text-dark card-title-text"><i class="ri-user-3-line me-1 text-primary"></i> {{ c.nome }}</strong>
-                        <span class="badge bg-{{ c.tipo_badge }} fw-bold">{{ c.cota_gb }} GB / {{ c.cota_max_gb }} GB ({{ c.cota_pct }}%)</span>
+                        <span class="badge bg-secondary fw-bold">Uso compondo montante global</span>
                     </div>
                     <div class="progress mb-2" style="height: 8px; border-radius: 8px;">
-                        <div class="progress-bar bg-{{ c.tipo_badge }}" role="progressbar" style="width: {{ c.cota_pct }}%;" aria-valuenow="{{ c.cota_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar bg-secondary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                     <div class="d-flex align-items-center justify-content-between">
-                        <small class="text-muted" style="font-size: 0.78em;">Limite de Alerta: 80% ({{ c.cota_max_gb|add:0 }} GB)</small>
-                        {% if c.cota_pct >= 80 %}
-                            <a href="{% url 'dashboard:simular_acao' 'alerta_80_cota' %}" class="btn btn-xs btn-outline-danger py-1 px-2 fw-bold" style="font-size: 0.75em;">
-                                <i class="ri-alarm-warning-line me-1"></i> Disparar Alerta WhatsApp
-                            </a>
-                        {% else %}
-                            <small class="text-success fw-bold" style="font-size: 0.78em;"><i class="ri-checkbox-circle-line me-1"></i> Dentro do limite</small>
-                        {% endif %}
+                        <small class="text-muted" style="font-size: 0.78em;">A API do Admin SDK não extrai os GBs exatos por pessoa; uso agregado ativado.</small>
                     </div>
                 </div>
             </div>
-            {% endif %}
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-4 text-muted bg-light-subtle rounded border">
+                    <i class="ri-hard-drive-2-line fs-32 d-block mb-2 text-secondary"></i>
+                    <strong class="d-block text-dark mb-1">Nenhum dado real disponível.</strong>
+                    <span style="font-size: 0.85em;">Conecte sua Service Account para visualizar os usuários.</span>
+                </div>
+            </div>
             {% endfor %}
         </div>
 
@@ -511,20 +518,24 @@
         </div>
 
         <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 3 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
-            <div class="position-relative flex-grow-1" style="max-width: 260px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
-                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab3" onkeyup="filterTab3()" placeholder="Buscar grupo ou responsável...">
-            </div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-status-tab3" onchange="filterTab3()">
-                    <option value="todos">Status de Segurança (Todos)</option>
-                    <option value="vazamento">🔴 Com Vazamento / Alerta</option>
-                    <option value="regular">🟢 Regular / Auditado</option>
-                </select>
-                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab3()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
-                    <i class="ri-refresh-line"></i> Limpar
-                </button>
+        <div class="filter-bar-box mb-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-4 position-relative">
+                    <i class="ri-search-line position-absolute text-muted" style="left: 15px; top: 9px; font-size: 0.95em;"></i>
+                    <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border w-100" id="search-tab3" onkeyup="filterTab3()" placeholder="Buscar grupo ou responsável...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm filter-select-sm bg-white border w-100" id="filter-status-tab3" onchange="filterTab3()">
+                        <option value="todos">Status de Segurança (Todos)</option>
+                        <option value="vazamento">🔴 Com Vazamento / Alerta</option>
+                        <option value="regular">🟢 Regular / Auditado</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-sm btn-light border d-flex align-items-center justify-content-center gap-1" onclick="resetTab3()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
+                        <i class="ri-refresh-line"></i> Limpar
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -535,50 +546,26 @@
                         <th>Grupo de Trabalho</th>
                         <th>E-mail do Grupo</th>
                         <th>Quantidade de Membros</th>
-                        <th>Dono / Responsável</th>
                         <th>Status de Segurança</th>
-                        <th class="text-center">Ação Operacional</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr data-status="vazamento">
-                        <td><strong>Projetos de Proteção</strong></td>
-                        <td><code>projetos@cdc.org.br</code></td>
-                        <td>12 membros</td>
-                        <td>fvier@cdc.org.br</td>
-                        <td><span class="badge bg-danger">⚠️ Vazamento Detectado</span></td>
-                        <td class="text-center">
-                            <a href="{% url 'dashboard:simular_acao' 'vazamento_grupo_joab' %}" class="btn btn-xs btn-warning fw-bold py-1 px-2">
-                                Corrigir Grupo
-                            </a>
+                    {% for grupo in grupos_workspace %}
+                    <tr data-status="regular">
+                        <td><strong>{{ grupo.nome }}</strong></td>
+                        <td><code>{{ grupo.email }}</code></td>
+                        <td>{{ grupo.membros }} membros</td>
+                        <td><span class="badge bg-success">🟢 Regular</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted bg-light-subtle">
+                            <i class="ri-team-line fs-32 d-block mb-2 text-secondary"></i>
+                            <strong class="d-block text-dark mb-1">Nenhum grupo real retornado.</strong>
+                            <span style="font-size: 0.85em;">Verifique se a Service Account tem acesso ao escopo de Grupos.</span>
                         </td>
                     </tr>
-                    <tr data-status="regular">
-                        <td><strong>Tesouraria & Financeiro</strong></td>
-                        <td><code>financeiro@cdc.org.br</code></td>
-                        <td>5 membros</td>
-                        <td>adrianasantos@cdc.org.br</td>
-                        <td><span class="badge bg-success">🟢 Regular</span></td>
-                        <td class="text-center"><button class="btn btn-xs btn-light border" disabled>Auditado</button></td>
-                    </tr>
-                    <tr data-status="regular">
-                        <td><strong>Presidência & Coordenação</strong></td>
-                        <td><code>presidencia@cdc.org.br</code></td>
-                        <td>3 membros</td>
-                        <td>ananery@cdc.org.br</td>
-                        <td><span class="badge bg-success">🟢 Regular</span></td>
-                        <td class="text-center"><button class="btn btn-xs btn-light border" disabled>Auditado</button></td>
-                    </tr>
-                    <tr data-status="regular">
-                        <td><strong>Equipe de Voluntários</strong></td>
-                        <td><code>voluntarios@cdc.org.br</code></td>
-                        <td>28 membros</td>
-                        <td>fvier@cdc.org.br</td>
-                        <td><span class="badge bg-warning text-dark">🟡 3 Expirando</span></td>
-                        <td class="text-center">
-                            <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-xs btn-light border">Ver Membros</a>
-                        </td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -596,22 +583,32 @@
             </a>
         </div>
 
+        <div class="alert alert-info border border-info-subtle mb-4 shadow-sm" style="border-radius: 10px;">
+            <h6 class="fw-bold mb-1"><i class="ri-lightbulb-flash-line me-1"></i> Como isso impacta a segurança (DataOps)?</h6>
+            <p class="mb-0" style="font-size: 0.85em;">
+                Muitas vezes os usuários clicam em "Entrar com o Google" em aplicativos não homologados pelo CDC (ex: conversores de PDF, jogos, extensões). Esses apps podem ter permissão oculta para ler e-mails ou baixar arquivos confidenciais do Drive (Shadow IT). Monitorar esses tokens é essencial para evitar vazamentos de dados.
+            </p>
+        </div>
+
         <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 4 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
-            <div class="position-relative flex-grow-1" style="max-width: 260px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
-                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab4" onkeyup="filterTab4()" placeholder="Buscar app ou escopo...">
-            </div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-risco-tab4" onchange="filterTab4()">
-                    <option value="todos">Nível de Risco (Todos)</option>
-                    <option value="danger">🔴 Alto Risco</option>
-                    <option value="success">🟢 Baixo Risco</option>
-                    <option value="info">🔵 Interno / Bot</option>
-                </select>
-                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab4()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
-                    <i class="ri-refresh-line"></i> Limpar
-                </button>
+        <div class="filter-bar-box mb-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-4 position-relative">
+                    <i class="ri-search-line position-absolute text-muted" style="left: 15px; top: 9px; font-size: 0.95em;"></i>
+                    <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border w-100" id="search-tab4" onkeyup="filterTab4()" placeholder="Buscar app ou escopo...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm filter-select-sm bg-white border w-100" id="filter-risco-tab4" onchange="filterTab4()">
+                        <option value="todos">Nível de Risco (Todos)</option>
+                        <option value="danger">🔴 Alto Risco</option>
+                        <option value="success">🟢 Baixo Risco</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-sm btn-light border d-flex align-items-center justify-content-center gap-1" onclick="resetTab4()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
+                        <i class="ri-refresh-line"></i> Limpar
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -622,30 +619,17 @@
                         <th>Aplicativo / Ferramenta</th>
                         <th>Escopos Solicitados</th>
                         <th>Nível de Risco</th>
-                        <th>Usuários Conectados</th>
                         <th>Status de Aprovação</th>
-                        <th class="text-center">Ação Operacional</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for app in apps_oauth %}
-                    <tr data-badge-risco="{{ app.badge_risco }}">
-                        <td><strong>{{ app.nome }}</strong></td>
-                        <td><code class="text-dark">{{ app.escopo }}</code></td>
-                        <td><span class="badge bg-{{ app.badge_risco }} fw-bold">{{ app.risco }}</span></td>
-                        <td>{{ app.usuarios }} usuário(s)</td>
-                        <td><span class="badge bg-light text-dark border">{{ app.status }}</span></td>
-                        <td class="text-center">
-                            {% if app.badge_risco == 'danger' %}
-                                <a href="{% url 'dashboard:simular_acao' 'revogar_oauth' %}" class="btn btn-xs btn-danger fw-bold py-1 px-2" style="border-radius: 6px;">
-                                    <i class="ri-delete-bin-line me-1"></i> Revogar Token
-                                </a>
-                            {% else %}
-                                <button class="btn btn-xs btn-light border text-muted" disabled>Aprovado</button>
-                            {% endif %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted bg-light-subtle">
+                            <i class="ri-shield-check-line fs-32 d-block mb-2 text-secondary"></i>
+                            <strong class="d-block text-dark mb-1">Nenhum aplicativo de risco detectado no momento.</strong>
+                            <span style="font-size: 0.85em;">A API do Admin Reports não retornou anomalias ou o JSON não foi configurado.</span>
                         </td>
                     </tr>
-                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -663,64 +647,38 @@
             </a>
         </div>
 
-        <!-- BARRA DE FILTROS AVANÇADA OTIMIZADA DA GUIA 5 -->
-        <div class="filter-bar-box d-flex flex-wrap align-items-center justify-content-between gap-2">
-            <div class="position-relative flex-grow-1" style="max-width: 260px;">
-                <i class="ri-search-line position-absolute text-muted" style="left: 10px; top: 8px; font-size: 0.95em;"></i>
-                <input type="text" class="form-control form-control-sm ps-4 filter-input-sm bg-white border" id="search-tab5" onkeyup="filterTab5()" placeholder="Buscar voluntário ou alias...">
-            </div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm filter-select-sm bg-white border" id="filter-categoria-tab5" onchange="filterTab5()">
-                    <option value="todos">Categorias (Todas)</option>
-                    <option value="voluntario">Voluntários</option>
-                    <option value="alias">Aliases Gratuitos</option>
-                </select>
-                <button class="btn btn-sm btn-light border py-1 px-2 d-flex align-items-center gap-1" onclick="resetTab5()" style="height: 34px; font-size: 0.82em; border-radius: 6px;">
-                    <i class="ri-refresh-line"></i> Limpar
-                </button>
-            </div>
+        <div class="alert alert-purple border mb-4 shadow-sm" style="border-radius: 10px; background-color: #f3e8ff; border-color: #d8b4fe;">
+            <h6 class="fw-bold mb-1" style="color: #6b21a8;"><i class="ri-book-open-line me-1"></i> Entendendo Aliases e Contas Suspensas</h6>
+            <p class="mb-0" style="font-size: 0.85em; color: #581c87;">
+                <strong>Aliases:</strong> E-mails setoriais (ex: <code>projetos@cdc.org.br</code>) podem ser configurados como grupos ou aliases sem consumir uma licença paga. Isso reduz drasticamente os custos recorrentes de licenciamento.<br>
+                <strong>Offboarding:</strong> Quando um voluntário sai, a conta deve ser suspensa imediatamente para impedir acesso indevido e, posteriormente, deletada (após transferir a custódia dos arquivos vitais) para liberar a licença paga. Abaixo listamos as contas no status <b>Suspenso</b> em seu domínio.
+            </p>
         </div>
 
         <div class="row g-3 mb-3" id="grid-tab5">
-            <div class="col-md-6 lifecycle-item" data-categoria="voluntario">
-                <div class="p-3 bg-light border rounded-3 shadow-sm">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <strong class="text-dark card-title-text"><i class="ri-user-heart-line me-1 text-danger"></i> Maria Oliveira (PROVITA)</strong>
-                        <span class="badge bg-warning text-dark fw-bold">Vence em 15 dias</span>
-                    </div>
-                    <small class="text-muted d-block mb-3">Vínculo de voluntariado com prazo determinado até 24/08/2026.</small>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'dashboard:simular_acao' 'expirar_voluntario' %}" class="btn btn-xs btn-outline-primary fw-bold" style="border-radius: 6px;">
-                            <i class="ri-calendar-event-line me-1"></i> Prorrogar Vínculo
-                        </a>
-                        <a href="{% url 'dashboard:simular_acao' 'offboarding_drive' %}" class="btn btn-xs btn-outline-danger fw-bold" style="border-radius: 6px;">
-                            <i class="ri-user-unfollow-line me-1"></i> Encerrar Acesso
-                        </a>
+            {% for c in contas_hipoteticas %}
+                {% if c.status == 'Suspenso' %}
+                <div class="col-md-6 lifecycle-item" data-categoria="voluntario">
+                    <div class="p-3 bg-light border rounded-3 shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <strong class="text-dark card-title-text"><i class="ri-user-unfollow-line me-1 text-danger"></i> {{ c.nome }}</strong>
+                            <span class="badge bg-danger fw-bold">Conta Suspensa</span>
+                        </div>
+                        <small class="text-muted d-block mb-3">E-mail: <code>{{ c.email }}</code>. Considere transferir os arquivos vitais para o e-mail de custódia e deletar esta conta para economizar 1 licença paga.</small>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-md-6 lifecycle-item" data-categoria="alias">
-                <div class="p-3 bg-light border rounded-3 shadow-sm">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <strong class="text-dark card-title-text"><i class="ri-mail-volume-line me-1 text-info"></i> Paterson Silva (Projetos)</strong>
-                        <span class="badge bg-info text-white fw-bold">Alias Ativo (Sem Custo)</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if stats_workspace.contas_suspensas == 0 %}
+                <div class="col-12">
+                    <div class="text-center py-4 text-muted bg-light-subtle rounded border">
+                        <i class="ri-check-double-line fs-32 d-block mb-2 text-success"></i>
+                        <strong class="d-block text-dark mb-1">Excelente! Nenhuma conta suspensa no domínio.</strong>
+                        <span style="font-size: 0.85em;">Seu ambiente está enxuto e sem desperdício visível de licenças Workspace.</span>
                     </div>
-                    <small class="text-muted d-block mb-3">E-mail `paterson.silva@cdc.org.br` convertido com sucesso para alias da caixa setorial `projetos@cdc.org.br`.</small>
-                    <a href="{% url 'dashboard:simular_acao' 'executar_alias_paterson' %}" class="btn btn-xs btn-outline-info fw-bold" style="border-radius: 6px;">
-                        <i class="ri-checkbox-circle-line me-1"></i> Verificação de Custos
-                    </a>
                 </div>
-            </div>
-        </div>
-
-        <div class="p-3 bg-success-subtle border border-success rounded-3 text-success">
-            <div class="d-flex align-items-center gap-2">
-                <i class="ri-money-dollar-circle-fill fs-20"></i>
-                <div style="font-size: 0.88em;">
-                    <strong>Economia Estimada de Licenciamento</strong>: 3 contas convertidas para aliases gratuitos reduziram o custo recorrente do Workspace em <strong>R$ 1.840,00/ano</strong> para o CDC.
-                </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 

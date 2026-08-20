@@ -244,6 +244,51 @@
             </div>
             {% endif %}
 
+            <!-- PAINEL DE GESTÃO DE APPS SATÉLITES E INTEGRAÇÕES INTERNAS -->
+            {% if api.slug == 'api-hub-interno' %}
+            <div class="card border border-primary-subtle p-3 mb-4" style="border-radius: 12px; background-color: #f8fafc !important;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                        <i class="ri-global-line text-primary fs-18"></i> Integrações entre Sites do Mesmo Domínio (*.cdc.org.br)
+                    </h6>
+                </div>
+                <p class="text-muted mb-3" style="font-size: 0.84em; line-height: 1.4;">
+                    Mapeamento de confiança, CORS compartilhado e SSO unificado entre portais da organização.
+                </p>
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-hover align-middle border bg-white mb-0" style="border-radius: 8px; overflow: hidden;">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="font-size: 0.8em; font-weight: 600;">Nome do App Satélite</th>
+                                <th style="font-size: 0.8em; font-weight: 600;">Subdomínio / Rota Base</th>
+                                <th style="font-size: 0.8em; font-weight: 600;">Status de Confiança</th>
+                                <th class="text-center" style="font-size: 0.8em; font-weight: 600;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted bg-light-subtle">
+                                    <i class="ri-apps-2-line fs-32 d-block mb-2 text-secondary"></i>
+                                    <strong class="d-block text-dark mb-1">Nenhum App Satélite Mapeado</strong>
+                                    <span style="font-size: 0.82em;">Cadastre um app (Flask/FastAPI) para gerar tokens e permitir a troca de dados.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary fw-bold d-flex align-items-center gap-1" style="border-radius: 6px;">
+                        <i class="ri-key-2-line fs-15"></i> Rotacionar Chave JWT
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary fw-bold d-flex align-items-center gap-1" style="border-radius: 6px;">
+                        <i class="ri-add-circle-line fs-15"></i> Adicionar Novo App Satélite
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Parâmetros de Configuração de Chaves -->
             <form method="POST" action="{% url 'dashboard:integracoes' %}" class="mb-4">
                 {% csrf_token %}

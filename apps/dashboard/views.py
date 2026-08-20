@@ -114,10 +114,11 @@ def workspace_view(request):
         cota_drive = google_real.get('drive_quota', '0.00 GB')
         grupos_render = google_real.get('groups', [])
         ous_render = google_real.get('ous', [])
-        grupos_count = len(grupos_render)
         
-        mfa_atividados = sum(1 for u in contas_render if 'Ativado' in str(u.get('mfa', '')))
-        taxa_mfa = f"{(mfa_atividados / total_contas * 100):.1f}%" if total_contas > 0 else "0.0%"
+        # Novas métricas de Otimização e Segurança
+        contas_suspensas = sum(1 for u in contas_render if u.get('status') == 'Suspenso')
+        contas_vulneraveis = sum(1 for u in contas_render if 'Não Ativado' in str(u.get('mfa', '')))
+        aliases_gratuitos = len(grupos_render)
     else:
         # SEM DADOS FICTÍCIOS - AGUARDANDO NAVEGAÇÃO E CHAVE API REAL
         contas_render = []
@@ -125,8 +126,10 @@ def workspace_view(request):
         cota_drive = 'Conexão Pendente'
         grupos_render = []
         ous_render = []
-        grupos_count = 0
-        taxa_mfa = '0.0%'
+        
+        contas_suspensas = 0
+        contas_vulneraveis = 0
+        aliases_gratuitos = 0
 
     logs_workspace = LogAuditoria.objects.all()[:10]
 
@@ -139,9 +142,10 @@ def workspace_view(request):
         'google_real': google_real,
         'stats_workspace': {
             'total_contas': total_contas,
+            'contas_suspensas': contas_suspensas,
+            'contas_vulneraveis': contas_vulneraveis,
+            'aliases_gratuitos': aliases_gratuitos,
             'cota_usada_total': cota_drive,
-            'taxa_mfa': taxa_mfa,
-            'grupos_ativos': grupos_count
         }
     }
     return render(request, 'dashboard/workspace.html', context)
@@ -468,12 +472,54 @@ def integracoes_view(request):
                     'status': 'Ativo (HTTP 200 OK)'
                 }
             ]
+        },
+        {
+            'slug': 'api-hub-interno',
+            'nome': 'API Gateway & Hub de Microsserviços Internos',
+            'categoria': 'Comunicação & Autenticação',
+            'icone': 'ri-node-tree',
+            'cor_icone': 'text-primary',
+            'descricao': 'Gerenciamento de tokens (JWT/OAuth2) e proxy reverso para comunicação segura entre o CDC Core (Django) e aplicações satélites (Flask/FastAPI) sob o mesmo domínio.',
+            'status': 'Operacional / Aguardando App',
+            'badge_status': 'success',
+            'endpoint': 'https://core.cdc.org.br/api/internal/',
+            'campos': [
+                {'name': 'base_domain', 'label': 'Domínio Base Compartilhado (Cookie Sharing)', 'value': '.cdc.org.br'},
+                {'name': 'jwt_secret', 'label': 'Chave de Assinatura JWT (Secret)', 'value': '••••••••••••••••••••••••••••••••'},
+                {'name': 'nginx_proxy', 'label': 'Rota Sugerida no Proxy Reverso (Nginx)', 'value': 'core.cdc.org.br/flask-app/'},
+            ],
+            'endpoints_detalhados': [
+                {
+                    'metodo': 'GET',
+                    'nome': '1. Auth Verification (SSO)',
+                    'url': 'https://core.cdc.org.br/api/internal/auth/verify',
+                    'descricao': 'Validação de Token JWT ou Cookie de Sessão para garantir que o usuário do Flask está autenticado no CDC Core.',
+                    'parametros': 'Authorization: Bearer <token>',
+                    'status': 'Pronto para uso'
+                },
+                {
+                    'metodo': 'GET',
+                    'nome': '2. Exportação de Dados do Workspace',
+                    'url': 'https://core.cdc.org.br/api/internal/workspace/data',
+                    'descricao': 'Endpoint para o Flask consultar informações de voluntários e grupos já sanitizadas pelo Hub.',
+                    'parametros': 'status=ativo',
+                    'status': 'Pronto para uso'
+                },
+                {
+                    'metodo': 'POST',
+                    'nome': '3. Webhooks de Sincronização',
+                    'url': 'https://core.cdc.org.br/api/internal/webhooks/notify',
+                    'descricao': 'O Django dispara avisos para os apps satélites caso haja uma atualização crítica (ex: suspensão de conta).',
+                    'parametros': 'event_type, payload',
+                    'status': 'Pronto para uso'
+                }
+            ]
         }
     ]
 
     context = {
         'integracoes': integracoes_list,
-        'total_ativas': 4,
+        'total_ativas': 5,
         'total_pendentes': 2,
     }
     return render(request, 'dashboard/integracoes.html', context)
