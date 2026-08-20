@@ -20,7 +20,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     
     # 🔌 Rotas da API M2M (Hub de Microsserviços)
-    path('api/internal/auth/verify', api_views.auth_verify_view, name='api_auth_verify'),
-    path('api/internal/workspace/data', api_views.workspace_data_view, name='api_workspace_data'),
-    path('api/internal/webhooks/notify', api_views.webhooks_notify_view, name='api_webhooks_notify'),
+    path('api/internal/auth/verify/', api_views.auth_verify_view, name='api_auth_verify'),
+    path('api/internal/workspace/data/', api_views.workspace_data_view, name='api_workspace_data'),
+    path('api/internal/webhooks/notify/', api_views.webhooks_notify_view, name='api_webhooks_notify'),
 ]

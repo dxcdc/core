@@ -525,7 +525,7 @@ def integracoes_view(request):
     return render(request, 'dashboard/integracoes.html', context)
 
 
-@login_required
+@login_required(login_url='dashboard:login')
 def ecosistema_m2m_view(request):
     """
     Renderiza a página de monitoramento do Ecossistema M2M (Hub de Microsserviços).
