@@ -197,4 +197,92 @@ class Command(BaseCommand):
             }
         )
 
-        self.stdout.write(self.style.SUCCESS('Carga do cenário hipotético DataOps e estruturas VPN concluída com sucesso!'))
+        # 6. Cadastro Real de Sistemas do CDC
+        from apps.dataops.models import CadastroSistema, RespostaFormulario
+        
+        sys_core, _ = CadastroSistema.objects.get_or_create(
+            nome_sistema='CDC Core - Central DataOps & Microsserviços',
+            defaults={
+                'sigla': 'CDC-CORE',
+                'responsavel_nome': 'Fernando Vier',
+                'responsavel_email': 'fvier@cdc.org.br',
+                'setor_projeto': 'Transformação Digital / Sede',
+                'url_acesso': 'https://core.cdc.org.br',
+                'tecnologias': 'Python, Django, PostgreSQL, Docker, Traefik',
+                'descricao': 'Plataforma central do CDC para governança de dados, auditoria, autenticação M2M e integração com Google Workspace.',
+                'criticidade': 'Alta',
+                'status': 'Operacional'
+            }
+        )
+
+        sys_vpn, _ = CadastroSistema.objects.get_or_create(
+            nome_sistema='CDC VPN WireGuard & Tunneling',
+            defaults={
+                'sigla': 'CDC-VPN',
+                'responsavel_nome': 'Fernando Vier',
+                'responsavel_email': 'fvier@cdc.org.br',
+                'setor_projeto': 'Infraestrutura & Projetos (PROVITA, PPCAAM)',
+                'url_acesso': 'https://vpn.cdc.org.br',
+                'tecnologias': 'WireGuard, Linux Kernel, Flask, Docker',
+                'descricao': 'Infraestrutura de rede privada para tráfego seguro de chamados e dados dos projetos territoriais de proteção à vida.',
+                'criticidade': 'Alta',
+                'status': 'Operacional'
+            }
+        )
+
+        sys_workspace, _ = CadastroSistema.objects.get_or_create(
+            nome_sistema='Google Workspace Institucional',
+            defaults={
+                'sigla': 'G-WORKSPACE',
+                'responsavel_nome': 'GT Transformação Digital',
+                'responsavel_email': 'gt.transformadigital@cdc.org.br',
+                'setor_projeto': 'Administrativo & TI',
+                'url_acesso': 'https://admin.google.com',
+                'tecnologias': 'Google Admin SDK API, OAuth2, Service Account',
+                'descricao': 'Gestão unificada de contas institucionais (@cdc.org.br), controle de MFA/2FA, cota de armazenamento e grupos.',
+                'criticidade': 'Alta',
+                'status': 'Operacional'
+            }
+        )
+
+        sys_wa, _ = CadastroSistema.objects.get_or_create(
+            nome_sistema='WhatsApp Evolution API',
+            defaults={
+                'sigla': 'WA-EVO',
+                'responsavel_nome': 'Fernando Vier',
+                'responsavel_email': 'fvier@cdc.org.br',
+                'setor_projeto': 'Transformação Digital',
+                'url_acesso': 'https://whatsapp.cdc.org.br',
+                'tecnologias': 'Node.js, Express, Evolution API, Webhooks',
+                'descricao': 'Gateway de mensagens automáticas e notificações de alertas de auditoria do CDC.',
+                'criticidade': 'Média',
+                'status': 'Operacional'
+            }
+        )
+
+        # 7. Respostas Reais Iniciais de Formulários
+        RespostaFormulario.objects.get_or_create(
+            tipo_formulario='avaliacao_servicos',
+            nome_respondente='Ana Nery',
+            email_respondente='ananery@cdc.org.br',
+            defaults={
+                'setor_ou_projeto': 'Presidência',
+                'avaliacao_nota': 5,
+                'assunto_ou_categoria': 'Google Workspace & E-mails',
+                'mensagem_detalhes': 'Excelente estabilidade dos e-mails institucionais e agilidade no controle de acesso.'
+            }
+        )
+
+        RespostaFormulario.objects.get_or_create(
+            tipo_formulario='suporte_ti',
+            nome_respondente='Adriana Santos',
+            email_respondente='adrianasantos@cdc.org.br',
+            defaults={
+                'setor_ou_projeto': 'Coordenação Institucional',
+                'avaliacao_nota': 5,
+                'assunto_ou_categoria': 'VPN WireGuard & Conectividade',
+                'mensagem_detalhes': 'Solicitação de ampliação de cota de armazenamento concluída com sucesso.'
+            }
+        )
+
+        self.stdout.write(self.style.SUCCESS('Carga do cenário hipotético DataOps, sistemas reais e formulários concluída com sucesso!'))
