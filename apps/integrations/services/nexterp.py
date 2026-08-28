@@ -1,0 +1,156 @@
+import logging
+import time
+import uuid
+from dataclasses import dataclass
+
+import requests
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
+
+class NextERPError(Exception):
+    code = "nexterp_error"
+
+
+class NextERPConfigurationError(NextERPError):
+    code = "configuration_error"
+
+
+class NextERPAuthenticationError(NextERPError):
+    code = "authentication_error"
+
+
+class NextERPAuthorizationError(NextERPError):
+    code = "authorization_error"
+
+
+class NextERPRateLimitError(NextERPError):
+    code = "rate_limit_error"
+
+
+class NextERPServerError(NextERPError):
+    code = "server_error"
+
+
+class NextERPContractError(NextERPError):
+    code = "contract_error"
+
+
+@dataclass(frozen=True)
+class DatasetPage:
+    records: list[dict]
+    next_cursor: str
+    has_more: bool
+    contract_version: str
+
+
+class NextERPAnalyticsClient:
+    dataset_path = "/api/method/cdc_theme.api.get_cdc_analytics_dataset"
+    catalog_path = "/api/method/cdc_theme.api.get_cdc_analytics_catalog"
+
+    def __init__(
+        self,
+        *,
+        base_url=None,
+        api_key=None,
+        api_secret=None,
+        connect_timeout=None,
+        read_timeout=None,
+        max_retries=None,
+        session=None,
+        sleeper=time.sleep,
+    ):
+        self.base_url = (base_url if base_url is not None else settings.NEXTERP_BASE_URL).rstrip("/")
+        self.api_key = api_key if api_key is not None else settings.NEXTERP_API_KEY
+        self.api_secret = api_secret if api_secret is not None else settings.NEXTERP_API_SECRET
+        self.connect_timeout = connect_timeout or settings.NEXTERP_CONNECT_TIMEOUT
+        self.read_timeout = read_timeout or settings.NEXTERP_READ_TIMEOUT
+        self.max_retries = max_retries if max_retries is not None else settings.NEXTERP_MAX_RETRIES
+        self.session = session or requests.Session()
+        self.sleeper = sleeper
+        self.last_attempts = 0
+        if not self.base_url or not self.api_key or not self.api_secret:
+            raise NextERPConfigurationError("Configuração M2M do NextERP incompleta.")
+
+    def fetch_dataset_page(self, dataset, *, cursor="", modified_since=None, correlation_id=None):
+        params = {"dataset": dataset}
+        if cursor:
+            params["cursor"] = cursor
+        if modified_since:
+            params["modified_since"] = modified_since.isoformat()
+        payload = self._get(self.dataset_path, params, correlation_id or uuid.uuid4())
+        return self._validate_page(payload)
+
+    def fetch_catalog(self, *, correlation_id=None):
+        return self._get(self.catalog_path, {}, correlation_id or uuid.uuid4())
+
+    def _get(self, path, params, correlation_id):
+        headers = {
+            "Authorization": f"token {self.api_key}:{self.api_secret}",
+            "Accept": "application/json",
+            "X-Correlation-ID": str(correlation_id),
+        }
+        url = f"{self.base_url}{path}"
+        retryable_statuses = {429, 500, 502, 503, 504}
+        for attempt in range(1, self.max_retries + 2):
+            self.last_attempts = attempt
+            try:
+                response = self.session.get(
+                    url,
+                    params=params,
+                    headers=headers,
+                    timeout=(self.connect_timeout, self.read_timeout),
+                )
+            except requests.RequestException as exc:
+                if attempt > self.max_retries:
+                    raise NextERPServerError("Falha de comunicação com o NextERP.") from exc
+                self._backoff(attempt, correlation_id)
+                continue
+
+            if response.status_code == 401:
+                raise NextERPAuthenticationError("Credencial M2M do NextERP recusada.")
+            if response.status_code == 403:
+                raise NextERPAuthorizationError("Usuário M2M sem permissão para o recurso solicitado.")
+            if response.status_code == 429 and attempt > self.max_retries:
+                raise NextERPRateLimitError("Limite de requisições do NextERP excedido.")
+            if response.status_code >= 500 and attempt > self.max_retries:
+                raise NextERPServerError("NextERP indisponível após as retentativas.")
+            if response.status_code in retryable_statuses:
+                self._backoff(attempt, correlation_id)
+                continue
+            if response.status_code >= 400:
+                raise NextERPError(f"NextERP recusou a requisição (HTTP {response.status_code}).")
+            try:
+                return response.json()
+            except ValueError as exc:
+                raise NextERPContractError("NextERP retornou JSON inválido.") from exc
+        raise NextERPServerError("Falha inesperada ao consultar o NextERP.")
+
+    def _backoff(self, attempt, correlation_id):
+        logger.warning(
+            "NextERP temporariamente indisponível; nova tentativa",
+            extra={"correlation_id": str(correlation_id), "attempt": attempt},
+        )
+        self.sleeper(min(2 ** (attempt - 1), 30))
+
+    @staticmethod
+    def _validate_page(payload):
+        if not isinstance(payload, dict):
+            raise NextERPContractError("Resposta do NextERP não é um objeto JSON.")
+        body = payload.get("message", payload)
+        if not isinstance(body, dict):
+            raise NextERPContractError("Corpo da resposta do NextERP é inválido.")
+        version = body.get("contract_version") or body.get("version")
+        if version != "v1":
+            raise NextERPContractError(f"Contrato incompatível: esperado v1, recebido {version!r}.")
+        records = body.get("data", body.get("records"))
+        has_more = body.get("has_more")
+        next_cursor = body.get("next_cursor")
+        if not isinstance(records, list) or not isinstance(has_more, bool):
+            raise NextERPContractError("Página incompleta: data/records ou has_more inválido.")
+        if has_more and not isinstance(next_cursor, str):
+            raise NextERPContractError("Página incompleta: next_cursor obrigatório.")
+        if any(not isinstance(record, dict) or not record.get("name") for record in records):
+            raise NextERPContractError("Registro sem objeto JSON ou identificador name.")
+        return DatasetPage(records, next_cursor or "", has_more, version)

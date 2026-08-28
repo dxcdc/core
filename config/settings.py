@@ -53,7 +53,17 @@ INSTALLED_APPS = [
     # Core Apps
     'apps.dashboard.apps.DashboardConfig',
     'apps.dataops.apps.DataopsConfig',
+    'apps.integrations.apps.IntegrationsConfig',
 ]
+
+# Integrações M2M de saída. Segredos são lidos somente no servidor e nunca
+# enviados a templates, respostas HTTP ou logs.
+NEXTERP_BASE_URL = os.getenv('NEXTERP_BASE_URL', '').rstrip('/')
+NEXTERP_API_KEY = os.getenv('NEXTERP_API_KEY', '')
+NEXTERP_API_SECRET = os.getenv('NEXTERP_API_SECRET', '')
+NEXTERP_CONNECT_TIMEOUT = float(os.getenv('NEXTERP_CONNECT_TIMEOUT', '5'))
+NEXTERP_READ_TIMEOUT = float(os.getenv('NEXTERP_READ_TIMEOUT', '30'))
+NEXTERP_MAX_RETRIES = int(os.getenv('NEXTERP_MAX_RETRIES', '3'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

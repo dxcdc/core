@@ -209,43 +209,107 @@ def formulario_suporte_ti_pagina(request):
 
 @login_required(login_url='dashboard:login')
 def submeter_cadastro_sistema(request):
-    """Processa a gravação de um novo sistema no Cadastro dos Sistemas."""
+    """Processa a gravação de uma nova Solicitação de Acesso aos Sistemas do CDC."""
     if request.method == 'POST':
-        nome = request.POST.get('nome_sistema')
-        sigla = request.POST.get('sigla')
-        responsavel_nome = request.POST.get('responsavel_nome')
-        responsavel_email = request.POST.get('responsavel_email')
-        setor_projeto = request.POST.get('setor_projeto')
-        url_acesso = request.POST.get('url_acesso')
-        tecnologias = request.POST.get('tecnologias')
-        descricao = request.POST.get('descricao')
-        criticidade = request.POST.get('criticidade', 'Média')
-        status = request.POST.get('status', 'Operacional')
+        # Tenta capturar os campos do novo formulário UI/UX
+        nome = request.POST.get('nome')
+        sobrenome = request.POST.get('sobrenome', '')
+        cpf = request.POST.get('cpf', '')
+        email_inst = request.POST.get('email_institucional')
+        telefone = request.POST.get('telefone_whatsapp', '')
+        projeto_programa = request.POST.get('projeto_programa', 'SEDE')
+        departamento = request.POST.get('departamento_sede', 'Administrativo')
+        cargo = request.POST.get('cargo_funcao', 'Analista')
+        sistemas_list = request.POST.getlist('sistemas_acesso')
+        sistemas_str = ", ".join(sistemas_list) if sistemas_list else "Acesso Geral"
 
-        sistema = CadastroSistema.objects.create(
-            nome_sistema=nome,
-            sigla=sigla,
-            responsavel_nome=responsavel_nome,
-            responsavel_email=responsavel_email,
-            setor_projeto=setor_projeto,
-            url_acesso=url_acesso,
-            tecnologias=tecnologias,
-            descricao=descricao,
-            criticidade=criticidade,
-            status=status
-        )
+        # Se for o formulário de Solicitação de Acesso (com Nome/Sobrenome/CPF)
+        if nome and email_inst:
+            nome_completo = f"{nome.strip()} {sobrenome.strip()}".strip()
+            
+            # Validação extra do e-mail institucional
+            if not email_inst.endswith('@cdc.org.br'):
+                messages.warning(request, "⚠️ Se o e-mail não for institucional (@cdc.org.br), o cadastro de acesso não poderá ser aprovado.")
 
-        user_exec = UsuarioDataOps.objects.filter(email='fvier@cdc.org.br').first()
-        LogAuditoria.objects.create(
-            usuario_executor=user_exec,
-            nivel='SUCCESS',
-            acao_executada='Cadastro de Sistema',
-            alvo_impactado=f"{sistema.nome_sistema} ({sistema.setor_projeto})",
-            detalhes=f"Sistema {sistema.nome_sistema} cadastrado por {responsavel_nome} com criticidade {criticidade}.",
-            ip_origem=request.META.get('REMOTE_ADDR', '127.0.0.1')
-        )
+            # 1. Salva na tabela de Respostas de Formulário
+            resposta = RespostaFormulario.objects.create(
+                tipo_formulario='cadastro_sistema',
+                nome_respondente=nome_completo,
+                email_respondente=email_inst,
+                setor_ou_projeto=projeto_programa,
+                avaliacao_nota=5,
+                assunto_ou_categoria=f"{cargo} ({departamento})",
+                mensagem_detalhes=f"CPF: {cpf} | Tel: {telefone} | Sistemas Solicitados: {sistemas_str}"
+            )
 
-        messages.success(request, f"✅ Sistema '{sistema.nome_sistema}' registrado com sucesso no banco de dados!")
+            # 2. Cria registro em CadastroSistema para listagem dos sistemas mapeados
+            for sys_nome in (sistemas_list if sistemas_list else ['Acesso Geral']):
+                CadastroSistema.objects.get_or_create(
+                    nome_sistema=f"Acesso {sys_nome} - {nome_completo}",
+                    defaults={
+                        'sigla': sys_nome.upper(),
+                        'responsavel_nome': nome_completo,
+                        'responsavel_email': email_inst,
+                        'setor_projeto': f"{projeto_programa} / {departamento}",
+                        'url_acesso': f"https://core.cdc.org.br/sistemas/{sys_nome.lower()}/",
+                        'tecnologias': f"Perfil: {cargo} | Permissão: Solicitada",
+                        'descricao': f"Solicitação de Acesso aos Sistemas pelo colaborador {nome_completo} (CPF: {cpf}).",
+                        'criticidade': 'Média',
+                        'status': 'Operacional'
+                    }
+                )
+
+            # 3. Log de Auditoria
+            user_exec = UsuarioDataOps.objects.filter(email='fvier@cdc.org.br').first()
+            LogAuditoria.objects.create(
+                usuario_executor=user_exec,
+                nivel='SUCCESS',
+                acao_executada='Solicitação de Acesso a Sistemas',
+                alvo_impactado=f"{nome_completo} ({email_inst})",
+                detalhes=f"Solicitado acesso aos sistemas [{sistemas_str}] para {nome_completo} ({cargo} - {projeto_programa}).",
+                ip_origem=request.META.get('REMOTE_ADDR', '127.0.0.1')
+            )
+
+            messages.success(request, f"✅ Solicitação de Cadastro e Acesso aos Sistemas para '{nome_completo}' registrada com sucesso!")
+        
+        # Suporte retrocompatível para o formulário técnico direto
+        else:
+            nome_sys = request.POST.get('nome_sistema', 'Novo Sistema')
+            sigla = request.POST.get('sigla', 'SYS')
+            resp_nome = request.POST.get('responsavel_nome', 'Fernando Vier')
+            resp_email = request.POST.get('responsavel_email', 'fvier@cdc.org.br')
+            setor_proj = request.POST.get('setor_projeto', 'Transformação Digital')
+            url_acesso = request.POST.get('url_acesso', '')
+            tecnologias = request.POST.get('tecnologias', '')
+            descricao = request.POST.get('descricao', '')
+            criticidade = request.POST.get('criticidade', 'Média')
+            status = request.POST.get('status', 'Operacional')
+
+            sistema = CadastroSistema.objects.create(
+                nome_sistema=nome_sys,
+                sigla=sigla,
+                responsavel_nome=resp_nome,
+                responsavel_email=resp_email,
+                setor_projeto=setor_proj,
+                url_acesso=url_acesso,
+                tecnologias=tecnologias,
+                descricao=descricao,
+                criticidade=criticidade,
+                status=status
+            )
+
+            user_exec = UsuarioDataOps.objects.filter(email='fvier@cdc.org.br').first()
+            LogAuditoria.objects.create(
+                usuario_executor=user_exec,
+                nivel='SUCCESS',
+                acao_executada='Cadastro de Sistema',
+                alvo_impactado=f"{sistema.nome_sistema} ({sistema.setor_projeto})",
+                detalhes=f"Sistema {sistema.nome_sistema} cadastrado por {resp_nome}.",
+                ip_origem=request.META.get('REMOTE_ADDR', '127.0.0.1')
+            )
+
+            messages.success(request, f"✅ Sistema '{sistema.nome_sistema}' registrado com sucesso no banco de dados!")
+
     return redirect('dashboard:formularios')
 
 @login_required(login_url='dashboard:login')

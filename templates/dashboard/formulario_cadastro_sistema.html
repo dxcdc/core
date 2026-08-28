@@ -1,54 +1,177 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Formulário: Cadastro dos Sistemas | CDC Core{% endblock %}
+{% block title %}Solicitação de Cadastro e Acesso aos Sistemas | CDC Core{% endblock %}
 
 {% block extra_css %}
 <style>
-    .google-form-wrapper {
-        max-width: 840px;
+    .form-hero-wrapper {
+        max-width: 900px;
         margin: 0 auto;
     }
-    .form-header-card {
-        background: #1e293b;
-        border-top: 10px solid #2563eb;
-        border-radius: 12px;
-        padding: 32px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-        margin-bottom: 24px;
+
+    .form-hero-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border: 1px solid #334155;
+        border-top: 8px solid #38bdf8;
+        border-radius: 16px;
+        padding: 36px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        margin-bottom: 28px;
     }
+
     .form-section-card {
         background: #1e293b;
         border: 1px solid #334155;
-        border-radius: 12px;
-        padding: 28px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-        margin-bottom: 24px;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        margin-bottom: 28px;
+        transition: border-color 0.2s ease;
     }
-    .form-field-group {
-        background: #0f172a;
-        border: 1px solid #334155;
-        border-radius: 8px;
-        padding: 20px;
+
+    .form-section-card:hover {
+        border-color: #475569;
+    }
+
+    .section-header-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
         margin-bottom: 20px;
     }
-    .form-field-label {
-        font-weight: 700;
-        font-size: 0.95rem;
-        color: #f8fafc;
-        margin-bottom: 8px;
+
+    .section-icon-badge {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-right: 12px;
     }
-    .form-field-desc {
-        font-size: 0.82rem;
+
+    .custom-input-label {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #f1f5f9;
+        margin-bottom: 6px;
+    }
+
+    .custom-input-desc {
+        font-size: 0.8rem;
         color: #94a3b8;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
+    }
+
+    .form-control-premium {
+        background-color: #0f172a !important;
+        border: 1px solid #334155 !important;
+        color: #f8fafc !important;
+        border-radius: 10px !important;
+        padding: 14px 16px !important;
+        font-size: 0.95rem !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .form-control-premium:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15) !important;
+    }
+
+    .form-select-premium {
+        background-color: #0f172a !important;
+        border: 1px solid #334155 !important;
+        color: #f8fafc !important;
+        border-radius: 10px !important;
+        padding: 14px 16px !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* CARDS DE SELEÇÃO VISUAL PARA PROJETOS & SISTEMAS */
+    .visual-select-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+    }
+
+    .visual-option-card {
+        position: relative;
+    }
+
+    .visual-option-card input[type="radio"],
+    .visual-option-card input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .visual-option-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 10px;
+        padding: 14px 16px;
+        color: #e2e8f0;
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .visual-option-card input:checked + .visual-option-label {
+        background: rgba(56, 189, 248, 0.12);
+        border-color: #38bdf8;
+        color: #38bdf8;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+    }
+
+    .visual-option-card input:checked + .visual-option-label .check-icon {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .check-icon {
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.2s ease;
+        color: #38bdf8;
+        font-size: 1.1rem;
+    }
+
+    /* ALERTA DE E-MAIL INSTITUCIONAL */
+    .email-warning-box {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: #f87171;
+        font-size: 0.84rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        margin-top: 8px;
+    }
+
+    .step-badge {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 6px 14px;
+        border-radius: 20px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <div class="google-form-wrapper">
+    <div class="form-hero-wrapper">
         <!-- BOTÃO VOLTAR -->
         <div class="mb-3">
             <a href="{% url 'dashboard:formularios' %}" class="btn btn-outline-secondary btn-sm rounded-3">
@@ -56,125 +179,309 @@
             </a>
         </div>
 
-        <!-- BANNER DE CABEÇALHO DO GOOGLE FORM -->
-        <div class="form-header-card">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <span class="badge bg-primary px-3 py-1 mb-2 font-weight-bold">Formulário Oficial CDC</span>
-                    <h2 class="text-white fw-bold mb-2">Formulário: Cadastro dos Sistemas</h2>
-                    <p class="text-secondary mb-0" style="color: #cbd5e1 !important;">
-                        Mapeamento e catalogação técnica de todas as aplicações institucionais, satélites, servidores e projetos do Centro Dom Helder Camara (CDC).
-                    </p>
-                </div>
+        <!-- HERO HEADER BANNER -->
+        <div class="form-hero-card">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <span class="step-badge bg-primary bg-opacity-20 text-primary border border-primary border-opacity-40">
+                    Formulário Institucional CDC
+                </span>
+                <span class="text-secondary small" style="color: #94a3b8 !important;">
+                    <i class="ri-shield-check-line text-success me-1"></i> Ambiente Seguro & Auditado
+                </span>
             </div>
-            <hr class="border-secondary my-3">
-            <div class="d-flex align-items-center text-info small">
-                <i class="ri-information-line me-2 fs-5"></i>
-                <span>Os dados informados serão salvos diretamente no banco de dados PostgreSQL do CDC Core.</span>
-            </div>
+            <h2 class="text-white fw-bold mb-2">Solicitação de Cadastro e Acesso aos Sistemas</h2>
+            <p class="text-secondary mb-0" style="color: #cbd5e1 !important; font-size: 0.95rem;">
+                Formulário oficial para liberação de credenciais de acesso aos sistemas e ferramentas de gestão do Centro Dom Helder Camara (CDC).
+            </p>
         </div>
 
-        <!-- FORMULÁRIO INTERATIVO -->
-        <form action="{% url 'dashboard:submeter_cadastro_sistema' %}" method="POST">
+        <!-- MENSAGENS FEEDBACK DO DJANGO -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show bg-dark border-{{ message.tags }} text-white mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- FORMULÁRIO PRINCIPAL COM UI/UX REFINADO -->
+        <form action="{% url 'dashboard:submeter_cadastro_sistema' %}" method="POST" id="formCadastroSistema">
             {% csrf_token %}
 
+            <!-- SEÇÃO 1: DADOS PESSOAIS & CONTATO -->
             <div class="form-section-card">
-                <h5 class="text-white fw-bold mb-4">
-                    <i class="ri-building-line text-primary me-2"></i>1. Identificação da Aplicação / Sistema
-                </h5>
-
-                <div class="form-field-group">
-                    <label class="form-field-label">Nome Oficial do Sistema / Aplicação *</label>
-                    <div class="form-field-desc">Informe a nomenclatura oficial pela qual o sistema é reconhecido no CDC.</div>
-                    <input type="text" name="nome_sistema" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: Sistema de Gestão do PROVITA / CDC Core" required>
-                </div>
-
-                <div class="form-field-group">
-                    <label class="form-field-label">Sigla ou Código de Identificação</label>
-                    <div class="form-field-desc">Acrônimo curto do sistema (se houver).</div>
-                    <input type="text" name="sigla" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: SIS-PROVITA / CDC-CORE">
-                </div>
-
-                <div class="form-field-group">
-                    <label class="form-field-label">Setor ou Projeto Vinculado *</label>
-                    <div class="form-field-desc">Qual programa, convênio ou setor institucional é responsável pelo uso.</div>
-                    <input type="text" name="setor_projeto" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: PROVITA, PPCAAM, PPDDH, Sede Recife" required>
-                </div>
-            </div>
-
-            <div class="form-section-card">
-                <h5 class="text-white fw-bold mb-4">
-                    <i class="ri-user-settings-line text-success me-2"></i>2. Responsabilidade Técnica & Contatos
-                </h5>
-
-                <div class="form-field-group">
-                    <label class="form-field-label">Responsável Técnico (Nome Completo) *</label>
-                    <div class="form-field-desc">Nome da pessoa responsável pelo gerenciamento ou ponto focal.</div>
-                    <input type="text" name="responsavel_nome" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: Fernando Vier" required>
-                </div>
-
-                <div class="form-field-group">
-                    <label class="form-field-label">E-mail do Responsável Técnico *</label>
-                    <div class="form-field-desc">E-mail institucional (@cdc.org.br).</div>
-                    <input type="email" name="responsavel_email" class="form-control bg-dark border-secondary text-white p-3" placeholder="fvier@cdc.org.br" required>
-                </div>
-            </div>
-
-            <div class="form-section-card">
-                <h5 class="text-white fw-bold mb-4">
-                    <i class="ri-cpu-line text-warning me-2"></i>3. Especificações Técnicas & Infraestrutura
-                </h5>
-
-                <div class="form-field-group">
-                    <label class="form-field-label">URL de Acesso ou IP do Servidor</label>
-                    <div class="form-field-desc">Endereço web ou IP de hospedagem do sistema.</div>
-                    <input type="text" name="url_acesso" class="form-control bg-dark border-secondary text-white p-3" placeholder="https://provita.cdc.org.br">
-                </div>
-
-                <div class="form-field-group">
-                    <label class="form-field-label">Stack Tecnológica (Linguagens, Banco & Frameworks)</label>
-                    <div class="form-field-desc">Tecnologias utilizadas no desenvolvimento.</div>
-                    <input type="text" name="tecnologias" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: Python, Django, PostgreSQL, Docker, Traefik">
+                <div class="section-header-title">
+                    <div class="section-icon-badge bg-primary bg-opacity-20 text-primary">
+                        <i class="ri-user-line"></i>
+                    </div>
+                    1. Identificação Pessoal & Contato
                 </div>
 
                 <div class="row g-3">
+                    <!-- NOME -->
                     <div class="col-md-6">
-                        <div class="form-field-group">
-                            <label class="form-field-label">Nível de Criticidade *</label>
-                            <select name="criticidade" class="form-select bg-dark border-secondary text-white p-3">
-                                <option value="Alta">Alta - Sistema Vital / Crítico</option>
-                                <option value="Média" selected>Média - Operação Normal</option>
-                                <option value="Baixa">Baixa - Apoio / Secundário</option>
-                            </select>
-                        </div>
+                        <label class="custom-input-label">Nome *</label>
+                        <input type="text" name="nome" class="form-control form-control-premium" placeholder="Ex: Maria" required>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-field-group">
-                            <label class="form-field-label">Status Operacional *</label>
-                            <select name="status" class="form-select bg-dark border-secondary text-white p-3">
-                                <option value="Operacional" selected>Operacional em Produção</option>
-                                <option value="Desenvolvimento">Em Desenvolvimento / Homologação</option>
-                                <option value="Legado">Legado / Manutenção Preventiva</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="form-field-group">
-                    <label class="form-field-label">Descrição Detalhada do Sistema</label>
-                    <div class="form-field-desc">Descreva a finalidade da aplicação e o impacto nas atividades do CDC.</div>
-                    <textarea name="descricao" class="form-control bg-dark border-secondary text-white p-3" rows="4" placeholder="Explique o objetivo e o funcionamento do sistema..."></textarea>
+                    <!-- SOBRENOME -->
+                    <div class="col-md-6">
+                        <label class="custom-input-label">Sobrenome *</label>
+                        <input type="text" name="sobrenome" class="form-control form-control-premium" placeholder="Ex: Silva Nery" required>
+                    </div>
+
+                    <!-- CPF -->
+                    <div class="col-md-6">
+                        <label class="custom-input-label">CPF *</label>
+                        <input type="text" name="cpf" id="inputCPF" class="form-control form-control-premium font-monospace" placeholder="000.000.000-00" maxlength="14" required>
+                    </div>
+
+                    <!-- TELEFONE / WHATSAPP -->
+                    <div class="col-md-6">
+                        <label class="custom-input-label">Telefone / WhatsApp *</label>
+                        <input type="text" name="telefone_whatsapp" id="inputTelefone" class="form-control form-control-premium font-monospace" placeholder="(81) 90000-0000" maxlength="15" required>
+                    </div>
+
+                    <!-- E-MAIL INSTITUCIONAL -->
+                    <div class="col-12 mt-3">
+                        <label class="custom-input-label">E-mail Institucional *</label>
+                        <div class="custom-input-desc">
+                            Endereço de e-mail corporativo finalizado com <code>@cdc.org.br</code>.
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-info"><i class="ri-mail-send-line"></i></span>
+                            <input type="email" name="email_institucional" id="inputEmailInst" class="form-control form-control-premium" placeholder="seuemail@cdc.org.br" required>
+                        </div>
+                        
+                        <!-- ALERTA DE E-MAIL PESSOAL REQUISITADO NA UI -->
+                        <div class="email-warning-box">
+                            <i class="ri-error-warning-line me-2 fs-5"></i>
+                            <div>
+                                <strong>Atenção:</strong> Se o e-mail for pessoal (ex: Gmail, Hotmail, Outlook), o cadastro não será realizado.
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- BOTÃO ENVIAR -->
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <a href="{% url 'dashboard:formularios' %}" class="btn btn-secondary px-4 py-2">Cancelar</a>
-                <button type="submit" class="btn btn-primary font-weight-bold px-5 py-3 rounded-3 fs-6">
-                    <i class="ri-send-plane-fill me-2"></i> Gravar Sistema no Banco de Dados
+            <!-- SEÇÃO 2: VÍNCULO INSTITUCIONAL & CARGO -->
+            <div class="form-section-card">
+                <div class="section-header-title">
+                    <div class="section-icon-badge bg-warning bg-opacity-20 text-warning">
+                        <i class="ri-building-4-line"></i>
+                    </div>
+                    2. Vínculo Institucional & Lotação
+                </div>
+
+                <!-- PROJETOS / PROGRAMAS -->
+                <div class="mb-4">
+                    <label class="custom-input-label">Projetos / Programas *</label>
+                    <div class="custom-input-desc">Selecione o projeto ou unidade onde atua:</div>
+                    
+                    <div class="visual-select-grid">
+                        <div class="visual-option-card">
+                            <input type="radio" name="projeto_programa" id="proj_atitude" value="ATITUDE" required>
+                            <label for="proj_atitude" class="visual-option-label">
+                                <span><i class="ri-heart-pulse-line me-2"></i>ATITUDE</span>
+                                <i class="ri-checkbox-circle-fill check-icon"></i>
+                            </label>
+                        </div>
+
+                        <div class="visual-option-card">
+                            <input type="radio" name="projeto_programa" id="proj_atm" value="ATM">
+                            <label for="proj_atm" class="visual-option-label">
+                                <span><i class="ri-shield-user-line me-2"></i>ATM</span>
+                                <i class="ri-checkbox-circle-fill check-icon"></i>
+                            </label>
+                        </div>
+
+                        <div class="visual-option-card">
+                            <input type="radio" name="projeto_programa" id="proj_ppcaam" value="PPCAAM">
+                            <label for="proj_ppcaam" class="visual-option-label">
+                                <span><i class="ri-scales-3-line me-2"></i>PPCAAM</span>
+                                <i class="ri-checkbox-circle-fill check-icon"></i>
+                            </label>
+                        </div>
+
+                        <div class="visual-option-card">
+                            <input type="radio" name="projeto_programa" id="proj_ppdpi" value="PPDPI">
+                            <label for="proj_ppdpi" class="visual-option-label">
+                                <span><i class="ri-hospital-line me-2"></i>PPDPI</span>
+                                <i class="ri-checkbox-circle-fill check-icon"></i>
+                            </label>
+                        </div>
+
+                        <div class="visual-option-card">
+                            <input type="radio" name="projeto_programa" id="proj_provita" value="PROVITA">
+                            <label for="proj_provita" class="visual-option-label">
+                                <span><i class="ri-hand-heart-line me-2"></i>PROVITA</span>
+                                <i class="ri-checkbox-circle-fill check-icon"></i>
+                            </label>
+                        </div>
+
+                        <div class="visual-option-card">
+                            <input type="radio" name="projeto_programa" id="proj_sede" value="SEDE" checked>
+                            <label for="proj_sede" class="visual-option-label">
+                                <span><i class="ri-building-line me-2"></i>SEDE</span>
+                                <i class="ri-checkbox-circle-fill check-icon"></i>
+                            </label>
+                        </div>
+
+                        <div class="visual-option-card">
+                            <input type="radio" name="projeto_programa" id="proj_cais" value="CAIS OLINDA">
+                            <label for="proj_cais" class="visual-option-label">
+                                <span><i class="ri-anchor-line me-2"></i>CAIS OLINDA</span>
+                                <i class="ri-checkbox-circle-fill check-icon"></i>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- DEPARTAMENTO / SETOR SEDE -->
+                    <div class="col-md-6">
+                        <label class="custom-input-label">Departamento / Setor SEDE *</label>
+                        <select name="departamento_sede" class="form-select form-select-premium" required>
+                            <option value="Administrativo" selected>Administrativo</option>
+                            <option value="Financeiro">Financeiro</option>
+                            <option value="RH">RH (Recursos Humanos)</option>
+                        </select>
+                    </div>
+
+                    <!-- CARGO / FUNÇÃO SEDE -->
+                    <div class="col-md-6">
+                        <label class="custom-input-label">Cargo / Função SEDE *</label>
+                        <select name="cargo_funcao" class="form-select form-select-premium" required>
+                            <option value="Coordenador (a)">Coordenador (a)</option>
+                            <option value="Supervisor (a)">Supervisor (a)</option>
+                            <option value="Assistente">Assistente</option>
+                            <option value="Analista" selected>Analista</option>
+                            <option value="Jovem Aprendiz">Jovem Aprendiz</option>
+                            <option value="Consultor">Consultor</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 3: SELEÇÃO DOS SISTEMAS DE ACESSO -->
+            <div class="form-section-card">
+                <div class="section-header-title">
+                    <div class="section-icon-badge bg-info bg-opacity-20 text-info">
+                        <i class="ri-layout-grid-line"></i>
+                    </div>
+                    3. Escolha os Sistemas que Terá Acesso
+                </div>
+
+                <div class="custom-input-desc mb-3">
+                    Marque todos os sistemas e módulos para os quais solicita liberação de credencial:
+                </div>
+
+                <div class="row g-3">
+                    <!-- ONGSYS -->
+                    <div class="col-md-4">
+                        <div class="visual-option-card">
+                            <input type="checkbox" name="sistemas_acesso" id="sys_ongsys" value="ONGSYS" checked>
+                            <label for="sys_ongsys" class="visual-option-label p-3 flex-column align-items-start gap-2">
+                                <div class="d-flex justify-content-between w-100 align-items-center">
+                                    <span class="fw-bold text-white"><i class="ri-building-2-line text-primary me-2"></i>ONGSYS</span>
+                                    <i class="ri-checkbox-circle-fill check-icon"></i>
+                                </div>
+                                <small class="text-secondary fw-normal" style="font-size: 0.78rem; color: #94a3b8 !important;">
+                                    Gestão Integrada de ONGs, Projetos e Convênios.
+                                </small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- SISTEMA DE ESTOQUE -->
+                    <div class="col-md-4">
+                        <div class="visual-option-card">
+                            <input type="checkbox" name="sistemas_acesso" id="sys_estoque" value="SISTEMA DE ESTOQUE">
+                            <label for="sys_estoque" class="visual-option-label p-3 flex-column align-items-start gap-2">
+                                <div class="d-flex justify-content-between w-100 align-items-center">
+                                    <span class="fw-bold text-white"><i class="ri-archive-line text-warning me-2"></i>SISTEMA DE ESTOQUE</span>
+                                    <i class="ri-checkbox-circle-fill check-icon"></i>
+                                </div>
+                                <small class="text-secondary fw-normal" style="font-size: 0.78rem; color: #94a3b8 !important;">
+                                    Controle de Estoque, Insumos e Almoxarifado.
+                                </small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- OKDOC -->
+                    <div class="col-md-4">
+                        <div class="visual-option-card">
+                            <input type="checkbox" name="sistemas_acesso" id="sys_okdoc" value="OKDOC">
+                            <label for="sys_okdoc" class="visual-option-label p-3 flex-column align-items-start gap-2">
+                                <div class="d-flex justify-content-between w-100 align-items-center">
+                                    <span class="fw-bold text-white"><i class="ri-file-shield-2-line text-success me-2"></i>OKDOC</span>
+                                    <i class="ri-checkbox-circle-fill check-icon"></i>
+                                </div>
+                                <small class="text-secondary fw-normal" style="font-size: 0.78rem; color: #94a3b8 !important;">
+                                    Gestão Eletrônica de Documentos & Protocolo.
+                                </small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÃO DE SUBMISSÃO FINAL -->
+            <div class="d-flex justify-content-between align-items-center mb-5 gap-3 flex-wrap">
+                <a href="{% url 'dashboard:formularios' %}" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary font-weight-bold px-5 py-3 rounded-3 fs-6 shadow-lg">
+                    <i class="ri-send-plane-fill me-2"></i> Solicitado Acesso aos Sistemas
                 </button>
             </div>
+
         </form>
     </div>
 </div>
+
+<!-- SCRIPTS DE MÁSCARA & VALIDAÇÃO UI/UX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // MÁSCARA AUTOMÁTICA DE CPF (000.000.000-00)
+    const cpfInput = document.getElementById('inputCPF');
+    if (cpfInput) {
+        cpfInput.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.slice(0, 11);
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            e.target.value = v;
+        });
+    }
+
+    // MÁSCARA AUTOMÁTICA DE TELEFONE/WHATSAPP ((00) 00000-0000)
+    const telInput = document.getElementById('inputTelefone');
+    if (telInput) {
+        telInput.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.slice(0, 11);
+            v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
+            v = v.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = v;
+        });
+    }
+
+    // VALIDAÇÃO EM TEMPO REAL DE E-MAIL INSTITUCIONAL
+    const emailInput = document.getElementById('inputEmailInst');
+    if (emailInput) {
+        emailInput.addEventListener('blur', function() {
+            const val = emailInput.value.trim();
+            if (val && !val.endsWith('@cdc.org.br')) {
+                emailInput.style.borderColor = '#f87171';
+            } else {
+                emailInput.style.borderColor = '#334155';
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

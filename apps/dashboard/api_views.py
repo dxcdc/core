@@ -113,13 +113,11 @@ def workspace_data_view(request):
                 }
             ]
 
-    api_key_used = request.headers.get('X-API-Key', os.getenv('INTERNAL_M2M_API_KEY', 'x-api-key-cdc-core-5928374928374928374'))
-
     payload = {
         "status": "success",
         "http_code": 200,
         "endpoint": "https://core.cdc.org.br/api/internal/workspace/data/",
-        "auth_header": f"X-API-Key: {api_key_used}",
+        "authentication": "X-API-Key validated",
         "unidade_organizacional_raiz": "/ATITUDE",
         "contas_mapeadas": len(users_list),
         "users": users_list,

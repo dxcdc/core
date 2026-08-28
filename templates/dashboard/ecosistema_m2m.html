@@ -334,7 +334,7 @@ async function consultarCdcCore() {
                     <div class="tab-pane fade" id="curl" role="tabpanel">
                         <div class="code-box">
 <pre style="margin:0; color:#34d399;"><code>curl -X GET "https://core.cdc.org.br/api/internal/workspace/data/" \
-  -H "X-API-Key: x-api-key-cdc-core-5928374928374928374"</code></pre>
+  -H "X-API-Key: &lt;chave-armazenada-no-cofre&gt;"</code></pre>
                         </div>
                     </div>
                 </div>
@@ -432,9 +432,9 @@ async function consultarCdcCore() {
                 <div class="alert alert-warning bg-warning bg-opacity-10 border-warning text-warning small mb-3">
                     <i class="ri-alert-line me-1"></i> <strong>Atenção:</strong> Ao alterar a chave no CDC Core, todas as aplicações satélites precisarão ter seu arquivo <code>.env</code> atualizado para manter o acesso às APIs.
                 </div>
-                <p class="text-secondary small mb-2" style="color: #cbd5e1 !important;">Chave M2M Atual no <code>.env</code>:</p>
+                <p class="text-secondary small mb-2" style="color: #cbd5e1 !important;">Referência da credencial M2M no cofre:</p>
                 <div class="p-2 rounded bg-dark border border-secondary text-info mb-3 font-monospace small">
-                    x-api-key-cdc-core-5928374928374928374
+                    INTERNAL_M2M_API_KEY (valor nunca exibido)
                 </div>
                 <div class="text-end mt-4">
                     <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">Fechar</button>
@@ -449,7 +449,7 @@ async function consultarCdcCore() {
 
 <script>
 function copiarCurlTeste() {
-    const comando = `curl -X GET "https://core.cdc.org.br/api/internal/workspace/data/" -H "X-API-Key: x-api-key-cdc-core-5928374928374928374"`;
+    const comando = `curl -X GET "https://core.cdc.org.br/api/internal/workspace/data/" -H "X-API-Key: <chave-armazenada-no-cofre>"`;
     navigator.clipboard.writeText(comando).then(() => {
         alert("Comando cURL de teste copiado para a sua área de transferência!");
     }).catch(err => {
