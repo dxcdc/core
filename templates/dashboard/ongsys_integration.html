@@ -85,7 +85,10 @@
             Consumo, testes e integração programática de todas as rotas financeiras, cadastros, compras e notas fiscais do OngSys.
         </p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-success btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" id="btnTestAllApis" onclick="testAllEndpoints()" style="border-radius: 6px; font-size: 0.82em; background: #10b981; border-color: #10b981;">
+            <i class="ri-heart-pulse-fill fs-16"></i> Testar Todas as APIs
+        </button>
         <button type="button" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalSyncAtomic" style="border-radius: 6px; font-size: 0.82em; background: #0284c7; border-color: #0284c7;">
             <i class="ri-refresh-line fs-16"></i> Sincronizar Banco Local (Atômico)
         </button>
@@ -94,6 +97,7 @@
         </a>
     </div>
 </div>
+
 
 <!-- CARDS COMPACTOS DE METRICAS DE MONITORAMENTO ONGSYS -->
 <div class="row g-3 mb-4">
@@ -301,13 +305,46 @@
     </li>
 </ul>
 
-<!-- BARRA DE PESQUISA RÁPIDA -->
-<div class="mb-4">
-    <div class="position-relative">
-        <i class="ri-search-line position-absolute text-muted" style="left: 12px; top: 10px; font-size: 1.1em;"></i>
-        <input type="text" class="form-control ps-4 bg-white border" id="searchOngsysEndpoint" onkeyup="filterEndpointsSearch()" placeholder="Pesquisar endpoint do OngSys (ex: contas-pagar, fornecedores, nfse, produtos...)" style="height: 42px; border-radius: 8px; font-size: 0.9em;">
+<!-- BARRA DE PROGRESSO DO HEALTH CHECK GERAL (Oculta por padrão) -->
+<div id="healthCheckProgressBox" class="d-none mb-3 p-3 bg-white rounded-3 border shadow-sm" style="border-radius: 12px !important;">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="d-flex align-items-center gap-2">
+            <span class="spinner-border spinner-border-sm text-success" role="status"></span>
+            <strong class="text-dark" style="font-size: 0.88em;">Executando Bateria de Testes em Todas as Rotas...</strong>
+        </div>
+        <small class="text-muted fw-bold font-monospace" id="healthProgressText">0 / 20 rotas</small>
+    </div>
+    <div class="progress" style="height: 8px; border-radius: 6px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="healthProgressBar" role="progressbar" style="width: 0%;"></div>
     </div>
 </div>
+
+<!-- BARRA DE PESQUISA RÁPIDA E FILTRO DE STATUS -->
+<div class="row g-2 mb-4 align-items-center">
+    <div class="col-md-7">
+        <div class="position-relative">
+            <i class="ri-search-line position-absolute text-muted" style="left: 12px; top: 10px; font-size: 1.1em;"></i>
+            <input type="text" class="form-control ps-4 bg-white border" id="searchOngsysEndpoint" onkeyup="filterEndpointsSearch()" placeholder="Pesquisar endpoint do OngSys (ex: contas-pagar, fornecedores, contratos, produtos...)" style="height: 42px; border-radius: 8px; font-size: 0.88em;">
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="p-2 bg-white rounded-3 border d-flex align-items-center justify-content-between gap-2" style="height: 42px; border-radius: 8px !important; font-size: 0.8em;">
+            <span class="text-muted fw-bold"><i class="ri-pulse-line text-success"></i> Health Check:</span>
+            <div class="d-flex align-items-center gap-1.5 font-monospace">
+                <span class="badge bg-success-subtle text-success border border-success px-2 py-1" id="cntStatus200" title="Endpoints com retorno 200 OK">
+                    🟢 <span id="valStatus200">0</span> OK
+                </span>
+                <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1" id="cntStatus422" title="Endpoints autenticados com validação de parâmetros 422">
+                    🟡 <span id="valStatus422">0</span> Validados
+                </span>
+                <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1" id="cntStatusErr" title="Endpoints com erro ou indisponíveis">
+                    🔴 <span id="valStatusErr">0</span> Erros
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- CONTEÚDO DAS GUIAS DE MÓDULOS -->
 <div class="tab-content" id="ongsysTabsContent">
@@ -433,9 +470,49 @@
                         <span class="badge bg-success px-3 py-1.5 fw-bold" id="resStatusBadge" style="font-size: 0.8em;">HTTP 200 OK</span>
                         <small class="text-muted fw-bold" id="resTimeMs"><i class="ri-timer-line me-1"></i> 142 ms</small>
                     </div>
-                    <pre class="response-box mb-0" id="resJsonBody">Carregando resposta...</pre>
+                    <pre class="response-box mb-0" id="resJsonBody">Carregando resposta...<<!-- MODAL SINCRONIZAÇÃO ATÔMICA -->
+<div class="modal fade" id="modalSyncAtomic" tabindex="-1" aria-labelledby="modalSyncAtomicLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%);">
+                <h6 class="modal-title fw-bold" id="modalSyncAtomicLabel">
+                    <i class="ri-database-2-line me-1.5"></i> Sincronização Atômica OngSys & PostgreSQL
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted" style="font-size: 0.85em;">
+                    O motor atômico conectará à API do OngSys, baixará os lotes de dados e executará <strong>Upserts Atômicos (ACID)</strong> no banco PostgreSQL do CDC Core.
+                </p>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="font-size: 0.82em;">Módulo / Entidade para Sincronizar:</label>
+                    <select class="form-select form-select-sm" id="syncEntitySelect" style="border-radius: 6px;">
+                        <option value="all" selected>🌟 Todas as Entidades (Completo)</option>
+                        <option value="fornecedores">🏢 Fornecedores (2.900+ registros)</option>
+                        <option value="contas_pagar">💳 Contas a Pagar (27.000+ registros)</option>
+                        <option value="contas_receber">📈 Contas a Receber (3.200+ registros)</option>
+                        <option value="lancamentos_bancarios">🏦 Lançamentos Bancários (800+ extratos)</option>
+                        <option value="clientes">👥 Clientes / Projetos (230+ registros)</option>
+                        <option value="contratos">📄 Contratos (100+ registros)</option>
+                        <option value="produtos">📦 Produtos / Itens (1.600+ itens)</option>
+                    </select>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="font-size: 0.82em;">Limite de Páginas por Entidade (100 itens/página):</label>
+                    <input type="number" class="form-control form-control-sm" id="syncPagesInput" value="5" min="1" max="50" style="border-radius: 6px;">
+                    <small class="text-muted" style="font-size: 0.72em;">5 páginas = ~500 registros por entidade para sincronização rápida.</small>
+                </div>
+
+                <div id="syncStatusResult" class="d-none mb-3"></div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light btn-sm fw-bold px-3" data-bs-dismiss="modal" style="border-radius: 6px;">Fechar</button>
+                    <button type="button" class="btn btn-primary btn-sm fw-bold px-3 d-flex align-items-center gap-1.5" id="btnExecuteSync" onclick="runAtomicSync()" style="border-radius: 6px; background: #0284c7; border-color: #0284c7;">
+                        <i class="ri-refresh-line"></i> Iniciar Sincronização Atômica
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -445,7 +522,10 @@
 
 {% block extra_js %}
 <script>
-    function openTestModal(path, method, name, defaultParams) {
+    let currentTestingEpId = null;
+
+    function openTestModal(path, method, name, defaultParams, epId) {
+        currentTestingEpId = epId || null;
         document.getElementById("modalEndpointName").innerText = name;
         document.getElementById("modalEndpointPath").value = path;
         document.getElementById("modalEndpointMethod").value = method;
@@ -469,6 +549,181 @@
 
         const modal = new bootstrap.Modal(document.getElementById('modalTestEndpoint'));
         modal.show();
+    }
+
+    function updateBadgeForEndpoint(epId, statusCode, elapsedMs, errorMsg) {
+        if (!epId) return;
+        const badge = document.getElementById(`badge-status-${epId}`);
+        const timeBadge = document.getElementById(`badge-time-${epId}`);
+        if (!badge) return;
+
+        if (statusCode === 200) {
+            badge.className = "badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge";
+            badge.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> 200 OK`;
+        } else if (statusCode === 422) {
+            badge.className = "badge bg-warning-subtle text-warning border border-warning px-2.5 py-1 fw-bold font-monospace ep-status-badge";
+            badge.innerHTML = `<i class="ri-shield-check-line me-1"></i> 422 Validado`;
+        } else if (statusCode === 201) {
+            badge.className = "badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge";
+            badge.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> 201 Criado`;
+        } else {
+            badge.className = "badge bg-danger-subtle text-danger border border-danger px-2.5 py-1 fw-bold font-monospace ep-status-badge";
+            badge.innerHTML = `<i class="ri-close-circle-fill me-1"></i> ${statusCode || 'Erro'}`;
+        }
+
+        if (timeBadge) {
+            timeBadge.classList.remove("d-none");
+            const valSpan = timeBadge.querySelector(".time-val");
+            if (valSpan) valSpan.innerText = elapsedMs || 0;
+        }
+
+        updateHealthSummaryCounters();
+    }
+
+    function updateHealthSummaryCounters() {
+        const badges = document.querySelectorAll(".ep-status-badge");
+        let c200 = 0, c422 = 0, cErr = 0;
+
+        badges.forEach(b => {
+            const txt = b.innerText;
+            if (txt.includes("200 OK") || txt.includes("201 Criado")) c200++;
+            else if (txt.includes("422 Validado")) c422++;
+            else if (txt.includes("Erro") || txt.includes("404") || txt.includes("500") || txt.includes("502")) cErr++;
+        });
+
+        const el200 = document.getElementById("valStatus200");
+        const el422 = document.getElementById("valStatus422");
+        const elErr = document.getElementById("valStatusErr");
+
+        if (el200) el200.innerText = c200;
+        if (el422) el422.innerText = c422;
+        if (elErr) elErr.innerText = cErr;
+    }
+
+    function testSingleEndpoint(epId, path, method, defaultParamsStr) {
+        const badge = document.getElementById(`badge-status-${epId}`);
+        const btn = document.getElementById(`btn-quick-${epId}`);
+        const inlineBox = document.getElementById(`inline-res-${epId}`);
+        const inlineJson = document.getElementById(`inline-json-${epId}`);
+
+        if (badge) {
+            badge.className = "badge bg-info-subtle text-info border border-info px-2.5 py-1 fw-bold font-monospace ep-status-badge";
+            badge.innerHTML = `<span class="spinner-border spinner-border-sm me-1" style="width: 10px; height: 10px;"></span> Testando...`;
+        }
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm" style="width: 12px; height: 12px;"></span>`;
+        }
+
+        let params = {};
+        let body = {};
+
+        if (defaultParamsStr) {
+            try {
+                const parsed = JSON.parse(defaultParamsStr);
+                if (method === 'GET') params = parsed;
+                else body = parsed;
+            } catch(e) {
+                if (method === 'GET') params = { raw: defaultParamsStr };
+                else body = { raw: defaultParamsStr };
+            }
+        }
+
+        const proxyUrl = "{% url 'dashboard:ongsys_api_proxy' endpoint_key='test' %}";
+
+        return fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                path: path,
+                method: method,
+                params: params,
+                body: body
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ri-play-fill fs-14"></i> Testar`;
+            }
+
+            const statusCode = data.error ? 502 : data.status_code;
+            const elapsed = data.elapsed_ms || 0;
+            updateBadgeForEndpoint(epId, statusCode, elapsed);
+
+            if (inlineBox && inlineJson) {
+                inlineBox.classList.remove("d-none");
+                const resData = data.error ? data : (data.response || data);
+                inlineJson.innerText = JSON.stringify(resData, null, 2);
+            }
+
+            return data;
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ri-play-fill fs-14"></i> Testar`;
+            }
+            updateBadgeForEndpoint(epId, 500, 0);
+            if (inlineBox && inlineJson) {
+                inlineBox.classList.remove("d-none");
+                inlineJson.innerText = "Erro na requisição: " + err;
+            }
+        });
+    }
+
+    function closeInlineResult(epId) {
+        const inlineBox = document.getElementById(`inline-res-${epId}`);
+        if (inlineBox) inlineBox.classList.add("d-none");
+    }
+
+    async function testAllEndpoints() {
+        const btnAll = document.getElementById("btnTestAllApis");
+        const progressBox = document.getElementById("healthCheckProgressBox");
+        const progressBar = document.getElementById("healthProgressBar");
+        const progressText = document.getElementById("healthProgressText");
+
+        const containers = Array.from(document.querySelectorAll(".endpoint-row-container"));
+        if (!containers.length) return;
+
+        btnAll.disabled = true;
+        btnAll.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Testando Todas as Rotas...`;
+
+        progressBox.classList.remove("d-none");
+        progressBar.style.width = "0%";
+
+        let done = 0;
+        const total = containers.length;
+
+        for (const item of containers) {
+            const epId = item.getAttribute("data-ep-id");
+            const path = item.getAttribute("data-ep-path");
+            const method = item.getAttribute("data-ep-method");
+            const paramsStr = item.getAttribute("data-ep-params");
+
+            if (epId && path) {
+                await testSingleEndpoint(epId, path, method, paramsStr);
+            }
+
+            done++;
+            const pct = Math.round((done / total) * 100);
+            progressBar.style.width = pct + "%";
+            progressText.innerText = `${done} / ${total} rotas (${pct}%)`;
+
+            // Intervalo suave de 150ms
+            await new Promise(r => setTimeout(r, 150));
+        }
+
+        btnAll.disabled = false;
+        btnAll.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> Health Check Concluído (${total} Rotas)`;
+
+        setTimeout(() => {
+            btnAll.innerHTML = `<i class="ri-heart-pulse-fill fs-16"></i> Testar Todas as APIs`;
+        }, 5000);
     }
 
     function executeEndpointRequest() {
@@ -529,15 +784,22 @@
             const timeMs = document.getElementById("resTimeMs");
             const jsonBody = document.getElementById("resJsonBody");
 
+            const statusCode = data.error ? 502 : data.status_code;
+            const elapsed = data.elapsed_ms || 0;
+
+            if (currentTestingEpId) {
+                updateBadgeForEndpoint(currentTestingEpId, statusCode, elapsed);
+            }
+
             if (data.error) {
                 statusBadge.className = "badge bg-danger px-3 py-1.5 fw-bold";
                 statusBadge.innerText = "HTTP ERRO";
-                timeMs.innerText = (data.elapsed_ms || 0) + " ms";
+                timeMs.innerText = elapsed + " ms";
                 jsonBody.innerText = JSON.stringify(data, null, 2);
             } else {
                 statusBadge.className = data.status_code < 300 ? "badge bg-success px-3 py-1.5 fw-bold" : "badge bg-warning text-dark px-3 py-1.5 fw-bold";
                 statusBadge.innerText = "HTTP " + data.status_code;
-                timeMs.innerText = data.elapsed_ms + " ms";
+                timeMs.innerText = elapsed + " ms";
                 jsonBody.innerText = JSON.stringify(data.response, null, 2);
             }
         })
@@ -606,53 +868,6 @@
         });
     }
 </script>
-
-<!-- MODAL SINCRONIZAÇÃO ATÔMICA -->
-<div class="modal fade" id="modalSyncAtomic" tabindex="-1" aria-labelledby="modalSyncAtomicLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
-            <div class="modal-header text-white" style="background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%);">
-                <h6 class="modal-title fw-bold" id="modalSyncAtomicLabel">
-                    <i class="ri-database-2-line me-1.5"></i> Sincronização Atômica OngSys & PostgreSQL
-                </h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <p class="text-muted" style="font-size: 0.85em;">
-                    O motor atômico conectará à API do OngSys, baixará os lotes de dados e executará <strong>Upserts Atômicos (ACID)</strong> no banco PostgreSQL do CDC Core.
-                </p>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold" style="font-size: 0.82em;">Módulo / Entidade para Sincronizar:</label>
-                    <select class="form-select form-select-sm" id="syncEntitySelect" style="border-radius: 6px;">
-                        <option value="all" selected>🌟 Todas as Entidades (Completo)</option>
-                        <option value="fornecedores">🏢 Fornecedores (2.900+ registros)</option>
-                        <option value="contas_pagar">💳 Contas a Pagar (27.000+ registros)</option>
-                        <option value="contas_receber">📈 Contas a Receber (3.200+ registros)</option>
-                        <option value="lancamentos_bancarios">🏦 Lançamentos Bancários (800+ extratos)</option>
-                        <option value="clientes">👥 Clientes / Projetos (230+ registros)</option>
-                        <option value="contratos">📄 Contratos (100+ registros)</option>
-                        <option value="produtos">📦 Produtos / Itens (1.600+ itens)</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold" style="font-size: 0.82em;">Limite de Páginas por Entidade (100 itens/página):</label>
-                    <input type="number" class="form-control form-control-sm" id="syncPagesInput" value="5" min="1" max="50" style="border-radius: 6px;">
-                    <small class="text-muted" style="font-size: 0.72em;">5 páginas = ~500 registros por entidade para sincronização rápida.</small>
-                </div>
-
-                <div id="syncStatusResult" class="d-none mb-3"></div>
-
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light btn-sm fw-bold px-3" data-bs-dismiss="modal" style="border-radius: 6px;">Fechar</button>
-                    <button type="button" class="btn btn-primary btn-sm fw-bold px-3 d-flex align-items-center gap-1.5" id="btnExecuteSync" onclick="runAtomicSync()" style="border-radius: 6px; background: #0284c7; border-color: #0284c7;">
-                        <i class="ri-refresh-line"></i> Iniciar Sincronização Atômica
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
+
 

@@ -1,29 +1,53 @@
-<div class="endpoint-row-container mb-3">
+<div class="endpoint-row-container mb-3" id="container-ep-{{ ep.id }}" data-ep-id="{{ ep.id }}" data-ep-path="{{ ep.path }}" data-ep-method="{{ ep.metodo }}" data-ep-name="{{ ep.nome }}" data-ep-params="{{ ep.parametros }}">
     <div class="endpoint-row d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div class="d-flex align-items-center gap-3">
             <span class="method-badge {% if ep.metodo == 'GET' %}method-get{% else %}method-post{% endif %}">
                 {{ ep.metodo }}
             </span>
             <div>
-                <h6 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
-                    {{ ep.nome }}
-                    <code class="text-primary font-monospace fw-normal" style="font-size: 0.84em;">/api/v2/{{ ep.path }}</code>
-                </h6>
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                        {{ ep.nome }}
+                        <code class="text-primary font-monospace fw-normal" style="font-size: 0.84em;">/api/v2/{{ ep.path }}</code>
+                    </h6>
+                    <!-- Indicador de Status ao Vivo -->
+                    <span class="badge bg-light text-muted border px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                        <i class="ri-checkbox-blank-circle-line me-1 text-slate-400"></i> Não testado
+                    </span>
+                    <span class="badge bg-purple-subtle text-purple border d-none font-monospace ep-time-badge" id="badge-time-{{ ep.id }}" style="font-size: 0.72em; border-radius: 6px; background: #f3e8ff; color: #7c3aed;">
+                        <i class="ri-timer-line me-0.5"></i> <span class="time-val">0</span> ms
+                    </span>
+                </div>
                 <p class="text-muted mb-0" style="font-size: 0.84em; line-height: 1.35;">
                     {{ ep.descricao }}
                 </p>
                 {% if ep.parametros %}
                 <small class="text-muted d-block mt-1" style="font-size: 0.76em;">
-                    <strong class="text-dark">Exemplo / Parâmetros:</strong> <code>{{ ep.parametros }}</code>
+                    <strong class="text-dark">Parâmetros Padrão:</strong> <code class="bg-light px-1 py-0.5 rounded">{{ ep.parametros }}</code>
                 </small>
                 {% endif %}
             </div>
         </div>
 
-        <div>
-            <button type="button" class="btn btn-sm btn-outline-primary fw-bold d-flex align-items-center gap-1.5" onclick="openTestModal('{{ ep.path }}', '{{ ep.metodo }}', '{{ ep.nome|escapejs }}', '{{ ep.parametros|escapejs }}')" style="border-radius: 6px; font-size: 0.82em;">
-                <i class="ri-play-circle-line fs-16"></i> Testar Endpoint
+        <div class="d-flex align-items-center gap-2">
+            <!-- Botão de Teste Rápido Inline -->
+            <button type="button" class="btn btn-sm btn-outline-success fw-bold d-flex align-items-center gap-1" id="btn-quick-{{ ep.id }}" onclick="testSingleEndpoint('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', '{{ ep.parametros|escapejs }}')" style="border-radius: 6px; font-size: 0.82em;">
+                <i class="ri-play-fill fs-14"></i> Testar
+            </button>
+            <!-- Botão de Detalhes / Modal Customizável -->
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold d-flex align-items-center gap-1" onclick="openTestModal('{{ ep.path }}', '{{ ep.metodo }}', '{{ ep.nome|escapejs }}', '{{ ep.parametros|escapejs }}', '{{ ep.id }}')" style="border-radius: 6px; font-size: 0.82em;" title="Abrir Console JSON e Parâmetros">
+                <i class="ri-code-s-slash-line fs-14"></i> Console JSON
             </button>
         </div>
     </div>
+    
+    <!-- Mini Drawer Inline com Resumo do Retorno (Oculto por padrão) -->
+    <div class="d-none mt-2 p-2 bg-slate-900 text-white rounded font-monospace ep-inline-result" id="inline-res-{{ ep.id }}" style="font-size: 0.75em; max-height: 140px; overflow-y: auto; background: #0f172a; border-left: 3px solid #0284c7;">
+        <div class="d-flex justify-content-between text-slate-400 pb-1 border-bottom border-slate-700 mb-1">
+            <span>RESPOSTA ONGSYS API:</span>
+            <a href="javascript:void(0)" onclick="closeInlineResult('{{ ep.id }}')" class="text-slate-400 text-decoration-none">&times; fechar</a>
+        </div>
+        <pre class="mb-0 text-info" id="inline-json-{{ ep.id }}" style="white-space: pre-wrap; word-break: break-all;"></pre>
+    </div>
 </div>
+
