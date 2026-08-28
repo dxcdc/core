@@ -128,15 +128,15 @@
                 </p>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-primary btn-sm font-weight-bold px-3 py-2 rounded-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalCadastroSistema" data-target="#modalCadastroSistema" onclick="abrirModalForm('modalCadastroSistema')">
+                <a href="{% url 'dashboard:formulario_cadastro_sistema_pagina' %}" class="btn btn-primary btn-sm font-weight-bold px-3 py-2 rounded-3">
                     <i class="ri-add-circle-line me-1"></i> Cadastrar Sistema
-                </button>
-                <button type="button" class="btn btn-success btn-sm font-weight-bold px-3 py-2 rounded-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalAvaliacaoServicos" data-target="#modalAvaliacaoServicos" onclick="abrirModalForm('modalAvaliacaoServicos')">
+                </a>
+                <a href="{% url 'dashboard:formulario_avaliacao_servicos_pagina' %}" class="btn btn-success btn-sm font-weight-bold px-3 py-2 rounded-3">
                     <i class="ri-star-line me-1"></i> Avaliar Serviços & TI
-                </button>
-                <button type="button" class="btn btn-info btn-sm font-weight-bold px-3 py-2 rounded-3 text-dark" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalSuporteTI" data-target="#modalSuporteTI" onclick="abrirModalForm('modalSuporteTI')">
+                </a>
+                <a href="{% url 'dashboard:formulario_suporte_ti_pagina' %}" class="btn btn-info btn-sm font-weight-bold px-3 py-2 rounded-3 text-dark">
                     <i class="ri-customer-service-2-line me-1"></i> Abrir Chamado TI
-                </button>
+                </a>
             </div>
         </div>
 
@@ -243,9 +243,9 @@
                         <span class="text-secondary small" style="color: #94a3b8 !important;">
                             <i class="ri-database-2-line me-1 text-primary"></i> <strong>{{ total_sistemas }}</strong> sistemas no DB
                         </span>
-                        <button type="button" class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalCadastroSistema" data-target="#modalCadastroSistema" onclick="abrirModalForm('modalCadastroSistema')">
+                        <a href="{% url 'dashboard:formulario_cadastro_sistema_pagina' %}" class="btn btn-primary btn-sm px-3">
                             <i class="ri-edit-box-line me-1"></i> Preencher
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -274,9 +274,9 @@
                         <span class="text-secondary small" style="color: #94a3b8 !important;">
                             <i class="ri-question-answer-line me-1 text-warning"></i> <strong>{{ total_avaliacoes }}</strong> avaliações
                         </span>
-                        <button type="button" class="btn btn-warning btn-sm text-dark font-weight-bold px-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalAvaliacaoServicos" data-target="#modalAvaliacaoServicos" onclick="abrirModalForm('modalAvaliacaoServicos')">
+                        <a href="{% url 'dashboard:formulario_avaliacao_servicos_pagina' %}" class="btn btn-warning btn-sm text-dark font-weight-bold px-3">
                             <i class="ri-edit-box-line me-1"></i> Preencher
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -305,9 +305,9 @@
                         <span class="text-secondary small" style="color: #94a3b8 !important;">
                             <i class="ri-headset-line me-1 text-info"></i> <strong>{{ total_chamados_suporte }}</strong> chamados
                         </span>
-                        <button type="button" class="btn btn-info btn-sm text-dark font-weight-bold px-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalSuporteTI" data-target="#modalSuporteTI" onclick="abrirModalForm('modalSuporteTI')">
+                        <a href="{% url 'dashboard:formulario_suporte_ti_pagina' %}" class="btn btn-info btn-sm text-dark font-weight-bold px-3">
                             <i class="ri-edit-box-line me-1"></i> Abrir Chamado
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

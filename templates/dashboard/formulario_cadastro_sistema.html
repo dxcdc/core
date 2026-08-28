@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Formulário: Cadastro dos Sistemas | CDC Core{% endblock %}
+
+{% block extra_css %}
+<style>
+    .google-form-wrapper {
+        max-width: 840px;
+        margin: 0 auto;
+    }
+    .form-header-card {
+        background: #1e293b;
+        border-top: 10px solid #2563eb;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        margin-bottom: 24px;
+    }
+    .form-section-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        margin-bottom: 24px;
+    }
+    .form-field-group {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .form-field-label {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #f8fafc;
+        margin-bottom: 8px;
+    }
+    .form-field-desc {
+        font-size: 0.82rem;
+        color: #94a3b8;
+        margin-bottom: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="google-form-wrapper">
+        <!-- BOTÃO VOLTAR -->
+        <div class="mb-3">
+            <a href="{% url 'dashboard:formularios' %}" class="btn btn-outline-secondary btn-sm rounded-3">
+                <i class="ri-arrow-left-line me-1"></i> Voltar para Central de Formulários
+            </a>
+        </div>
+
+        <!-- BANNER DE CABEÇALHO DO GOOGLE FORM -->
+        <div class="form-header-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <span class="badge bg-primary px-3 py-1 mb-2 font-weight-bold">Formulário Oficial CDC</span>
+                    <h2 class="text-white fw-bold mb-2">Formulário: Cadastro dos Sistemas</h2>
+                    <p class="text-secondary mb-0" style="color: #cbd5e1 !important;">
+                        Mapeamento e catalogação técnica de todas as aplicações institucionais, satélites, servidores e projetos do Centro Dom Helder Camara (CDC).
+                    </p>
+                </div>
+            </div>
+            <hr class="border-secondary my-3">
+            <div class="d-flex align-items-center text-info small">
+                <i class="ri-information-line me-2 fs-5"></i>
+                <span>Os dados informados serão salvos diretamente no banco de dados PostgreSQL do CDC Core.</span>
+            </div>
+        </div>
+
+        <!-- FORMULÁRIO INTERATIVO -->
+        <form action="{% url 'dashboard:submeter_cadastro_sistema' %}" method="POST">
+            {% csrf_token %}
+
+            <div class="form-section-card">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="ri-building-line text-primary me-2"></i>1. Identificação da Aplicação / Sistema
+                </h5>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Nome Oficial do Sistema / Aplicação *</label>
+                    <div class="form-field-desc">Informe a nomenclatura oficial pela qual o sistema é reconhecido no CDC.</div>
+                    <input type="text" name="nome_sistema" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: Sistema de Gestão do PROVITA / CDC Core" required>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Sigla ou Código de Identificação</label>
+                    <div class="form-field-desc">Acrônimo curto do sistema (se houver).</div>
+                    <input type="text" name="sigla" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: SIS-PROVITA / CDC-CORE">
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Setor ou Projeto Vinculado *</label>
+                    <div class="form-field-desc">Qual programa, convênio ou setor institucional é responsável pelo uso.</div>
+                    <input type="text" name="setor_projeto" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: PROVITA, PPCAAM, PPDDH, Sede Recife" required>
+                </div>
+            </div>
+
+            <div class="form-section-card">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="ri-user-settings-line text-success me-2"></i>2. Responsabilidade Técnica & Contatos
+                </h5>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Responsável Técnico (Nome Completo) *</label>
+                    <div class="form-field-desc">Nome da pessoa responsável pelo gerenciamento ou ponto focal.</div>
+                    <input type="text" name="responsavel_nome" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: Fernando Vier" required>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">E-mail do Responsável Técnico *</label>
+                    <div class="form-field-desc">E-mail institucional (@cdc.org.br).</div>
+                    <input type="email" name="responsavel_email" class="form-control bg-dark border-secondary text-white p-3" placeholder="fvier@cdc.org.br" required>
+                </div>
+            </div>
+
+            <div class="form-section-card">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="ri-cpu-line text-warning me-2"></i>3. Especificações Técnicas & Infraestrutura
+                </h5>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">URL de Acesso ou IP do Servidor</label>
+                    <div class="form-field-desc">Endereço web ou IP de hospedagem do sistema.</div>
+                    <input type="text" name="url_acesso" class="form-control bg-dark border-secondary text-white p-3" placeholder="https://provita.cdc.org.br">
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Stack Tecnológica (Linguagens, Banco & Frameworks)</label>
+                    <div class="form-field-desc">Tecnologias utilizadas no desenvolvimento.</div>
+                    <input type="text" name="tecnologias" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: Python, Django, PostgreSQL, Docker, Traefik">
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-field-group">
+                            <label class="form-field-label">Nível de Criticidade *</label>
+                            <select name="criticidade" class="form-select bg-dark border-secondary text-white p-3">
+                                <option value="Alta">Alta - Sistema Vital / Crítico</option>
+                                <option value="Média" selected>Média - Operação Normal</option>
+                                <option value="Baixa">Baixa - Apoio / Secundário</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-field-group">
+                            <label class="form-field-label">Status Operacional *</label>
+                            <select name="status" class="form-select bg-dark border-secondary text-white p-3">
+                                <option value="Operacional" selected>Operacional em Produção</option>
+                                <option value="Desenvolvimento">Em Desenvolvimento / Homologação</option>
+                                <option value="Legado">Legado / Manutenção Preventiva</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Descrição Detalhada do Sistema</label>
+                    <div class="form-field-desc">Descreva a finalidade da aplicação e o impacto nas atividades do CDC.</div>
+                    <textarea name="descricao" class="form-control bg-dark border-secondary text-white p-3" rows="4" placeholder="Explique o objetivo e o funcionamento do sistema..."></textarea>
+                </div>
+            </div>
+
+            <!-- BOTÃO ENVIAR -->
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <a href="{% url 'dashboard:formularios' %}" class="btn btn-secondary px-4 py-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary font-weight-bold px-5 py-3 rounded-3 fs-6">
+                    <i class="ri-send-plane-fill me-2"></i> Gravar Sistema no Banco de Dados
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

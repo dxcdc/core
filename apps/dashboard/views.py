@@ -193,6 +193,21 @@ def formularios_view(request):
     return render(request, 'dashboard/formularios.html', context)
 
 @login_required(login_url='dashboard:login')
+def formulario_cadastro_sistema_pagina(request):
+    """Página dedicada do Formulário de Cadastro dos Sistemas (Reprodução Google Forms)."""
+    return render(request, 'dashboard/formulario_cadastro_sistema.html')
+
+@login_required(login_url='dashboard:login')
+def formulario_avaliacao_servicos_pagina(request):
+    """Página dedicada do Formulário de Avaliação de Serviços & TI."""
+    return render(request, 'dashboard/formulario_avaliacao_servicos.html')
+
+@login_required(login_url='dashboard:login')
+def formulario_suporte_ti_pagina(request):
+    """Página dedicada do Formulário de Suporte & Chamados TI."""
+    return render(request, 'dashboard/formulario_suporte_ti.html')
+
+@login_required(login_url='dashboard:login')
 def submeter_cadastro_sistema(request):
     """Processa a gravação de um novo sistema no Cadastro dos Sistemas."""
     if request.method == 'POST':

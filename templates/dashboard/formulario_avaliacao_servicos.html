@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Formulário: Avaliação de Serviços & TI | CDC Core{% endblock %}
+
+{% block extra_css %}
+<style>
+    .google-form-wrapper {
+        max-width: 840px;
+        margin: 0 auto;
+    }
+    .form-header-card {
+        background: #1e293b;
+        border-top: 10px solid #f59e0b;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        margin-bottom: 24px;
+    }
+    .form-section-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        margin-bottom: 24px;
+    }
+    .form-field-group {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .form-field-label {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #f8fafc;
+        margin-bottom: 8px;
+    }
+    .form-field-desc {
+        font-size: 0.82rem;
+        color: #94a3b8;
+        margin-bottom: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="google-form-wrapper">
+        <!-- BOTÃO VOLTAR -->
+        <div class="mb-3">
+            <a href="{% url 'dashboard:formularios' %}" class="btn btn-outline-secondary btn-sm rounded-3">
+                <i class="ri-arrow-left-line me-1"></i> Voltar para Central de Formulários
+            </a>
+        </div>
+
+        <!-- BANNER DE CABEÇALHO DO GOOGLE FORM -->
+        <div class="form-header-card">
+            <span class="badge bg-warning text-dark px-3 py-1 mb-2 font-weight-bold">Pesquisa Institucional</span>
+            <h2 class="text-white fw-bold mb-2">Formulário: Avaliação de Serviços & TI</h2>
+            <p class="text-secondary mb-0" style="color: #cbd5e1 !important;">
+                Avaliação periódica da qualidade das nossas ferramentas e infraestrutura (Google Workspace, VPN WireGuard, Conectores M2M e Atendimento TI).
+            </p>
+        </div>
+
+        <!-- FORMULÁRIO INTERATIVO -->
+        <form action="{% url 'dashboard:submeter_resposta_formulario' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="tipo_formulario" value="avaliacao_servicos">
+
+            <div class="form-section-card">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="ri-user-smile-line text-warning me-2"></i>1. Identificação do Usuário
+                </h5>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Seu Nome Completo *</label>
+                    <input type="text" name="nome_respondente" class="form-control bg-dark border-secondary text-white p-3" placeholder="Seu nome" required>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">E-mail Institucional *</label>
+                    <input type="email" name="email_respondente" class="form-control bg-dark border-secondary text-white p-3" placeholder="usuario@cdc.org.br" required>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Setor ou Projeto Vinculado *</label>
+                    <input type="text" name="setor_ou_projeto" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: Sede Recife / PROVITA / Presidência" required>
+                </div>
+            </div>
+
+            <div class="form-section-card">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="ri-star-line text-warning me-2"></i>2. Avaliação de Qualidade & Feedback
+                </h5>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Serviço Avaliado *</label>
+                    <select name="assunto_ou_categoria" class="form-select bg-dark border-secondary text-white p-3" required>
+                        <option value="Google Workspace & E-mails">Google Workspace & E-mails</option>
+                        <option value="VPN WireGuard & Conectividade">VPN WireGuard & Conectividade</option>
+                        <option value="Atendimento & Suporte TI">Atendimento & Suporte TI</option>
+                        <option value="Sistemas & Conectores M2M">Sistemas & Conectores M2M</option>
+                    </select>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Nota de Satisfação (1 a 5 Estrelas) *</label>
+                    <select name="avaliacao_nota" class="form-select bg-dark border-secondary text-white p-3" required>
+                        <option value="5" selected>⭐️⭐️⭐️⭐️⭐️ (5 - Excelente)</option>
+                        <option value="4">⭐️⭐️⭐️⭐️ (4 - Bom)</option>
+                        <option value="3">⭐️⭐️⭐️ (3 - Regular)</option>
+                        <option value="2">⭐️⭐️ (2 - Ruim)</option>
+                        <option value="1">⭐️ (1 - Insatisfeito)</option>
+                    </select>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Comentários, Sugestões & Elogios</label>
+                    <textarea name="mensagem_detalhes" class="form-control bg-dark border-secondary text-white p-3" rows="4" placeholder="O que podemos melhorar no serviço?"></textarea>
+                </div>
+            </div>
+
+            <!-- BOTÃO ENVIAR -->
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <a href="{% url 'dashboard:formularios' %}" class="btn btn-secondary px-4 py-2">Cancelar</a>
+                <button type="submit" class="btn btn-warning text-dark font-weight-bold px-5 py-3 rounded-3 fs-6">
+                    <i class="ri-send-plane-fill me-2"></i> Registrar Avaliação no Banco
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Formulário: Suporte & Chamados TI | CDC Core{% endblock %}
+
+{% block extra_css %}
+<style>
+    .google-form-wrapper {
+        max-width: 840px;
+        margin: 0 auto;
+    }
+    .form-header-card {
+        background: #1e293b;
+        border-top: 10px solid #06b6d4;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        margin-bottom: 24px;
+    }
+    .form-section-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        margin-bottom: 24px;
+    }
+    .form-field-group {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .form-field-label {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #f8fafc;
+        margin-bottom: 8px;
+    }
+    .form-field-desc {
+        font-size: 0.82rem;
+        color: #94a3b8;
+        margin-bottom: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="google-form-wrapper">
+        <!-- BOTÃO VOLTAR -->
+        <div class="mb-3">
+            <a href="{% url 'dashboard:formularios' %}" class="btn btn-outline-secondary btn-sm rounded-3">
+                <i class="ri-arrow-left-line me-1"></i> Voltar para Central de Formulários
+            </a>
+        </div>
+
+        <!-- BANNER DE CABEÇALHO DO GOOGLE FORM -->
+        <div class="form-header-card">
+            <span class="badge bg-info text-dark px-3 py-1 mb-2 font-weight-bold">Apoio Técnico</span>
+            <h2 class="text-white fw-bold mb-2">Formulário: Suporte & Chamados TI</h2>
+            <p class="text-secondary mb-0" style="color: #cbd5e1 !important;">
+                Abertura de chamados técnicos para ajuste de acesso VPN WireGuard, e-mail/MFA, liberação de cota ou auxílio em sistemas do CDC.
+            </p>
+        </div>
+
+        <!-- FORMULÁRIO INTERATIVO -->
+        <form action="{% url 'dashboard:submeter_resposta_formulario' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="tipo_formulario" value="suporte_ti">
+
+            <div class="form-section-card">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="ri-customer-service-2-line text-info me-2"></i>1. Solicitante & Contato
+                </h5>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Seu Nome *</label>
+                    <input type="text" name="nome_respondente" class="form-control bg-dark border-secondary text-white p-3" placeholder="Seu nome completo" required>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">E-mail para Retorno *</label>
+                    <input type="email" name="email_respondente" class="form-control bg-dark border-secondary text-white p-3" placeholder="usuario@cdc.org.br" required>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Setor ou Projeto Vinculado *</label>
+                    <input type="text" name="setor_ou_projeto" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: PROVITA / PPCAAM / Sede" required>
+                </div>
+            </div>
+
+            <div class="form-section-card">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="ri-headset-line text-info me-2"></i>2. Detalhes da Solicitação
+                </h5>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Categoria do Chamado *</label>
+                    <select name="assunto_ou_categoria" class="form-select bg-dark border-secondary text-white p-3" required>
+                        <option value="Problema de Acesso VPN">Problema de Acesso VPN WireGuard</option>
+                        <option value="Senha / MFA / Autenticação">Senha / MFA / Autenticação Google Workspace</option>
+                        <option value="Erro em Sistema / Aplicação">Erro em Sistema / Aplicação CDC</option>
+                        <option value="Solicitação de Novo Recurso">Solicitação de Novo Recurso / Cota</option>
+                    </select>
+                </div>
+
+                <div class="form-field-group">
+                    <label class="form-field-label">Descrição Completa da Dificuldade / Problema *</label>
+                    <textarea name="mensagem_detalhes" class="form-control bg-dark border-secondary text-white p-3" rows="5" placeholder="Descreva o problema com o máximo de detalhes..." required></textarea>
+                </div>
+            </div>
+
+            <!-- BOTÃO ENVIAR -->
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <a href="{% url 'dashboard:formularios' %}" class="btn btn-secondary px-4 py-2">Cancelar</a>
+                <button type="submit" class="btn btn-info text-dark font-weight-bold px-5 py-3 rounded-3 fs-6">
+                    <i class="ri-send-plane-fill me-2"></i> Abrir Chamado no Banco de Dados
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
