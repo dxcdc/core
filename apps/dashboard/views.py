@@ -168,6 +168,11 @@ def ferramentas_view(request):
     return render(request, 'dashboard/ferramentas.html')
 
 @login_required(login_url='dashboard:login')
+def formularios_view(request):
+    """Renderiza a Central de Formulários Institucionais do CDC Core."""
+    return render(request, 'dashboard/formularios.html')
+
+@login_required(login_url='dashboard:login')
 def governanca_view(request):
     """Renderiza a página de Governança, Diretrizes e ADRs do CDC."""
     adrs = [

@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Central de Formulários | CDC Core{% endblock %}
+
+{% block extra_css %}
+<style>
+    .forms-dashboard {
+        background-color: #0f172a;
+        color: #f8fafc;
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .forms-header-title {
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(90deg, #38bdf8, #34d399, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .stat-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 20px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        border-color: #475569;
+    }
+
+    .stat-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-top: 10px;
+    }
+
+    .form-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 22px;
+        transition: all 0.25s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .form-card:hover {
+        border-color: #38bdf8;
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .badge-status-active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    .badge-status-draft {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    .form-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="forms-dashboard">
+        <!-- HEADER COM AÇÕES PRINCIPAIS -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h2 class="forms-header-title mb-1">
+                    <i class="ri-survey-line me-2"></i>Central de Formulários Institucionais
+                </h2>
+                <p class="text-secondary mb-0" style="color: #94a3b8 !important;">
+                    Gestão Integrada de Pesquisas, Admissão de Voluntários e Termos LGPD do CDC Core.
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-success btn-sm font-weight-bold px-3 py-2 rounded-3" data-bs-toggle="modal" data-bs-target="#modalNovoFormulario">
+                    <i class="ri-add-circle-line me-1"></i> Criar Novo Formulário
+                </button>
+                <button class="btn btn-outline-info btn-sm px-3 py-2 rounded-3" data-bs-toggle="modal" data-bs-target="#modalIntegrarGoogleForms">
+                    <i class="ri-google-line me-1"></i> Integrar Google Forms
+                </button>
+                <button class="btn btn-outline-light btn-sm px-3 py-2 rounded-3" style="border-color: #475569;" onclick="alert('Exportando relatório consolidado de todas as respostas recebidas...');">
+                    <i class="ri-file-excel-line me-1"></i> Exportar Respostas
+                </button>
+            </div>
+        </div>
+
+        <!-- CARDS DE ESTATÍSTICAS -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.72rem; letter-spacing: 0.05em; color: #94a3b8 !important;">Formulários Ativos</span>
+                        <div class="bg-primary bg-opacity-10 rounded p-2 text-primary">
+                            <i class="ri-file-list-3-line fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value text-white">4</div>
+                    <div class="mt-2 text-success" style="font-size: 0.8rem;">
+                        <i class="ri-checkbox-circle-line me-1"></i> 100% operacionais
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.72rem; letter-spacing: 0.05em; color: #94a3b8 !important;">Total de Respostas</span>
+                        <div class="bg-success bg-opacity-10 rounded p-2 text-success">
+                            <i class="ri-question-answer-line fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value text-white">495</div>
+                    <div class="mt-2 text-success" style="font-size: 0.8rem;">
+                        <i class="ri-arrow-up-line me-1"></i> +32 esta semana
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.72rem; letter-spacing: 0.05em; color: #94a3b8 !important;">Taxa de Conclusão</span>
+                        <div class="bg-info bg-opacity-10 rounded p-2 text-info">
+                            <i class="ri-pie-chart-line fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value text-info">94.2%</div>
+                    <div class="mt-2 text-secondary" style="font-size: 0.8rem; color: #64748b !important;">
+                        Tempo médio: 2.5 min
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-uppercase text-secondary fw-bold" style="font-size: 0.72rem; letter-spacing: 0.05em; color: #94a3b8 !important;">Conformidade LGPD</span>
+                        <div class="bg-warning bg-opacity-10 rounded p-2 text-warning">
+                            <i class="ri-shield-check-line fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value text-warning" style="font-size: 1.5rem; margin-top: 15px;">Validado</div>
+                    <div class="mt-2 text-secondary" style="font-size: 0.8rem; color: #64748b !important;">
+                        Termos registrados
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO: FORMULÁRIOS INSTITUCIONAIS ATIVOS -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-white fw-bold mb-0">
+                <i class="ri-folders-line me-2 text-info"></i>Formulários Institucionais
+            </h4>
+            <span class="text-secondary small" style="color: #94a3b8 !important;">Sincronizados com o banco CDC DataOps</span>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- FORMULÁRIO 1 -->
+            <div class="col-lg-6">
+                <div class="form-card">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="form-icon-box bg-primary bg-opacity-20 text-primary me-3">
+                                    <i class="ri-user-add-line"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-white fw-bold mb-0">Cadastro & Admissão de Voluntários</h5>
+                                    <small class="text-secondary" style="color: #94a3b8 !important;">Coleta de dados, setor de interesse e disponibilidade</small>
+                                </div>
+                            </div>
+                            <span class="badge-status-active">Ativo</span>
+                        </div>
+                        <p class="text-secondary small mb-3" style="color: #cbd5e1 !important;">
+                            Utilizado na integração do ciclo de vida dos voluntários para gerar automaticamente os aliases gratuitos no Google Workspace.
+                        </p>
+                    </div>
+                    <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center" style="border-color: #334155 !important;">
+                        <span class="text-secondary small" style="color: #94a3b8 !important;">
+                            <i class="ri-question-answer-line me-1 text-success"></i> <strong>142</strong> respostas
+                        </span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-light btn-sm px-3" onclick="alert('Link do Formulário: https://core.cdc.org.br/forms/voluntarios/');">
+                                <i class="ri-link me-1"></i> Copiar Link
+                            </button>
+                            <button class="btn btn-primary btn-sm px-3" onclick="alert('Visualizando 142 respostas consolidadas do formulário de voluntários.');">
+                                <i class="ri-eye-line me-1"></i> Respostas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMULÁRIO 2 -->
+            <div class="col-lg-6">
+                <div class="form-card">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="form-icon-box bg-purple bg-opacity-20 me-3" style="background: rgba(192, 132, 252, 0.15); color: #c084fc;">
+                                    <i class="ri-shield-keyhole-line"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-white fw-bold mb-0">Solicitação de Acessos & VPN WireGuard</h5>
+                                    <small class="text-secondary" style="color: #94a3b8 !important;">Requisito de chave VPN para projetos (PROVITA, PPCAM, PPDDH)</small>
+                                </div>
+                            </div>
+                            <span class="badge-status-active">Ativo</span>
+                        </div>
+                        <p class="text-secondary small mb-3" style="color: #cbd5e1 !important;">
+                            Formulário interno para equipe e coordenadores solicitarem provisionamento de IP fixo e certificado VPN.
+                        </p>
+                    </div>
+                    <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center" style="border-color: #334155 !important;">
+                        <span class="text-secondary small" style="color: #94a3b8 !important;">
+                            <i class="ri-question-answer-line me-1 text-success"></i> <strong>89</strong> respostas
+                        </span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-light btn-sm px-3" onclick="alert('Link do Formulário: https://core.cdc.org.br/forms/solicitacao-vpn/');">
+                                <i class="ri-link me-1"></i> Copiar Link
+                            </button>
+                            <button class="btn btn-primary btn-sm px-3" onclick="alert('Visualizando 89 solicitações de acesso VPN.');">
+                                <i class="ri-eye-line me-1"></i> Respostas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMULÁRIO 3 -->
+            <div class="col-lg-6">
+                <div class="form-card">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="form-icon-box bg-info bg-opacity-20 text-info me-3">
+                                    <i class="ri-chat-smile-2-line"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-white fw-bold mb-0">Pesquisa de Clima Organizacional & Ouvidoria</h5>
+                                    <small class="text-secondary" style="color: #94a3b8 !important;">Coleta confidencial e anônima de feedback de colaboradores</small>
+                                </div>
+                            </div>
+                            <span class="badge-status-active">Ativo</span>
+                        </div>
+                        <p class="text-secondary small mb-3" style="color: #cbd5e1 !important;">
+                            Canal seguro de ouvidoria para avaliação contínua do ambiente de trabalho e melhorias operacionais.
+                        </p>
+                    </div>
+                    <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center" style="border-color: #334155 !important;">
+                        <span class="text-secondary small" style="color: #94a3b8 !important;">
+                            <i class="ri-question-answer-line me-1 text-success"></i> <strong>54</strong> respostas
+                        </span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-light btn-sm px-3" onclick="alert('Link do Formulário: https://core.cdc.org.br/forms/ouvidoria/');">
+                                <i class="ri-link me-1"></i> Copiar Link
+                            </button>
+                            <button class="btn btn-primary btn-sm px-3" onclick="alert('Visualizando relatórios anônimos de clima.');">
+                                <i class="ri-eye-line me-1"></i> Respostas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMULÁRIO 4 -->
+            <div class="col-lg-6">
+                <div class="form-card">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="form-icon-box bg-warning bg-opacity-20 text-warning me-3">
+                                    <i class="ri-file-shield-line"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-white fw-bold mb-0">Termo de Consentimento LGPD & Privacidade</h5>
+                                    <small class="text-secondary" style="color: #94a3b8 !important;">Assinatura digital e aceite dos termos de proteção de dados</small>
+                                </div>
+                            </div>
+                            <span class="badge-status-active">Ativo</span>
+                        </div>
+                        <p class="text-secondary small mb-3" style="color: #cbd5e1 !important;">
+                            Coleta obrigatoriedade legal de aceite dos termos da LGPD para novos usuários e parceiros do CDC.
+                        </p>
+                    </div>
+                    <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center" style="border-color: #334155 !important;">
+                        <span class="text-secondary small" style="color: #94a3b8 !important;">
+                            <i class="ri-question-answer-line me-1 text-success"></i> <strong>210</strong> respostas
+                        </span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-light btn-sm px-3" onclick="alert('Link do Formulário: https://core.cdc.org.br/forms/termo-lgpd/');">
+                                <i class="ri-link me-1"></i> Copiar Link
+                            </button>
+                            <button class="btn btn-primary btn-sm px-3" onclick="alert('Visualizando 210 termos assinados digitalmente.');">
+                                <i class="ri-eye-line me-1"></i> Respostas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO: INTEGRAÇÕES DISPONÍVEIS COM SERVIÇOS DE FORMULÁRIOS EXTERNOS -->
+        <div class="card border-0 mb-4" style="background: #1e293b; border-radius: 12px;">
+            <div class="card-body p-4">
+                <h5 class="text-white fw-bold mb-3">
+                    <i class="ri-plug-2-line me-2 text-success"></i>Conectores de Formulários Suportados
+                </h5>
+                <p class="text-secondary small mb-4" style="color: #cbd5e1 !important;">
+                    O CDC Core pode receber respostas de formulários tanto nativos quanto integrados via Webhooks e APIs oficiais.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="p-3 rounded-3 d-flex align-items-center" style="background: #0f172a; border: 1px solid #334155;">
+                            <i class="ri-google-line fs-3 text-info me-3"></i>
+                            <div>
+                                <h6 class="text-white mb-0 fw-bold">Google Forms</h6>
+                                <small class="text-success">Conectado via Apps Script</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded-3 d-flex align-items-center" style="background: #0f172a; border: 1px solid #334155;">
+                            <i class="ri-survey-line fs-3 text-warning me-3"></i>
+                            <div>
+                                <h6 class="text-white mb-0 fw-bold">Typeform</h6>
+                                <small class="text-secondary">Pronto para Webhook</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded-3 d-flex align-items-center" style="background: #0f172a; border: 1px solid #334155;">
+                            <i class="ri-code-s-slash-line fs-3 text-primary me-3"></i>
+                            <div>
+                                <h6 class="text-white mb-0 fw-bold">API M2M Nativa</h6>
+                                <small class="text-success">Header X-API-Key</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded-3 d-flex align-items-center" style="background: #0f172a; border: 1px solid #334155;">
+                            <i class="ri-table-line fs-3 text-success me-3"></i>
+                            <div>
+                                <h6 class="text-white mb-0 fw-bold">Google Sheets</h6>
+                                <small class="text-success">Sincronização em Lote</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL 1: CRIAR NOVO FORMULÁRIO -->
+<div class="modal fade" id="modalNovoFormulario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content text-white" style="background: #1e293b; border: 1px solid #334155; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #334155;">
+                <h5 class="modal-title font-weight-bold"><i class="ri-add-circle-line me-2 text-success"></i>Criar Novo Formulário Institucional</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCriarFormulario" onsubmit="event.preventDefault(); alert('Novo formulário configurado com sucesso no CDC Core!'); bootstrap.Modal.getInstance(document.getElementById('modalNovoFormulario')).hide();">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label text-white small font-weight-bold">Título do Formulário</label>
+                            <input type="text" class="form-control bg-dark border-secondary text-white" placeholder="Ex: Pesquisa de Avaliação de Treinamento" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-white small font-weight-bold">Categoria</label>
+                            <select class="form-select bg-dark border-secondary text-white">
+                                <option>Admissão / Voluntários</option>
+                                <option>Suporte TI / VPN</option>
+                                <option>Ouvidoria / Clima</option>
+                                <option>LGPD & Privacidade</option>
+                                <option>Geral</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-white small font-weight-bold">Descrição & Objetivo</label>
+                            <textarea class="form-control bg-dark border-secondary text-white" rows="3" placeholder="Explique brevemente o propósito deste formulário..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white small font-weight-bold">Notificar por E-mail em cada resposta</label>
+                            <input type="email" class="form-control bg-dark border-secondary text-white" placeholder="gestao@cdc.org.br">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white small font-weight-bold">Status Inicial</label>
+                            <select class="form-select bg-dark border-secondary text-white">
+                                <option>Publicado (Ativo)</option>
+                                <option>Rascunho</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="text-end mt-4">
+                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success btn-sm px-4">Salvar e Publicar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: INTEGRAR GOOGLE FORMS -->
+<div class="modal fade" id="modalIntegrarGoogleForms" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white" style="background: #1e293b; border: 1px solid #334155; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #334155;">
+                <h5 class="modal-title font-weight-bold"><i class="ri-google-line me-2 text-info"></i>Integrar com Google Forms</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-secondary small mb-3" style="color: #cbd5e1 !important;">
+                    Insira o Webhook ou ID da planilha do Google Forms para sincronizar respostas automaticamente no CDC Core.
+                </p>
+                <form id="formIntegrarGoogle" onsubmit="event.preventDefault(); alert('Integração com Google Forms configurada!'); bootstrap.Modal.getInstance(document.getElementById('modalIntegrarGoogleForms')).hide();">
+                    <div class="mb-3">
+                        <label class="form-label text-white small font-weight-bold">URL do Formulário / Apps Script Webhook</label>
+                        <input type="url" class="form-control bg-dark border-secondary text-white" placeholder="https://script.google.com/macros/s/.../exec" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white small font-weight-bold">Mapear para o Módulo</label>
+                        <select class="form-select bg-dark border-secondary text-white">
+                            <option>Cadastro de Voluntários (Google Workspace)</option>
+                            <option>Solicitações de Acesso VPN</option>
+                            <option>Registros de Auditoria</option>
+                        </select>
+                    </div>
+                    <div class="text-end mt-4">
+                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-info btn-sm text-dark font-weight-bold px-3">Salvar Integração</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

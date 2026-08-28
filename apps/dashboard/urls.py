@@ -14,6 +14,7 @@ urlpatterns = [
     path('dashboard/vpn/', views.vpn_view, name='vpn'),
     path('dashboard/cofre/', views.cofre_view, name='cofre'),
     path('dashboard/ferramentas/', views.ferramentas_view, name='ferramentas'),
+    path('dashboard/formularios/', views.formularios_view, name='formularios'),
     path('dashboard/governanca/', views.governanca_view, name='governanca'),
     path('dashboard/simular/<str:acao>/', views.simular_acao, name='simular_acao'),
     path('login/', views.login_view, name='login'),
