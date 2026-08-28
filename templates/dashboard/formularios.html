@@ -128,13 +128,13 @@
                 </p>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <button class="btn btn-primary btn-sm font-weight-bold px-3 py-2 rounded-3" data-bs-toggle="modal" data-bs-target="#modalCadastroSistema">
+                <button type="button" class="btn btn-primary btn-sm font-weight-bold px-3 py-2 rounded-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalCadastroSistema" data-target="#modalCadastroSistema" onclick="abrirModalForm('modalCadastroSistema')">
                     <i class="ri-add-circle-line me-1"></i> Cadastrar Sistema
                 </button>
-                <button class="btn btn-success btn-sm font-weight-bold px-3 py-2 rounded-3" data-bs-toggle="modal" data-bs-target="#modalAvaliacaoServicos">
+                <button type="button" class="btn btn-success btn-sm font-weight-bold px-3 py-2 rounded-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalAvaliacaoServicos" data-target="#modalAvaliacaoServicos" onclick="abrirModalForm('modalAvaliacaoServicos')">
                     <i class="ri-star-line me-1"></i> Avaliar Serviços & TI
                 </button>
-                <button class="btn btn-info btn-sm font-weight-bold px-3 py-2 rounded-3 text-dark" data-bs-toggle="modal" data-bs-target="#modalSuporteTI">
+                <button type="button" class="btn btn-info btn-sm font-weight-bold px-3 py-2 rounded-3 text-dark" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalSuporteTI" data-target="#modalSuporteTI" onclick="abrirModalForm('modalSuporteTI')">
                     <i class="ri-customer-service-2-line me-1"></i> Abrir Chamado TI
                 </button>
             </div>
@@ -243,7 +243,7 @@
                         <span class="text-secondary small" style="color: #94a3b8 !important;">
                             <i class="ri-database-2-line me-1 text-primary"></i> <strong>{{ total_sistemas }}</strong> sistemas no DB
                         </span>
-                        <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalCadastroSistema">
+                        <button type="button" class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalCadastroSistema" data-target="#modalCadastroSistema" onclick="abrirModalForm('modalCadastroSistema')">
                             <i class="ri-edit-box-line me-1"></i> Preencher
                         </button>
                     </div>
@@ -274,7 +274,7 @@
                         <span class="text-secondary small" style="color: #94a3b8 !important;">
                             <i class="ri-question-answer-line me-1 text-warning"></i> <strong>{{ total_avaliacoes }}</strong> avaliações
                         </span>
-                        <button class="btn btn-warning btn-sm text-dark font-weight-bold px-3" data-bs-toggle="modal" data-bs-target="#modalAvaliacaoServicos">
+                        <button type="button" class="btn btn-warning btn-sm text-dark font-weight-bold px-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalAvaliacaoServicos" data-target="#modalAvaliacaoServicos" onclick="abrirModalForm('modalAvaliacaoServicos')">
                             <i class="ri-edit-box-line me-1"></i> Preencher
                         </button>
                     </div>
@@ -305,7 +305,7 @@
                         <span class="text-secondary small" style="color: #94a3b8 !important;">
                             <i class="ri-headset-line me-1 text-info"></i> <strong>{{ total_chamados_suporte }}</strong> chamados
                         </span>
-                        <button class="btn btn-info btn-sm text-dark font-weight-bold px-3" data-bs-toggle="modal" data-bs-target="#modalSuporteTI">
+                        <button type="button" class="btn btn-info btn-sm text-dark font-weight-bold px-3" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalSuporteTI" data-target="#modalSuporteTI" onclick="abrirModalForm('modalSuporteTI')">
                             <i class="ri-edit-box-line me-1"></i> Abrir Chamado
                         </button>
                     </div>
@@ -318,12 +318,12 @@
             <div class="card-header bg-transparent border-bottom border-secondary p-3">
                 <ul class="nav nav-tabs card-header-tabs" id="tabFormularios" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="tab-sistemas-tab" data-bs-toggle="tab" data-bs-target="#tab-sistemas" type="button" role="tab">
+                        <button class="nav-link active" id="tab-sistemas-tab" data-bs-toggle="tab" data-toggle="tab" data-bs-target="#tab-sistemas" data-target="#tab-sistemas" type="button" role="tab">
                             <i class="ri-server-line me-1"></i> Sistemas Mapeados no Banco ({{ total_sistemas }})
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-respostas-tab" data-bs-toggle="tab" data-bs-target="#tab-respostas" type="button" role="tab">
+                        <button class="nav-link" id="tab-respostas-tab" data-bs-toggle="tab" data-toggle="tab" data-bs-target="#tab-respostas" data-target="#tab-respostas" type="button" role="tab">
                             <i class="ri-inbox-archive-line me-1"></i> Respostas & Chamados Gravados ({{ total_respostas }})
                         </button>
                     </li>
@@ -392,7 +392,7 @@
                                 <p class="text-secondary small mb-3" style="color: #94a3b8 !important;">
                                     Clique no botão abaixo para preencher o Formulário de Cadastro de Sistemas e salvar o primeiro registro no banco.
                                 </p>
-                                <button class="btn btn-primary btn-sm px-4" data-bs-toggle="modal" data-bs-target="#modalCadastroSistema">
+                                <button type="button" class="btn btn-primary btn-sm px-4" data-bs-toggle="modal" data-toggle="modal" data-bs-target="#modalCadastroSistema" data-target="#modalCadastroSistema" onclick="abrirModalForm('modalCadastroSistema')">
                                     <i class="ri-add-line me-1"></i> Cadastrar Primeiro Sistema
                                 </button>
                             </div>
@@ -466,12 +466,12 @@
 </div>
 
 <!-- MODAL 1: REPRODUÇÃO DO GOOGLE FORM (CADASTRO DOS SISTEMAS) -->
-<div class="modal fade" id="modalCadastroSistema" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalCadastroSistema" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content text-white" style="background: #1e293b; border: 1px solid #334155; border-radius: 12px;">
             <div class="modal-header" style="border-bottom: 1px solid #334155;">
                 <h5 class="modal-title font-weight-bold"><i class="ri-layout-grid-line me-2 text-primary"></i>Formulário: Cadastro dos Sistemas (CDC)</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p class="text-secondary small mb-4" style="color: #cbd5e1 !important;">
@@ -530,7 +530,7 @@
                         </div>
                     </div>
                     <div class="text-end mt-4">
-                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal" data-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-primary btn-sm px-4">Salvar no Banco de Dados</button>
                     </div>
                 </form>
@@ -540,12 +540,12 @@
 </div>
 
 <!-- MODAL 2: AVALIAÇÃO DE SERVIÇOS INSTITUCIONAIS -->
-<div class="modal fade" id="modalAvaliacaoServicos" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalAvaliacaoServicos" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-white" style="background: #1e293b; border: 1px solid #334155; border-radius: 12px;">
             <div class="modal-header" style="border-bottom: 1px solid #334155;">
                 <h5 class="modal-title font-weight-bold"><i class="ri-star-line me-2 text-warning"></i>Avaliação de Serviços & TI</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form action="{% url 'dashboard:submeter_resposta_formulario' %}" method="POST">
@@ -583,7 +583,7 @@
                         <textarea name="mensagem_detalhes" class="form-control bg-dark border-secondary text-white" rows="3" placeholder="O que podemos melhorar no serviço?"></textarea>
                     </div>
                     <div class="text-end mt-4">
-                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal" data-dismiss="modal">Fechar</button>
                         <button type="submit" class="btn btn-warning btn-sm text-dark font-weight-bold px-4">Enviar Avaliação</button>
                     </div>
                 </form>
@@ -593,12 +593,12 @@
 </div>
 
 <!-- MODAL 3: CENTRAL DE SUPORTE TI (CHAMADOS) -->
-<div class="modal fade" id="modalSuporteTI" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalSuporteTI" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-white" style="background: #1e293b; border: 1px solid #334155; border-radius: 12px;">
             <div class="modal-header" style="border-bottom: 1px solid #334155;">
                 <h5 class="modal-title font-weight-bold"><i class="ri-customer-service-2-line me-2 text-info"></i>Abrir Chamado de Suporte TI</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form action="{% url 'dashboard:submeter_resposta_formulario' %}" method="POST">
@@ -626,7 +626,7 @@
                         <textarea name="mensagem_detalhes" class="form-control bg-dark border-secondary text-white" rows="4" placeholder="Descreva o problema com o máximo de detalhes..." required></textarea>
                     </div>
                     <div class="text-end mt-4">
-                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal" data-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-info btn-sm text-dark font-weight-bold px-4">Registrar Chamado</button>
                     </div>
                 </form>
@@ -634,4 +634,17 @@
         </div>
     </div>
 </div>
+
+<script>
+function abrirModalForm(modalId) {
+    var el = document.getElementById(modalId);
+    if (!el) return;
+    if (window.bootstrap && bootstrap.Modal) {
+        var m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+        m.show();
+    } else if (typeof $ !== 'undefined' && $.fn && $.fn.modal) {
+        $('#' + modalId).modal('show');
+    }
+}
+</script>
 {% endblock %}
