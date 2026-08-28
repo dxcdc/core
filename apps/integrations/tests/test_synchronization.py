@@ -37,6 +37,7 @@ class WarehouseSynchronizationTests(TestCase):
         next_cursor="cursor-2",
         has_more=True,
         contract_version="v1",
+        checkpoint=datetime(2026, 8, 28, 10, 5, tzinfo=dt_timezone.utc),
     )
 
     def test_failure_keeps_cursor_and_does_not_advance_checkpoint(self):
@@ -61,6 +62,7 @@ class WarehouseSynchronizationTests(TestCase):
             next_cursor="",
             has_more=False,
             contract_version="v1",
+            checkpoint=datetime(2026, 8, 28, 10, 5, tzinfo=dt_timezone.utc),
         )
         resumed = FakeClient([final_page])
         run = WarehouseSynchronizer(resumed).run()
@@ -72,4 +74,5 @@ class WarehouseSynchronizationTests(TestCase):
         checkpoint = IntegrationCheckpoint.objects.get(dataset="warehouses")
         self.assertEqual(checkpoint.resume_cursor, "")
         self.assertIsNotNone(checkpoint.completed_through)
+        self.assertEqual(checkpoint.completed_through, final_page.checkpoint)
         self.assertEqual(run.status, "succeeded")

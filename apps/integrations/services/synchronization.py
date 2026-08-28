@@ -54,6 +54,7 @@ class WarehouseSynchronizer:
             checkpoint.save()
 
         try:
+            provider_checkpoint = None
             while True:
                 page = self.client.fetch_dataset_page(
                     self.dataset,
@@ -61,6 +62,9 @@ class WarehouseSynchronizer:
                     modified_since=modified_since,
                     correlation_id=run.correlation_id,
                 )
+                if provider_checkpoint and page.checkpoint != provider_checkpoint:
+                    raise NextERPError("O checkpoint do NextERP mudou durante a paginação.")
+                provider_checkpoint = page.checkpoint
                 with transaction.atomic():
                     inserted = updated = 0
                     for record in page.records:
@@ -114,7 +118,7 @@ class WarehouseSynchronizer:
                 run.finished_at = timezone.now()
                 run.save()
                 checkpoint = IntegrationCheckpoint.objects.select_for_update().get(pk=checkpoint.pk)
-                checkpoint.completed_through = started_at
+                checkpoint.completed_through = provider_checkpoint
                 checkpoint.resume_cursor = ""
                 checkpoint.resume_modified_since = None
                 checkpoint.last_run = run

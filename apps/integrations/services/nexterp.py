@@ -44,6 +44,7 @@ class DatasetPage:
     next_cursor: str
     has_more: bool
     contract_version: str
+    checkpoint: datetime
 
 
 class NextERPAnalyticsClient:
@@ -84,7 +85,8 @@ class NextERPAnalyticsClient:
         return self._validate_page(payload)
 
     def fetch_catalog(self, *, correlation_id=None):
-        return self._get(self.catalog_path, {}, correlation_id or uuid.uuid4())
+        payload = self._get(self.catalog_path, {}, correlation_id or uuid.uuid4())
+        return self._validate_catalog(payload)
 
     def _get(self, path, params, correlation_id):
         headers = {
@@ -148,10 +150,17 @@ class NextERPAnalyticsClient:
         records = body.get("data", body.get("records"))
         has_more = body.get("has_more")
         next_cursor = body.get("next_cursor")
+        checkpoint_value = body.get("checkpoint")
         if not isinstance(records, list) or not isinstance(has_more, bool):
             raise NextERPContractError("Página incompleta: data/records ou has_more inválido.")
         if has_more and not isinstance(next_cursor, str):
             raise NextERPContractError("Página incompleta: next_cursor obrigatório.")
+        if not isinstance(checkpoint_value, str):
+            raise NextERPContractError("Página incompleta: checkpoint obrigatório.")
+        try:
+            checkpoint = datetime.fromisoformat(checkpoint_value.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise NextERPContractError("Página com checkpoint inválido.") from exc
         for record in records:
             if not isinstance(record, dict) or not record.get("name"):
                 raise NextERPContractError("Registro sem objeto JSON ou identificador name.")
@@ -162,4 +171,22 @@ class NextERPAnalyticsClient:
                 datetime.fromisoformat(modified.replace("Z", "+00:00"))
             except ValueError as exc:
                 raise NextERPContractError("Registro com data modified inválida.") from exc
-        return DatasetPage(records, next_cursor or "", has_more, version)
+        return DatasetPage(records, next_cursor or "", has_more, version, checkpoint)
+
+    @staticmethod
+    def _validate_catalog(payload):
+        if not isinstance(payload, dict):
+            raise NextERPContractError("Catálogo do NextERP não é um objeto JSON.")
+        body = payload.get("message", payload)
+        if not isinstance(body, dict) or body.get("contract_version") != "v1":
+            raise NextERPContractError("Catálogo do NextERP não usa o contrato v1.")
+        datasets = body.get("datasets")
+        if not isinstance(datasets, list):
+            raise NextERPContractError("Catálogo do NextERP não informa os conjuntos.")
+        warehouses = next(
+            (item for item in datasets if isinstance(item, dict) and item.get("id") == "warehouses"),
+            None,
+        )
+        if not warehouses or warehouses.get("read_only") is not True:
+            raise NextERPContractError("Catálogo sem conjunto warehouses somente leitura.")
+        return body

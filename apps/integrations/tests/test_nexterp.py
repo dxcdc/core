@@ -37,6 +37,7 @@ class NextERPClientTests(SimpleTestCase):
                 "data": [{"name": "WH-001", "modified": "2026-08-28T10:00:00Z"}],
                 "has_more": False,
                 "next_cursor": None,
+                "checkpoint": "2026-08-28T10:05:00Z",
             }})
         ])
         page = client.fetch_dataset_page("warehouses")
@@ -47,7 +48,8 @@ class NextERPClientTests(SimpleTestCase):
     def test_rejects_contract_other_than_v1(self):
         client, _ = self.make_client([
             self.response(200, {
-                "contract_version": "v2", "data": [], "has_more": False
+                "contract_version": "v2", "data": [], "has_more": False,
+                "checkpoint": "2026-08-28T10:05:00Z",
             })
         ])
         with self.assertRaisesRegex(NextERPContractError, "esperado v1"):
@@ -65,3 +67,11 @@ class NextERPClientTests(SimpleTestCase):
         with self.assertRaises(NextERPRateLimitError):
             client.fetch_dataset_page("warehouses")
         self.assertEqual(session.get.call_count, 2)
+
+    def test_catalog_requires_read_only_warehouses(self):
+        client, _ = self.make_client([self.response(200, {"message": {
+            "contract_version": "v1",
+            "datasets": [{"id": "warehouses", "read_only": True, "records": 3}],
+        }})])
+        catalog = client.fetch_catalog()
+        self.assertEqual(catalog["datasets"][0]["records"], 3)

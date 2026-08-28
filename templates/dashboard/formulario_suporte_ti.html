@@ -1,125 +1,245 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Formulário: Suporte & Chamados TI | CDC Core{% endblock %}
+{% block title %}Central de Suporte TI & Chamados | CDC Core App{% endblock %}
 
 {% block extra_css %}
 <style>
-    .google-form-wrapper {
-        max-width: 840px;
+    .webapp-form-container {
+        max-width: 900px;
         margin: 0 auto;
     }
-    .form-header-card {
-        background: #1e293b;
-        border-top: 10px solid #06b6d4;
-        border-radius: 12px;
+
+    .webapp-hero-banner {
+        background: linear-gradient(135deg, #0f172a 0%, #0891b2 50%, #0f172a 100%);
+        border: 1px solid rgba(6, 182, 212, 0.25);
+        border-radius: 20px;
+        padding: 32px 36px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 28px;
+    }
+
+    .webapp-card {
+        background: #141c2e;
+        border: 1px solid #26334d;
+        border-radius: 18px;
         padding: 32px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        margin-bottom: 24px;
+        transition: border-color 0.25s ease;
+    }
+
+    .webapp-card:hover {
+        border-color: #06b6d4;
+    }
+
+    .webapp-section-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #26334d;
         margin-bottom: 24px;
     }
-    .form-section-card {
-        background: #1e293b;
-        border: 1px solid #334155;
+
+    .webapp-icon-box {
+        width: 44px;
+        height: 44px;
         border-radius: 12px;
-        padding: 28px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
     }
-    .form-field-group {
-        background: #0f172a;
-        border: 1px solid #334155;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-    .form-field-label {
+
+    .webapp-label {
+        font-size: 0.88rem;
         font-weight: 700;
-        font-size: 0.95rem;
-        color: #f8fafc;
+        color: #f1f5f9;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .webapp-sublabel {
+        font-size: 0.78rem;
+        color: #94a3b8;
         margin-bottom: 8px;
     }
-    .form-field-desc {
-        font-size: 0.82rem;
-        color: #94a3b8;
-        margin-bottom: 12px;
+
+    .webapp-input {
+        background-color: #0b1120 !important;
+        border: 1px solid #26334d !important;
+        color: #f8fafc !important;
+        border-radius: 12px !important;
+        padding: 14px 18px !important;
+        font-size: 0.95rem !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .webapp-input:focus {
+        border-color: #06b6d4 !important;
+        box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.18) !important;
+    }
+
+    .webapp-select {
+        background-color: #0b1120 !important;
+        border: 1px solid #26334d !important;
+        color: #f8fafc !important;
+        border-radius: 12px !important;
+        padding: 14px 18px !important;
+        font-size: 0.95rem !important;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <div class="google-form-wrapper">
+    <div class="webapp-form-container">
+
         <!-- BOTÃO VOLTAR -->
-        <div class="mb-3">
-            <a href="{% url 'dashboard:formularios' %}" class="btn btn-outline-secondary btn-sm rounded-3">
-                <i class="ri-arrow-left-line me-1"></i> Voltar para Central de Formulários
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <a href="{% url 'dashboard:formularios' %}" class="btn btn-outline-secondary btn-sm rounded-3 px-3">
+                <i class="ri-arrow-left-line me-1"></i> Voltar para Central
             </a>
+            <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-30 px-3 py-1 font-weight-bold">
+                Suporte & Chamados TI
+            </span>
         </div>
 
-        <!-- BANNER DE CABEÇALHO DO GOOGLE FORM -->
-        <div class="form-header-card">
-            <span class="badge bg-info text-dark px-3 py-1 mb-2 font-weight-bold">Apoio Técnico</span>
-            <h2 class="text-white fw-bold mb-2">Formulário: Suporte & Chamados TI</h2>
-            <p class="text-secondary mb-0" style="color: #cbd5e1 !important;">
-                Abertura de chamados técnicos para ajuste de acesso VPN WireGuard, e-mail/MFA, liberação de cota ou auxílio em sistemas do CDC.
+        <!-- HERO BANNER WEB APP -->
+        <div class="webapp-hero-banner">
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="p-2 bg-info bg-opacity-20 rounded-3 text-info fs-4">
+                    <i class="ri-customer-service-2-line"></i>
+                </div>
+                <div>
+                    <h2 class="text-white fw-bold mb-0" style="letter-spacing: -0.02em;">Central de Suporte TI & Chamados</h2>
+                    <span class="text-info small fw-semibold">Atendimento Técnico Integrado ao Banco do CDC Core</span>
+                </div>
+            </div>
+            <p class="text-secondary mb-0 mt-3" style="color: #cbd5e1 !important; font-size: 0.92rem; max-width: 800px;">
+                Abra sua solicitação técnica para suporte em e-mail/MFA, VPN WireGuard, liberação de cota ou auxílio em sistemas do CDC.
             </p>
         </div>
 
-        <!-- FORMULÁRIO INTERATIVO -->
-        <form action="{% url 'dashboard:submeter_resposta_formulario' %}" method="POST">
+        <!-- MENSAGENS DE FEEDBACK DO DJANGO -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show bg-dark border-{{ message.tags }} text-white mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- FORMULÁRIO WEB APP -->
+        <form action="{% url 'dashboard:submeter_resposta_formulario' %}" method="POST" id="formWebappSuporte">
             {% csrf_token %}
             <input type="hidden" name="tipo_formulario" value="suporte_ti">
 
-            <div class="form-section-card">
-                <h5 class="text-white fw-bold mb-4">
-                    <i class="ri-customer-service-2-line text-info me-2"></i>1. Solicitante & Contato
-                </h5>
-
-                <div class="form-field-group">
-                    <label class="form-field-label">Seu Nome *</label>
-                    <input type="text" name="nome_respondente" class="form-control bg-dark border-secondary text-white p-3" placeholder="Seu nome completo" required>
+            <!-- SEÇÃO 1: SOLICITANTE -->
+            <div class="webapp-card">
+                <div class="webapp-section-header">
+                    <div class="webapp-icon-box bg-info bg-opacity-20 text-info">
+                        <i class="ri-user-settings-line"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-white fw-bold mb-0">1. Identificação do Solicitante</h5>
+                        <small class="text-secondary" style="color: #94a3b8 !important;">Informe seus dados para acompanhamento do chamado</small>
+                    </div>
                 </div>
 
-                <div class="form-field-group">
-                    <label class="form-field-label">E-mail para Retorno *</label>
-                    <input type="email" name="email_respondente" class="form-control bg-dark border-secondary text-white p-3" placeholder="usuario@cdc.org.br" required>
-                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="webapp-label">Seu Nome Completo *</label>
+                        <input type="text" name="nome_respondente" class="form-control webapp-input" placeholder="Seu nome completo" required>
+                    </div>
 
-                <div class="form-field-group">
-                    <label class="form-field-label">Setor ou Projeto Vinculado *</label>
-                    <input type="text" name="setor_ou_projeto" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: PROVITA / PPCAAM / Sede" required>
+                    <div class="col-md-6">
+                        <label class="webapp-label">E-mail para Retorno *</label>
+                        <input type="email" name="email_respondente" class="form-control webapp-input" placeholder="usuario@cdc.org.br" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="webapp-label">Setor ou Projeto Vinculado *</label>
+                        <input type="text" name="setor_ou_projeto" class="form-control webapp-input" placeholder="Ex: PROVITA / PPCAAM / Sede Recife" required>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-section-card">
-                <h5 class="text-white fw-bold mb-4">
-                    <i class="ri-headset-line text-info me-2"></i>2. Detalhes da Solicitação
-                </h5>
+            <!-- SEÇÃO 2: DETALHES & CATEGORIA "OUTRO" -->
+            <div class="webapp-card">
+                <div class="webapp-section-header">
+                    <div class="webapp-icon-box bg-info bg-opacity-20 text-info">
+                        <i class="ri-headset-line"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-white fw-bold mb-0">2. Detalhes da Solicitação de Suporte</h5>
+                        <small class="text-secondary" style="color: #94a3b8 !important;">Selecione a categoria do problema ou escolha 'Outro'</small>
+                    </div>
+                </div>
 
-                <div class="form-field-group">
-                    <label class="form-field-label">Categoria do Chamado *</label>
-                    <select name="assunto_ou_categoria" class="form-select bg-dark border-secondary text-white p-3" required>
+                <!-- CATEGORIA DO CHAMADO COM OPÇÃO OUTRO -->
+                <div class="mb-4">
+                    <label class="webapp-label">Categoria do Chamado *</label>
+                    <select name="assunto_ou_categoria" id="selectCategoriaChamado" class="form-select webapp-select" required>
                         <option value="Problema de Acesso VPN">Problema de Acesso VPN WireGuard</option>
                         <option value="Senha / MFA / Autenticação">Senha / MFA / Autenticação Google Workspace</option>
                         <option value="Erro em Sistema / Aplicação">Erro em Sistema / Aplicação CDC</option>
                         <option value="Solicitação de Novo Recurso">Solicitação de Novo Recurso / Cota</option>
+                        <option value="Outro">Outro (especificar abaixo)</option>
                     </select>
+
+                    <!-- CAMPO DINÂMICO PARA SELEÇÃO 'OUTRO' -->
+                    <div id="boxOutroChamado" class="mt-3 p-3 bg-dark border border-secondary rounded-3" style="display: none;">
+                        <label class="webapp-label text-info"><i class="ri-edit-line me-1"></i> Especifique o motivo do chamado *</label>
+                        <input type="text" name="outro_servico_especifico" id="inputOutroChamado" class="form-control webapp-input" placeholder="Descreva brevemente a categoria do assunto...">
+                    </div>
                 </div>
 
-                <div class="form-field-group">
-                    <label class="form-field-label">Descrição Completa da Dificuldade / Problema *</label>
-                    <textarea name="mensagem_detalhes" class="form-control bg-dark border-secondary text-white p-3" rows="5" placeholder="Descreva o problema com o máximo de detalhes..." required></textarea>
+                <!-- DESCRIÇÃO COMPLETA -->
+                <div>
+                    <label class="webapp-label">Descrição Completa da Dificuldade / Problema *</label>
+                    <div class="webapp-sublabel">Descreva com detalhes o problema ocorrido, mensagens de erro ou comportamento observado.</div>
+                    <textarea name="mensagem_detalhes" class="form-control webapp-input" rows="5" placeholder="Descreva o problema com o máximo de detalhes..." required></textarea>
                 </div>
             </div>
 
-            <!-- BOTÃO ENVIAR -->
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <a href="{% url 'dashboard:formularios' %}" class="btn btn-secondary px-4 py-2">Cancelar</a>
-                <button type="submit" class="btn btn-info text-dark font-weight-bold px-5 py-3 rounded-3 fs-6">
-                    <i class="ri-send-plane-fill me-2"></i> Abrir Chamado no Banco de Dados
+            <!-- SUBMIT -->
+            <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+                <a href="{% url 'dashboard:formularios' %}" class="btn btn-outline-secondary px-4 py-2.5 rounded-3">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-info text-dark font-weight-bold px-5 py-3 rounded-3 fs-6 shadow-lg">
+                    <i class="ri-send-plane-fill me-2"></i> Registrar Chamado no Banco
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectCategoria = document.getElementById('selectCategoriaChamado');
+    const boxOutroChamado = document.getElementById('boxOutroChamado');
+    const inputOutroChamado = document.getElementById('inputOutroChamado');
+
+    if (selectCategoria) {
+        selectCategoria.addEventListener('change', function() {
+            if (this.value === 'Outro') {
+                boxOutroChamado.style.display = 'block';
+                inputOutroChamado.setAttribute('required', 'required');
+                inputOutroChamado.focus();
+            } else {
+                boxOutroChamado.style.display = 'none';
+                inputOutroChamado.removeAttribute('required');
+                inputOutroChamado.value = '';
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
