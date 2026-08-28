@@ -145,3 +145,67 @@ class EstruturaVpn(models.Model):
 
     def __str__(self):
         return f"{self.nome} ({self.get_tipo_display()}) - {self.status}"
+
+
+class CadastroSistema(models.Model):
+    """Mapeamento e Cadastro de Sistemas / Aplicações Satélites do CDC."""
+    CRITICIDADE_CHOICES = (
+        ('Alta', 'Alta - Crítico'),
+        ('Média', 'Média'),
+        ('Baixa', 'Baixa'),
+    )
+    STATUS_CHOICES = (
+        ('Operacional', 'Operacional / Em Produção'),
+        ('Desenvolvimento', 'Em Desenvolvimento'),
+        ('Legado', 'Sistema Legado'),
+        ('Descontinuado', 'Descontinuado'),
+    )
+
+    nome_sistema = models.CharField(max_length=200, verbose_name="Nome do Sistema")
+    sigla = models.CharField(max_length=50, blank=True, null=True, verbose_name="Sigla / Código")
+    responsavel_nome = models.CharField(max_length=150, verbose_name="Responsável Técnico")
+    responsavel_email = models.EmailField(max_length=255, verbose_name="E-mail do Responsável")
+    setor_projeto = models.CharField(max_length=100, verbose_name="Setor ou Projeto Vinculado")
+    url_acesso = models.CharField(max_length=255, blank=True, null=True, verbose_name="URL de Acesso / IP")
+    tecnologias = models.CharField(max_length=255, blank=True, null=True, verbose_name="Stack / Tecnologias")
+    descricao = models.TextField(blank=True, null=True, verbose_name="Descrição do Sistema")
+    criticidade = models.CharField(max_length=20, choices=CRITICIDADE_CHOICES, default='Média', verbose_name="Criticidade")
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='Operacional', verbose_name="Status")
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Cadastro de Sistema"
+        verbose_name_plural = "Cadastro dos Sistemas"
+        ordering = ['-criado_em']
+
+    def __str__(self):
+        return f"{self.nome_sistema} ({self.setor_projeto}) - {self.status}"
+
+
+class RespostaFormulario(models.Model):
+    """Armazenamento Único de Respostas de Formulários (Avaliação, Suporte, LGPD, etc)."""
+    TIPO_CHOICES = (
+        ('cadastro_sistema', 'Cadastro de Sistema'),
+        ('avaliacao_servicos', 'Avaliação de Serviços & TI'),
+        ('suporte_ti', 'Chamado de Suporte TI'),
+        ('voluntario', 'Admissão de Voluntário'),
+        ('termo_lgpd', 'Termo de Aceite LGPD'),
+    )
+
+    tipo_formulario = models.CharField(max_length=50, choices=TIPO_CHOICES, verbose_name="Tipo de Formulário")
+    nome_respondente = models.CharField(max_length=150, verbose_name="Nome do Respondente")
+    email_respondente = models.EmailField(max_length=255, verbose_name="E-mail")
+    setor_ou_projeto = models.CharField(max_length=100, blank=True, null=True, verbose_name="Setor / Projeto")
+    avaliacao_nota = models.IntegerField(default=5, verbose_name="Nota de Satisfação (1-5)")
+    assunto_ou_categoria = models.CharField(max_length=150, blank=True, null=True, verbose_name="Assunto / Categoria")
+    mensagem_detalhes = models.TextField(verbose_name="Mensagem / Detalhes")
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Resposta de Formulário"
+        verbose_name_plural = "Respostas de Formulários"
+        ordering = ['-criado_em']
+
+    def __str__(self):
+        return f"[{self.get_tipo_formulario_display()}] {self.nome_respondente} ({self.criado_em.strftime('%d/%m/%Y %H:%M')})"

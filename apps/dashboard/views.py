@@ -4,7 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.utils import timezone
-from apps.dataops.models import UsuarioDataOps, GrupoWorkspace, MembroGrupo, NotaFiscalConciliacao, LogAuditoria
+from apps.dataops.models import (
+    UsuarioDataOps, GrupoWorkspace, MembroGrupo, 
+    NotaFiscalConciliacao, LogAuditoria, CadastroSistema, RespostaFormulario
+)
 
 User = get_user_model()
 
@@ -169,8 +172,101 @@ def ferramentas_view(request):
 
 @login_required(login_url='dashboard:login')
 def formularios_view(request):
-    """Renderiza a Central de Formulários Institucionais do CDC Core."""
-    return render(request, 'dashboard/formularios.html')
+    """Renderiza a Central de Formulários Institucionais e Respostas do Banco."""
+    sistemas_cadastrados = CadastroSistema.objects.all()
+    respostas_formularios = RespostaFormulario.objects.all()
+    
+    # Estatísticas reais
+    total_sistemas = sistemas_cadastrados.count()
+    total_respostas = respostas_formularios.count()
+    total_chamados_suporte = respostas_formularios.filter(tipo_formulario='suporte_ti').count()
+    total_avaliacoes = respostas_formularios.filter(tipo_formulario='avaliacao_servicos').count()
+
+    context = {
+        'sistemas_cadastrados': sistemas_cadastrados,
+        'respostas_formularios': respostas_formularios,
+        'total_sistemas': total_sistemas,
+        'total_respostas': total_respostas,
+        'total_chamados_suporte': total_chamados_suporte,
+        'total_avaliacoes': total_avaliacoes,
+    }
+    return render(request, 'dashboard/formularios.html', context)
+
+@login_required(login_url='dashboard:login')
+def submeter_cadastro_sistema(request):
+    """Processa a gravação de um novo sistema no Cadastro dos Sistemas."""
+    if request.method == 'POST':
+        nome = request.POST.get('nome_sistema')
+        sigla = request.POST.get('sigla')
+        responsavel_nome = request.POST.get('responsavel_nome')
+        responsavel_email = request.POST.get('responsavel_email')
+        setor_projeto = request.POST.get('setor_projeto')
+        url_acesso = request.POST.get('url_acesso')
+        tecnologias = request.POST.get('tecnologias')
+        descricao = request.POST.get('descricao')
+        criticidade = request.POST.get('criticidade', 'Média')
+        status = request.POST.get('status', 'Operacional')
+
+        sistema = CadastroSistema.objects.create(
+            nome_sistema=nome,
+            sigla=sigla,
+            responsavel_nome=responsavel_nome,
+            responsavel_email=responsavel_email,
+            setor_projeto=setor_projeto,
+            url_acesso=url_acesso,
+            tecnologias=tecnologias,
+            descricao=descricao,
+            criticidade=criticidade,
+            status=status
+        )
+
+        user_exec = UsuarioDataOps.objects.filter(email='fvier@cdc.org.br').first()
+        LogAuditoria.objects.create(
+            usuario_executor=user_exec,
+            nivel='SUCCESS',
+            acao_executada='Cadastro de Sistema',
+            alvo_impactado=f"{sistema.nome_sistema} ({sistema.setor_projeto})",
+            detalhes=f"Sistema {sistema.nome_sistema} cadastrado por {responsavel_nome} com criticidade {criticidade}.",
+            ip_origem=request.META.get('REMOTE_ADDR', '127.0.0.1')
+        )
+
+        messages.success(request, f"✅ Sistema '{sistema.nome_sistema}' registrado com sucesso no banco de dados!")
+    return redirect('dashboard:formularios')
+
+@login_required(login_url='dashboard:login')
+def submeter_resposta_formulario(request):
+    """Processa respostas dos Formulários de Avaliação de Serviços ou Suporte TI."""
+    if request.method == 'POST':
+        tipo = request.POST.get('tipo_formulario', 'avaliacao_servicos')
+        nome = request.POST.get('nome_respondente', 'Usuário Anônimo')
+        email = request.POST.get('email_respondente', 'contato@cdc.org.br')
+        setor = request.POST.get('setor_ou_projeto', 'Sede CDC')
+        nota = int(request.POST.get('avaliacao_nota', 5))
+        assunto = request.POST.get('assunto_ou_categoria', 'Geral')
+        mensagem = request.POST.get('mensagem_detalhes', '')
+
+        resposta = RespostaFormulario.objects.create(
+            tipo_formulario=tipo,
+            nome_respondente=nome,
+            email_respondente=email,
+            setor_ou_projeto=setor,
+            avaliacao_nota=nota,
+            assunto_ou_categoria=assunto,
+            mensagem_detalhes=mensagem
+        )
+
+        user_exec = UsuarioDataOps.objects.filter(email='fvier@cdc.org.br').first()
+        LogAuditoria.objects.create(
+            usuario_executor=user_exec,
+            nivel='INFO',
+            acao_executada=f"Submissão de Formulário ({tipo})",
+            alvo_impactado=f"{nome} - {assunto}",
+            detalhes=f"Formulário {tipo} enviado por {nome} ({email}).",
+            ip_origem=request.META.get('REMOTE_ADDR', '127.0.0.1')
+        )
+
+        messages.success(request, f"🎉 Sua resposta no formulário de {resposta.get_tipo_formulario_display()} foi gravada com sucesso!")
+    return redirect('dashboard:formularios')
 
 @login_required(login_url='dashboard:login')
 def governanca_view(request):
