@@ -18,14 +18,20 @@
                         <i class="ri-timer-line me-0.5"></i> <span class="time-val">0</span> ms
                     </span>
                 </div>
-                <p class="text-muted mb-0" style="font-size: 0.84em; line-height: 1.35;">
+                <p class="text-muted mb-1" style="font-size: 0.84em; line-height: 1.35;">
                     {{ ep.descricao }}
                 </p>
+                {% if ep.especificidades %}
+                <div class="p-1.5 px-2 bg-light rounded border border-slate-200 mb-1 d-inline-block" style="font-size: 0.76em; color: #475569;">
+                    <i class="ri-information-fill text-primary me-1"></i> <strong class="text-dark">Regra/Especificidade:</strong> {{ ep.especificidades }}
+                </div>
+                {% endif %}
                 {% if ep.parametros %}
-                <small class="text-muted d-block mt-1" style="font-size: 0.76em;">
-                    <strong class="text-dark">Parâmetros Padrão:</strong> <code class="bg-light px-1 py-0.5 rounded">{{ ep.parametros }}</code>
+                <small class="text-muted d-block" style="font-size: 0.75em;">
+                    <strong class="text-dark">{% if ep.metodo == 'GET' %}Query Parameters:{% else %}Request Body (JSON):{% endif %}</strong> <code class="bg-light px-1 py-0.5 rounded text-dark">{{ ep.parametros }}</code>
                 </small>
                 {% endif %}
+
             </div>
         </div>
 

@@ -792,7 +792,8 @@ def ongsys_integration_view(request):
             'nome': 'Buscar Contas a Pagar',
             'metodo': 'GET',
             'path': 'contas-pagar',
-            'descricao': 'Busca todas as contas a pagar no período com suporte a rateio por projeto e plano de contas.',
+            'descricao': 'Busca todas as contas a pagar no período com suporte a rateio por projeto, plano de contas e impostos retidos.',
+            'especificidades': 'Exige filtro (1=Emissão, 2=Vencimento, 3=Pagamento, 4=Cadastro, 6=Competência), data_inicio, data_fim e pageNumber.',
             'parametros': '{"filtro": 1, "data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
         {
@@ -800,9 +801,10 @@ def ongsys_integration_view(request):
             'modulo': 'financeiro',
             'nome': 'Inserir Conta a Pagar',
             'metodo': 'POST',
-            'path': 'contas-pagar',
-            'descricao': 'Cadastra uma nova conta a pagar na base de dados do OngSys com rateio de projetos.',
-            'parametros': '{"fornecedor": "FORN001", "valorTotal": 1500.00, "dataVencimento": "2026-09-30"}'
+            'path': 'create-contas-pagar',
+            'descricao': 'Cadastra uma nova conta a pagar com fornecedor, rateio de projetos, contas contábeis e retenções fiscais.',
+            'especificidades': 'Endpoint específico /create-contas-pagar. Exige fornecedor (nome/documento), dataEmissao, dataVencimento, valorBruto, historicoDespesa e tipoDespesa.',
+            'parametros': '{"fornecedor": {"nome": "Empresa Fornecedora LTDA", "documento": "12.345.678/0001-99"}, "dataEmissao": "2026-08-01", "dataVencimento": "2026-08-31", "valorBruto": 1500.00, "historicoDespesa": "Pagamento de serviços de consultoria", "tipoDespesa": 1, "lancamento": "Real", "tipoDocumento": 1, "numeroDocumento": "NF-000123"}'
         },
         {
             'id': 'baixa-contas-pagar-post',
@@ -810,8 +812,9 @@ def ongsys_integration_view(request):
             'nome': 'Baixa de Contas a Pagar',
             'metodo': 'POST',
             'path': 'baixa-contas-pagar',
-            'descricao': 'Informa a liquidação/baixa de uma conta a pagar previamente cadastrada.',
-            'parametros': '{"codLancamento": "CP00001", "dataPagamento": "2026-08-28", "valorPago": 1500.00}'
+            'descricao': 'Informa a liquidação/baixa de uma conta a pagar previamente cadastrada informando a conta bancária.',
+            'especificidades': 'Endpoint /baixa-contas-pagar. Exige codLancamento (ex: CP050940), contaBancaria, dataPagamento e valorPago.',
+            'parametros': '{"codLancamento": "CP050940", "contaBancaria": 1, "dataPagamento": "2026-08-28", "valorPago": 1500.00, "formaPagamento": 1}'
         },
         {
             'id': 'contas-receber-get',
@@ -819,7 +822,8 @@ def ongsys_integration_view(request):
             'nome': 'Buscar Contas a Receber',
             'metodo': 'GET',
             'path': 'contas-receber',
-            'descricao': 'Lista todas as contas a receber registradas no período.',
+            'descricao': 'Lista todas as contas a receber registradas no período (repasse de emendas, convênios e doações).',
+            'especificidades': 'Exige filtro (1=Emissão, 2=Vencimento, 3=Recebimento, 4=Cadastro, 6=Competência), data_inicio, data_fim e pageNumber.',
             'parametros': '{"filtro": 1, "data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
         {
@@ -827,9 +831,10 @@ def ongsys_integration_view(request):
             'modulo': 'financeiro',
             'nome': 'Inserir Conta a Receber',
             'metodo': 'POST',
-            'path': 'contas-receber',
-            'descricao': 'Cadastra uma nova receita/recebimento com vínculo a clientes e projetos.',
-            'parametros': '{"cliente": {"nome": "NOME CLIENTE", "documento": "00.000.000/0001-00"}, "valor": 5000.00}'
+            'path': 'create-contas-receber',
+            'descricao': 'Cadastra uma nova receita/recebimento com vínculo a parceiro/cliente e projeto apoiado.',
+            'especificidades': 'Endpoint específico /create-contas-receber. Exige cliente (nome/documento), dataEmissao, dataVencimento, valorBruto e tipoReceita.',
+            'parametros': '{"cliente": {"nome": "NOME DO CLIENTE", "documento": "00.000.000/0001-00"}, "dataEmissao": "2026-08-01", "dataVencimento": "2026-08-31", "valorBruto": 5000.00, "historicoReceita": "Repasse referente a projeto", "tipoReceita": 1}'
         },
         {
             'id': 'baixa-contas-receber-post',
@@ -837,8 +842,9 @@ def ongsys_integration_view(request):
             'nome': 'Baixa de Contas a Receber',
             'metodo': 'POST',
             'path': 'baixa-contas-receber',
-            'descricao': 'Registra o recebimento e baixa de uma conta a receber.',
-            'parametros': '{"codLancamento": "CR00001", "dataRecebimento": "2026-08-28"}'
+            'descricao': 'Registra a baixa e quitação de uma receita na conta corrente da entidade.',
+            'especificidades': 'Endpoint /baixa-contas-receber. Exige codLancamento (ex: CR003554), contaBancaria, dataRecebimento e valorRecebido.',
+            'parametros': '{"codLancamento": "CR003554", "contaBancaria": 1, "dataRecebimento": "2026-08-28", "valorRecebido": 5000.00}'
         },
         {
             'id': 'transferencias-bancarias-get',
@@ -847,6 +853,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'transferencias-bancarias',
             'descricao': 'Consulta todas as transferências entre contas bancárias no período.',
+            'especificidades': 'Exige data_inicio (aaaa-mm-dd), data_fim (aaaa-mm-dd) e pageNumber (>=1).',
             'parametros': '{"data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
         {
@@ -854,9 +861,10 @@ def ongsys_integration_view(request):
             'modulo': 'financeiro',
             'nome': 'Inserir Transferência Bancária',
             'metodo': 'POST',
-            'path': 'transferencias-bancarias',
-            'descricao': 'Realiza o registro de movimentação entre contas da instituição.',
-            'parametros': '{"contaOrigem": 1, "contaDestino": 2, "valor": 1000.00}'
+            'path': 'create-transferencias-bancarias',
+            'descricao': 'Realiza o registro de movimentação entre contas da instituição no OngSys.',
+            'especificidades': 'Endpoint específico /create-transferencias-bancarias. Exige contaOrigem, contaDestino, valor, data e historico.',
+            'parametros': '{"contaOrigem": 1, "contaDestino": 2, "valor": 1000.00, "data": "2026-08-28", "historico": "Transferência entre contas correntes do projeto"}'
         },
         {
             'id': 'lancamentos-bancarios-get',
@@ -865,6 +873,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'lancamentos-bancarios',
             'descricao': 'Extrato de lançamentos bancários das contas correntes da organização.',
+            'especificidades': 'Exige data_inicio (aaaa-mm-dd), data_fim (aaaa-mm-dd) e pageNumber (>=1).',
             'parametros': '{"data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
         {
@@ -874,6 +883,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'adiantamentos-fornecedores',
             'descricao': 'Lista adiantamentos financeiros concedidos a fornecedores.',
+            'especificidades': 'Exige filtro (1=Operação), data_inicio, data_fim e pageNumber.',
             'parametros': '{"filtro": 1, "data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
         {
@@ -883,6 +893,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'adiantamentos-clientes',
             'descricao': 'Lista valores adiantados por doadores/clientes em projetos.',
+            'especificidades': 'Exige filtro (1=Operação), data_inicio, data_fim e pageNumber.',
             'parametros': '{"filtro": 1, "data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
 
@@ -894,6 +905,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'clientes',
             'descricao': 'Lista o cadastro de clientes, parceiros, doadores e projetos apoiados.',
+            'especificidades': 'Exige pageNumber (>=1). Suporta filtros opcionais como tipo e ativoInativo.',
             'parametros': '{"pageNumber": 1}'
         },
         {
@@ -903,6 +915,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'fornecedores',
             'descricao': 'Lista completa de fornecedores cadastrados na base do OngSys (2.900+ registros).',
+            'especificidades': 'Exige pageNumber (>=1). Suporta filtros opcionais de tipo (F/J) e ativoInativo.',
             'parametros': '{"pageNumber": 1}'
         },
         {
@@ -912,6 +925,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'contratos',
             'descricao': 'Consulta contratos vigentes de fornecedores e prestadores da instituição.',
+            'especificidades': 'Endpoint /contratos. Exige pageNumber (>=1).',
             'parametros': '{"pageNumber": 1}'
         },
         {
@@ -921,6 +935,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'contratos-receber',
             'descricao': 'Consulta contratos de parcerias, repasses, emendas e doações recorrentes.',
+            'especificidades': 'Endpoint /contratos-receber. Exige pageNumber (>=1).',
             'parametros': '{"pageNumber": 1}'
         },
 
@@ -932,6 +947,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'produtos',
             'descricao': 'Catálogo de produtos e materiais cadastrados no sistema (1.600+ itens).',
+            'especificidades': 'Endpoint /produtos. Exige pageNumber (>=1).',
             'parametros': '{"pageNumber": 1}'
         },
         {
@@ -941,6 +957,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'pedidos',
             'descricao': 'Ordens e requisições de compras e contratações em andamento.',
+            'especificidades': 'Endpoint /pedidos. Exige pageNumber (>=1). Suporta filtro opcional numero_pedido.',
             'parametros': '{"pageNumber": 1}'
         },
 
@@ -952,6 +969,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'notas-servico',
             'descricao': 'Consulta Notas Fiscais de Serviço capturadas e escrituradas.',
+            'especificidades': 'Endpoint /notas-servico. Exige data_inicio, data_fim e pageNumber.',
             'parametros': '{"data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
         {
@@ -961,6 +979,7 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'notas-produto',
             'descricao': 'Consulta Notas Fiscais de Produto (danfe) importadas.',
+            'especificidades': 'Endpoint /notas-produto. Exige data_inicio, data_fim e pageNumber.',
             'parametros': '{"data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
         {
@@ -970,9 +989,11 @@ def ongsys_integration_view(request):
             'metodo': 'GET',
             'path': 'logs',
             'descricao': 'Histórico de ações e alterações realizadas na base de dados do OngSys.',
+            'especificidades': 'Endpoint /logs. Exige data_inicio, data_fim e pageNumber.',
             'parametros': '{"data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         }
     ]
+
 
     # Contagens locais do espelho PostgreSQL atômico
     try:
