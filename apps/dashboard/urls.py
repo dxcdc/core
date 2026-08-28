@@ -10,7 +10,12 @@ urlpatterns = [
     path('dashboard/infra/', views.infra_view, name='infra'),
     path('dashboard/workspace/', views.workspace_view, name='workspace'),
     path('dashboard/integracoes/', views.integracoes_view, name='integracoes'),
+    path('dashboard/integracoes/ongsys/', views.ongsys_integration_view, name='ongsys_integration'),
+    path('dashboard/integracoes/ongsys/sync/', views.ongsys_trigger_sync_view, name='ongsys_trigger_sync'),
+    path('dashboard/integracoes/ongsys/api/<str:endpoint_key>/', views.ongsys_api_proxy_view, name='ongsys_api_proxy'),
+
     path('dashboard/integracoes/ecosistema/', views.ecosistema_m2m_view, name='ecosistema_m2m'),
+
     path('dashboard/vpn/', views.vpn_view, name='vpn'),
     path('dashboard/cofre/', views.cofre_view, name='cofre'),
     path('dashboard/ferramentas/', views.ferramentas_view, name='ferramentas'),

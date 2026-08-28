@@ -1,0 +1,658 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Integração API OngSys (v2) | CDC Core{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ongsys-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+        transition: all 0.2s ease-in-out;
+    }
+    .endpoint-row {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        transition: all 0.2s ease;
+    }
+    .endpoint-row:hover {
+        border-color: #3b82f6;
+        background: #f8fafc;
+    }
+    .method-badge {
+        font-weight: 700;
+        font-size: 0.75em;
+        padding: 4px 10px;
+        border-radius: 6px;
+        letter-spacing: 0.5px;
+    }
+    .method-get {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+    .method-post {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+    .response-box {
+        background-color: #0f172a;
+        color: #38bdf8;
+        border-radius: 8px;
+        padding: 14px;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        font-size: 0.82em;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .nav-pills-custom .nav-link {
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.88em;
+        padding: 10px 18px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        margin-right: 6px;
+        transition: all 0.2s ease;
+    }
+    .nav-pills-custom .nav-link.active {
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header da Página -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <a href="{% url 'dashboard:integracoes' %}" class="btn btn-sm btn-outline-secondary px-2 py-1" style="border-radius: 6px;" title="Voltar para Central de Integrações">
+                <i class="ri-arrow-left-line"></i>
+            </a>
+            <h4 class="fw-bold mb-0" style="color: #0f172a; font-size: 1.45em;">
+                <i class="ri-building-4-line text-primary me-2"></i> Central de API — OngSys (v2)
+            </h4>
+        </div>
+        <p class="text-muted mb-0" style="font-size: 0.88em;">
+            Consumo, testes e integração programática de todas as rotas financeiras, cadastros, compras e notas fiscais do OngSys.
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalSyncAtomic" style="border-radius: 6px; font-size: 0.82em; background: #0284c7; border-color: #0284c7;">
+            <i class="ri-refresh-line fs-16"></i> Sincronizar Banco Local (Atômico)
+        </button>
+        <a href="{{ docs_url }}" target="_blank" class="btn btn-outline-primary btn-sm fw-bold d-flex align-items-center gap-1" style="border-radius: 6px; font-size: 0.82em;">
+            <i class="ri-book-read-line fs-16"></i> Documentação Oficial OngSys
+        </a>
+    </div>
+</div>
+
+<!-- CARDS COMPACTOS DE METRICAS DE MONITORAMENTO ONGSYS -->
+<div class="row g-3 mb-4">
+    <!-- Card 1: Status de Conectividade -->
+    <div class="col-md-3">
+        <div class="stat-card-compact d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm" style="border-radius: 12px !important;">
+            <div>
+                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">STATUS DA INTEGRAÇÃO</small>
+                {% if has_api_key %}
+                <span class="fw-bold text-success" style="font-size: 1.15em;">🟢 Operacional</span>
+                <small class="text-success fw-bold d-block" style="font-size: 0.72em;"><i class="ri-checkbox-circle-line"></i> Basic Auth Validado</small>
+                {% else %}
+                <span class="fw-bold text-warning" style="font-size: 1.15em;">⚠️ Pendente</span>
+                <small class="text-warning fw-bold d-block" style="font-size: 0.72em;"><i class="ri-alert-line"></i> Falta API Key</small>
+                {% endif %}
+            </div>
+            <div class="p-2.5 bg-success-subtle text-success rounded-3 fs-22">
+                <i class="ri-heart-pulse-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Endpoints & Módulos Mapeados -->
+    <div class="col-md-3">
+        <div class="stat-card-compact d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm" style="border-radius: 12px !important;">
+            <div>
+                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">ENDPOINTS MAPEADOS</small>
+                <span class="fw-bold text-primary" style="font-size: 1.15em;">{{ total_endpoints }} Rotas REST</span>
+                <small class="text-muted d-block" style="font-size: 0.72em;">{{ total_modulos }} Módulos do Sistema</small>
+            </div>
+            <div class="p-2.5 bg-primary-subtle text-primary rounded-3 fs-22">
+                <i class="ri-api-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Credencial & Organização -->
+    <div class="col-md-3">
+        <div class="stat-card-compact d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm" style="border-radius: 12px !important;">
+            <div>
+                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">ORGANIZAÇÃO & CNPJ</small>
+                <span class="fw-bold text-dark font-monospace" style="font-size: 0.92em;">{{ formatted_cnpj }}</span>
+                <small class="text-info fw-bold d-block" style="font-size: 0.72em;"><i class="ri-shield-check-line"></i> Centro Dom Helder</small>
+            </div>
+            <div class="p-2.5 bg-info-subtle text-info rounded-3 fs-22">
+                <i class="ri-building-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Desempenho Gateway / Latência -->
+    <div class="col-md-3">
+        <div class="stat-card-compact d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm" style="border-radius: 12px !important;">
+            <div>
+                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">BANCO LOCAL ATÔMICO</small>
+                <span class="fw-bold text-purple" style="font-size: 1.15em; color: #7c3aed;">{{ db_total }} registros</span>
+                <small class="text-muted d-block" style="font-size: 0.72em;">PostgreSQL ACID Transacional</small>
+            </div>
+            <div class="p-2.5 rounded-3 fs-22" style="background: #f3e8ff; color: #7c3aed;">
+                <i class="ri-database-2-fill"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CARD DETALHADO DO ESPELHO POSTGRESQL ATÔMICO -->
+<div class="card border shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
+    <div class="card-header bg-slate-900 text-white d-flex align-items-center justify-content-between py-2.5 px-3" style="background: #0f172a;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="ri-database-2-line text-info fs-18"></i>
+            <span class="fw-bold" style="font-size: 0.9em;">Espelho de Dados Atômico Local (PostgreSQL do CDC Core)</span>
+        </div>
+        <span class="badge bg-info-subtle text-info border border-info px-2.5 py-1 fw-bold" style="font-size: 0.75em;">
+            Atomic Transactions (ACID)
+        </span>
+    </div>
+    <div class="card-body bg-light p-3">
+        <div class="row g-2 text-center">
+            <div class="col-md">
+                <div class="p-2 bg-white rounded border shadow-2xs">
+                    <small class="text-muted d-block" style="font-size: 0.72em;">FORNECEDORES</small>
+                    <span class="fw-bold text-dark fs-16" id="cntFornecedores">{{ db_fornecedores }}</span>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="p-2 bg-white rounded border shadow-2xs">
+                    <small class="text-muted d-block" style="font-size: 0.72em;">CONTAS A PAGAR</small>
+                    <span class="fw-bold text-danger fs-16" id="cntContasPagar">{{ db_contas_pagar }}</span>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="p-2 bg-white rounded border shadow-2xs">
+                    <small class="text-muted d-block" style="font-size: 0.72em;">CONTAS A RECEBER</small>
+                    <span class="fw-bold text-success fs-16" id="cntContasReceber">{{ db_contas_receber }}</span>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="p-2 bg-white rounded border shadow-2xs">
+                    <small class="text-muted d-block" style="font-size: 0.72em;">LANÇAMENTOS BANCÁRIOS</small>
+                    <span class="fw-bold text-primary fs-16" id="cntLancamentos">{{ db_lancamentos }}</span>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="p-2 bg-white rounded border shadow-2xs">
+                    <small class="text-muted d-block" style="font-size: 0.72em;">CLIENTES / PROJETOS</small>
+                    <span class="fw-bold text-dark fs-16" id="cntClientes">{{ db_clientes }}</span>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="p-2 bg-white rounded border shadow-2xs">
+                    <small class="text-muted d-block" style="font-size: 0.72em;">CONTRATOS</small>
+                    <span class="fw-bold text-secondary fs-16" id="cntContratos">{{ db_contratos }}</span>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="p-2 bg-white rounded border shadow-2xs">
+                    <small class="text-muted d-block" style="font-size: 0.72em;">PRODUTOS / ITENS</small>
+                    <span class="fw-bold text-dark fs-16" id="cntProdutos">{{ db_produtos }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Notification Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 mb-3 p-2.5" role="alert" style="border-radius: 8px; font-size: 0.86em;">
+            <i class="ri-checkbox-circle-fill me-2 fs-16"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Card de Autenticação Segura (Ansible & .env Server Secrets) -->
+<div class="ongsys-card p-4 mb-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-left: 5px solid #10b981;">
+    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-slate-700 pb-2">
+        <h6 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+            <i class="ri-shield-keyhole-fill text-success fs-20"></i> Gerenciamento via Arquivo .env & Ansible Playbook (Nave Mãe)
+        </h6>
+        {% if has_api_key %}
+        <span class="badge bg-success-subtle text-success border border-success px-3 py-1.5 fw-bold" style="border-radius: 14px; font-size: 0.8em;">
+            <i class="ri-checkbox-circle-fill me-1"></i> Carregado do Arquivo .env
+        </span>
+        {% else %}
+        <span class="badge bg-warning-subtle text-warning border border-warning px-3 py-1.5 fw-bold" style="border-radius: 14px; font-size: 0.8em;">
+            <i class="ri-alert-line me-1"></i> Aguardando ONGSYS_API_KEY no .env
+        </span>
+        {% endif %}
+    </div>
+
+    <div class="row g-3 align-items-center">
+        <div class="col-md-4">
+            <small class="text-slate-400 d-block fw-bold mb-1" style="font-size: 0.72em; text-transform: uppercase; color: #94a3b8;">CNPJ (Variável ONGSYS_CNPJ)</small>
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold text-white font-monospace" style="font-size: 1.05em;">{{ vault_cnpj }}</span>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <small class="text-slate-400 d-block fw-bold mb-1" style="font-size: 0.72em; text-transform: uppercase; color: #94a3b8;">API Key (Variável ONGSYS_API_KEY)</small>
+            <div class="d-flex align-items-center gap-2">
+                <span class="font-monospace" style="color: #60a5fa; font-size: 0.95em;">{{ masked_api_key }}</span>
+            </div>
+        </div>
+
+        <div class="col-md-3 d-flex justify-content-end">
+            <button type="button" class="btn btn-outline-light btn-sm fw-bold d-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalConfigVault" style="border-radius: 6px; font-size: 0.82em;">
+                <i class="ri-terminal-box-line"></i> Instruções Ansible / .env
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-3 p-2 bg-slate-900 rounded-3 border border-slate-700 d-flex align-items-center justify-content-between flex-wrap gap-2" style="font-size: 0.78em; color: #cbd5e1;">
+        <div>
+            <strong class="text-white">Padrão DevSecOps:</strong> As variáveis <code>ONGSYS_CNPJ</code> e <code>ONGSYS_API_KEY</code> são mantidas exclusivamente no arquivo <code>/root/cdc-core/.env</code> da VPS (com permissão <code>chmod 600</code>) ou provisionadas via <strong>Ansible Semaphore</strong>.
+        </div>
+    </div>
+</div>
+
+
+<!-- NAVEGAÇÃO DE MÓDULOS (TABS POR CATEGORIA) -->
+<ul class="nav nav-pills nav-pills-custom mb-3" id="ongsysTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-btn-financeiro" data-bs-toggle="pill" data-bs-target="#tab-financeiro" type="button" role="tab">
+            <i class="ri-money-dollar-circle-line me-1.5"></i> Movimentações Financeiras (11)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-btn-cadastros" data-bs-toggle="pill" data-bs-target="#tab-cadastros" type="button" role="tab">
+            <i class="ri-user-shared-line me-1.5"></i> Cadastros & Contratos (4)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-btn-compras" data-bs-toggle="pill" data-bs-target="#tab-compras" type="button" role="tab">
+            <i class="ri-shopping-cart-line me-1.5"></i> Compras & Suprimentos (2)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-btn-notas" data-bs-toggle="pill" data-bs-target="#tab-notas" type="button" role="tab">
+            <i class="ri-file-text-line me-1.5"></i> Notas Fiscais & Auditoria (3)
+        </button>
+    </li>
+</ul>
+
+<!-- BARRA DE PESQUISA RÁPIDA -->
+<div class="mb-4">
+    <div class="position-relative">
+        <i class="ri-search-line position-absolute text-muted" style="left: 12px; top: 10px; font-size: 1.1em;"></i>
+        <input type="text" class="form-control ps-4 bg-white border" id="searchOngsysEndpoint" onkeyup="filterEndpointsSearch()" placeholder="Pesquisar endpoint do OngSys (ex: contas-pagar, fornecedores, nfse, produtos...)" style="height: 42px; border-radius: 8px; font-size: 0.9em;">
+    </div>
+</div>
+
+<!-- CONTEÚDO DAS GUIAS DE MÓDULOS -->
+<div class="tab-content" id="ongsysTabsContent">
+    
+    <!-- Módulo 1: Movimentações Financeiras -->
+    <div class="tab-pane fade show active" id="tab-financeiro" role="tabpanel">
+        {% for ep in endpoints %}
+            {% if ep.modulo == 'financeiro' %}
+                {% include 'dashboard/partials/_ongsys_endpoint_item.html' with ep=ep %}
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Módulo 2: Cadastros & Contratos -->
+    <div class="tab-pane fade" id="tab-cadastros" role="tabpanel">
+        {% for ep in endpoints %}
+            {% if ep.modulo == 'cadastros' %}
+                {% include 'dashboard/partials/_ongsys_endpoint_item.html' with ep=ep %}
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Módulo 3: Compras & Suprimentos -->
+    <div class="tab-pane fade" id="tab-compras" role="tabpanel">
+        {% for ep in endpoints %}
+            {% if ep.modulo == 'compras' %}
+                {% include 'dashboard/partials/_ongsys_endpoint_item.html' with ep=ep %}
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Módulo 4: Notas Fiscais & Auditoria -->
+    <div class="tab-pane fade" id="tab-notas" role="tabpanel">
+        {% for ep in endpoints %}
+            {% if ep.modulo == 'notas_fiscais' %}
+                {% include 'dashboard/partials/_ongsys_endpoint_item.html' with ep=ep %}
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- MODAL DE CONFIGURAÇÃO DE CREDENCIAIS NO COFRE -->
+<div class="modal fade" id="modalConfigVault" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
+            <div class="modal-header bg-dark text-white border-0 py-3" style="border-top-left-radius: 14px; border-top-right-radius: 14px;">
+                <h6 class="modal-title fw-bold d-flex align-items-center gap-2">
+                    <i class="ri-shield-keyhole-line text-success fs-18"></i> Atualizar Segredo no Cofre do CDC Core
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'dashboard:ongsys_integration' %}">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <p class="text-muted mb-3" style="font-size: 0.84em;">
+                        Atualize a chave de API do OngSys. O segredo será salvo no servidor e utilizado automaticamente por todas as chamadas proxy seguras.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.8em;">CNPJ da Organização</label>
+                        <input type="text" class="form-control form-control-sm font-monospace bg-white border" name="ongsys_cnpj" value="{{ vault_cnpj }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.8em;">Nova API Key do OngSys</label>
+                        <input type="password" class="form-control form-control-sm font-monospace bg-white border" name="ongsys_api_key" placeholder="Cole a nova API Key..." required>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0 py-2.5">
+                    <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-sm btn-success fw-bold d-flex align-items-center gap-1">
+                        <i class="ri-save-3-line"></i> Salvar no Cofre do Servidor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE EXECUÇÃO E TESTE DE ENDPOINT -->
+<div class="modal fade" id="modalTestEndpoint" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
+            <div class="modal-header bg-dark text-white border-0 py-3" style="border-top-left-radius: 14px; border-top-right-radius: 14px;">
+                <h6 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalEndpointTitle">
+                    <span class="method-badge method-get" id="modalMethodBadge">GET</span>
+                    <span id="modalEndpointName">Testar Endpoint OngSys</span>
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                
+                <div class="mb-3 p-2 bg-light rounded border">
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.74em; text-transform: uppercase;">URL ALVO:</small>
+                    <code id="modalTargetUrl" class="text-primary fw-bold" style="font-size: 0.88em;">https://www.ongsys.com.br/app/index.php/api/v2/contas-pagar</code>
+                </div>
+
+                <input type="hidden" id="modalEndpointPath">
+                <input type="hidden" id="modalEndpointMethod">
+
+                <!-- Parâmetros de Query GET -->
+                <div class="mb-3" id="groupQueryString">
+                    <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.8em;">Parâmetros da Consulta (Query String em formato JSON)</label>
+                    <input type="text" class="form-control form-control-sm font-monospace bg-white border" id="modalQueryString" placeholder='{"dataInicial": "2026-01-01", "dataFinal": "2026-12-31"}'>
+                </div>
+
+                <!-- Payload Body POST -->
+                <div class="mb-3 d-none" id="groupRequestBody">
+                    <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.8em;">Corpo da Requisição (JSON Payload)</label>
+                    <textarea class="form-control form-control-sm font-monospace bg-white border" id="modalRequestBody" rows="5" placeholder='{"fornecedor": "FORN001", "valorTotal": 1500.00}'></textarea>
+                </div>
+
+                <!-- Botão de Envio -->
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-primary fw-bold d-flex align-items-center gap-1.5" onclick="executeEndpointRequest()" id="btnExecuteRequest">
+                        <i class="ri-send-plane-fill"></i> Executar Requisição via API Proxy Seguro
+                    </button>
+                </div>
+
+                <!-- Caixa de Resultado HTTP -->
+                <div id="resultContainer" class="d-none">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="badge bg-success px-3 py-1.5 fw-bold" id="resStatusBadge" style="font-size: 0.8em;">HTTP 200 OK</span>
+                        <small class="text-muted fw-bold" id="resTimeMs"><i class="ri-timer-line me-1"></i> 142 ms</small>
+                    </div>
+                    <pre class="response-box mb-0" id="resJsonBody">Carregando resposta...</pre>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openTestModal(path, method, name, defaultParams) {
+        document.getElementById("modalEndpointName").innerText = name;
+        document.getElementById("modalEndpointPath").value = path;
+        document.getElementById("modalEndpointMethod").value = method;
+        document.getElementById("modalTargetUrl").innerText = "https://www.ongsys.com.br/app/index.php/api/v2/" + path;
+
+        const methodBadge = document.getElementById("modalMethodBadge");
+        methodBadge.innerText = method;
+        if (method === 'GET') {
+            methodBadge.className = "method-badge method-get";
+            document.getElementById("groupQueryString").classList.remove("d-none");
+            document.getElementById("groupRequestBody").classList.add("d-none");
+            document.getElementById("modalQueryString").value = defaultParams || '';
+        } else {
+            methodBadge.className = "method-badge method-post";
+            document.getElementById("groupQueryString").classList.add("d-none");
+            document.getElementById("groupRequestBody").classList.remove("d-none");
+            document.getElementById("modalRequestBody").value = defaultParams || '{}';
+        }
+
+        document.getElementById("resultContainer").classList.add("d-none");
+
+        const modal = new bootstrap.Modal(document.getElementById('modalTestEndpoint'));
+        modal.show();
+    }
+
+    function executeEndpointRequest() {
+        const path = document.getElementById("modalEndpointPath").value;
+        const method = document.getElementById("modalEndpointMethod").value;
+
+        const btn = document.getElementById("btnExecuteRequest");
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Conectando via Cofre do Servidor...';
+
+        let params = {};
+        let body = {};
+
+        if (method === 'GET') {
+            const rawQ = document.getElementById("modalQueryString").value.trim();
+            if (rawQ) {
+                try {
+                    params = JSON.parse(rawQ);
+                } catch(e) {
+                    params = { raw: rawQ };
+                }
+            }
+        } else {
+            const rawB = document.getElementById("modalRequestBody").value.trim();
+            if (rawB) {
+                try {
+                    body = JSON.parse(rawB);
+                } catch(e) {
+                    body = { raw: rawB };
+                }
+            }
+        }
+
+        const proxyUrl = "{% url 'dashboard:ongsys_api_proxy' endpoint_key='test' %}";
+
+        fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                path: path,
+                method: method,
+                params: params,
+                body: body
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-send-plane-fill"></i> Executar Requisição via API Proxy Seguro';
+
+            const resContainer = document.getElementById("resultContainer");
+            resContainer.classList.remove("d-none");
+
+            const statusBadge = document.getElementById("resStatusBadge");
+            const timeMs = document.getElementById("resTimeMs");
+            const jsonBody = document.getElementById("resJsonBody");
+
+            if (data.error) {
+                statusBadge.className = "badge bg-danger px-3 py-1.5 fw-bold";
+                statusBadge.innerText = "HTTP ERRO";
+                timeMs.innerText = (data.elapsed_ms || 0) + " ms";
+                jsonBody.innerText = JSON.stringify(data, null, 2);
+            } else {
+                statusBadge.className = data.status_code < 300 ? "badge bg-success px-3 py-1.5 fw-bold" : "badge bg-warning text-dark px-3 py-1.5 fw-bold";
+                statusBadge.innerText = "HTTP " + data.status_code;
+                timeMs.innerText = data.elapsed_ms + " ms";
+                jsonBody.innerText = JSON.stringify(data.response, null, 2);
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-send-plane-fill"></i> Executar Requisição via API Proxy Seguro';
+            alert("Erro na requisição: " + err);
+        });
+    }
+
+    function filterEndpointsSearch() {
+        const query = document.getElementById("searchOngsysEndpoint").value.toLowerCase();
+        const items = document.querySelectorAll(".endpoint-row-container");
+
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if (text.includes(query)) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
+        });
+    }
+
+    function runAtomicSync() {
+        const entity = document.getElementById("syncEntitySelect").value;
+        const pages = parseInt(document.getElementById("syncPagesInput").value) || 3;
+        const btn = document.getElementById("btnExecuteSync");
+        const statusBox = document.getElementById("syncStatusResult");
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Sincronizando de forma Atômica...';
+        statusBox.classList.remove("d-none");
+        statusBox.innerHTML = '<div class="text-center p-3 text-muted"><i class="ri-loader-4-line ri-spin fs-24 d-block mb-2 text-primary"></i>Conectando aos servidores da OngSys e executando Upserts Atômicos no PostgreSQL...</div>';
+
+        fetch("{% url 'dashboard:ongsys_trigger_sync' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ entity: entity, pages: pages })
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-refresh-line"></i> Iniciar Sincronização Atômica';
+
+            if (data.status === "success") {
+                let html = '<div class="alert alert-success border-0 mb-0" style="border-radius: 8px;">';
+                html += '<h6 class="fw-bold mb-2"><i class="ri-checkbox-circle-fill me-1"></i> Sincronização Atômica Concluída com Sucesso!</h6><ul class="mb-0 ps-3" style="font-size: 0.85em;">';
+                data.results.forEach(r => {
+                    html += `<li><strong>${r.entidade}:</strong> ${r.total} registros sincronizados em ${r.duracao}s</li>`;
+                });
+                html += '</ul></div>';
+                statusBox.innerHTML = html;
+                setTimeout(() => { window.location.reload(); }, 2500);
+            } else {
+                statusBox.innerHTML = `<div class="alert alert-danger border-0 mb-0" style="border-radius: 8px;"><i class="ri-error-warning-fill me-1"></i> <strong>Erro na sincronização:</strong> ${data.message}</div>`;
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-refresh-line"></i> Iniciar Sincronização Atômica';
+            statusBox.innerHTML = `<div class="alert alert-danger border-0 mb-0" style="border-radius: 8px;">Erro na requisição: ${err}</div>`;
+        });
+    }
+</script>
+
+<!-- MODAL SINCRONIZAÇÃO ATÔMICA -->
+<div class="modal fade" id="modalSyncAtomic" tabindex="-1" aria-labelledby="modalSyncAtomicLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%);">
+                <h6 class="modal-title fw-bold" id="modalSyncAtomicLabel">
+                    <i class="ri-database-2-line me-1.5"></i> Sincronização Atômica OngSys & PostgreSQL
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted" style="font-size: 0.85em;">
+                    O motor atômico conectará à API do OngSys, baixará os lotes de dados e executará <strong>Upserts Atômicos (ACID)</strong> no banco PostgreSQL do CDC Core.
+                </p>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="font-size: 0.82em;">Módulo / Entidade para Sincronizar:</label>
+                    <select class="form-select form-select-sm" id="syncEntitySelect" style="border-radius: 6px;">
+                        <option value="all" selected>🌟 Todas as Entidades (Completo)</option>
+                        <option value="fornecedores">🏢 Fornecedores (2.900+ registros)</option>
+                        <option value="contas_pagar">💳 Contas a Pagar (27.000+ registros)</option>
+                        <option value="contas_receber">📈 Contas a Receber (3.200+ registros)</option>
+                        <option value="lancamentos_bancarios">🏦 Lançamentos Bancários (800+ extratos)</option>
+                        <option value="clientes">👥 Clientes / Projetos (230+ registros)</option>
+                        <option value="contratos">📄 Contratos (100+ registros)</option>
+                        <option value="produtos">📦 Produtos / Itens (1.600+ itens)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="font-size: 0.82em;">Limite de Páginas por Entidade (100 itens/página):</label>
+                    <input type="number" class="form-control form-control-sm" id="syncPagesInput" value="5" min="1" max="50" style="border-radius: 6px;">
+                    <small class="text-muted" style="font-size: 0.72em;">5 páginas = ~500 registros por entidade para sincronização rápida.</small>
+                </div>
+
+                <div id="syncStatusResult" class="d-none mb-3"></div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light btn-sm fw-bold px-3" data-bs-dismiss="modal" style="border-radius: 6px;">Fechar</button>
+                    <button type="button" class="btn btn-primary btn-sm fw-bold px-3 d-flex align-items-center gap-1.5" id="btnExecuteSync" onclick="runAtomicSync()" style="border-radius: 6px; background: #0284c7; border-color: #0284c7;">
+                        <i class="ri-refresh-line"></i> Iniciar Sincronização Atômica
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

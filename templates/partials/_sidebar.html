@@ -238,7 +238,7 @@
 
         <!-- SEÇÃO 4: INTEGRAÇÕES & CONEXÕES -->
         <div class="sidebar-dropdown-group mb-3">
-            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between sidebar-toggle-btn {% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ecosistema_m2m' %}active-dropdown{% endif %}" data-bs-toggle="collapse" data-bs-target="#dropdown-integracoes" aria-expanded="{% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ecosistema_m2m' %}true{% else %}false{% endif %}" title="Central de Integrações">
+            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between sidebar-toggle-btn {% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ongsys_integration' or request.resolver_match.url_name == 'ecosistema_m2m' %}active-dropdown{% endif %}" data-bs-toggle="collapse" data-bs-target="#dropdown-integracoes" aria-expanded="{% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ongsys_integration' or request.resolver_match.url_name == 'ecosistema_m2m' %}true{% else %}false{% endif %}" title="Central de Integrações">
                 <div class="d-flex align-items-center">
                     <i class="ri-plug-line menu-icon fs-18 text-info"></i>
                     <span class="menu-text" style="font-weight: 700; font-size: 0.88em;">Central de Integrações</span>
@@ -247,12 +247,18 @@
             </button>
 
             <!-- SUB-ITENS DA CENTRAL DE INTEGRAÇÕES -->
-            <div class="collapse {% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ecosistema_m2m' %}show{% endif %} mt-1" id="dropdown-integracoes">
+            <div class="collapse {% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ongsys_integration' or request.resolver_match.url_name == 'ecosistema_m2m' %}show{% endif %} mt-1" id="dropdown-integracoes">
                 <ul class="nav flex-column sidebar-sub-menu gap-1">
                     <li class="nav-item">
                         <a href="{% url 'dashboard:integracoes' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'integracoes' %}active-item{% endif %}">
                             <i class="ri-dashboard-line menu-icon fs-16 text-primary"></i>
                             <span class="menu-text" style="font-size: 0.84em;">Painel de Conectores</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard:ongsys_integration' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'ongsys_integration' %}active-item{% endif %}">
+                            <i class="ri-building-4-line menu-icon fs-16 text-danger"></i>
+                            <span class="menu-text" style="font-size: 0.84em;">API OngSys (v2)</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -276,6 +282,7 @@
                 </ul>
             </div>
         </div>
+
 
     </div>
 
