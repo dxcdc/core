@@ -125,6 +125,13 @@ class WarehouseSynchronizer:
             run.finished_at = timezone.now()
             run.attempts += self.client.last_attempts
             run.error_code = getattr(exc, "code", "unexpected_error")
-            run.error_message = str(exc)[:2000]
+            error_message = str(exc)
+            for sensitive_value in (
+                getattr(self.client, "api_key", ""),
+                getattr(self.client, "api_secret", ""),
+            ):
+                if sensitive_value:
+                    error_message = error_message.replace(sensitive_value, "[REDACTED]")
+            run.error_message = error_message[:2000]
             run.save()
             raise

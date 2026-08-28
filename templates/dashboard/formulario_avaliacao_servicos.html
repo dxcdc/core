@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Formulário: Avaliação de Serviços & TI | CDC Core{% endblock %}
+{% block title %}Formulário: Avaliação de Serviços / Sugestões & TI | CDC Core{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -56,56 +56,94 @@
             </a>
         </div>
 
-        <!-- BANNER DE CABEÇALHO DO GOOGLE FORM -->
+        <!-- BANNER DE CABEÇALHO -->
         <div class="form-header-card">
-            <span class="badge bg-warning text-dark px-3 py-1 mb-2 font-weight-bold">Pesquisa Institucional</span>
-            <h2 class="text-white fw-bold mb-2">Formulário: Avaliação de Serviços & TI</h2>
+            <span class="badge bg-warning text-dark px-3 py-1 mb-2 font-weight-bold">Pesquisa Institucional & TI</span>
+            <h2 class="text-white fw-bold mb-2">Formulário: Avaliação de Serviços / Sugestões & TI</h2>
             <p class="text-secondary mb-0" style="color: #cbd5e1 !important;">
                 Avaliação periódica da qualidade das nossas ferramentas e infraestrutura (Google Workspace, VPN WireGuard, Conectores M2M e Atendimento TI).
             </p>
         </div>
 
+        <!-- MENSAGENS FEEDBACK DO DJANGO -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show bg-dark border-{{ message.tags }} text-white mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <!-- FORMULÁRIO INTERATIVO -->
-        <form action="{% url 'dashboard:submeter_resposta_formulario' %}" method="POST">
+        <form action="{% url 'dashboard:submeter_resposta_formulario' %}" method="POST" id="formAvaliacao">
             {% csrf_token %}
             <input type="hidden" name="tipo_formulario" value="avaliacao_servicos">
 
+            <!-- SEÇÃO 1: IDENTIFICAÇÃO DO USUÁRIO OU ANÔNIMO -->
             <div class="form-section-card">
-                <h5 class="text-white fw-bold mb-4">
-                    <i class="ri-user-smile-line text-warning me-2"></i>1. Identificação do Usuário
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <h5 class="text-white fw-bold mb-0">
+                        <i class="ri-user-smile-line text-warning me-2"></i>1. Identificação do Usuário
+                    </h5>
 
-                <div class="form-field-group">
-                    <label class="form-field-label">Seu Nome Completo *</label>
-                    <input type="text" name="nome_respondente" class="form-control bg-dark border-secondary text-white p-3" placeholder="Seu nome" required>
+                    <!-- SWITCH OPÇÃO ANÔNIMO -->
+                    <div class="form-check form-switch bg-dark border border-secondary rounded-3 px-3 py-2">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" name="is_anonimo" id="checkAnonimo" style="width: 2.2em; height: 1.2em; cursor: pointer;">
+                        <label class="form-check-label text-warning font-weight-bold small" for="checkAnonimo" style="cursor: pointer;">
+                            <i class="ri-spy-line me-1"></i> Enviar como Anônimo
+                        </label>
+                    </div>
                 </div>
 
-                <div class="form-field-group">
-                    <label class="form-field-label">E-mail Institucional *</label>
-                    <input type="email" name="email_respondente" class="form-control bg-dark border-secondary text-white p-3" placeholder="usuario@cdc.org.br" required>
+                <div id="boxCamposIdentificacao">
+                    <div class="form-field-group">
+                        <label class="form-field-label" id="lblNome">Seu Nome Completo *</label>
+                        <input type="text" name="nome_respondente" id="inputNome" class="form-control bg-dark border-secondary text-white p-3" placeholder="Seu nome" required>
+                    </div>
+
+                    <div class="form-field-group">
+                        <label class="form-field-label" id="lblEmail">E-mail Institucional *</label>
+                        <input type="email" name="email_respondente" id="inputEmail" class="form-control bg-dark border-secondary text-white p-3" placeholder="usuario@cdc.org.br" required>
+                    </div>
                 </div>
 
-                <div class="form-field-group">
+                <!-- ALERTA QUANDO ANÔNIMO FOR ATIVADO -->
+                <div id="boxAlertaAnonimo" class="alert alert-warning bg-warning bg-opacity-10 border-warning text-warning mb-3 small" style="display: none;">
+                    <i class="ri-shield-user-line me-1"></i> <strong>Modo Anônimo Ativado:</strong> Seus dados pessoais (nome e e-mail) não serão coletados ou armazenados neste envio.
+                </div>
+
+                <div class="form-field-group mb-0">
                     <label class="form-field-label">Setor ou Projeto Vinculado *</label>
                     <input type="text" name="setor_ou_projeto" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ex: Sede Recife / PROVITA / Presidência" required>
                 </div>
             </div>
 
+            <!-- SEÇÃO 2: AVALIAÇÃO DE SERVIÇOS -->
             <div class="form-section-card">
                 <h5 class="text-white fw-bold mb-4">
                     <i class="ri-star-line text-warning me-2"></i>2. Avaliação de Qualidade & Feedback
                 </h5>
 
+                <!-- SERVIÇO AVALIADO COM OPÇÃO 'OUTRO' -->
                 <div class="form-field-group">
                     <label class="form-field-label">Serviço Avaliado *</label>
-                    <select name="assunto_ou_categoria" class="form-select bg-dark border-secondary text-white p-3" required>
+                    <select name="assunto_ou_categoria" id="selectServico" class="form-select bg-dark border-secondary text-white p-3" required>
                         <option value="Google Workspace & E-mails">Google Workspace & E-mails</option>
                         <option value="VPN WireGuard & Conectividade">VPN WireGuard & Conectividade</option>
                         <option value="Atendimento & Suporte TI">Atendimento & Suporte TI</option>
                         <option value="Sistemas & Conectores M2M">Sistemas & Conectores M2M</option>
+                        <option value="Outro">Outro (especificar abaixo)</option>
                     </select>
+
+                    <!-- CAMPO DINÂMICO PARA SELEÇÃO 'OUTRO' -->
+                    <div id="boxOutroServico" class="mt-3 p-3 bg-dark border border-secondary rounded-3" style="display: none;">
+                        <label class="form-field-label text-warning"><i class="ri-edit-line me-1"></i> Escreva qual é o outro serviço *</label>
+                        <input type="text" name="outro_servico_especifico" id="inputOutroServico" class="form-control bg-dark border-secondary text-white p-3" placeholder="Digite o nome do serviço ou ferramenta...">
+                    </div>
                 </div>
 
+                <!-- NOTA -->
                 <div class="form-field-group">
                     <label class="form-field-label">Nota de Satisfação (1 a 5 Estrelas) *</label>
                     <select name="avaliacao_nota" class="form-select bg-dark border-secondary text-white p-3" required>
@@ -117,9 +155,10 @@
                     </select>
                 </div>
 
+                <!-- COMENTÁRIOS / SUGESTÕES -->
                 <div class="form-field-group">
                     <label class="form-field-label">Comentários, Sugestões & Elogios</label>
-                    <textarea name="mensagem_detalhes" class="form-control bg-dark border-secondary text-white p-3" rows="4" placeholder="O que podemos melhorar no serviço?"></textarea>
+                    <textarea name="mensagem_detalhes" class="form-control bg-dark border-secondary text-white p-3" rows="4" placeholder="O que podemos melhorar no serviço? Deixe sua sugestão..."></textarea>
                 </div>
             </div>
 
@@ -127,10 +166,59 @@
             <div class="d-flex justify-content-between align-items-center mb-5">
                 <a href="{% url 'dashboard:formularios' %}" class="btn btn-secondary px-4 py-2">Cancelar</a>
                 <button type="submit" class="btn btn-warning text-dark font-weight-bold px-5 py-3 rounded-3 fs-6">
-                    <i class="ri-send-plane-fill me-2"></i> Registrar Avaliação no Banco
+                    <i class="ri-send-plane-fill me-2"></i> Registrar Avaliação / Sugestão
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<!-- SCRIPT INTERATIVO PARA ANÔNIMO & OPÇÃO OUTRO -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. GERENCIAMENTO DO MODOR ANÔNIMO
+    const checkAnonimo = document.getElementById('checkAnonimo');
+    const boxCamposIdentificacao = document.getElementById('boxCamposIdentificacao');
+    const boxAlertaAnonimo = document.getElementById('boxAlertaAnonimo');
+    const inputNome = document.getElementById('inputNome');
+    const inputEmail = document.getElementById('inputEmail');
+
+    if (checkAnonimo) {
+        checkAnonimo.addEventListener('change', function() {
+            if (this.checked) {
+                boxCamposIdentificacao.style.display = 'none';
+                boxAlertaAnonimo.style.display = 'block';
+                inputNome.removeAttribute('required');
+                inputEmail.removeAttribute('required');
+                inputNome.value = '';
+                inputEmail.value = '';
+            } else {
+                boxCamposIdentificacao.style.display = 'block';
+                boxAlertaAnonimo.style.display = 'none';
+                inputNome.setAttribute('required', 'required');
+                inputEmail.setAttribute('required', 'required');
+            }
+        });
+    }
+
+    // 2. GERENCIAMENTO DA OPÇÃO 'OUTRO' NO SERVIÇO AVALIADO
+    const selectServico = document.getElementById('selectServico');
+    const boxOutroServico = document.getElementById('boxOutroServico');
+    const inputOutroServico = document.getElementById('inputOutroServico');
+
+    if (selectServico) {
+        selectServico.addEventListener('change', function() {
+            if (this.value === 'Outro') {
+                boxOutroServico.style.display = 'block';
+                inputOutroServico.setAttribute('required', 'required');
+                inputOutroServico.focus();
+            } else {
+                boxOutroServico.style.display = 'none';
+                inputOutroServico.removeAttribute('required');
+                inputOutroServico.value = '';
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

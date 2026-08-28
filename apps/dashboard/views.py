@@ -317,11 +317,24 @@ def submeter_resposta_formulario(request):
     """Processa respostas dos Formulários de Avaliação de Serviços ou Suporte TI."""
     if request.method == 'POST':
         tipo = request.POST.get('tipo_formulario', 'avaliacao_servicos')
-        nome = request.POST.get('nome_respondente', 'Usuário Anônimo')
-        email = request.POST.get('email_respondente', 'contato@cdc.org.br')
+        is_anonimo = request.POST.get('is_anonimo') in ['on', 'true', '1']
+        
+        if is_anonimo:
+            nome = "Usuário Anônimo"
+            email = "anonimo@cdc.org.br"
+        else:
+            nome = request.POST.get('nome_respondente', 'Usuário Anônimo').strip() or "Usuário Anônimo"
+            email = request.POST.get('email_respondente', 'contato@cdc.org.br').strip() or "contato@cdc.org.br"
+
         setor = request.POST.get('setor_ou_projeto', 'Sede CDC')
         nota = int(request.POST.get('avaliacao_nota', 5))
         assunto = request.POST.get('assunto_ou_categoria', 'Geral')
+        outro_servico = request.POST.get('outro_servico_especifico', '').strip()
+
+        # Se selecionou a opção "Outro", salva com a especificação digitada
+        if assunto == 'Outro' and outro_servico:
+            assunto = f"Outro: {outro_servico}"
+
         mensagem = request.POST.get('mensagem_detalhes', '')
 
         resposta = RespostaFormulario.objects.create(
@@ -340,7 +353,7 @@ def submeter_resposta_formulario(request):
             nivel='INFO',
             acao_executada=f"Submissão de Formulário ({tipo})",
             alvo_impactado=f"{nome} - {assunto}",
-            detalhes=f"Formulário {tipo} enviado por {nome} ({email}).",
+            detalhes=f"Formulário {tipo} enviado ({'Anônimo' if is_anonimo else 'Identificado'}).",
             ip_origem=request.META.get('REMOTE_ADDR', '127.0.0.1')
         )
 
@@ -521,7 +534,7 @@ def integracoes_view(request):
             'endpoint': 'https://whatsapp.cdc.org.br',
             'campos': [
                 {'name': 'instance_name', 'label': 'Nome da Instância', 'value': 'cdc_bot_operacional'},
-                {'name': 'api_key', 'label': 'API Secret Key (Evolution API)', 'value': 'cdc_evolution_key_983f472a1'},
+                {'name': 'api_key', 'label': 'API Secret Key (Evolution API)', 'value': 'Configurada somente no cofre'},
                 {'name': 'webhook_url', 'label': 'Webhook Receiver URL', 'value': 'https://core.cdc.org.br/api/v1/webhooks/whatsapp/'},
             ],
             'endpoints_detalhados': [
@@ -555,7 +568,7 @@ def integracoes_view(request):
             'endpoint': 'https://ajuda.ongsys.com.br/api-v1',
             'campos': [
                 {'name': 'subdominio_ongsys', 'label': 'Subdomínio ONGSYS', 'value': 'cdc.ongsys.com.br'},
-                {'name': 'app_token', 'label': 'App Access Token ONGSYS', 'value': 'ongsys_token_live_38472910'},
+                {'name': 'app_token', 'label': 'App Access Token ONGSYS', 'value': 'Não configurado'},
                 {'name': 'sync_interval', 'label': 'Intervalo de Sincronização', 'value': 'A cada 15 minutos'},
             ],
             'endpoints_detalhados': [
@@ -615,7 +628,7 @@ def integracoes_view(request):
             'endpoint': 'https://vpn.cdc.org.br:51820',
             'campos': [
                 {'name': 'vpn_endpoint', 'label': 'Endpoint WireGuard', 'value': 'vpn.cdc.org.br:51820'},
-                {'name': 'api_secret', 'label': 'WireGuard Management Key', 'value': 'wg_sec_83921734912'},
+                {'name': 'api_secret', 'label': 'WireGuard Management Key', 'value': 'Configurada somente no cofre'},
             ],
             'endpoints_detalhados': [
                 {

@@ -9,6 +9,7 @@ media/
 staticfiles/
 .env
 .env.*
+!.env.example
 
 # Chaves de Credenciais & Segredos de Produção (LGPD & Cofre CDC)
 credentials/

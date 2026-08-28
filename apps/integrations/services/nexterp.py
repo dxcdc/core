@@ -2,6 +2,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
 
 import requests
 from django.conf import settings
@@ -151,6 +152,14 @@ class NextERPAnalyticsClient:
             raise NextERPContractError("Página incompleta: data/records ou has_more inválido.")
         if has_more and not isinstance(next_cursor, str):
             raise NextERPContractError("Página incompleta: next_cursor obrigatório.")
-        if any(not isinstance(record, dict) or not record.get("name") for record in records):
-            raise NextERPContractError("Registro sem objeto JSON ou identificador name.")
+        for record in records:
+            if not isinstance(record, dict) or not record.get("name"):
+                raise NextERPContractError("Registro sem objeto JSON ou identificador name.")
+            modified = record.get("modified")
+            if not isinstance(modified, str):
+                raise NextERPContractError("Registro sem data modified da origem.")
+            try:
+                datetime.fromisoformat(modified.replace("Z", "+00:00"))
+            except ValueError as exc:
+                raise NextERPContractError("Registro com data modified inválida.") from exc
         return DatasetPage(records, next_cursor or "", has_more, version)

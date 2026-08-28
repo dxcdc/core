@@ -1,4 +1,5 @@
 import os
+import secrets
 from functools import wraps
 from django.http import JsonResponse
 import logging
@@ -28,7 +29,7 @@ def require_m2m_key(view_func):
             }, status=500)
             
         # 4. Compara as chaves. Se for diferente ou vazia, bloqueia na hora (Status 401)
-        if api_key_header != expected_key:
+        if not api_key_header or not secrets.compare_digest(api_key_header, expected_key):
             logger.warning(f"Tentativa de acesso não autorizada na API. IP: {request.META.get('REMOTE_ADDR')}")
             return JsonResponse({
                 "status": "error",
