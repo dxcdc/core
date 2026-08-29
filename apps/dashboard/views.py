@@ -995,7 +995,7 @@ def ongsys_integration_view(request):
     ]
 
 
-    # Contagens locais do espelho PostgreSQL atômico
+    # Contagens locais do espelho PostgreSQL atômico e Status dos Endpoints
     try:
         from apps.integrations.models import (
             OngsysFornecedor,
@@ -1005,6 +1005,7 @@ def ongsys_integration_view(request):
             OngsysLancamentoBancario,
             OngsysContrato,
             OngsysProduto,
+            OngsysEndpointStatus,
         )
         db_fornecedores = OngsysFornecedor.objects.count()
         db_clientes = OngsysCliente.objects.count()
@@ -1022,9 +1023,40 @@ def ongsys_integration_view(request):
             + db_contratos
             + db_produtos
         )
+        
+        # Mapeamento de status dos endpoints
+        statuses = list(OngsysEndpointStatus.objects.all())
+        status_map = {s.endpoint_id: s for s in statuses}
     except Exception:
         db_fornecedores = db_clientes = db_contas_pagar = db_contas_receber = 0
         db_lancamentos = db_contratos = db_produtos = db_total = 0
+        statuses = []
+        status_map = {}
+
+    cnt_200 = 0
+    cnt_422 = 0
+    cnt_err = 0
+
+    for ep in endpoints_ongsys:
+        st = status_map.get(ep['id'])
+        if st:
+            ep['ultimo_status_http'] = st.ultimo_status_http
+            ep['status_classificacao'] = st.status_classificacao
+            ep['latencia_ms'] = st.latencia_ms
+            ep['ultima_vez_testado'] = st.ultima_vez_testado
+            ep['ultima_vez_sucesso'] = st.ultima_vez_sucesso
+            if st.status_classificacao == 'success':
+                cnt_200 += 1
+            elif st.status_classificacao == 'validated':
+                cnt_422 += 1
+            elif st.status_classificacao == 'error':
+                cnt_err += 1
+        else:
+            ep['ultimo_status_http'] = None
+            ep['status_classificacao'] = 'untested'
+            ep['latencia_ms'] = 0
+            ep['ultima_vez_testado'] = None
+            ep['ultima_vez_sucesso'] = None
 
     context = {
         'endpoints': endpoints_ongsys,
@@ -1038,6 +1070,9 @@ def ongsys_integration_view(request):
         'total_modulos': 4,
         'latency_ms': 120,
         'health_status': 'Operacional (Basic Auth OK)' if has_api_key else 'Aguardando API Key',
+        'cnt_200': cnt_200,
+        'cnt_422': cnt_422,
+        'cnt_err': cnt_err,
         # Métricas do Espelho Atômico Local
         'db_total': db_total,
         'db_fornecedores': db_fornecedores,
@@ -1070,6 +1105,7 @@ def ongsys_trigger_sync_view(request):
         sync_produtos,
         sync_all_ongsys,
     )
+    from apps.integrations.models import OngsysEndpointStatus
 
     try:
         data = json.loads(request.body.decode('utf-8')) if request.body else {}
@@ -1082,20 +1118,125 @@ def ongsys_trigger_sync_view(request):
     try:
         if entity == 'fornecedores':
             result = [sync_fornecedores(max_pages=pages)]
+            now = timezone.now()
+            OngsysEndpointStatus.objects.update_or_create(
+                endpoint_id='fornecedores-get',
+                defaults={
+                    'endpoint_path': 'fornecedores',
+                    'metodo': 'GET',
+                    'ultimo_status_http': 200,
+                    'status_classificacao': 'success',
+                    'ultima_vez_testado': now,
+                    'ultima_vez_sucesso': now,
+                }
+            )
         elif entity == 'clientes':
             result = [sync_clientes(max_pages=pages)]
+            now = timezone.now()
+            OngsysEndpointStatus.objects.update_or_create(
+                endpoint_id='clientes-get',
+                defaults={
+                    'endpoint_path': 'clientes',
+                    'metodo': 'GET',
+                    'ultimo_status_http': 200,
+                    'status_classificacao': 'success',
+                    'ultima_vez_testado': now,
+                    'ultima_vez_sucesso': now,
+                }
+            )
         elif entity == 'contas_pagar':
             result = [sync_contas_pagar(max_pages=pages)]
+            now = timezone.now()
+            OngsysEndpointStatus.objects.update_or_create(
+                endpoint_id='contas-pagar-get',
+                defaults={
+                    'endpoint_path': 'contas-pagar',
+                    'metodo': 'GET',
+                    'ultimo_status_http': 200,
+                    'status_classificacao': 'success',
+                    'ultima_vez_testado': now,
+                    'ultima_vez_sucesso': now,
+                }
+            )
         elif entity == 'contas_receber':
             result = [sync_contas_receber(max_pages=pages)]
+            now = timezone.now()
+            OngsysEndpointStatus.objects.update_or_create(
+                endpoint_id='contas-receber-get',
+                defaults={
+                    'endpoint_path': 'contas-receber',
+                    'metodo': 'GET',
+                    'ultimo_status_http': 200,
+                    'status_classificacao': 'success',
+                    'ultima_vez_testado': now,
+                    'ultima_vez_sucesso': now,
+                }
+            )
         elif entity == 'lancamentos_bancarios':
             result = [sync_lancamentos_bancarios(max_pages=pages)]
+            now = timezone.now()
+            OngsysEndpointStatus.objects.update_or_create(
+                endpoint_id='lancamentos-bancarios-get',
+                defaults={
+                    'endpoint_path': 'lancamentos-bancarios',
+                    'metodo': 'GET',
+                    'ultimo_status_http': 200,
+                    'status_classificacao': 'success',
+                    'ultima_vez_testado': now,
+                    'ultima_vez_sucesso': now,
+                }
+            )
         elif entity == 'contratos':
             result = [sync_contratos(max_pages=pages)]
+            now = timezone.now()
+            OngsysEndpointStatus.objects.update_or_create(
+                endpoint_id='contratos-pagar-get',
+                defaults={
+                    'endpoint_path': 'contratos',
+                    'metodo': 'GET',
+                    'ultimo_status_http': 200,
+                    'status_classificacao': 'success',
+                    'ultima_vez_testado': now,
+                    'ultima_vez_sucesso': now,
+                }
+            )
         elif entity == 'produtos':
             result = [sync_produtos(max_pages=pages)]
+            now = timezone.now()
+            OngsysEndpointStatus.objects.update_or_create(
+                endpoint_id='produtos-get',
+                defaults={
+                    'endpoint_path': 'produtos',
+                    'metodo': 'GET',
+                    'ultimo_status_http': 200,
+                    'status_classificacao': 'success',
+                    'ultima_vez_testado': now,
+                    'ultima_vez_sucesso': now,
+                }
+            )
         else:
             result = sync_all_ongsys(max_pages_per_entity=pages)
+            now = timezone.now()
+            for ep_key, p in [
+                ('fornecedores-get', 'fornecedores'),
+                ('clientes-get', 'clientes'),
+                ('contas-pagar-get', 'contas-pagar'),
+                ('contas-receber-get', 'contas-receber'),
+                ('lancamentos-bancarios-get', 'lancamentos-bancarios'),
+                ('contratos-pagar-get', 'contratos'),
+                ('produtos-get', 'produtos')
+            ]:
+                OngsysEndpointStatus.objects.update_or_create(
+                    endpoint_id=ep_key,
+                    defaults={
+                        'endpoint_path': p,
+                        'metodo': 'GET',
+                        'ultimo_status_http': 200,
+                        'status_classificacao': 'success',
+                        'ultima_vez_testado': now,
+                        'ultima_vez_sucesso': now,
+                    }
+                )
 
         return JsonResponse({'status': 'success', 'results': result})
     except Exception as e:
@@ -1116,6 +1257,7 @@ def ongsys_api_proxy_view(request, endpoint_key):
     import time
     import os
     import requests
+    from apps.integrations.models import OngsysEndpointStatus
 
     if request.method != 'POST':
         return JsonResponse({'error': 'Somente método POST é permitido para a API Proxy'}, status=405)
@@ -1135,6 +1277,7 @@ def ongsys_api_proxy_view(request, endpoint_key):
     method = str(data.get('method', 'GET')).upper()
     custom_params = data.get('params', {})
     custom_body = data.get('body', {})
+    ep_id = str(data.get('ep_id') or endpoint_key or '').strip()
 
     if not cnpj or not api_key:
         return JsonResponse({
@@ -1173,16 +1316,64 @@ def ongsys_api_proxy_view(request, endpoint_key):
         except Exception:
             json_response = {'raw_body': resp.text}
 
+        # Classificação e Persistência do Status
+        status_code = resp.status_code
+        now = timezone.now()
+
+        if status_code == 200:
+            classification = 'success'
+        elif status_code == 422:
+            classification = 'validated'
+        else:
+            classification = 'error'
+
+        # Busca ou infere endpoint_id
+        target_ep_id = ep_id if ep_id and ep_id != 'test' else f"{path}-{method.lower()}"
+
+        try:
+            obj, _ = OngsysEndpointStatus.objects.get_or_create(
+                endpoint_id=target_ep_id,
+                defaults={'endpoint_path': path, 'metodo': method}
+            )
+            obj.endpoint_path = path
+            obj.metodo = method
+            obj.ultimo_status_http = status_code
+            obj.status_classificacao = classification
+            obj.latencia_ms = elapsed_ms
+            obj.ultima_vez_testado = now
+            if classification == 'success':
+                obj.ultima_vez_sucesso = now
+            obj.save()
+        except Exception:
+            pass
+
         return JsonResponse({
             'status_code': resp.status_code,
             'elapsed_ms': elapsed_ms,
             'target_url': resp.url,
             'headers': dict(resp.headers),
-            'response': json_response
+            'response': json_response,
+            'classification': classification,
+            'last_tested': now.strftime('%d/%m/%Y %H:%M:%S'),
+            'last_success': now.strftime('%d/%m/%Y %H:%M:%S') if classification == 'success' else None,
         })
 
     except requests.exceptions.RequestException as req_err:
         elapsed_ms = int((time.time() - start_time) * 1000)
+        target_ep_id = ep_id if ep_id and ep_id != 'test' else f"{path}-{method.lower()}"
+        try:
+            obj, _ = OngsysEndpointStatus.objects.get_or_create(
+                endpoint_id=target_ep_id,
+                defaults={'endpoint_path': path, 'metodo': method}
+            )
+            obj.ultimo_status_http = 502
+            obj.status_classificacao = 'error'
+            obj.latencia_ms = elapsed_ms
+            obj.ultima_vez_testado = timezone.now()
+            obj.save()
+        except Exception:
+            pass
+
         return JsonResponse({
             'error': f'Falha ao conectar com servidor OngSys: {req_err}',
             'elapsed_ms': elapsed_ms,

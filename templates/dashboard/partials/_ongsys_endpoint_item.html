@@ -10,17 +10,64 @@
                         {{ ep.nome }}
                         <code class="text-primary font-monospace fw-normal" style="font-size: 0.84em;">/api/v2/{{ ep.path }}</code>
                     </h6>
-                    <!-- Indicador de Status ao Vivo -->
+                    <!-- Indicador de Status com Persistência -->
+                    {% if ep.status_classificacao == 'success' %}
+                    <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                        <i class="ri-checkbox-circle-fill me-1"></i> HTTP 200 OK
+                    </span>
+                    {% elif ep.status_classificacao == 'validated' %}
+                    <span class="badge bg-warning-subtle text-warning border border-warning px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                        <i class="ri-alert-fill me-1"></i> HTTP 422 Validado
+                    </span>
+                    {% elif ep.status_classificacao == 'error' %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                        <i class="ri-close-circle-fill me-1"></i> HTTP {{ ep.ultimo_status_http|default:"Erro" }}
+                    </span>
+                    {% else %}
                     <span class="badge bg-light text-muted border px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
                         <i class="ri-checkbox-blank-circle-line me-1 text-slate-400"></i> Não testado
                     </span>
-                    <span class="badge bg-purple-subtle text-purple border d-none font-monospace ep-time-badge" id="badge-time-{{ ep.id }}" style="font-size: 0.72em; border-radius: 6px; background: #f3e8ff; color: #7c3aed;">
-                        <i class="ri-timer-line me-0.5"></i> <span class="time-val">0</span> ms
+                    {% endif %}
+
+                    <!-- Badge de Latência -->
+                    <span class="badge bg-purple-subtle text-purple border {% if not ep.latencia_ms %}d-none{% endif %} font-monospace ep-time-badge" id="badge-time-{{ ep.id }}" style="font-size: 0.72em; border-radius: 6px; background: #f3e8ff; color: #7c3aed;">
+                        <i class="ri-timer-line me-0.5"></i> <span class="time-val">{{ ep.latencia_ms|default:"0" }}</span> ms
                     </span>
                 </div>
+                
                 <p class="text-muted mb-1" style="font-size: 0.84em; line-height: 1.35;">
                     {{ ep.descricao }}
                 </p>
+
+                <!-- Rastreabilidade de Último Sucesso e Último Teste -->
+                <div class="d-flex align-items-center gap-3 mb-1 flex-wrap" style="font-size: 0.74em;">
+                    <div class="d-flex align-items-center gap-1 text-muted">
+                        <i class="ri-shield-check-line text-success"></i>
+                        <span>Último uso com sucesso:</span>
+                        <strong class="{% if ep.ultima_vez_sucesso %}text-success{% else %}text-muted{% endif %}" id="last-success-{{ ep.id }}">
+                            {% if ep.ultima_vez_sucesso %}
+                                {{ ep.ultima_vez_sucesso|date:"d/m/Y H:i:s" }}
+                            {% else %}
+                                <em>Nunca executado</em>
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                    {% if ep.ultima_vez_testado %}
+                    <div class="d-flex align-items-center gap-1 text-muted">
+                        <i class="ri-history-line text-primary"></i>
+                        <span>Último teste:</span>
+                        <span class="text-dark font-monospace" id="last-tested-{{ ep.id }}">{{ ep.ultima_vez_testado|date:"d/m/Y H:i:s" }}</span>
+                    </div>
+                    {% else %}
+                    <div class="d-flex align-items-center gap-1 text-muted d-none" id="last-tested-box-{{ ep.id }}">
+                        <i class="ri-history-line text-primary"></i>
+                        <span>Último teste:</span>
+                        <span class="text-dark font-monospace" id="last-tested-{{ ep.id }}">-</span>
+                    </div>
+                    {% endif %}
+                </div>
+
                 {% if ep.especificidades %}
                 <div class="p-1.5 px-2 bg-light rounded border border-slate-200 mb-1 d-inline-block" style="font-size: 0.76em; color: #475569;">
                     <i class="ri-information-fill text-primary me-1"></i> <strong class="text-dark">Regra/Especificidade:</strong> {{ ep.especificidades }}

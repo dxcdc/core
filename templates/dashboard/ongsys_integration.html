@@ -332,13 +332,13 @@
             <span class="text-muted fw-bold"><i class="ri-pulse-line text-success"></i> Health Check:</span>
             <div class="d-flex align-items-center gap-1.5 font-monospace">
                 <span class="badge bg-success-subtle text-success border border-success px-2 py-1" id="cntStatus200" title="Endpoints com retorno 200 OK">
-                    🟢 <span id="valStatus200">0</span> OK
+                    🟢 <span id="valStatus200">{{ cnt_200|default:"0" }}</span> OK
                 </span>
                 <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1" id="cntStatus422" title="Endpoints autenticados com validação de parâmetros 422">
-                    🟡 <span id="valStatus422">0</span> Validados
+                    🟡 <span id="valStatus422">{{ cnt_422|default:"0" }}</span> Validados
                 </span>
                 <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1" id="cntStatusErr" title="Endpoints com erro ou indisponíveis">
-                    🔴 <span id="valStatusErr">0</span> Erros
+                    🔴 <span id="valStatusErr">{{ cnt_err|default:"0" }}</span> Erros
                 </span>
             </div>
         </div>
@@ -470,7 +470,15 @@
                         <span class="badge bg-success px-3 py-1.5 fw-bold" id="resStatusBadge" style="font-size: 0.8em;">HTTP 200 OK</span>
                         <small class="text-muted fw-bold" id="resTimeMs"><i class="ri-timer-line me-1"></i> 142 ms</small>
                     </div>
-                    <pre class="response-box mb-0" id="resJsonBody">Carregando resposta...<<!-- MODAL SINCRONIZAÇÃO ATÔMICA -->
+                    <pre class="response-box mb-0" id="resJsonBody">Carregando resposta...</pre>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SINCRONIZAÇÃO ATÔMICA -->
 <div class="modal fade" id="modalSyncAtomic" tabindex="-1" aria-labelledby="modalSyncAtomicLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
@@ -527,12 +535,13 @@
     function openTestModal(path, method, name, defaultParams, epId) {
         currentTestingEpId = epId || null;
         document.getElementById("modalEndpointName").innerText = name;
+        document.getElementById("modalTargetUrl").innerText = `https://www.ongsys.com.br/app/index.php/api/v2/${path}`;
         document.getElementById("modalEndpointPath").value = path;
         document.getElementById("modalEndpointMethod").value = method;
-        document.getElementById("modalTargetUrl").innerText = "https://www.ongsys.com.br/app/index.php/api/v2/" + path;
 
         const methodBadge = document.getElementById("modalMethodBadge");
         methodBadge.innerText = method;
+
         if (method === 'GET') {
             methodBadge.className = "method-badge method-get";
             document.getElementById("groupQueryString").classList.remove("d-none");
@@ -551,30 +560,44 @@
         modal.show();
     }
 
-    function updateBadgeForEndpoint(epId, statusCode, elapsedMs, errorMsg) {
+    function updateBadgeForEndpoint(epId, statusCode, elapsedMs, errorMsg, lastSuccess, lastTested) {
         if (!epId) return;
         const badge = document.getElementById(`badge-status-${epId}`);
         const timeBadge = document.getElementById(`badge-time-${epId}`);
-        if (!badge) return;
+        const elLastSuccess = document.getElementById(`last-success-${epId}`);
+        const elLastTested = document.getElementById(`last-tested-${epId}`);
+        const boxLastTested = document.getElementById(`last-tested-box-${epId}`);
 
-        if (statusCode === 200) {
-            badge.className = "badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge";
-            badge.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> 200 OK`;
-        } else if (statusCode === 422) {
-            badge.className = "badge bg-warning-subtle text-warning border border-warning px-2.5 py-1 fw-bold font-monospace ep-status-badge";
-            badge.innerHTML = `<i class="ri-shield-check-line me-1"></i> 422 Validado`;
-        } else if (statusCode === 201) {
-            badge.className = "badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge";
-            badge.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> 201 Criado`;
-        } else {
-            badge.className = "badge bg-danger-subtle text-danger border border-danger px-2.5 py-1 fw-bold font-monospace ep-status-badge";
-            badge.innerHTML = `<i class="ri-close-circle-fill me-1"></i> ${statusCode || 'Erro'}`;
+        if (badge) {
+            if (statusCode === 200) {
+                badge.className = "badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge";
+                badge.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> HTTP 200 OK`;
+            } else if (statusCode === 422) {
+                badge.className = "badge bg-warning-subtle text-warning border border-warning px-2.5 py-1 fw-bold font-monospace ep-status-badge";
+                badge.innerHTML = `<i class="ri-shield-check-line me-1"></i> HTTP 422 Validado`;
+            } else if (statusCode === 201) {
+                badge.className = "badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge";
+                badge.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> HTTP 201 Criado`;
+            } else {
+                badge.className = "badge bg-danger-subtle text-danger border border-danger px-2.5 py-1 fw-bold font-monospace ep-status-badge";
+                badge.innerHTML = `<i class="ri-close-circle-fill me-1"></i> HTTP ${statusCode || 'Erro'}`;
+            }
         }
 
         if (timeBadge) {
             timeBadge.classList.remove("d-none");
             const valSpan = timeBadge.querySelector(".time-val");
             if (valSpan) valSpan.innerText = elapsedMs || 0;
+        }
+
+        if (lastTested && elLastTested) {
+            elLastTested.innerText = lastTested;
+            if (boxLastTested) boxLastTested.classList.remove("d-none");
+        }
+
+        if (lastSuccess && elLastSuccess) {
+            elLastSuccess.innerText = lastSuccess;
+            elLastSuccess.className = "text-success fw-bold";
         }
 
         updateHealthSummaryCounters();
@@ -638,6 +661,7 @@
                 'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify({
+                ep_id: epId,
                 path: path,
                 method: method,
                 params: params,
@@ -653,7 +677,7 @@
 
             const statusCode = data.error ? 502 : data.status_code;
             const elapsed = data.elapsed_ms || 0;
-            updateBadgeForEndpoint(epId, statusCode, elapsed);
+            updateBadgeForEndpoint(epId, statusCode, elapsed, null, data.last_success, data.last_tested);
 
             if (inlineBox && inlineJson) {
                 inlineBox.classList.remove("d-none");
@@ -668,7 +692,7 @@
                 btn.disabled = false;
                 btn.innerHTML = `<i class="ri-play-fill fs-14"></i> Testar`;
             }
-            updateBadgeForEndpoint(epId, 500, 0);
+            updateBadgeForEndpoint(epId, 500, 0, null, null, "Agora");
             if (inlineBox && inlineJson) {
                 inlineBox.classList.remove("d-none");
                 inlineJson.innerText = "Erro na requisição: " + err;
@@ -766,6 +790,7 @@
                 'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify({
+                ep_id: currentTestingEpId,
                 path: path,
                 method: method,
                 params: params,
@@ -788,7 +813,7 @@
             const elapsed = data.elapsed_ms || 0;
 
             if (currentTestingEpId) {
-                updateBadgeForEndpoint(currentTestingEpId, statusCode, elapsed);
+                updateBadgeForEndpoint(currentTestingEpId, statusCode, elapsed, null, data.last_success, data.last_tested);
             }
 
             if (data.error) {

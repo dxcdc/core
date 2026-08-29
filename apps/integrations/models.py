@@ -264,3 +264,35 @@ class OngsysProduto(models.Model):
     def __str__(self):
         return f"{self.nome_produto} ({self.grupo})"
 
+
+class OngsysEndpointStatus(models.Model):
+    class Classificacao(models.TextChoices):
+        SUCCESS = "success", "Operacional (HTTP 200)"
+        VALIDATED = "validated", "Requer Parâmetros (HTTP 422)"
+        ERROR = "error", "Com Falha / Erro"
+        UNTESTED = "untested", "Não Testado"
+
+    endpoint_id = models.CharField(max_length=64, unique=True, db_index=True)
+    endpoint_path = models.CharField(max_length=120)
+    metodo = models.CharField(max_length=10, default="GET")
+    ultimo_status_http = models.IntegerField(null=True, blank=True)
+    status_classificacao = models.CharField(
+        max_length=32,
+        choices=Classificacao.choices,
+        default=Classificacao.UNTESTED
+    )
+    latencia_ms = models.IntegerField(default=0)
+    ultima_vez_testado = models.DateTimeField(null=True, blank=True)
+    ultima_vez_sucesso = models.DateTimeField(null=True, blank=True)
+    detalhes_resposta = models.TextField(blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Status de Endpoint OngSys"
+        verbose_name_plural = "Status de Endpoints OngSys"
+        ordering = ["endpoint_id"]
+
+    def __str__(self):
+        return f"{self.endpoint_id} - HTTP {self.ultimo_status_http} ({self.status_classificacao})"
+
