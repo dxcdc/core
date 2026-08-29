@@ -38,10 +38,24 @@ class Command(BaseCommand):
             default=5,
             help="Limite de páginas por entidade (0 para todas as páginas)",
         )
+        parser.add_argument(
+            "--since",
+            type=str,
+            default="2025-07-01",
+            help="Data inicial no formato YYYY-MM-DD (janela padrão: 13 meses)",
+        )
+        parser.add_argument(
+            "--until",
+            type=str,
+            default="2026-12-31",
+            help="Data final no formato YYYY-MM-DD",
+        )
 
     def handle(self, *args, **options):
         entity = options["entity"]
         max_pages = options["pages"] if options["pages"] > 0 else None
+        since = options["since"]
+        until = options["until"]
 
         self.stdout.write(self.style.MIGRATE_HEADING(f"=== INICIANDO SINCRONIZAÇÃO ATÔMICA ONGSYS ({entity}) ==="))
         t_start = time.time()
@@ -61,14 +75,15 @@ class Command(BaseCommand):
             res = sync_clientes(max_pages=max_pages)
             self.stdout.write(self.style.SUCCESS(f"✔ Clientes: {res['total']} sincronizados em {res['duracao']}s"))
         elif entity == "contas_pagar":
-            res = sync_contas_pagar(max_pages=max_pages)
+            res = sync_contas_pagar(max_pages=max_pages, data_inicio=since, data_fim=until)
             self.stdout.write(self.style.SUCCESS(f"✔ Contas a Pagar: {res['total']} sincronizados em {res['duracao']}s"))
         elif entity == "contas_receber":
-            res = sync_contas_receber(max_pages=max_pages)
+            res = sync_contas_receber(max_pages=max_pages, data_inicio=since, data_fim=until)
             self.stdout.write(self.style.SUCCESS(f"✔ Contas a Receber: {res['total']} sincronizados em {res['duracao']}s"))
         elif entity == "lancamentos_bancarios":
-            res = sync_lancamentos_bancarios(max_pages=max_pages)
+            res = sync_lancamentos_bancarios(max_pages=max_pages, data_inicio=since, data_fim=until)
             self.stdout.write(self.style.SUCCESS(f"✔ Lançamentos Bancários: {res['total']} sincronizados em {res['duracao']}s"))
+
         elif entity == "contratos":
             res = sync_contratos(max_pages=max_pages)
             self.stdout.write(self.style.SUCCESS(f"✔ Contratos: {res['total']} sincronizados em {res['duracao']}s"))

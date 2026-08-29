@@ -205,7 +205,7 @@ def sync_clientes(max_pages=None):
 # ==============================================================================
 # 3. CONTAS A PAGAR (ATÔMICO)
 # ==============================================================================
-def sync_contas_pagar(max_pages=None, data_inicio="2024-01-01", data_fim="2026-12-31"):
+def sync_contas_pagar(max_pages=None, data_inicio="2025-07-01", data_fim="2026-12-31"):
     headers = get_headers()
     page = 1
     total_processed = 0
@@ -240,22 +240,37 @@ def sync_contas_pagar(max_pages=None, data_inicio="2024-01-01", data_fim="2026-1
                 if not cod:
                     continue
                 forn = item.get("fornecedor") or {}
+                
+                # Extração de Rateios Contábeis e Projetos
+                rateios = item.get("rateios") or []
+                r0 = rateios[0] if isinstance(rateios, list) and len(rateios) > 0 else {}
+                proj_nome = str(r0.get("projeto") or item.get("projeto") or "")[:255]
+                subproj_nome = str(r0.get("subprojeto") or item.get("subprojeto") or "")[:255]
+                conta_cont = str(r0.get("conta") or item.get("contaContabil") or "")[:255]
+
+                # Extração de Baixas / Pagamentos
+                baixas = item.get("baixaTipo") or []
+                b0 = baixas[0] if isinstance(baixas, list) and len(baixas) > 0 else {}
+                dt_pag = parse_date(b0.get("data") or item.get("dataPagamento"))
+                vl_pag = parse_decimal(b0.get("valor") or item.get("valorPago"))
+                vl_tot = parse_decimal(item.get("valorBruto") or item.get("valorLiquido") or item.get("valorTotal") or item.get("valor"))
+
                 objs.append(
                     OngsysContaPagar(
                         cod_lancamento=cod,
-                        fornecedor_nome=str(forn.get("nome") or "").strip()[:255],
+                        fornecedor_nome=str(forn.get("nome") or forn.get("nomeEmpresa") or "").strip()[:255],
                         fornecedor_documento=str(forn.get("documento") or "").strip()[:32],
-                        historico_despesa=str(item.get("historicoDespesa") or ""),
+                        historico_despesa=str(item.get("historicoDespesa") or item.get("historico") or ""),
                         tipo_despesa=str(item.get("tipoDespesa") or "")[:120],
                         data_emissao=parse_date(item.get("dataEmissao")),
                         data_vencimento=parse_date(item.get("dataVencimento")),
-                        data_pagamento=parse_date(item.get("dataPagamento")),
-                        valor_total=parse_decimal(item.get("valorTotal") or item.get("valor")),
-                        valor_pago=parse_decimal(item.get("valorPago")),
-                        status_pagamento=str(item.get("status") or "")[:64],
-                        projeto_nome=str(item.get("projeto") or "")[:255],
-                        subprojeto_nome=str(item.get("subprojeto") or "")[:255],
-                        conta_contabil=str(item.get("contaContabil") or "")[:255],
+                        data_pagamento=dt_pag,
+                        valor_total=vl_tot,
+                        valor_pago=vl_pag,
+                        status_pagamento=str(item.get("statusAprovacao") or item.get("status") or "")[:64],
+                        projeto_nome=proj_nome,
+                        subprojeto_nome=subproj_nome,
+                        conta_contabil=conta_cont,
                         dados_brutos=item,
                     )
                 )
@@ -299,7 +314,7 @@ def sync_contas_pagar(max_pages=None, data_inicio="2024-01-01", data_fim="2026-1
 # ==============================================================================
 # 4. CONTAS A RECEBER (ATÔMICO)
 # ==============================================================================
-def sync_contas_receber(max_pages=None, data_inicio="2024-01-01", data_fim="2026-12-31"):
+def sync_contas_receber(max_pages=None, data_inicio="2025-07-01", data_fim="2026-12-31"):
     headers = get_headers()
     page = 1
     total_processed = 0
@@ -334,17 +349,35 @@ def sync_contas_receber(max_pages=None, data_inicio="2024-01-01", data_fim="2026
                 if not cod:
                     continue
                 cli = item.get("cliente") or {}
+
+                # Extração de Rateios e Projetos
+                rateios = item.get("rateios") or []
+                r0 = rateios[0] if isinstance(rateios, list) and len(rateios) > 0 else {}
+                proj_nome = str(r0.get("projeto") or item.get("projeto") or "")[:255]
+                conta_cont = str(r0.get("conta") or item.get("contaContabil") or "")[:255]
+
+                # Extração de Baixas / Recebimentos
+                baixas = item.get("baixaTipo") or []
+                b0 = baixas[0] if isinstance(baixas, list) and len(baixas) > 0 else {}
+                dt_rec = parse_date(b0.get("data") or item.get("dataRecebimento"))
+                vl_rec = parse_decimal(b0.get("valor") or item.get("valorRecebido"))
+                vl_tot = parse_decimal(item.get("valorBruto") or item.get("valorLiquido") or item.get("valorTotal") or item.get("valor"))
+
                 objs.append(
                     OngsysContaReceber(
                         cod_lancamento=cod,
-                        cliente_nome=str(cli.get("nome") or "").strip()[:255],
+                        cliente_nome=str(cli.get("nome") or cli.get("nomeEmpresa") or "").strip()[:255],
                         cliente_documento=str(cli.get("documento") or "").strip()[:32],
+                        historico_receita=str(item.get("historicoReceita") or item.get("historico") or ""),
+                        tipo_receita=str(item.get("tipoReceita") or "")[:120],
                         data_emissao=parse_date(item.get("dataEmissao")),
                         data_vencimento=parse_date(item.get("dataVencimento")),
-                        data_recebimento=parse_date(item.get("dataRecebimento")),
-                        valor_total=parse_decimal(item.get("valorTotal") or item.get("valor")),
-                        valor_recebido=parse_decimal(item.get("valorRecebido")),
-                        projeto_nome=str(item.get("projeto") or "")[:255],
+                        data_recebimento=dt_rec,
+                        valor_total=vl_tot,
+                        valor_recebido=vl_rec,
+                        status_recebimento=str(item.get("status") or item.get("statusAprovacao") or "")[:64],
+                        projeto_nome=proj_nome,
+                        conta_contabil=conta_cont,
                         dados_brutos=item,
                     )
                 )
@@ -357,12 +390,16 @@ def sync_contas_receber(max_pages=None, data_inicio="2024-01-01", data_fim="2026
                     update_fields=[
                         "cliente_nome",
                         "cliente_documento",
+                        "historico_receita",
+                        "tipo_receita",
                         "data_emissao",
                         "data_vencimento",
                         "data_recebimento",
                         "valor_total",
                         "valor_recebido",
+                        "status_recebimento",
                         "projeto_nome",
+                        "conta_contabil",
                         "dados_brutos",
                         "atualizado_em",
                     ],
