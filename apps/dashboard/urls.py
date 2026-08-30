@@ -14,6 +14,9 @@ urlpatterns = [
     path('dashboard/integracoes/ongsys/sync/', views.ongsys_trigger_sync_view, name='ongsys_trigger_sync'),
     path('dashboard/integracoes/ongsys/api/<str:endpoint_key>/', views.ongsys_api_proxy_view, name='ongsys_api_proxy'),
 
+    path('dashboard/integracoes/transportes/', views.transportes_integration_view, name='transportes_integracao'),
+    path('dashboard/integracoes/transportes/api/<str:provider>/<str:endpoint_key>/', views.transportes_api_proxy_view, name='transportes_api_proxy'),
+
     path('dashboard/integracoes/ecosistema/', views.ecosistema_m2m_view, name='ecosistema_m2m'),
 
     path('dashboard/vpn/', views.vpn_view, name='vpn'),

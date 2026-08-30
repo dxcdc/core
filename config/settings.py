@@ -10,6 +10,11 @@ env_path = BASE_DIR / '.env'
 if env_path.exists():
     load_dotenv(env_path)
 
+# OngSys API v2 Settings
+ONGSYS_CNPJ = os.getenv('ONGSYS_CNPJ', '03970166000129')
+ONGSYS_API_KEY = os.getenv('ONGSYS_API_KEY', '')
+ONGSYS_BASE_URL = os.getenv('ONGSYS_BASE_URL', 'https://www.ongsys.com.br/app/index.php/api/v2/')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
