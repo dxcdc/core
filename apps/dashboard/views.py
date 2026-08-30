@@ -1353,7 +1353,9 @@ def ongsys_integration_view(request):
         'has_api_key': has_api_key,
         'total_endpoints': len(endpoints_ongsys),
         'total_endpoints_estoque': len(endpoints_ongsys_estoque),
+        'total_endpoints_all': len(endpoints_ongsys) + len(endpoints_ongsys_estoque),
         'total_modulos': 4,
+
         'latency_ms': 120,
         'health_status': 'Operacional (Basic Auth OK)' if has_api_key else 'Aguardando API Key',
         'cnt_200': cnt_200,

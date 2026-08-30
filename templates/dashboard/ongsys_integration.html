@@ -295,11 +295,12 @@
             </div>
             <div>
                 <div class="fw-bold text-dark" style="font-size: 1.15rem; line-height: 1.2;">
-                    {{ total_endpoints|add:total_endpoints_estoque }} Rotas
+                    {{ total_endpoints_all|default:"25" }} Rotas
                 </div>
                 <small class="text-muted d-block mt-0.5" style="font-size: 0.74rem;">
-                    20 Oficiais • 5 Estoque
+                    {{ total_endpoints|default:"20" }} Oficiais • {{ total_endpoints_estoque|default:"5" }} Estoque
                 </small>
+
             </div>
         </div>
     </div>
