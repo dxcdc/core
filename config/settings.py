@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+from urllib.parse import parse_qsl, unquote, urlparse
+
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -104,12 +107,40 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+
+def database_config(database_url):
+    """Converte DATABASE_URL em configuração Django sem dependência adicional."""
+    if not database_url:
+        return {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+
+    parsed = urlparse(database_url)
+    if parsed.scheme not in ('postgres', 'postgresql'):
+        raise ImproperlyConfigured(
+            'DATABASE_URL deve usar o esquema postgres:// ou postgresql://.'
+        )
+    if not all((parsed.hostname, parsed.path.lstrip('/'), parsed.username)):
+        raise ImproperlyConfigured('DATABASE_URL do PostgreSQL está incompleta.')
+
+    config = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': unquote(parsed.path.lstrip('/')),
+        'USER': unquote(parsed.username),
+        'PASSWORD': unquote(parsed.password or ''),
+        'HOST': parsed.hostname,
+        'PORT': str(parsed.port or 5432),
+        'CONN_MAX_AGE': int(os.getenv('DATABASE_CONN_MAX_AGE', '60')),
+        'CONN_HEALTH_CHECKS': True,
     }
-}
+    options = dict(parse_qsl(parsed.query, keep_blank_values=False))
+    if options:
+        config['OPTIONS'] = options
+    return config
+
+
+DATABASES = {'default': database_config(os.getenv('DATABASE_URL', '').strip())}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
