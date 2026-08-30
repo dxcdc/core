@@ -1,366 +1,398 @@
 {% load static %}
 <style>
-    /* SIDEBAR BASE STYLING - RECOLHIDA POR PADRÃO (APENAS ÍCONES 72px) */
-    .sidebar-lahomes {
-        width: 72px;
-        min-width: 72px;
-        background: #0f172a;
-        border-right: 1px solid #1e293b;
-        display: flex;
-        flex-direction: column;
-        color: #f8fafc;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        position: relative;
-        z-index: 1040;
-        transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow-x: hidden;
+    /* ==========================================================================
+       CDC CORE SIDEBAR - ARQUITETURA AUTÔNOMA E BLINDADA
+       ========================================================================== */
+    .cdc-sidebar-container {
+        width: 64px !important;
+        min-width: 64px !important;
+        max-width: 64px !important;
+        background: #0f172a !important;
+        border-right: 1px solid #1e293b !important;
+        transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        height: 100vh !important;
+        z-index: 1050 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     }
 
-    /* EXPANSÃO AO PASSAR O MOUSE (HOVER) OU CLICAR NO MENU SANDUÍCHE (.sidebar-expanded) */
-    .sidebar-lahomes:hover,
-    .sidebar-lahomes.sidebar-expanded,
-    body.sidebar-pinned .sidebar-lahomes {
-        width: 260px;
-        min-width: 260px;
+    /* ESTADO EXPANDIDO (260px) */
+    .cdc-sidebar-container.cdc-expanded {
+        width: 260px !important;
+        min-width: 260px !important;
+        max-width: 260px !important;
+        box-shadow: 8px 0 35px rgba(0, 0, 0, 0.5) !important;
     }
 
-    /* BOTÕES E LINKS DA SIDEBAR */
-    .sidebar-lahomes .nav-link,
-    .sidebar-lahomes .sidebar-toggle-btn {
-        background: transparent;
-        border: 1px solid transparent;
-        color: #cbd5e1;
-        text-decoration: none;
-        transition: all 0.2s ease-in-out;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        padding: 9px 12px;
-        white-space: nowrap;
-        overflow: hidden;
+    /* LOGO HEADER FIXO (54px) */
+    .cdc-logo-header {
+        height: 54px !important;
+        min-height: 54px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 12px !important;
+        border-bottom: 1px solid #1e293b !important;
+        background: #0b1324 !important;
+        width: 100% !important;
+        text-decoration: none !important;
+    }
+    .cdc-sidebar-container.cdc-expanded .cdc-logo-header {
+        justify-content: flex-start !important;
+        padding: 0 16px !important;
+    }
+    .cdc-logo-icon {
+        height: 32px !important;
+        width: 32px !important;
+        min-height: 32px !important;
+        min-width: 32px !important;
+        object-fit: contain !important;
+        display: block !important;
+        flex-shrink: 0 !important;
+    }
+    .cdc-logo-text {
+        display: none !important;
+        flex-direction: column !important;
+        margin-left: 10px !important;
+        white-space: nowrap !important;
+    }
+    .cdc-sidebar-container.cdc-expanded .cdc-logo-text {
+        display: flex !important;
     }
 
-    .sidebar-lahomes .nav-link:hover,
-    .sidebar-lahomes .sidebar-toggle-btn:hover {
+    /* LISTA DO MENU */
+    .cdc-menu-list {
+        list-style: none !important;
+        padding: 10px 0 30px 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    .cdc-menu-item {
+        width: 100% !important;
+        margin: 3px 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    /* LINKS PRINCIPAIS */
+    .cdc-nav-link {
+        display: flex !important;
+        align-items: center !important;
+        width: 44px !important;
+        height: 44px !important;
+        margin: 2px auto !important;
+        padding: 0 !important;
+        color: #94a3b8 !important;
+        text-decoration: none !important;
+        border-radius: 10px !important;
+        border: 1px solid transparent !important;
+        justify-content: center !important;
+        transition: all 0.15s ease !important;
+        white-space: nowrap !important;
+        cursor: pointer !important;
+        box-sizing: border-box !important;
+    }
+    .cdc-nav-link:hover {
         background: rgba(255, 255, 255, 0.08) !important;
         color: #ffffff !important;
     }
-
-    .sidebar-lahomes .nav-link.active-item {
-        background: rgba(37, 99, 235, 0.2) !important;
-        border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    .cdc-nav-link.active {
+        background: rgba(37, 99, 235, 0.25) !important;
+        border: 1px solid rgba(59, 130, 246, 0.5) !important;
         color: #60a5fa !important;
         font-weight: 700 !important;
     }
 
-    .sidebar-lahomes .sidebar-toggle-btn.active-dropdown {
-        background: rgba(30, 41, 59, 0.9) !important;
-        border: 1px solid rgba(51, 65, 85, 0.8) !important;
+    /* ÍCONES PRINCIPAIS */
+    .cdc-nav-icon {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 24px !important;
+        min-width: 24px !important;
+        height: 24px !important;
+        font-size: 1.25rem !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* TEXTO E CHEVRON DO LINK PRINCIPAL */
+    .cdc-nav-text {
+        display: none !important;
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        color: #e2e8f0 !important;
+        margin-left: 12px !important;
+        white-space: nowrap !important;
+    }
+    .cdc-chevron {
+        display: none !important;
+        margin-left: auto !important;
+        font-size: 1.1rem !important;
+        color: #64748b !important;
+        transition: transform 0.2s ease !important;
+    }
+
+    /* REGRAS QUANDO A SIDEBAR ESTIVER EXPANDIDA (260px) */
+    .cdc-sidebar-container.cdc-expanded .cdc-nav-link {
+        width: calc(100% - 16px) !important;
+        height: 40px !important;
+        margin: 2px 8px !important;
+        padding: 0 12px !important;
+        justify-content: flex-start !important;
+        border-radius: 8px !important;
+    }
+    .cdc-sidebar-container.cdc-expanded .cdc-nav-text {
+        display: inline-block !important;
+    }
+    .cdc-sidebar-container.cdc-expanded .cdc-chevron {
+        display: inline-flex !important;
+    }
+    .cdc-sidebar-container.cdc-expanded .cdc-nav-link[aria-expanded="true"] .cdc-chevron {
+        transform: rotate(180deg) !important;
+        color: #93c5fd !important;
+    }
+
+    /* ==========================================================================
+       SUBMENUS 100% VISÍVEIS E ILUMINADOS
+       ========================================================================== */
+    .cdc-submenu-wrapper {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 4px 0 4px 12px !important;
+        margin: 3px 12px 6px 22px !important;
+        border-left: 2px solid #334155 !important;
+        background: transparent !important;
+        min-width: 210px !important;
+    }
+    .cdc-submenu {
+        display: none !important;
+    }
+    .cdc-submenu.show {
+        display: block !important;
+    }
+    .cdc-sidebar-container:not(.cdc-expanded) .cdc-submenu {
+        display: none !important;
+    }
+    .cdc-sub-link {
+        display: flex !important;
+        align-items: center !important;
+        color: #cbd5e1 !important;
+        font-size: 0.82rem !important;
+        font-weight: 500 !important;
+        padding: 7px 10px !important;
+        margin: 2px 0 !important;
+        border-radius: 6px !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
+        transition: all 0.15s ease !important;
+        background: transparent !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        line-height: 1.2 !important;
+    }
+    .cdc-sub-link i {
+        font-size: 1.05rem !important;
+        margin-right: 9px !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+    }
+    .cdc-sub-link:hover {
         color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        transform: translateX(3px) !important;
     }
-
-    /* ÍCONES PADRONIZADOS COM ALINHAMENTO FIXO */
-    .sidebar-lahomes i.menu-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 24px;
-        height: 24px;
-        font-size: 1.2rem;
-        margin-right: 14px !important;
-        flex-shrink: 0;
-    }
-
-    /* TEXTOS OCULTOS QUANDO RECOLHIDA */
-    .sidebar-lahomes .brand-text,
-    .sidebar-lahomes .menu-text,
-    .sidebar-lahomes .section-header-text,
-    .sidebar-lahomes .dropdown-chevron,
-    .sidebar-lahomes .sidebar-user-details {
-        opacity: 0;
-        visibility: hidden;
-        white-space: nowrap;
-        transition: opacity 0.2s ease, visibility 0.2s ease;
-    }
-
-    /* TEXTOS VISÍVEIS QUANDO EXPANDIDA (HOVER OU FIXADA PELO SANDUÍCHE) */
-    .sidebar-lahomes:hover .brand-text,
-    .sidebar-lahomes:hover .menu-text,
-    .sidebar-lahomes:hover .section-header-text,
-    .sidebar-lahomes:hover .dropdown-chevron,
-    .sidebar-lahomes:hover .sidebar-user-details,
-    .sidebar-lahomes.sidebar-expanded .brand-text,
-    .sidebar-lahomes.sidebar-expanded .menu-text,
-    .sidebar-lahomes.sidebar-expanded .section-header-text,
-    .sidebar-lahomes.sidebar-expanded .dropdown-chevron,
-    .sidebar-lahomes.sidebar-expanded .sidebar-user-details,
-    body.sidebar-pinned .sidebar-lahomes .brand-text,
-    body.sidebar-pinned .sidebar-lahomes .menu-text,
-    body.sidebar-pinned .sidebar-lahomes .section-header-text,
-    body.sidebar-pinned .sidebar-lahomes .dropdown-chevron,
-    body.sidebar-pinned .sidebar-lahomes .sidebar-user-details {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    /* SUB-ITENS INDENTADOS */
-    .sidebar-sub-menu {
-        list-style: none;
-        border-left: 1px solid #334155;
-        margin-left: 24px;
-        padding-left: 8px;
+    .cdc-sub-link.active {
+        color: #60a5fa !important;
+        background: rgba(37, 99, 235, 0.25) !important;
+        font-weight: 700 !important;
+        border-left: 3px solid #3b82f6 !important;
     }
 </style>
 
-<aside class="sidebar-lahomes">
-    
-    <!-- Sidebar Brand Header (Logo Fixa 38px + Texto Expansível) -->
-    <div class="sidebar-brand-box px-3 py-3 d-flex align-items-center" style="border-bottom: 1px solid #1e293b; height: 70px; flex-shrink: 0;">
-        <a href="{% url 'dashboard:index' %}" class="d-flex align-items-center gap-3 text-decoration-none">
-            <img src="{% static 'img/cdc_logo_icon.png' %}" alt="CDC Logo" style="height: 38px; width: 38px; object-fit: contain; flex-shrink: 0;">
-            <div class="d-flex flex-column brand-text">
-                <span style="color: #ffffff; font-size: 1.15em; font-weight: 800; letter-spacing: -0.2px; line-height: 1.1;">CDC Core</span>
-                <small style="color: #64748b; font-size: 0.7em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Operações CDC</small>
-            </div>
-        </a>
-    </div>
-
-    <!-- Sidebar Menu Content Wrapper -->
-    <div class="sidebar-menu-wrapper px-3 py-3" style="flex-grow: 1; overflow-y: auto; overflow-x: hidden;">
-        
-        <!-- SEÇÃO 1: VISÃO GERAL -->
-        <div class="text-uppercase fw-bold mb-2 px-2 section-header-text" style="font-size: 0.68em; letter-spacing: 1.2px; color: #64748b !important;">
-            VISÃO GERAL
+<aside class="cdc-sidebar-container" id="cdc-main-sidebar">
+    <!-- Header com Favicon Oficial -->
+    <a href="{% url 'dashboard:index' %}" class="cdc-logo-header">
+        <img src="{% static 'img/favicon.png' %}" class="cdc-logo-icon" alt="CDC Logo">
+        <div class="cdc-logo-text">
+            <span style="font-weight: 800; font-size: 1.05rem; color: #ffffff; letter-spacing: -0.2px; line-height: 1.1;">CDC Core</span>
+            <small style="color: #64748b; font-size: 0.65em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Operações CDC</small>
         </div>
-        
-        <ul class="nav flex-column mb-3 gap-1" style="list-style: none; padding-left: 0; margin-left: 0;">
-            <li class="nav-item">
-                <a href="{% url 'dashboard:landing' %}" class="nav-link {% if request.resolver_match.url_name == 'landing' %}active-item{% endif %}" title="Início">
-                    <i class="ri-home-4-line menu-icon fs-18 text-info"></i>
-                    <span class="menu-text">Início</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'dashboard:index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}active-item{% endif %}" title="Dashboard DataOps">
-                    <i class="ri-line-chart-line menu-icon fs-18 text-success"></i>
-                    <span class="menu-text">Dashboard DataOps</span>
-                </a>
-            </li>
-        </ul>
+    </a>
 
-        <!-- SEÇÃO 2: MÓDULOS DE OPERAÇÃO -->
-        <div class="sidebar-dropdown-group mb-2">
-            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between sidebar-toggle-btn {% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}active-dropdown{% endif %}" data-bs-toggle="collapse" data-bs-target="#dropdown-modulos" aria-expanded="{% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}true{% else %}false{% endif %}" title="Módulos de Operação">
-                <div class="d-flex align-items-center">
-                    <i class="ri-settings-4-line menu-icon fs-18 text-primary"></i>
-                    <span class="menu-text" style="font-weight: 700; font-size: 0.88em;">Módulos de Operação</span>
+    <!-- Lista de Navegação -->
+    <ul class="cdc-menu-list">
+
+        <!-- 1. DASHBOARD DATAOPS -->
+        <li class="cdc-menu-item">
+            <a href="{% url 'dashboard:index' %}" class="cdc-nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                <span class="cdc-nav-icon"><i class="ri-dashboard-3-line text-success"></i></span>
+                <span class="cdc-nav-text">Dashboard DataOps</span>
+            </a>
+        </li>
+
+        <!-- 2. MÓDULOS DE OPERAÇÃO -->
+        <li class="cdc-menu-item">
+            <a href="#cdcSubModulos" class="cdc-nav-link {% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}active{% endif %}" data-cdc-submenu="cdcSubModulos" role="button" aria-expanded="{% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}true{% else %}false{% endif %}" aria-controls="cdcSubModulos">
+                <span class="cdc-nav-icon"><i class="ri-settings-4-line text-primary"></i></span>
+                <span class="cdc-nav-text">Módulos CDC</span>
+                <i class="ri-arrow-down-s-line cdc-chevron"></i>
+            </a>
+            <div class="cdc-submenu {% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}show{% endif %}" id="cdcSubModulos">
+                <div class="cdc-submenu-wrapper">
+                    <a href="{% url 'dashboard:workspace' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'workspace' %}active{% endif %}">
+                        <i class="ri-google-line text-info"></i> Google Workspace
+                    </a>
+                    <a href="{% url 'dashboard:infra' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'infra' %}active{% endif %}">
+                        <i class="ri-server-line text-primary"></i> Infra & Docker
+                    </a>
+                    <a href="{% url 'dashboard:vpn' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'vpn' %}active{% endif %}">
+                        <i class="ri-shield-keyhole-line" style="color: #c084fc;"></i> VPN & Projetos
+                    </a>
+                    <a href="{% url 'dashboard:cofre' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'cofre' %}active{% endif %}">
+                        <i class="ri-key-2-line text-success"></i> Cofre Segredos
+                    </a>
+                    <a href="{% url 'dashboard:ferramentas' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'ferramentas' %}active{% endif %}">
+                        <i class="ri-tools-line text-warning"></i> Ferramentas
+                    </a>
                 </div>
-                <i class="ri-arrow-down-s-line fs-18 dropdown-chevron text-white-50" style="transition: transform 0.25s ease;"></i>
-            </button>
-
-            <!-- SUB-ITENS DOS MÓDULOS -->
-            <div class="collapse {% if request.resolver_match.url_name == 'workspace' or request.resolver_match.url_name == 'infra' or request.resolver_match.url_name == 'vpn' or request.resolver_match.url_name == 'cofre' or request.resolver_match.url_name == 'ferramentas' %}show{% endif %} mt-1" id="dropdown-modulos">
-                <ul class="nav flex-column sidebar-sub-menu gap-1">
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:workspace' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'workspace' %}active-item{% endif %}">
-                            <i class="ri-google-line menu-icon fs-16 text-info"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Google Workspace</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:infra' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'infra' %}active-item{% endif %}">
-                            <i class="ri-server-line menu-icon fs-16 text-primary"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Infraestrutura & Docker</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:vpn' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'vpn' %}active-item{% endif %}">
-                            <i class="ri-shield-keyhole-line menu-icon fs-16" style="color: #c084fc;"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">VPN & Mapa de Projetos</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:cofre' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'cofre' %}active-item{% endif %}">
-                            <i class="ri-key-2-line menu-icon fs-16 text-success"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Cofre de Segredos</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:ferramentas' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'ferramentas' %}active-item{% endif %}">
-                            <i class="ri-tools-line menu-icon fs-16 text-warning"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Canivete de Ferramentas</span>
-                        </a>
-                    </li>
-                </ul>
             </div>
-        </div>
+        </li>
 
-        <!-- SEÇÃO 3: GOVERNANÇA & DOCUMENTAÇÃO -->
-        <div class="sidebar-dropdown-group mb-2">
-            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between sidebar-toggle-btn {% if request.resolver_match.url_name == 'governanca' or request.resolver_match.url_name == 'formularios' %}active-dropdown{% endif %}" data-bs-toggle="collapse" data-bs-target="#dropdown-governanca" aria-expanded="{% if request.resolver_match.url_name == 'governanca' or request.resolver_match.url_name == 'formularios' %}true{% else %}false{% endif %}" title="Governança & Docs">
-                <div class="d-flex align-items-center">
-                    <i class="ri-book-open-line menu-icon fs-18 text-warning"></i>
-                    <span class="menu-text" style="font-weight: 700; font-size: 0.88em;">Governança & Docs</span>
+        <!-- 3. GOVERNANÇA & DOCS -->
+        <li class="cdc-menu-item">
+            <a href="#cdcSubGovernanca" class="cdc-nav-link {% if request.resolver_match.url_name == 'governanca' or request.resolver_match.url_name == 'formularios' %}active{% endif %}" data-cdc-submenu="cdcSubGovernanca" role="button" aria-expanded="{% if request.resolver_match.url_name == 'governanca' or request.resolver_match.url_name == 'formularios' %}true{% else %}false{% endif %}" aria-controls="cdcSubGovernanca">
+                <span class="cdc-nav-icon"><i class="ri-book-open-line text-warning"></i></span>
+                <span class="cdc-nav-text">Governança & Docs</span>
+                <i class="ri-arrow-down-s-line cdc-chevron"></i>
+            </a>
+            <div class="cdc-submenu {% if request.resolver_match.url_name == 'governanca' or request.resolver_match.url_name == 'formularios' %}show{% endif %}" id="cdcSubGovernanca">
+                <div class="cdc-submenu-wrapper">
+                    <a href="{% url 'dashboard:governanca' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'governanca' %}active{% endif %}">
+                        <i class="ri-file-text-line text-info"></i> Diretrizes & ADRs
+                    </a>
+                    <a href="{% url 'dashboard:formularios' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'formularios' %}active{% endif %}">
+                        <i class="ri-survey-line text-primary"></i> Formulários
+                    </a>
+                    <a href="{% url 'dashboard:governanca' %}#lgpd" class="cdc-sub-link">
+                        <i class="ri-shield-user-line text-danger"></i> Proteção & LGPD
+                    </a>
+                    <a href="{% url 'dashboard:governanca' %}#auditoria" class="cdc-sub-link">
+                        <i class="ri-history-line text-success"></i> Trilha Auditoria
+                    </a>
                 </div>
-                <i class="ri-arrow-down-s-line fs-18 dropdown-chevron text-white-50" style="transition: transform 0.25s ease;"></i>
-            </button>
-
-            <!-- SUB-ITENS DA GOVERNANÇA -->
-            <div class="collapse {% if request.resolver_match.url_name == 'governanca' or request.resolver_match.url_name == 'formularios' %}show{% endif %} mt-1" id="dropdown-governanca">
-                <ul class="nav flex-column sidebar-sub-menu gap-1">
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:governanca' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'governanca' %}active-item{% endif %}">
-                            <i class="ri-file-text-line menu-icon fs-16 text-info"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Diretrizes & ADRs CDC</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:formularios' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'formularios' %}active-item{% endif %}">
-                            <i class="ri-survey-line menu-icon fs-16 text-primary"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Formulários & Cadastros</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:governanca' %}#lgpd" class="nav-link py-1.5 px-2">
-                            <i class="ri-shield-user-line menu-icon fs-16 text-danger"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Proteção de Dados & LGPD</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:governanca' %}#auditoria" class="nav-link py-1.5 px-2">
-                            <i class="ri-history-line menu-icon fs-16 text-success"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Trilha de Auditoria</span>
-                        </a>
-                    </li>
-                </ul>
             </div>
-        </div>
+        </li>
 
-        <!-- SEÇÃO 4: INTEGRAÇÕES & CONEXÕES -->
-        <div class="sidebar-dropdown-group mb-3">
-            <button type="button" class="btn w-100 d-flex align-items-center justify-content-between sidebar-toggle-btn {% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ongsys_integration' or request.resolver_match.url_name == 'ecosistema_m2m' %}active-dropdown{% endif %}" data-bs-toggle="collapse" data-bs-target="#dropdown-integracoes" aria-expanded="{% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ongsys_integration' or request.resolver_match.url_name == 'ecosistema_m2m' %}true{% else %}false{% endif %}" title="Central de Integrações">
-                <div class="d-flex align-items-center">
-                    <i class="ri-plug-line menu-icon fs-18 text-info"></i>
-                    <span class="menu-text" style="font-weight: 700; font-size: 0.88em;">Central de Integrações</span>
+        <!-- 4. CENTRAL DE INTEGRAÇÕES & APIS -->
+        <li class="cdc-menu-item">
+            <a href="#cdcSubIntegracoes" class="cdc-nav-link {% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ongsys_integration' or request.resolver_match.url_name == 'transportes_integracao' or request.resolver_match.url_name == 'ecosistema_m2m' %}active{% endif %}" data-cdc-submenu="cdcSubIntegracoes" role="button" aria-expanded="{% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ongsys_integration' or request.resolver_match.url_name == 'transportes_integracao' or request.resolver_match.url_name == 'ecosistema_m2m' %}true{% else %}false{% endif %}" aria-controls="cdcSubIntegracoes">
+                <span class="cdc-nav-icon"><i class="ri-plug-line text-info"></i></span>
+                <span class="cdc-nav-text">Central de APIs</span>
+                <i class="ri-arrow-down-s-line cdc-chevron"></i>
+            </a>
+            <div class="cdc-submenu {% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ongsys_integration' or request.resolver_match.url_name == 'transportes_integracao' or request.resolver_match.url_name == 'ecosistema_m2m' %}show{% endif %}" id="cdcSubIntegracoes">
+                <div class="cdc-submenu-wrapper">
+                    <a href="{% url 'dashboard:integracoes' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'integracoes' %}active{% endif %}">
+                        <i class="ri-dashboard-line text-primary"></i> Painel Conectores
+                    </a>
+                    <a href="{% url 'dashboard:ongsys_integration' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'ongsys_integration' %}active{% endif %}">
+                        <i class="ri-building-4-line text-danger"></i> API OngSys (v2)
+                    </a>
+                    <a href="{% url 'dashboard:transportes_integracao' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'transportes_integracao' %}active{% endif %}">
+                        <i class="ri-car-line text-warning"></i> Transportes (Uber/99)
+                    </a>
+                    <a href="{% url 'dashboard:integracoes' %}#google-workspace" class="cdc-sub-link">
+                        <i class="ri-google-line text-info"></i> Google API
+                    </a>
+                    <a href="{% url 'dashboard:integracoes' %}#whatsapp-evolution" class="cdc-sub-link">
+                        <i class="ri-whatsapp-line text-success"></i> WhatsApp API
+                    </a>
+                    <a href="{% url 'dashboard:ecosistema_m2m' %}" class="cdc-sub-link {% if request.resolver_match.url_name == 'ecosistema_m2m' %}active{% endif %}">
+                        <i class="ri-base-station-line text-primary"></i> Ecossistema (M2M)
+                    </a>
                 </div>
-                <i class="ri-arrow-down-s-line fs-18 dropdown-chevron text-white-50" style="transition: transform 0.25s ease;"></i>
-            </button>
-
-            <!-- SUB-ITENS DA CENTRAL DE INTEGRAÇÕES -->
-            <div class="collapse {% if request.resolver_match.url_name == 'integracoes' or request.resolver_match.url_name == 'ongsys_integration' or request.resolver_match.url_name == 'ecosistema_m2m' %}show{% endif %} mt-1" id="dropdown-integracoes">
-                <ul class="nav flex-column sidebar-sub-menu gap-1">
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:integracoes' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'integracoes' %}active-item{% endif %}">
-                            <i class="ri-dashboard-line menu-icon fs-16 text-primary"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Painel de Conectores</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:ongsys_integration' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'ongsys_integration' %}active-item{% endif %}">
-                            <i class="ri-building-4-line menu-icon fs-16 text-danger"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">API OngSys (v2)</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:integracoes' %}#google-workspace" class="nav-link py-1.5 px-2">
-                            <i class="ri-google-line menu-icon fs-16 text-info"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">API Google Workspace</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:integracoes' %}#whatsapp-evolution" class="nav-link py-1.5 px-2">
-                            <i class="ri-whatsapp-line menu-icon fs-16 text-success"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">API WhatsApp Evolution</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard:ecosistema_m2m' %}" class="nav-link py-1.5 px-2 {% if request.resolver_match.url_name == 'ecosistema_m2m' %}active-item{% endif %}">
-                            <i class="ri-base-station-line menu-icon fs-16 text-warning"></i>
-                            <span class="menu-text" style="font-size: 0.84em;">Ecossistema (M2M)</span>
-                        </a>
-                    </li>
-                </ul>
             </div>
-        </div>
+        </li>
 
-
-    </div>
-
-    <!-- Sidebar Bottom User Info (Footer Compacto Dark) -->
-    <div class="sidebar-user-box px-3 py-3 d-flex align-items-center justify-content-between" style="border-top: 1px solid #1e293b; background: #0b1324; height: 64px; flex-shrink: 0;">
-        <div class="d-flex align-items-center">
-            <img src="{% static 'img/placeholders/avatars/avatar2.jpg' %}" alt="avatar" class="rounded-circle" style="width: 34px; height: 34px; border: 1px solid #334155; margin-right: 12px; flex-shrink: 0;">
-            <div class="d-flex flex-column sidebar-user-details">
-                <span class="fw-bold" style="font-size: 0.84em; color: #f8fafc;">{{ user.username|default:"dxcdc" }}</span>
-                <small class="text-muted" style="font-size: 0.7em; color: #94a3b8 !important;">Operações CDC</small>
-            </div>
-        </div>
-        <a href="{% url 'dashboard:logout' %}" class="btn btn-sm p-1.5 border-0 sidebar-user-details" title="Sair" style="color: #f87171; background: #450a0a; border-radius: 6px; line-height: 1;">
-            <i class="ri-logout-box-r-line fs-14"></i>
-        </a>
-    </div>
+    </ul>
 </aside>
 
-<!-- SCRIPT VANILLA JS NATIVO PARA EXPANSÃO / MENU SANDUÍCHE E ROTAÇÃO DE SETAS -->
+<!-- JAVASCRIPT: CONTROLE INTELIGENTE DE HOVER E CLIQUE NOS GRUPOS -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const toggleButtons = document.querySelectorAll('.sidebar-toggle-btn');
-        const sidebar = document.querySelector('.sidebar-lahomes');
-        const menuSanduicheBtn = document.getElementById('button-toggle-sidebar');
-        
-        // 1. Restaurar Estado Fixado no LocalStorage
-        const isPinned = localStorage.getItem('cdc_sidebar_pinned') === 'true';
-        if (isPinned && sidebar) {
-            sidebar.classList.add('sidebar-expanded');
-            document.body.classList.add('sidebar-pinned');
-        }
+        const sidebar = document.getElementById('cdc-main-sidebar');
+        const toggleBtn = document.getElementById('button-toggle-sidebar');
+        let hoverTimer = null;
+        let isLockedOpen = false;
 
-        // 2. Evento do Botão Sanduíche no Cabeçalho
-        if (menuSanduicheBtn && sidebar) {
-            menuSanduicheBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const currentlyExpanded = sidebar.classList.contains('sidebar-expanded');
-                if (currentlyExpanded) {
-                    sidebar.classList.remove('sidebar-expanded');
-                    document.body.classList.remove('sidebar-pinned');
-                    localStorage.setItem('cdc_sidebar_pinned', 'false');
-                } else {
-                    sidebar.classList.add('sidebar-expanded');
-                    document.body.classList.add('sidebar-pinned');
-                    localStorage.setItem('cdc_sidebar_pinned', 'true');
+        if (sidebar) {
+            // 1. Ao passar o mouse: expande após 1.5s
+            sidebar.addEventListener('mouseenter', function() {
+                if (!isLockedOpen) {
+                    hoverTimer = setTimeout(function() {
+                        sidebar.classList.add('cdc-expanded');
+                    }, 1500);
+                }
+            });
+
+            // 2. Ao tirar o mouse: só fecha se o usuário NÃO tiver clicado para fixar um submenu
+            sidebar.addEventListener('mouseleave', function() {
+                if (hoverTimer) {
+                    clearTimeout(hoverTimer);
+                    hoverTimer = null;
+                }
+                if (!isLockedOpen) {
+                    sidebar.classList.remove('cdc-expanded');
+                }
+            });
+
+            // 3. Ao Clicar em QUALQUER grupo com submenu: Expande na hora e trava aberta
+            const groupLinks = sidebar.querySelectorAll('[data-cdc-submenu]');
+            groupLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    sidebar.classList.add('cdc-expanded');
+                    isLockedOpen = true;
+
+                    const target = document.getElementById(link.dataset.cdcSubmenu);
+                    if (!target) return;
+
+                    const willOpen = !target.classList.contains('show');
+                    sidebar.querySelectorAll('.cdc-submenu.show').forEach(submenu => {
+                        if (submenu !== target) submenu.classList.remove('show');
+                    });
+                    groupLinks.forEach(groupLink => {
+                        if (groupLink !== link) groupLink.setAttribute('aria-expanded', 'false');
+                    });
+                    target.classList.toggle('show', willOpen);
+                    link.setAttribute('aria-expanded', String(willOpen));
+                });
+            });
+
+            // 4. Ao clicar fora da sidebar, destrava e recolhe
+            document.addEventListener('click', function(e) {
+                if (isLockedOpen && !sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
+                    isLockedOpen = false;
+                    sidebar.classList.remove('cdc-expanded');
                 }
             });
         }
 
-        // 3. Rotação dos Ícones Chevron do Sub-Menu
-        toggleButtons.forEach(btn => {
-            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-            const chevron = btn.querySelector('.dropdown-chevron');
-            if (chevron) {
-                chevron.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
-            }
-
-            btn.addEventListener('click', function(e) {
+        // 5. Botão Sanduíche na Topbar
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                const targetSelector = this.getAttribute('data-bs-target');
-                if (!targetSelector) return;
-
-                const targetEl = document.querySelector(targetSelector);
-                if (!targetEl) return;
-
-                const isShown = targetEl.classList.contains('show');
-                const chevronIcon = this.querySelector('.dropdown-chevron');
-
-                if (isShown) {
-                    targetEl.classList.remove('show');
-                    this.setAttribute('aria-expanded', 'false');
-                    if (chevronIcon) chevronIcon.style.transform = 'rotate(0deg)';
-                } else {
-                    targetEl.classList.add('show');
-                    this.setAttribute('aria-expanded', 'true');
-                    if (chevronIcon) chevronIcon.style.transform = 'rotate(180deg)';
-                }
+                isLockedOpen = !sidebar.classList.contains('cdc-expanded');
+                sidebar.classList.toggle('cdc-expanded');
             });
-        });
+        }
     });
 </script>

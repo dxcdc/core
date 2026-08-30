@@ -11,46 +11,78 @@
         <!-- Favicon -->
         <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
 
-        <!-- Lahomes Stylesheets & Icons -->
-        <link rel="stylesheet" href="{% static 'lahomes/css/app.min.css' %}">
-        <link rel="stylesheet" href="{% static 'lahomes/css/icons.min.css' %}">
+        <!-- Larkon Vendor & Icons CSS -->
+        <link rel="stylesheet" href="{% static 'larkon/css/vendor.min.css' %}">
+        <link rel="stylesheet" href="{% static 'larkon/css/icons.min.css' %}">
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+        
+        <!-- Larkon Core App CSS -->
+        <link rel="stylesheet" href="{% static 'larkon/css/app.min.css' %}">
         
         <!-- Base Custom Overrides -->
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+        <!-- Larkon Theme Config JS -->
+        <script src="{% static 'larkon/js/config.js' %}"></script>
+
         {% block extra_css %}{% endblock %}
 
         <style>
+            :root {
+                --bs-body-bg: #f8fafc;
+                --bs-body-color: #334155;
+            }
             body {
                 background-color: #f8fafc;
                 color: #334155;
-                font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                margin: 0;
+                padding: 0;
+                overflow-x: hidden;
             }
             .wrapper {
                 display: flex;
                 min-height: 100vh;
-                overflow: hidden;
+                position: relative;
             }
-            .page-content, .main-content, .content-page, header.navbar {
-                flex-grow: 1;
-                background-color: #f8fafc;
-                padding-bottom: 40px;
-                min-width: 0;
+
+            /* TOPBAR FIXA NO TOPO COM ZERO DESPERDÍCIO */
+            .topbar {
+                position: fixed !important;
+                top: 0 !important;
+                left: 64px !important;
+                right: 0 !important;
+                height: 50px !important;
+                min-height: 50px !important;
+                max-height: 50px !important;
+                z-index: 1030 !important;
+                background: #ffffff !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;
                 margin-left: 0 !important;
+                width: calc(100% - 64px) !important;
+                padding: 0 16px !important;
             }
-            .card-lahomes {
-                background: #ffffff;
-                border: 1px solid #e2e8f0;
+
+            /* CONTEÚDO PERFEITAMENTE COLADO NA SIDEBAR (64px) */
+            .page-content {
+                margin-left: 64px !important;
+                margin-top: 50px !important;
+                padding: 16px 14px 40px 14px !important;
+                width: calc(100% - 64px) !important;
+                min-width: 0 !important;
+                background-color: #f8fafc !important;
+                flex-grow: 1 !important;
+            }
+
+            .card-lahomes, .card {
                 border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
             }
             ul, ol, li {
                 list-style: none !important;
                 list-style-type: none !important;
-            }
-            .sidebar-lahomes ul {
-                padding-left: 0 !important;
-                margin-left: 0 !important;
             }
             .nav-tabs-segmented {
                 border-bottom: none !important;
@@ -64,7 +96,7 @@
                 border-radius: 8px !important;
                 padding: 10px 18px;
                 font-weight: 600;
-                background: #f8fafc;
+                background: #ffffff;
                 transition: all 0.2s ease;
             }
             .nav-tabs-segmented .nav-link.active {
@@ -80,33 +112,29 @@
         </style>
     </head>
     <body>
-        <!-- Main Wrapper -->
+        <!-- Main Larkon Wrapper -->
         <div class="wrapper">
             
-            <!-- Sidebar (Lahomes Style) -->
+            <!-- Sidebar (Larkon Navigation - 58px Fixa) -->
             {% include 'partials/_sidebar.html' %}
 
-            <!-- Page Content Wrapper -->
-            <div class="page-content">
-                
-                <!-- Topbar Header (Lahomes Style) -->
-                {% include 'partials/_header.html' %}
+            <!-- Topbar Header (Larkon Style - Fixa no Topo) -->
+            {% include 'partials/_header.html' %}
 
-                <!-- Container Fluid for Pages -->
-                <div class="container-fluid px-4 py-3">
+            <!-- Page Content (Colado na Sidebar) -->
+            <div class="page-content">
+                <div class="container-fluid p-0">
                     {% block content %}{% endblock %}
                 </div>
-
-                <!-- No Footer as requested for authenticated area -->
             </div>
             <!-- END Page Content -->
 
         </div>
         <!-- END Wrapper -->
 
-        <!-- Vendor Scripts -->
-        <script src="{% static 'js/vendor/jquery.min.js' %}"></script>
-        <script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+        <!-- Larkon Vendor & App JS -->
+        <script src="{% static 'larkon/js/vendor.js' %}"></script>
+        <script src="{% static 'larkon/js/app.js' %}"></script>
         {% block extra_js %}{% endblock %}
     </body>
 </html>

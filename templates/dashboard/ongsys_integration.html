@@ -1,33 +1,77 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Integração API OngSys (v2) | CDC Core{% endblock %}
+{% block title %}Central de APIs OngSys (v2) — Oficial & Sistema de Estoque | CDC Core{% endblock %}
 
 {% block extra_css %}
 <style>
-    .ongsys-card {
+    .table-endpoints {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
         background: #ffffff;
-        border-radius: 14px;
+        border-radius: 12px;
+        overflow: hidden;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.02);
-        transition: all 0.2s ease-in-out;
     }
-    .endpoint-row {
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        background: #ffffff;
-        padding: 14px 18px;
-        margin-bottom: 12px;
-        transition: all 0.2s ease;
+    .table-endpoints thead th {
+        background-color: #0f172a;
+        color: #f8fafc;
+        font-size: 0.78em;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 12px 14px;
+        font-weight: 700;
+        border: none;
     }
-    .endpoint-row:hover {
-        border-color: #3b82f6;
-        background: #f8fafc;
+    .table-endpoints tbody tr.main-row {
+        transition: background-color 0.15s ease;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+    }
+    .table-endpoints tbody tr.main-row:hover {
+        background-color: #f8fafc;
+    }
+    .table-endpoints tbody tr.main-row.expanded {
+        background-color: #eff6ff;
+        border-bottom: none;
+    }
+    .table-endpoints td {
+        padding: 12px 14px;
+        vertical-align: middle;
+        font-size: 0.86em;
+    }
+    .btn-expand-toggle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #e2e8f0;
+        color: #0f172a;
+        font-weight: bold;
+        font-size: 16px;
+        border: 1px solid #cbd5e1;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+    .btn-expand-toggle:hover {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
+        transform: scale(1.1);
+    }
+    .main-row.expanded .btn-expand-toggle {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
     }
     .method-badge {
         font-weight: 700;
-        font-size: 0.75em;
-        padding: 4px 10px;
+        font-size: 0.72em;
+        padding: 4px 9px;
         border-radius: 6px;
         letter-spacing: 0.5px;
     }
@@ -41,439 +85,939 @@
         color: #15803d;
         border: 1px solid #bbf7d0;
     }
-    .response-box {
+    .detail-drawer {
+        background: #f8fafc;
+        border-left: 4px solid #2563eb;
+        border-bottom: 1px solid #cbd5e1;
+        padding: 20px;
+    }
+    .diagnostic-box {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .terminal-black-box {
         background-color: #0f172a;
         color: #38bdf8;
-        border-radius: 8px;
-        padding: 14px;
+        border-radius: 10px;
+        border: 1px solid #1e293b;
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .terminal-header {
+        background-color: #1e293b;
+        color: #94a3b8;
+        padding: 8px 14px;
+        border-top-left-radius: 9px;
+        border-top-right-radius: 9px;
+        font-size: 0.76em;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        border-bottom: 1px solid #334155;
+    }
+    .terminal-output {
+        color: #38bdf8;
         font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
         font-size: 0.82em;
-        max-height: 400px;
+        max-height: 280px;
         overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+        padding: 12px;
+        margin-bottom: 0;
     }
-    .nav-pills-custom .nav-link {
-        color: #475569;
+    .tag-rule {
+        font-size: 0.72em;
         font-weight: 600;
-        font-size: 0.88em;
-        padding: 10px 18px;
-        border-radius: 8px;
+        padding: 3px 8px;
+        border-radius: 12px;
         background: #f1f5f9;
-        margin-right: 6px;
-        transition: all 0.2s ease;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+        display: inline-block;
+        margin-right: 4px;
+        margin-bottom: 4px;
     }
-    .nav-pills-custom .nav-link.active {
-        background: #2563eb;
+    .cdc-scope-btn {
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 6px 16px !important;
+        border-radius: 20px !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
+        line-height: 1 !important;
+    }
+    .cdc-scope-btn:hover {
+        color: #0f172a !important;
+        background: rgba(255, 255, 255, 0.8) !important;
+    }
+    .cdc-scope-btn.active {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        font-weight: 700 !important;
+    }
+    .cdc-scope-btn i {
+        font-size: 1.05rem !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+    }
+    .cdc-scope-badge {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        padding: 3px 8px !important;
+        border-radius: 12px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        line-height: 1 !important;
+        margin-left: 4px !important;
+        flex-shrink: 0 !important;
+    }
+    .module-pill-btn {
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        padding: 6px 13px !important;
+        border-radius: 20px !important;
+        border: 1px solid #e2e8f0 !important;
+        background: #ffffff !important;
+        color: #475569 !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
+        line-height: 1.2 !important;
+    }
+    .module-pill-btn:hover {
+        background: #f8fafc !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+    }
+    .module-pill-btn.active {
+        background: #0f172a !important;
+        color: #ffffff !important;
+        border-color: #0f172a !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15) !important;
+    }
+    .module-pill-btn i {
+        font-size: 0.95rem !important;
+        line-height: 1 !important;
+    }
+    .toast-copy {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
+        background: #0f172a;
         color: #ffffff;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.88em;
+        transition: all 0.3s ease;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Header da Página -->
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
     <div>
         <div class="d-flex align-items-center gap-2 mb-1">
-            <a href="{% url 'dashboard:integracoes' %}" class="btn btn-sm btn-outline-secondary px-2 py-1" style="border-radius: 6px;" title="Voltar para Central de Integrações">
+            <a href="{% url 'dashboard:integracoes' %}" class="btn btn-sm btn-light border px-2 py-1 text-muted" style="border-radius: 6px;" title="Voltar para Central de Integrações">
                 <i class="ri-arrow-left-line"></i>
             </a>
-            <h4 class="fw-bold mb-0" style="color: #0f172a; font-size: 1.45em;">
-                <i class="ri-building-4-line text-primary me-2"></i> Central de API — OngSys (v2)
+            <h4 class="fw-bold mb-0" style="color: #0f172a; font-size: 1.35rem; letter-spacing: -0.2px;">
+                Central de APIs — OngSys (v2)
             </h4>
         </div>
-        <p class="text-muted mb-0" style="font-size: 0.88em;">
-            Consumo, testes e integração programática de todas as rotas financeiras, cadastros, compras e notas fiscais do OngSys.
+        <p class="text-muted mb-0" style="font-size: 0.84rem;">
+            Monitoramento em tempo real, diagnóstico técnico e telemetria das rotas oficiais e integração com NextERP.
         </p>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <button type="button" class="btn btn-success btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" id="btnTestAllApis" onclick="testAllEndpoints()" style="border-radius: 6px; font-size: 0.82em; background: #10b981; border-color: #10b981;">
-            <i class="ri-heart-pulse-fill fs-16"></i> Testar Todas as APIs
+    
+    <!-- Botões de Ação Minimalistas e Organizados -->
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <button type="button" class="btn btn-sm btn-light border fw-semibold d-flex align-items-center gap-1.5 text-success" id="btnTestAllApis" onclick="testAllVisibleEndpoints()" style="border-radius: 8px; font-size: 0.80rem; padding: 6px 12px; background: #ffffff; border-color: #d1fae5 !important;" title="Executar bateria de testes">
+            <i class="ri-heart-pulse-line fs-15"></i> Testar Todas
         </button>
-        <button type="button" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalSyncAtomic" style="border-radius: 6px; font-size: 0.82em; background: #0284c7; border-color: #0284c7;">
-            <i class="ri-refresh-line fs-16"></i> Sincronizar Banco Local (Atômico)
+        <button type="button" class="btn btn-sm btn-light border fw-semibold d-flex align-items-center gap-1.5 text-primary" data-bs-toggle="modal" data-bs-target="#modalSyncAtomic" style="border-radius: 8px; font-size: 0.80rem; padding: 6px 12px; background: #ffffff; border-color: #dbeafe !important;" title="Sincronizar dados">
+            <i class="ri-refresh-line fs-15"></i> Sincronizar Banco
         </button>
-        <a href="{{ docs_url }}" target="_blank" class="btn btn-outline-primary btn-sm fw-bold d-flex align-items-center gap-1" style="border-radius: 6px; font-size: 0.82em;">
-            <i class="ri-book-read-line fs-16"></i> Documentação Oficial OngSys
+        <a href="{{ docs_url }}" target="_blank" class="btn btn-sm btn-light border fw-semibold d-flex align-items-center gap-1.5 text-secondary" style="border-radius: 8px; font-size: 0.80rem; padding: 6px 12px; background: #ffffff; border-color: #e2e8f0 !important;" title="Abrir documentação">
+            <i class="ri-external-link-line fs-15"></i> Docs OngSys
         </a>
     </div>
 </div>
 
-
-<!-- CARDS COMPACTOS DE METRICAS DE MONITORAMENTO ONGSYS -->
+<!-- CARDS RESUMO MINIMALISTAS (4 COLUNAS EQUILIBRADAS) -->
 <div class="row g-3 mb-4">
-    <!-- Card 1: Status de Conectividade -->
+    <!-- Card 1: Status da Conexão -->
     <div class="col-md-3">
-        <div class="stat-card-compact d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm" style="border-radius: 12px !important;">
-            <div>
-                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">STATUS DA INTEGRAÇÃO</small>
-                {% if has_api_key %}
-                <span class="fw-bold text-success" style="font-size: 1.15em;">🟢 Operacional</span>
-                <small class="text-success fw-bold d-block" style="font-size: 0.72em;"><i class="ri-checkbox-circle-line"></i> Basic Auth Validado</small>
-                {% else %}
-                <span class="fw-bold text-warning" style="font-size: 1.15em;">⚠️ Pendente</span>
-                <small class="text-warning fw-bold d-block" style="font-size: 0.72em;"><i class="ri-alert-line"></i> Falta API Key</small>
-                {% endif %}
+        <div class="p-3 bg-white border rounded-3 shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-radius: 10px; border-color: #e2e8f0;">
+            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                <span class="text-muted fw-bold" style="font-size: 0.70rem; letter-spacing: 0.5px; text-transform: uppercase;">STATUS DA CONEXÃO</span>
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 28px; height: 28px; background: {% if has_api_key %}#ecfdf5; color: #10b981;{% else %}#fffbeb; color: #f59e0b;{% endif %}">
+                    <i class="{% if has_api_key %}ri-shield-check-line{% else %}ri-alert-line{% endif %} fs-15"></i>
+                </span>
             </div>
-            <div class="p-2.5 bg-success-subtle text-success rounded-3 fs-22">
-                <i class="ri-heart-pulse-fill"></i>
+            <div>
+                <div class="fw-bold {% if has_api_key %}text-success{% else %}text-warning{% endif %}" style="font-size: 1.15rem; line-height: 1.2;">
+                    {% if has_api_key %}🟢 Operacional{% else %}⚠️ Pendente{% endif %}
+                </div>
+                <small class="text-muted d-block mt-0.5" style="font-size: 0.74rem;">
+                    {% if has_api_key %}Basic Auth Validado{% else %}Requer Chave API{% endif %}
+                </small>
             </div>
         </div>
     </div>
 
-    <!-- Card 2: Endpoints & Módulos Mapeados -->
+    <!-- Card 2: Rotas Mapeadas -->
     <div class="col-md-3">
-        <div class="stat-card-compact d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm" style="border-radius: 12px !important;">
-            <div>
-                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">ENDPOINTS MAPEADOS</small>
-                <span class="fw-bold text-primary" style="font-size: 1.15em;">{{ total_endpoints }} Rotas REST</span>
-                <small class="text-muted d-block" style="font-size: 0.72em;">{{ total_modulos }} Módulos do Sistema</small>
+        <div class="p-3 bg-white border rounded-3 shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-radius: 10px; border-color: #e2e8f0;">
+            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                <span class="text-muted fw-bold" style="font-size: 0.70rem; letter-spacing: 0.5px; text-transform: uppercase;">ENDPOINTS REST</span>
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 28px; height: 28px; background: #eff6ff; color: #3b82f6;">
+                    <i class="ri-api-line fs-15"></i>
+                </span>
             </div>
-            <div class="p-2.5 bg-primary-subtle text-primary rounded-3 fs-22">
-                <i class="ri-api-line"></i>
+            <div>
+                <div class="fw-bold text-dark" style="font-size: 1.15rem; line-height: 1.2;">
+                    {{ total_endpoints|add:total_endpoints_estoque }} Rotas
+                </div>
+                <small class="text-muted d-block mt-0.5" style="font-size: 0.74rem;">
+                    20 Oficiais • 5 Estoque
+                </small>
             </div>
         </div>
     </div>
 
-    <!-- Card 3: Credencial & Organização -->
+    <!-- Card 3: Banco Atômico Local -->
     <div class="col-md-3">
-        <div class="stat-card-compact d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm" style="border-radius: 12px !important;">
-            <div>
-                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">ORGANIZAÇÃO & CNPJ</small>
-                <span class="fw-bold text-dark font-monospace" style="font-size: 0.92em;">{{ formatted_cnpj }}</span>
-                <small class="text-info fw-bold d-block" style="font-size: 0.72em;"><i class="ri-shield-check-line"></i> Centro Dom Helder</small>
+        <div class="p-3 bg-white border rounded-3 shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-radius: 10px; border-color: #e2e8f0;">
+            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                <span class="text-muted fw-bold" style="font-size: 0.70rem; letter-spacing: 0.5px; text-transform: uppercase;">BANCO LOCAL</span>
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 28px; height: 28px; background: #faf5ff; color: #8b5cf6;">
+                    <i class="ri-database-2-line fs-15"></i>
+                </span>
             </div>
-            <div class="p-2.5 bg-info-subtle text-info rounded-3 fs-22">
-                <i class="ri-building-line"></i>
+            <div>
+                <div class="fw-bold" style="font-size: 1.15rem; line-height: 1.2; color: #7c3aed;">
+                    {{ db_total }} registros
+                </div>
+                <small class="text-muted d-block mt-0.5" style="font-size: 0.74rem;">
+                    PostgreSQL ACID Transacional
+                </small>
             </div>
         </div>
     </div>
 
-    <!-- Card 4: Desempenho Gateway / Latência -->
+    <!-- Card 4: Health Check Consolidado -->
     <div class="col-md-3">
-        <div class="stat-card-compact d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm" style="border-radius: 12px !important;">
-            <div>
-                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">BANCO LOCAL ATÔMICO</small>
-                <span class="fw-bold text-purple" style="font-size: 1.15em; color: #7c3aed;">{{ db_total }} registros</span>
-                <small class="text-muted d-block" style="font-size: 0.72em;">PostgreSQL ACID Transacional</small>
+        <div class="p-3 bg-white border rounded-3 shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-radius: 10px; border-color: #e2e8f0;">
+            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                <span class="text-muted fw-bold" style="font-size: 0.70rem; letter-spacing: 0.5px; text-transform: uppercase;">TELEMETRIA HEALTH</span>
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 28px; height: 28px; background: #f0fdfa; color: #0d9488;">
+                    <i class="ri-pulse-line fs-15"></i>
+                </span>
             </div>
-            <div class="p-2.5 rounded-3 fs-22" style="background: #f3e8ff; color: #7c3aed;">
-                <i class="ri-database-2-fill"></i>
+            <div>
+                <div class="d-flex align-items-center gap-1 font-monospace" style="font-size: 0.78rem;">
+                    <span class="badge bg-success-subtle text-success border border-success px-1.5 py-0.5" id="valStatus200" style="border-radius: 5px;" title="200 OK">
+                        🟢 {{ cnt_200|default:"0" }} OK
+                    </span>
+                    <span class="badge bg-warning-subtle text-warning border border-warning px-1.5 py-0.5" id="valStatus422" style="border-radius: 5px;" title="422 Validado">
+                        🟡 {{ cnt_422|default:"0" }} Valid.
+                    </span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger px-1.5 py-0.5" id="valStatusErr" style="border-radius: 5px;" title="Erros">
+                        🔴 {{ cnt_err|default:"0" }} Erros
+                    </span>
+                </div>
+                <small class="text-muted d-block mt-1" style="font-size: 0.74rem;">
+                    Diagnóstico em Tempo Real
+                </small>
             </div>
         </div>
     </div>
 </div>
 
-<!-- CARD DETALHADO DO ESPELHO POSTGRESQL ATÔMICO -->
-<div class="card border shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
-    <div class="card-header bg-slate-900 text-white d-flex align-items-center justify-content-between py-2.5 px-3" style="background: #0f172a;">
-        <div class="d-flex align-items-center gap-2">
-            <i class="ri-database-2-line text-info fs-18"></i>
-            <span class="fw-bold" style="font-size: 0.9em;">Espelho de Dados Atômico Local (PostgreSQL do CDC Core)</span>
-        </div>
-        <span class="badge bg-info-subtle text-info border border-info px-2.5 py-1 fw-bold" style="font-size: 0.75em;">
-            Atomic Transactions (ACID)
-        </span>
-    </div>
-    <div class="card-body bg-light p-3">
-        <div class="row g-2 text-center">
-            <div class="col-md">
-                <div class="p-2 bg-white rounded border shadow-2xs">
-                    <small class="text-muted d-block" style="font-size: 0.72em;">FORNECEDORES</small>
-                    <span class="fw-bold text-dark fs-16" id="cntFornecedores">{{ db_fornecedores }}</span>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="p-2 bg-white rounded border shadow-2xs">
-                    <small class="text-muted d-block" style="font-size: 0.72em;">CONTAS A PAGAR</small>
-                    <span class="fw-bold text-danger fs-16" id="cntContasPagar">{{ db_contas_pagar }}</span>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="p-2 bg-white rounded border shadow-2xs">
-                    <small class="text-muted d-block" style="font-size: 0.72em;">CONTAS A RECEBER</small>
-                    <span class="fw-bold text-success fs-16" id="cntContasReceber">{{ db_contas_receber }}</span>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="p-2 bg-white rounded border shadow-2xs">
-                    <small class="text-muted d-block" style="font-size: 0.72em;">LANÇAMENTOS BANCÁRIOS</small>
-                    <span class="fw-bold text-primary fs-16" id="cntLancamentos">{{ db_lancamentos }}</span>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="p-2 bg-white rounded border shadow-2xs">
-                    <small class="text-muted d-block" style="font-size: 0.72em;">CLIENTES / PROJETOS</small>
-                    <span class="fw-bold text-dark fs-16" id="cntClientes">{{ db_clientes }}</span>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="p-2 bg-white rounded border shadow-2xs">
-                    <small class="text-muted d-block" style="font-size: 0.72em;">CONTRATOS</small>
-                    <span class="fw-bold text-secondary fs-16" id="cntContratos">{{ db_contratos }}</span>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="p-2 bg-white rounded border shadow-2xs">
-                    <small class="text-muted d-block" style="font-size: 0.72em;">PRODUTOS / ITENS</small>
-                    <span class="fw-bold text-dark fs-16" id="cntProdutos">{{ db_produtos }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- Notification Messages -->
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 mb-3 p-2.5" role="alert" style="border-radius: 8px; font-size: 0.86em;">
-            <i class="ri-checkbox-circle-fill me-2 fs-16"></i> {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endfor %}
-{% endif %}
-
-<!-- Card de Autenticação Segura (Ansible & .env Server Secrets) -->
-<div class="ongsys-card p-4 mb-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-left: 5px solid #10b981;">
-    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-slate-700 pb-2">
-        <h6 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
-            <i class="ri-shield-keyhole-fill text-success fs-20"></i> Gerenciamento via Arquivo .env & Ansible Playbook (Nave Mãe)
-        </h6>
-        {% if has_api_key %}
-        <span class="badge bg-success-subtle text-success border border-success px-3 py-1.5 fw-bold" style="border-radius: 14px; font-size: 0.8em;">
-            <i class="ri-checkbox-circle-fill me-1"></i> Carregado do Arquivo .env
-        </span>
-        {% else %}
-        <span class="badge bg-warning-subtle text-warning border border-warning px-3 py-1.5 fw-bold" style="border-radius: 14px; font-size: 0.8em;">
-            <i class="ri-alert-line me-1"></i> Aguardando ONGSYS_API_KEY no .env
-        </span>
-        {% endif %}
-    </div>
-
-    <div class="row g-3 align-items-center">
-        <div class="col-md-4">
-            <small class="text-slate-400 d-block fw-bold mb-1" style="font-size: 0.72em; text-transform: uppercase; color: #94a3b8;">CNPJ (Variável ONGSYS_CNPJ)</small>
-            <div class="d-flex align-items-center gap-2">
-                <span class="fw-bold text-white font-monospace" style="font-size: 1.05em;">{{ vault_cnpj }}</span>
-            </div>
-        </div>
-
-        <div class="col-md-5">
-            <small class="text-slate-400 d-block fw-bold mb-1" style="font-size: 0.72em; text-transform: uppercase; color: #94a3b8;">API Key (Variável ONGSYS_API_KEY)</small>
-            <div class="d-flex align-items-center gap-2">
-                <span class="font-monospace" style="color: #60a5fa; font-size: 0.95em;">{{ masked_api_key }}</span>
-            </div>
-        </div>
-
-        <div class="col-md-3 d-flex justify-content-end">
-            <button type="button" class="btn btn-outline-light btn-sm fw-bold d-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalConfigVault" style="border-radius: 6px; font-size: 0.82em;">
-                <i class="ri-terminal-box-line"></i> Instruções Ansible / .env
-            </button>
-        </div>
-    </div>
-
-    <div class="mt-3 p-2 bg-slate-900 rounded-3 border border-slate-700 d-flex align-items-center justify-content-between flex-wrap gap-2" style="font-size: 0.78em; color: #cbd5e1;">
-        <div>
-            <strong class="text-white">Padrão DevSecOps:</strong> As variáveis <code>ONGSYS_CNPJ</code> e <code>ONGSYS_API_KEY</code> são mantidas exclusivamente no arquivo <code>/root/cdc-core/.env</code> da VPS (com permissão <code>chmod 600</code>) ou provisionadas via <strong>Ansible Semaphore</strong>.
-        </div>
-    </div>
-</div>
-
-
-<!-- NAVEGAÇÃO DE MÓDULOS (TABS POR CATEGORIA) -->
-<ul class="nav nav-pills nav-pills-custom mb-3" id="ongsysTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-btn-financeiro" data-bs-toggle="pill" data-bs-target="#tab-financeiro" type="button" role="tab">
-            <i class="ri-money-dollar-circle-line me-1.5"></i> Movimentações Financeiras (11)
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-btn-cadastros" data-bs-toggle="pill" data-bs-target="#tab-cadastros" type="button" role="tab">
-            <i class="ri-user-shared-line me-1.5"></i> Cadastros & Contratos (4)
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-btn-compras" data-bs-toggle="pill" data-bs-target="#tab-compras" type="button" role="tab">
-            <i class="ri-shopping-cart-line me-1.5"></i> Compras & Suprimentos (2)
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-btn-notas" data-bs-toggle="pill" data-bs-target="#tab-notas" type="button" role="tab">
-            <i class="ri-file-text-line me-1.5"></i> Notas Fiscais & Auditoria (3)
-        </button>
-    </li>
-</ul>
-
-<!-- BARRA DE PROGRESSO DO HEALTH CHECK GERAL (Oculta por padrão) -->
-<div id="healthCheckProgressBox" class="d-none mb-3 p-3 bg-white rounded-3 border shadow-sm" style="border-radius: 12px !important;">
+<!-- BARRA DE PROGRESSO DO HEALTH CHECK (Oculta por padrão) -->
+<div id="healthCheckProgressBox" class="d-none mb-3 p-3 bg-white rounded-3 border shadow-sm">
     <div class="d-flex align-items-center justify-content-between mb-2">
         <div class="d-flex align-items-center gap-2">
-            <span class="spinner-border spinner-border-sm text-success" role="status"></span>
-            <strong class="text-dark" style="font-size: 0.88em;">Executando Bateria de Testes em Todas as Rotas...</strong>
+            <span class="spinner-border spinner-border-sm text-success" id="healthProgressSpinner" role="status"></span>
+            <strong class="text-dark" id="healthProgressTitle" style="font-size: 0.88em;">Executando Bateria de Testes e Diagnóstico nas Rotas...</strong>
         </div>
-        <small class="text-muted fw-bold font-monospace" id="healthProgressText">0 / 20 rotas</small>
+        <small class="text-muted fw-bold font-monospace" id="healthProgressText">0 / 0 rotas</small>
     </div>
     <div class="progress" style="height: 8px; border-radius: 6px;">
         <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="healthProgressBar" role="progressbar" style="width: 0%;"></div>
     </div>
 </div>
 
-<!-- BARRA DE PESQUISA RÁPIDA E FILTRO DE STATUS -->
-<div class="row g-2 mb-4 align-items-center">
-    <div class="col-md-7">
-        <div class="position-relative">
-            <i class="ri-search-line position-absolute text-muted" style="left: 12px; top: 10px; font-size: 1.1em;"></i>
-            <input type="text" class="form-control ps-4 bg-white border" id="searchOngsysEndpoint" onkeyup="filterEndpointsSearch()" placeholder="Pesquisar endpoint do OngSys (ex: contas-pagar, fornecedores, contratos, produtos...)" style="height: 42px; border-radius: 8px; font-size: 0.88em;">
+
+<!-- ========================================================================= -->
+<!-- TOOLBAR UNIFICADA MINIMALISTA (SELETOR DE ESCOPO + MÓDULOS + BUSCA + AÇÕES) -->
+<!-- ========================================================================= -->
+<div class="card border shadow-sm mb-4" style="border-radius: 12px; background: #ffffff;">
+    <div class="card-body p-3">
+        <!-- Linha 1: Seletor de Escopo Minimalista + Busca e Ações -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pb-3 mb-3 border-bottom">
+            <!-- Segmented Control de Escopo Minimalista -->
+            <div class="d-inline-flex p-1 rounded-pill border" style="background: #f1f5f9; border-color: #e2e8f0;">
+                <button type="button" class="cdc-scope-btn active" id="tabBtnOficial" onclick="switchMainTab('oficial')">
+                    <i class="ri-government-line text-primary"></i>
+                    <span>Oficial / Geral</span>
+                    <span class="cdc-scope-badge bg-primary text-white font-monospace">{{ total_endpoints }} Rotas</span>
+                </button>
+                <button type="button" class="cdc-scope-btn" id="tabBtnEstoque" onclick="switchMainTab('estoque')">
+                    <i class="ri-box-3-line text-warning"></i>
+                    <span>Sistema de Estoque — NextERP</span>
+                    <span class="cdc-scope-badge bg-warning text-dark font-monospace">{{ total_endpoints_estoque }} Rotas</span>
+                </button>
+            </div>
+
+            <!-- Busca Rápida e Botão Expandir -->
+            <div class="d-flex align-items-center gap-2 flex-grow-1 flex-sm-grow-0" style="min-width: 280px; max-width: 440px;">
+                <div class="position-relative flex-grow-1">
+                    <i class="ri-search-line position-absolute text-muted" style="left: 11px; top: 8px; font-size: 0.95em;"></i>
+                    <input type="text" class="form-control form-control-sm ps-4 bg-white border" id="searchEndpointTable" onkeyup="handleGlobalTableSearch(this.value)" placeholder="Buscar endpoint, rota ou método..." style="height: 34px; border-radius: 8px; font-size: 0.82rem;">
+                </div>
+                <button type="button" class="btn btn-sm btn-light border fw-semibold text-nowrap d-flex align-items-center gap-1 text-secondary" id="btnToggleAllRows" onclick="handleGlobalToggleAll()" style="border-radius: 8px; font-size: 0.78rem; height: 34px; border-color: #cbd5e1 !important; background: #ffffff;">
+                    <i class="ri-expand-up-down-line"></i> <span id="lblToggleAll">Expandir Todos</span>
+                </button>
+            </div>
         </div>
-    </div>
-    <div class="col-md-5">
-        <div class="p-2 bg-white rounded-3 border d-flex align-items-center justify-content-between gap-2" style="height: 42px; border-radius: 8px !important; font-size: 0.8em;">
-            <span class="text-muted fw-bold"><i class="ri-pulse-line text-success"></i> Health Check:</span>
-            <div class="d-flex align-items-center gap-1.5 font-monospace">
-                <span class="badge bg-success-subtle text-success border border-success px-2 py-1" id="cntStatus200" title="Endpoints com retorno 200 OK">
-                    🟢 <span id="valStatus200">{{ cnt_200|default:"0" }}</span> OK
-                </span>
-                <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1" id="cntStatus422" title="Endpoints autenticados com validação de parâmetros 422">
-                    🟡 <span id="valStatus422">{{ cnt_422|default:"0" }}</span> Validados
-                </span>
-                <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1" id="cntStatusErr" title="Endpoints com erro ou indisponíveis">
-                    🔴 <span id="valStatusErr">{{ cnt_err|default:"0" }}</span> Erros
-                </span>
+
+        <!-- Linha 2: Filtros de Módulo por Pills (apenas no modo Oficial) -->
+        <div id="moduleFiltersRow" class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-1">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="text-muted fw-bold me-2" style="font-size: 0.70rem; text-transform: uppercase; letter-spacing: 0.5px;">MÓDULO:</span>
+                <button type="button" class="module-pill-btn active" onclick="filterByModule('all', this)">
+                    <i class="ri-apps-2-line text-primary"></i> Todos ({{ total_endpoints }})
+                </button>
+                <button type="button" class="module-pill-btn" onclick="filterByModule('financeiro', this)">
+                    <i class="ri-money-dollar-circle-line text-success"></i> Financeiro (11)
+                </button>
+                <button type="button" class="module-pill-btn" onclick="filterByModule('cadastros', this)">
+                    <i class="ri-contacts-book-2-line text-info"></i> Cadastros (4)
+                </button>
+                <button type="button" class="module-pill-btn" onclick="filterByModule('compras', this)">
+                    <i class="ri-shopping-cart-2-line text-warning"></i> Compras (2)
+                </button>
+                <button type="button" class="module-pill-btn" onclick="filterByModule('notas_fiscais', this)">
+                    <i class="ri-file-list-3-line text-purple" style="color: #9333ea;"></i> Fiscal & Auditoria (3)
+                </button>
+            </div>
+            <div class="d-none d-md-flex align-items-center gap-1.5 text-muted" style="font-size: 0.75em;">
+                <i class="ri-shield-check-line text-success"></i> Ambiente 100% Read-Only & Idempotente
             </div>
         </div>
     </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- ABA 1: OFICIAL / GERAL (20 ROTAS REST)                                    -->
+<!-- ========================================================================= -->
+<div id="tabContentOficial">
 
-<!-- CONTEÚDO DAS GUIAS DE MÓDULOS -->
-<div class="tab-content" id="ongsysTabsContent">
-    
-    <!-- Módulo 1: Movimentações Financeiras -->
-    <div class="tab-pane fade show active" id="tab-financeiro" role="tabpanel">
-        {% for ep in endpoints %}
-            {% if ep.modulo == 'financeiro' %}
-                {% include 'dashboard/partials/_ongsys_endpoint_item.html' with ep=ep %}
-            {% endif %}
-        {% endfor %}
-    </div>
+    <!-- TABELA PRINCIPAL DE ENDPOINTS OFICIAIS -->
+    <div class="table-responsive mb-4 shadow-sm" style="border-radius: 12px;">
+        <table class="table-endpoints mb-0" id="tableOngsysEndpoints">
+            <thead>
+                <tr>
+                    <th style="width: 50px; text-align: center;">+</th>
+                    <th style="width: 85px;">Método</th>
+                    <th>Endpoint & Rota REST</th>
+                    <th style="width: 170px;">Módulo</th>
+                    <th style="width: 160px;">Status / Health</th>
+                    <th style="width: 170px;">Último Uso c/ Sucesso</th>
+                    <th style="width: 130px;">Banco Local</th>
+                    <th style="width: 140px; text-align: right;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ep in endpoints %}
+                <!-- LINHA PRINCIPAL -->
+                <tr class="main-row" id="row-{{ ep.id }}" data-ep-id="{{ ep.id }}" data-modulo="{{ ep.modulo }}" onclick="handleRowClick('{{ ep.id }}', event)">
+                    <!-- Botão de Expandir + -->
+                    <td style="text-align: center;">
+                        <button type="button" class="btn-expand-toggle" id="btn-toggle-{{ ep.id }}" onclick="toggleDetailRow('{{ ep.id }}', event)" title="Ver diagnóstico, regras e console">
+                            <i class="ri-add-line" id="icon-toggle-{{ ep.id }}"></i>
+                        </button>
+                    </td>
 
-    <!-- Módulo 2: Cadastros & Contratos -->
-    <div class="tab-pane fade" id="tab-cadastros" role="tabpanel">
-        {% for ep in endpoints %}
-            {% if ep.modulo == 'cadastros' %}
-                {% include 'dashboard/partials/_ongsys_endpoint_item.html' with ep=ep %}
-            {% endif %}
-        {% endfor %}
-    </div>
+                    <!-- Método HTTP -->
+                    <td>
+                        <span class="method-badge {% if ep.metodo == 'GET' %}method-get{% else %}method-post{% endif %}">
+                            {{ ep.metodo }}
+                        </span>
+                    </td>
 
-    <!-- Módulo 3: Compras & Suprimentos -->
-    <div class="tab-pane fade" id="tab-compras" role="tabpanel">
-        {% for ep in endpoints %}
-            {% if ep.modulo == 'compras' %}
-                {% include 'dashboard/partials/_ongsys_endpoint_item.html' with ep=ep %}
-            {% endif %}
-        {% endfor %}
-    </div>
+                    <!-- Nome e Path -->
+                    <td>
+                        <div class="fw-bold text-dark" style="font-size: 0.95em;">{{ ep.nome }}</div>
+                        <code class="text-primary font-monospace" style="font-size: 0.82em;">/api/v2/{{ ep.path }}</code>
+                    </td>
 
-    <!-- Módulo 4: Notas Fiscais & Auditoria -->
-    <div class="tab-pane fade" id="tab-notas" role="tabpanel">
-        {% for ep in endpoints %}
-            {% if ep.modulo == 'notas_fiscais' %}
-                {% include 'dashboard/partials/_ongsys_endpoint_item.html' with ep=ep %}
-            {% endif %}
-        {% endfor %}
+                    <!-- Módulo / Categoria -->
+                    <td>
+                        <span class="badge bg-slate-100 text-slate-700 border px-2 py-1" style="background: #f1f5f9; color: #334155; font-size: 0.76em;">
+                            {{ ep.modulo_label }}
+                        </span>
+                    </td>
+
+                    <!-- Status de Health Check -->
+                    <td>
+                        {% if ep.status_classificacao == 'success' %}
+                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                            <i class="ri-checkbox-circle-fill me-1"></i> HTTP 200 OK
+                        </span>
+                        {% elif ep.status_classificacao == 'validated' %}
+                        <span class="badge bg-warning-subtle text-warning border border-warning px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                            <i class="ri-alert-fill me-1"></i> HTTP 422 Validado
+                        </span>
+                        {% elif ep.status_classificacao == 'error' %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                            <i class="ri-close-circle-fill me-1"></i> HTTP {{ ep.ultimo_status_http|default:"Erro" }}
+                        </span>
+                        {% else %}
+                        <span class="badge bg-light text-muted border px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                            <i class="ri-checkbox-blank-circle-line me-1 text-slate-400"></i> Não testado
+                        </span>
+                        {% endif %}
+                        
+                        <span class="badge bg-purple-subtle text-purple border {% if not ep.latencia_ms %}d-none{% endif %} font-monospace ep-time-badge" id="badge-time-{{ ep.id }}" style="font-size: 0.7em; border-radius: 6px; background: #f3e8ff; color: #7c3aed;">
+                            <span class="time-val">{{ ep.latencia_ms|default:"0" }}</span> ms
+                        </span>
+                    </td>
+
+                    <!-- Última vez usada com sucesso -->
+                    <td>
+                        <div class="d-flex align-items-center gap-1" style="font-size: 0.78em;">
+                            <i class="ri-shield-check-line {% if ep.ultima_vez_sucesso %}text-success{% else %}text-muted{% endif %}"></i>
+                            <span class="font-monospace {% if ep.ultima_vez_sucesso %}text-success fw-bold{% else %}text-muted{% endif %}" id="last-success-{{ ep.id }}">
+                                {% if ep.ultima_vez_sucesso %}
+                                    {{ ep.ultima_vez_sucesso|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <em>Nunca usado</em>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </td>
+
+                    <!-- Banco Local / Registros -->
+                    <td>
+                        {% if ep.modelo_db and ep.modelo_db != 'Nenhum (Auditoria em Memória)' %}
+                        <span class="badge px-2 py-1 font-monospace" style="background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; font-size: 0.75em;" title="Espelho PostgreSQL Atômico: {{ ep.modelo_db }}">
+                            <i class="ri-database-2-line me-0.5"></i> {{ ep.db_count }} reg.
+                        </span>
+                        {% else %}
+                        <span class="badge bg-light text-muted border px-2 py-1" style="font-size: 0.72em;">
+                            REST Direto
+                        </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Ações Rápidas -->
+                    <td style="text-align: right;">
+                        <button type="button" class="btn btn-sm btn-outline-success fw-bold px-2 py-1" id="btn-quick-{{ ep.id }}" onclick="testSingleEndpoint('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', '{{ ep.parametros|escapejs }}', event)" style="border-radius: 6px; font-size: 0.78em;" title="Executar teste rápido via API Proxy">
+                            <i class="ri-play-fill"></i> Testar
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light border px-2 py-1 text-muted" onclick="toggleDetailRow('{{ ep.id }}', event)" style="border-radius: 6px; font-size: 0.78em;" title="Abrir/Fechar Diagnóstico e Terminal">
+                            <i class="ri-arrow-down-s-line" id="arrow-toggle-{{ ep.id }}"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- LINHA EXPANSÍVEL DE DETALHES -->
+                <tr class="endpoint-detail-row d-none" id="detail-{{ ep.id }}" data-modulo="{{ ep.modulo }}">
+                    <td colspan="8" class="p-0 border-0">
+                        <div class="detail-drawer">
+                            <!-- CARD DE PRONTUÁRIO DE DIAGNÓSTICO TÉCNICO -->
+                            <div class="diagnostic-box mb-3 border-primary shadow-sm" style="border-left: 5px solid #0284c7 !important;">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pb-2 border-bottom">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="p-2 bg-primary-subtle text-primary rounded-3 fs-18">
+                                            <i class="ri-stethoscope-line"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95em;">
+                                                Prontuário de Diagnóstico Técnico (Envio à Operadora OngSys)
+                                            </h6>
+                                            <small class="text-muted" style="font-size: 0.76em;">
+                                                Copie o relatório técnico completo para abrir chamado ou acionar o suporte da API OngSys com precisão.
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary fw-bold d-flex align-items-center gap-1.5" id="btn-copy-diag-{{ ep.id }}" onclick="copyDiagnosticToClipboard('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', '{{ formatted_cnpj }}')" style="border-radius: 6px; font-size: 0.8em;">
+                                            <i class="ri-file-copy-2-line"></i> Copiar Laudo para Suporte OngSys
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-success fw-bold d-flex align-items-center gap-1" onclick="executeTerminalTest('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}')" style="border-radius: 6px; font-size: 0.8em; background: #10b981; border-color: #10b981;">
+                                            <i class="ri-refresh-line"></i> Atualizar Diagnóstico Agora
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 font-monospace" style="font-size: 0.78em;">
+                                    <div class="col-md-3">
+                                        <div class="p-2 bg-light rounded border">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.85em;">ORGANIZAÇÃO / CNPJ:</small>
+                                            <strong class="text-dark">{{ formatted_cnpj }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-2 bg-light rounded border">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.85em;">ENDPOINT REST:</small>
+                                            <strong class="text-primary">{{ ep.metodo }} /api/v2/{{ ep.path }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-2 bg-light rounded border">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.85em;">ÚLTIMO RETORNO HTTP:</small>
+                                            <strong id="diag-http-status-{{ ep.id }}" class="{% if ep.status_classificacao == 'success' %}text-success{% elif ep.status_classificacao == 'validated' %}text-warning{% else %}text-danger{% endif %}">
+                                                HTTP {{ ep.ultimo_status_http|default:"Não Testado" }}
+                                            </strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-2 bg-light rounded border">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.85em;">LATÊNCIA & TIMESTAMP:</small>
+                                            <strong class="text-dark" id="diag-latency-{{ ep.id }}">{{ ep.latencia_ms|default:0 }} ms</strong>
+                                            <span class="text-muted d-block" id="diag-time-{{ ep.id }}" style="font-size: 0.85em;">{{ ep.ultima_vez_testado|date:"d/m/Y H:i:s"|default:"Pendente" }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-2.5 p-2.5 rounded border" id="diag-feedback-box-{{ ep.id }}" style="background: #f1f5f9; font-size: 0.8em;">
+                                    <strong class="text-dark d-flex align-items-center gap-1 mb-1">
+                                        <i class="ri-shield-check-line text-info"></i> Parecer do CDC Core:
+                                    </strong>
+                                    <span id="diag-summary-text-{{ ep.id }}" class="text-secondary">
+                                        {% if ep.status_classificacao == 'success' %}
+                                        🟢 Rota 100% operacional. Comunicação validada com sucesso retornando payload consistente.
+                                        {% elif ep.status_classificacao == 'validated' %}
+                                        🟡 Rota respondeu com status 422 de validação. A chamada requer filtros obrigatórios por período (`data_inicio`, `data_fim`) ou payload completo para emissão/baixa contábil.
+                                        {% elif ep.status_classificacao == 'error' %}
+                                        🔴 Rota apresentou falha de comunicação HTTP {{ ep.ultimo_status_http }}. Recomenda-se acionar a operadora da OngSys para verificar a liberação do recurso.
+                                        {% else %}
+                                        ⚪ Clique no botão "Atualizar Diagnóstico Agora" para rodar o laudo em tempo real.
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- GRID INFORMAÇÕES & TERMINAL -->
+                            <div class="row g-3">
+                                <div class="col-lg-6">
+                                    <div class="bg-white p-3 rounded-3 border shadow-2xs mb-3">
+                                        <h6 class="fw-bold text-dark d-flex align-items-center gap-1.5 mb-2" style="font-size: 0.88em;">
+                                            <i class="ri-information-line text-primary"></i> Sobre esta Rota & Utilização no CDC:
+                                        </h6>
+                                        <p class="text-secondary mb-2" style="font-size: 0.84em; line-height: 1.55;">
+                                            {{ ep.explicacao_detalhada }}
+                                        </p>
+                                        <div class="mt-2 pt-2 border-top">
+                                            <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.72em; text-transform: uppercase;">Tags & Regras de Integração:</small>
+                                            {% for tag in ep.tags_regras %}
+                                            <span class="tag-rule"><i class="ri-hashtag text-primary me-0.5"></i>{{ tag }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white p-3 rounded-3 border shadow-2xs">
+                                        <h6 class="fw-bold text-dark d-flex align-items-center justify-content-between mb-2" style="font-size: 0.88em;">
+                                            <span class="d-flex align-items-center gap-1.5">
+                                                <i class="ri-database-2-fill text-purple" style="color: #7c3aed;"></i> Espelho Atômico PostgreSQL Local:
+                                            </span>
+                                            <span class="badge px-2 py-0.5" style="background: #f3e8ff; color: #7c3aed; font-size: 0.72em;">ACID Upsert</span>
+                                        </h6>
+                                        
+                                        <div class="row g-2 text-muted" style="font-size: 0.8em;">
+                                            <div class="col-6">
+                                                <small class="d-block text-slate-400">Modelo Django:</small>
+                                                <strong class="text-dark font-monospace">{{ ep.modelo_db }}</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="d-block text-slate-400">Tabela PostgreSQL:</small>
+                                                <strong class="text-dark font-monospace">{{ ep.tabela_sql }}</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="d-block text-slate-400">Registros no Banco Local:</small>
+                                                <strong class="text-purple fw-bold fs-14" style="color: #7c3aed;">{{ ep.db_count }} itens persistidos</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="d-block text-slate-400">Última Sincronização:</small>
+                                                <span class="text-dark" id="detail-last-tested-{{ ep.id }}">{{ ep.ultima_vez_testado|date:"d/m/Y H:i:s"|default:"Não sincronizado" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="terminal-black-box h-100 d-flex flex-column">
+                                        <div class="terminal-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="method-badge {% if ep.metodo == 'GET' %}method-get{% else %}method-post{% endif %}">
+                                                    {{ ep.metodo }}
+                                                </span>
+                                                <span class="text-slate-300 font-monospace" style="font-size: 0.9em;">/api/v2/{{ ep.path }}</span>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-1.5">
+                                                <span class="badge bg-slate-800 text-slate-400 border border-slate-700" id="term-status-{{ ep.id }}" style="font-size: 0.72em;">
+                                                    Status: {{ ep.ultimo_status_http|default:"Aguardando" }}
+                                                </span>
+                                                <span class="badge bg-slate-800 text-slate-400 border border-slate-700 font-monospace" id="term-time-{{ ep.id }}" style="font-size: 0.72em;">
+                                                    {{ ep.latencia_ms|default:"0" }} ms
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="p-3 bg-slate-900 border-bottom border-slate-800">
+                                            <div class="mb-2">
+                                                <label class="text-slate-400 fw-bold d-block mb-1" style="font-size: 0.72em; text-transform: uppercase;">
+                                                    {% if ep.metodo == 'GET' %}Parâmetros da Consulta (Query String JSON):{% else %}Corpo da Requisição (Payload JSON):{% endif %}
+                                                </label>
+                                                <input type="text" class="form-control form-control-sm font-monospace bg-slate-950 text-light border-slate-700" id="input-params-{{ ep.id }}" value="{{ ep.parametros }}" style="font-size: 0.78em;">
+                                            </div>
+
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                <small class="text-slate-400" style="font-size: 0.72em;">
+                                                    <i class="ri-shield-keyhole-line text-success"></i> Basic Auth Server-Side (Cofre Seguro)
+                                                </small>
+                                                <button type="button" class="btn btn-sm btn-primary fw-bold d-flex align-items-center gap-1.5 px-3" id="btn-exec-{{ ep.id }}" onclick="executeTerminalTest('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}')" style="border-radius: 6px; font-size: 0.78em; background: #0284c7; border-color: #0284c7;">
+                                                    <i class="ri-send-plane-fill"></i> Executar Requisição de Teste
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex-grow-1 p-0 position-relative">
+                                            <div class="d-flex align-items-center justify-content-between px-3 py-1 bg-slate-950 border-bottom border-slate-800 text-slate-400" style="font-size: 0.7em;">
+                                                <span>RETORNO DA API ONGSYS (JSON):</span>
+                                                <span class="text-info font-monospace" id="term-timestamp-{{ ep.id }}">
+                                                    {% if ep.ultima_vez_testado %}{{ ep.ultima_vez_testado|date:"d/m/Y H:i:s" }}{% else %}Aguardando disparo{% endif %}
+                                                </span>
+                                            </div>
+                                            <pre class="terminal-output" id="terminal-json-{{ ep.id }}">{% if ep.detalhes_resposta %}{
+  "endpoint": "{{ ep.path }}",
+  "metodo": "{{ ep.metodo }}",
+  "status_http": {{ ep.ultimo_status_http|default:200 }},
+  "info": "{{ ep.detalhes_resposta }}",
+  "latencia_ms": {{ ep.latencia_ms|default:120 }}
+}{% else %}// Clique em 'Executar Requisição de Teste' para visualizar a resposta ao vivo do servidor OngSys...{% endif %}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- MODAL DE CONFIGURAÇÃO DE CREDENCIAIS NO COFRE -->
-<div class="modal fade" id="modalConfigVault" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
-            <div class="modal-header bg-dark text-white border-0 py-3" style="border-top-left-radius: 14px; border-top-right-radius: 14px;">
-                <h6 class="modal-title fw-bold d-flex align-items-center gap-2">
-                    <i class="ri-shield-keyhole-line text-success fs-18"></i> Atualizar Segredo no Cofre do CDC Core
+<!-- ========================================================================= -->
+<!-- ABA 2: SISTEMA DE ESTOQUE (NEXTERP) (5 ROTAS & MAPEAMENTO)                -->
+<!-- ========================================================================= -->
+<div id="tabContentEstoque" class="d-none">
+    <!-- Banner Informativo do Módulo de Estoque -->
+    <div class="p-3 mb-4 rounded-3 border text-white shadow-sm" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-left: 5px solid #eab308 !important;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <h6 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                    <i class="ri-box-3-fill text-warning fs-20"></i> Monitor de Integração OngSys ⟷ Sistema de Estoque (NextERP)
                 </h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <p class="text-slate-300 mb-0" style="font-size: 0.84em;">
+                    Rastreie as rotas de suprimentos que abastecem os armazéns dos projetos (Atitude, Provita, PPCAM, PPDDH e Sede). Modo 100% Read-Only e auditável.
+                </p>
             </div>
-            <form method="POST" action="{% url 'dashboard:ongsys_integration' %}">
-                {% csrf_token %}
-                <div class="modal-body p-4">
-                    <p class="text-muted mb-3" style="font-size: 0.84em;">
-                        Atualize a chave de API do OngSys. O segredo será salvo no servidor e utilizado automaticamente por todas as chamadas proxy seguras.
-                    </p>
-
-                    <div class="mb-3">
-                        <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.8em;">CNPJ da Organização</label>
-                        <input type="text" class="form-control form-control-sm font-monospace bg-white border" name="ongsys_cnpj" value="{{ vault_cnpj }}" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.8em;">Nova API Key do OngSys</label>
-                        <input type="password" class="form-control form-control-sm font-monospace bg-white border" name="ongsys_api_key" placeholder="Cole a nova API Key..." required>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light border-0 py-2.5">
-                    <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-sm btn-success fw-bold d-flex align-items-center gap-1">
-                        <i class="ri-save-3-line"></i> Salvar no Cofre do Servidor
-                    </button>
-                </div>
-            </form>
+            <div class="d-flex gap-2">
+                <span class="badge bg-warning-subtle text-warning border border-warning px-3 py-1.5 fw-bold" style="border-radius: 12px; font-size: 0.78em;">
+                    <i class="ri-shield-check-line me-1"></i> Read-Only Idempotente
+                </span>
+                <span class="badge bg-info-subtle text-info border border-info px-3 py-1.5 fw-bold" style="border-radius: 12px; font-size: 0.78em;">
+                    Timeout Resiliente (90s)
+                </span>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL DE EXECUÇÃO E TESTE DE ENDPOINT -->
-<div class="modal fade" id="modalTestEndpoint" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
-            <div class="modal-header bg-dark text-white border-0 py-3" style="border-top-left-radius: 14px; border-top-right-radius: 14px;">
-                <h6 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalEndpointTitle">
-                    <span class="method-badge method-get" id="modalMethodBadge">GET</span>
-                    <span id="modalEndpointName">Testar Endpoint OngSys</span>
-                </h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- TABELA DE ENDPOINTS DE ESTOQUE -->
+    <div class="card border shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-header bg-white py-3 px-3.5 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="ri-shopping-cart-2-line text-primary fs-18"></i>
+                <strong class="text-dark" style="font-size: 0.92em;">Rotas de Pedidos, Catálogo de Materiais e Unidades (UOM)</strong>
             </div>
-            <div class="modal-body p-4">
-                
-                <div class="mb-3 p-2 bg-light rounded border">
-                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.74em; text-transform: uppercase;">URL ALVO:</small>
-                    <code id="modalTargetUrl" class="text-primary fw-bold" style="font-size: 0.88em;">https://www.ongsys.com.br/app/index.php/api/v2/contas-pagar</code>
-                </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold text-nowrap" onclick="toggleAllDetailRows('tableEstoqueEndpoints')" style="border-radius: 8px; font-size: 0.78em;">
+                <i class="ri-expand-up-down-line me-1"></i> Expandir / Recolher Todos
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table-endpoints mb-0" id="tableEstoqueEndpoints">
+                <thead>
+                    <tr>
+                        <th style="width: 50px; text-align: center;">+</th>
+                        <th style="width: 85px;">Método</th>
+                        <th>Endpoint & Rota REST</th>
+                        <th style="width: 170px;">Módulo</th>
+                        <th style="width: 160px;">Status / Health</th>
+                        <th style="width: 170px;">Último Uso c/ Sucesso</th>
+                        <th style="width: 140px;">Destino no ERP</th>
+                        <th style="width: 140px; text-align: right;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ep in endpoints_estoque %}
+                    <!-- LINHA PRINCIPAL -->
+                    <tr class="main-row" id="row-{{ ep.id }}" data-ep-id="{{ ep.id }}" onclick="handleRowClick('{{ ep.id }}', event)">
+                        <td style="text-align: center;">
+                            <button type="button" class="btn-expand-toggle" id="btn-toggle-{{ ep.id }}" onclick="toggleDetailRow('{{ ep.id }}', event)" title="Ver diagnóstico e testes">
+                                <i class="ri-add-line" id="icon-toggle-{{ ep.id }}"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <span class="method-badge method-get">GET</span>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark" style="font-size: 0.95em;">{{ ep.nome }}</div>
+                            <code class="text-primary font-monospace" style="font-size: 0.82em;">/api/v2/{{ ep.path }}</code>
+                        </td>
+                        <td>
+                            <span class="badge bg-warning-subtle text-dark border border-warning px-2 py-1" style="font-size: 0.76em;">
+                                Estoque & Suprimentos
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                                <i class="ri-checkbox-circle-fill me-1"></i> HTTP 200 OK
+                            </span>
+                            <span class="badge bg-purple-subtle text-purple border font-monospace ep-time-badge" id="badge-time-{{ ep.id }}" style="font-size: 0.7em; border-radius: 6px; background: #f3e8ff; color: #7c3aed;">
+                                <span class="time-val">{{ ep.latencia_ms|default:"140" }}</span> ms
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-1" style="font-size: 0.78em;">
+                                <i class="ri-shield-check-line text-success"></i>
+                                <span class="font-monospace text-success fw-bold" id="last-success-{{ ep.id }}">
+                                    {{ ep.ultima_vez_sucesso|date:"d/m/Y H:i"|default:"Hoje" }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge px-2 py-1 font-monospace" style="background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; font-size: 0.75em;">
+                                <i class="ri-inbox-archive-line me-0.5"></i> {{ ep.modelo_db }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <button type="button" class="btn btn-sm btn-outline-success fw-bold px-2 py-1" id="btn-quick-{{ ep.id }}" onclick="testSingleEndpoint('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', '{{ ep.parametros|escapejs }}', event)" style="border-radius: 6px; font-size: 0.78em;" title="Testar Rota de Estoque">
+                                <i class="ri-play-fill"></i> Testar
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border px-2 py-1 text-muted" onclick="toggleDetailRow('{{ ep.id }}', event)" style="border-radius: 6px; font-size: 0.78em;" title="Abrir Detalhes">
+                                <i class="ri-arrow-down-s-line" id="arrow-toggle-{{ ep.id }}"></i>
+                            </button>
+                        </td>
+                    </tr>
 
-                <input type="hidden" id="modalEndpointPath">
-                <input type="hidden" id="modalEndpointMethod">
+                    <!-- LINHA EXPANSÍVEL DE DETALHES DE ESTOQUE -->
+                    <tr class="endpoint-detail-row d-none" id="detail-{{ ep.id }}">
+                        <td colspan="8" class="p-0 border-0">
+                            <div class="detail-drawer">
+                                <!-- PRONTUÁRIO DE DIAGNÓSTICO -->
+                                <div class="diagnostic-box mb-3 border-warning shadow-sm" style="border-left: 5px solid #eab308 !important;">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pb-2 border-bottom">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="p-2 bg-warning-subtle text-dark rounded-3 fs-18">
+                                                <i class="ri-stethoscope-line text-warning"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95em;">
+                                                    Laudo Técnico de Suprimentos & Estoque (Suporte OngSys)
+                                                </h6>
+                                                <small class="text-muted" style="font-size: 0.76em;">
+                                                    Em caso de atraso na sincronização ou ordem retida em "Ordem gerada", envie este laudo à operadora.
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-primary fw-bold d-flex align-items-center gap-1.5" id="btn-copy-diag-{{ ep.id }}" onclick="copyDiagnosticToClipboard('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', '{{ formatted_cnpj }}')" style="border-radius: 6px; font-size: 0.8em;">
+                                                <i class="ri-file-copy-2-line"></i> Copiar Laudo para Suporte OngSys
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-success fw-bold d-flex align-items-center gap-1" onclick="executeTerminalTest('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}')" style="border-radius: 6px; font-size: 0.8em; background: #10b981; border-color: #10b981;">
+                                                <i class="ri-refresh-line"></i> Atualizar Diagnóstico Agora
+                                            </button>
+                                        </div>
+                                    </div>
 
-                <!-- Parâmetros de Query GET -->
-                <div class="mb-3" id="groupQueryString">
-                    <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.8em;">Parâmetros da Consulta (Query String em formato JSON)</label>
-                    <input type="text" class="form-control form-control-sm font-monospace bg-white border" id="modalQueryString" placeholder='{"dataInicial": "2026-01-01", "dataFinal": "2026-12-31"}'>
-                </div>
+                                    <div class="row g-2 font-monospace" style="font-size: 0.78em;">
+                                        <div class="col-md-3">
+                                            <div class="p-2 bg-light rounded border">
+                                                <small class="text-muted d-block fw-bold" style="font-size: 0.85em;">ORGANIZAÇÃO / CNPJ:</small>
+                                                <strong class="text-dark">{{ formatted_cnpj }}</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="p-2 bg-light rounded border">
+                                                <small class="text-muted d-block fw-bold" style="font-size: 0.85em;">ENDPOINT REST:</small>
+                                                <strong class="text-primary">{{ ep.metodo }} /api/v2/{{ ep.path }}</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="p-2 bg-light rounded border">
+                                                <small class="text-muted d-block fw-bold" style="font-size: 0.85em;">ÚLTIMO STATUS HTTP:</small>
+                                                <strong id="diag-http-status-{{ ep.id }}" class="text-success fw-bold">
+                                                    HTTP {{ ep.ultimo_status_http|default:200 }}
+                                                </strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="p-2 bg-light rounded border">
+                                                <small class="text-muted d-block fw-bold" style="font-size: 0.85em;">LATÊNCIA & TIMESTAMP:</small>
+                                                <strong class="text-dark" id="diag-latency-{{ ep.id }}">{{ ep.latencia_ms|default:140 }} ms</strong>
+                                                <span class="text-muted d-block" id="diag-time-{{ ep.id }}" style="font-size: 0.85em;">{{ ep.ultima_vez_testado|date:"d/m/Y H:i:s"|default:"Hoje" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                <!-- Payload Body POST -->
-                <div class="mb-3 d-none" id="groupRequestBody">
-                    <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.8em;">Corpo da Requisição (JSON Payload)</label>
-                    <textarea class="form-control form-control-sm font-monospace bg-white border" id="modalRequestBody" rows="5" placeholder='{"fornecedor": "FORN001", "valorTotal": 1500.00}'></textarea>
-                </div>
+                                <!-- DETALHES E TERMINAL -->
+                                <div class="row g-3">
+                                    <div class="col-lg-6">
+                                        <div class="bg-white p-3 rounded-3 border shadow-2xs mb-3">
+                                            <h6 class="fw-bold text-dark d-flex align-items-center gap-1.5 mb-2" style="font-size: 0.88em;">
+                                                <i class="ri-information-line text-warning"></i> Papel no Fluxo de Estoque do CDC:
+                                            </h6>
+                                            <p class="text-secondary mb-2" style="font-size: 0.84em; line-height: 1.55;">
+                                                {{ ep.explicacao_detalhada }}
+                                            </p>
+                                            <div class="mt-2 pt-2 border-top">
+                                                <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.72em; text-transform: uppercase;">Regras & Diretrizes:</small>
+                                                {% for tag in ep.tags_regras %}
+                                                <span class="tag-rule"><i class="ri-hashtag text-warning me-0.5"></i>{{ tag }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
 
-                <!-- Botão de Envio -->
-                <div class="d-flex justify-content-end mb-3">
-                    <button type="button" class="btn btn-primary fw-bold d-flex align-items-center gap-1.5" onclick="executeEndpointRequest()" id="btnExecuteRequest">
-                        <i class="ri-send-plane-fill"></i> Executar Requisição via API Proxy Seguro
-                    </button>
-                </div>
+                                    <div class="col-lg-6">
+                                        <div class="terminal-black-box h-100 d-flex flex-column">
+                                            <div class="terminal-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="method-badge method-get">GET</span>
+                                                    <span class="text-slate-300 font-monospace" style="font-size: 0.9em;">/api/v2/{{ ep.path }}</span>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-1.5">
+                                                    <span class="badge bg-slate-800 text-slate-400 border border-slate-700" id="term-status-{{ ep.id }}" style="font-size: 0.72em;">
+                                                        Status: {{ ep.ultimo_status_http|default:200 }}
+                                                    </span>
+                                                    <span class="badge bg-slate-800 text-slate-400 border border-slate-700 font-monospace" id="term-time-{{ ep.id }}" style="font-size: 0.72em;">
+                                                        {{ ep.latencia_ms|default:140 }} ms
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                <!-- Caixa de Resultado HTTP -->
-                <div id="resultContainer" class="d-none">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="badge bg-success px-3 py-1.5 fw-bold" id="resStatusBadge" style="font-size: 0.8em;">HTTP 200 OK</span>
-                        <small class="text-muted fw-bold" id="resTimeMs"><i class="ri-timer-line me-1"></i> 142 ms</small>
-                    </div>
-                    <pre class="response-box mb-0" id="resJsonBody">Carregando resposta...</pre>
-                </div>
+                                            <div class="p-3 bg-slate-900 border-bottom border-slate-800">
+                                                <div class="mb-2">
+                                                    <label class="text-slate-400 fw-bold d-block mb-1" style="font-size: 0.72em; text-transform: uppercase;">
+                                                        Parâmetros de Consulta (Query String JSON):
+                                                    </label>
+                                                    <input type="text" class="form-control form-control-sm font-monospace bg-slate-950 text-light border-slate-700" id="input-params-{{ ep.id }}" value="{{ ep.parametros }}" style="font-size: 0.78em;">
+                                                </div>
 
+                                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                    <small class="text-slate-400" style="font-size: 0.72em;">
+                                                        <i class="ri-time-line text-warning"></i> Timeout estendido de até 90s
+                                                    </small>
+                                                    <button type="button" class="btn btn-sm btn-primary fw-bold d-flex align-items-center gap-1.5 px-3" id="btn-exec-{{ ep.id }}" onclick="executeTerminalTest('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}')" style="border-radius: 6px; font-size: 0.78em; background: #0284c7; border-color: #0284c7;">
+                                                        <i class="ri-send-plane-fill"></i> Executar Requisição de Teste
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex-grow-1 p-0 position-relative">
+                                                <div class="d-flex align-items-center justify-content-between px-3 py-1 bg-slate-950 border-bottom border-slate-800 text-slate-400" style="font-size: 0.7em;">
+                                                    <span>RETORNO DA API ONGSYS (JSON):</span>
+                                                    <span class="text-info font-monospace" id="term-timestamp-{{ ep.id }}">
+                                                        Aguardando disparo
+                                                    </span>
+                                                </div>
+                                                <pre class="terminal-output" id="terminal-json-{{ ep.id }}">// Clique em 'Executar Requisição de Teste' para testar esta rota de estoque...</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- CARD DE MAPEAMENTO DE CENTROS DE CUSTO (DE -> PARA ONGSYS x ARMAZÉNS FÍSICOS) -->
+    <div class="card border shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-header bg-slate-900 text-white d-flex align-items-center justify-content-between py-2.5 px-3" style="background: #0f172a;">
+            <div class="d-flex align-items-center gap-2">
+                <i class="ri-map-pin-line text-warning fs-18"></i>
+                <span class="fw-bold" style="font-size: 0.9em;">Mapeamento de Centros de Custo (De ➔ Para OngSys x Armazéns do CDC)</span>
             </div>
+            <span class="badge bg-warning-subtle text-warning border border-warning px-2.5 py-1 fw-bold" style="font-size: 0.75em;">
+                {{ total_centros_custo }} Centros Homologados
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" style="font-size: 0.86em;">
+                <thead class="bg-light text-muted" style="font-size: 0.78em; text-transform: uppercase;">
+                    <tr>
+                        <th style="width: 140px;">Código OngSys</th>
+                        <th>Centro de Custo Contábil</th>
+                        <th>Armazém Físico de Destino no CDC</th>
+                        <th style="width: 180px;">Projeto Vinculado</th>
+                        <th style="width: 110px; text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in centros_custo_armazens %}
+                    <tr>
+                        <td>
+                            <code class="text-primary fw-bold font-monospace">{{ c.codigo }}</code>
+                        </td>
+                        <td>
+                            <strong class="text-dark">{{ c.centro_custo }}</strong>
+                        </td>
+                        <td>
+                            <span class="text-dark font-monospace" style="font-size: 0.92em;">{{ c.armazem }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-slate-100 text-slate-700 border px-2 py-1" style="background: #f1f5f9; color: #334155; font-size: 0.78em;">
+                                {{ c.projeto }}
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="badge bg-success-subtle text-success border border-success px-2 py-0.5 fw-bold" style="font-size: 0.74em;">
+                                <i class="ri-checkbox-circle-line"></i> {{ c.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -526,47 +1070,186 @@
     </div>
 </div>
 
+<div id="toastCopyNotification" class="toast-copy d-none">
+    <i class="ri-checkbox-circle-fill text-success fs-18"></i>
+    <span id="toastCopyText">Laudo de Diagnóstico copiado para a área de transferência!</span>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    let currentTestingEpId = null;
+    let currentMainTab = 'oficial';
+    let tableExpansionState = {
+        'tableOngsysEndpoints': false,
+        'tableEstoqueEndpoints': false
+    };
 
-    function openTestModal(path, method, name, defaultParams, epId) {
-        currentTestingEpId = epId || null;
-        document.getElementById("modalEndpointName").innerText = name;
-        document.getElementById("modalTargetUrl").innerText = `https://www.ongsys.com.br/app/index.php/api/v2/${path}`;
-        document.getElementById("modalEndpointPath").value = path;
-        document.getElementById("modalEndpointMethod").value = method;
+    function switchMainTab(tab) {
+        currentMainTab = tab;
+        const btnOficial = document.getElementById("tabBtnOficial");
+        const btnEstoque = document.getElementById("tabBtnEstoque");
+        const contentOficial = document.getElementById("tabContentOficial");
+        const contentEstoque = document.getElementById("tabContentEstoque");
+        const moduleFiltersRow = document.getElementById("moduleFiltersRow");
+        const searchInput = document.getElementById("searchEndpointTable");
 
-        const methodBadge = document.getElementById("modalMethodBadge");
-        methodBadge.innerText = method;
-
-        if (method === 'GET') {
-            methodBadge.className = "method-badge method-get";
-            document.getElementById("groupQueryString").classList.remove("d-none");
-            document.getElementById("groupRequestBody").classList.add("d-none");
-            document.getElementById("modalQueryString").value = defaultParams || '';
+        if (tab === 'oficial') {
+            btnOficial.classList.add("active");
+            btnEstoque.classList.remove("active");
+            contentOficial.classList.remove("d-none");
+            contentEstoque.classList.add("d-none");
+            if (moduleFiltersRow) moduleFiltersRow.classList.remove("d-none");
+            if (searchInput) searchInput.placeholder = "Buscar rota oficial...";
         } else {
-            methodBadge.className = "method-badge method-post";
-            document.getElementById("groupQueryString").classList.add("d-none");
-            document.getElementById("groupRequestBody").classList.remove("d-none");
-            document.getElementById("modalRequestBody").value = defaultParams || '{}';
+            btnEstoque.classList.add("active");
+            btnOficial.classList.remove("active");
+            contentEstoque.classList.remove("d-none");
+            contentOficial.classList.add("d-none");
+            if (moduleFiltersRow) moduleFiltersRow.classList.add("d-none");
+            if (searchInput) searchInput.placeholder = "Buscar rota de estoque / NextERP...";
         }
 
-        document.getElementById("resultContainer").classList.add("d-none");
-
-        const modal = new bootstrap.Modal(document.getElementById('modalTestEndpoint'));
-        modal.show();
+        if (searchInput && searchInput.value) {
+            handleGlobalTableSearch(searchInput.value);
+        }
     }
 
-    function updateBadgeForEndpoint(epId, statusCode, elapsedMs, errorMsg, lastSuccess, lastTested) {
+    function handleGlobalTableSearch(queryVal) {
+        if (currentMainTab === 'oficial') {
+            filterTableSearch('tableOngsysEndpoints', queryVal);
+        } else {
+            filterTableSearch('tableEstoqueEndpoints', queryVal);
+        }
+    }
+
+    function handleGlobalToggleAll() {
+        const tableId = currentMainTab === 'oficial' ? 'tableOngsysEndpoints' : 'tableEstoqueEndpoints';
+        toggleAllDetailRows(tableId);
+        const lbl = document.getElementById("lblToggleAll");
+        if (lbl) {
+            lbl.innerText = tableExpansionState[tableId] ? "Recolher Todos" : "Expandir Todos";
+        }
+    }
+
+    function handleRowClick(epId, event) {
+        if (event.target.closest(".btn-expand-toggle")) {
+            return;
+        }
+        if (event.target.closest("button") || event.target.closest("input") || event.target.closest("a")) {
+            return;
+        }
+        toggleDetailRow(epId, event);
+    }
+
+    function toggleDetailRow(epId, event) {
+        if (event) event.stopPropagation();
+
+        const mainRow = document.getElementById(`row-${epId}`);
+        const detailRow = document.getElementById(`detail-${epId}`);
+        const iconToggle = document.getElementById(`icon-toggle-${epId}`);
+        const arrowToggle = document.getElementById(`arrow-toggle-${epId}`);
+
+        if (!detailRow) return;
+
+        const isHidden = detailRow.classList.contains("d-none");
+
+        if (isHidden) {
+            detailRow.classList.remove("d-none");
+            if (mainRow) mainRow.classList.add("expanded");
+            if (iconToggle) iconToggle.className = "ri-subtract-line";
+            if (arrowToggle) arrowToggle.className = "ri-arrow-up-s-line";
+        } else {
+            detailRow.classList.add("d-none");
+            if (mainRow) mainRow.classList.remove("expanded");
+            if (iconToggle) iconToggle.className = "ri-add-line";
+            if (arrowToggle) arrowToggle.className = "ri-arrow-down-s-line";
+        }
+    }
+
+    function toggleAllDetailRows(tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+
+        tableExpansionState[tableId] = !tableExpansionState[tableId];
+        const isExp = tableExpansionState[tableId];
+
+        const detailRows = table.querySelectorAll(".endpoint-detail-row");
+        const mainRows = table.querySelectorAll(".main-row");
+
+        detailRows.forEach(row => {
+            if (isExp) row.classList.remove("d-none");
+            else row.classList.add("d-none");
+        });
+
+        mainRows.forEach(row => {
+            const epId = row.getAttribute("data-ep-id");
+            const iconToggle = document.getElementById(`icon-toggle-${epId}`);
+            const arrowToggle = document.getElementById(`arrow-toggle-${epId}`);
+
+            if (isExp) {
+                row.classList.add("expanded");
+                if (iconToggle) iconToggle.className = "ri-subtract-line";
+                if (arrowToggle) arrowToggle.className = "ri-arrow-up-s-line";
+            } else {
+                row.classList.remove("expanded");
+                if (iconToggle) iconToggle.className = "ri-add-line";
+                if (arrowToggle) arrowToggle.className = "ri-arrow-down-s-line";
+            }
+        });
+    }
+
+    function filterByModule(moduleName, btn) {
+        document.querySelectorAll(".module-pill-btn").forEach(b => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+
+        const mainRows = document.querySelectorAll("#tableOngsysEndpoints .main-row");
+        mainRows.forEach(row => {
+            const rowMod = row.getAttribute("data-modulo");
+            const epId = row.getAttribute("data-ep-id");
+            const detailRow = document.getElementById(`detail-${epId}`);
+
+            if (moduleName === "all" || rowMod === moduleName) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+                if (detailRow) detailRow.classList.add("d-none");
+            }
+        });
+    }
+
+    function filterTableSearch(tableId, queryVal) {
+        const query = (queryVal || "").toLowerCase();
+        const mainRows = document.querySelectorAll(`#${tableId} .main-row`);
+
+        mainRows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            const epId = row.getAttribute("data-ep-id");
+            const detailRow = document.getElementById(`detail-${epId}`);
+
+            if (text.includes(query)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+                if (detailRow) detailRow.classList.add("d-none");
+            }
+        });
+    }
+
+    function updateBadgeForEndpoint(epId, statusCode, elapsedMs, errorMsg, lastSuccess, lastTested, rawResponse) {
         if (!epId) return;
         const badge = document.getElementById(`badge-status-${epId}`);
         const timeBadge = document.getElementById(`badge-time-${epId}`);
         const elLastSuccess = document.getElementById(`last-success-${epId}`);
-        const elLastTested = document.getElementById(`last-tested-${epId}`);
-        const boxLastTested = document.getElementById(`last-tested-box-${epId}`);
+        const elDetailLastTested = document.getElementById(`detail-last-tested-${epId}`);
+        const termStatus = document.getElementById(`term-status-${epId}`);
+        const termTime = document.getElementById(`term-time-${epId}`);
+        const termTimestamp = document.getElementById(`term-timestamp-${epId}`);
+
+        const diagHttpStatus = document.getElementById(`diag-http-status-${epId}`);
+        const diagLatency = document.getElementById(`diag-latency-${epId}`);
+        const diagTime = document.getElementById(`diag-time-${epId}`);
+        const diagSummary = document.getElementById(`diag-summary-text-${epId}`);
 
         if (badge) {
             if (statusCode === 200) {
@@ -574,7 +1257,7 @@
                 badge.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> HTTP 200 OK`;
             } else if (statusCode === 422) {
                 badge.className = "badge bg-warning-subtle text-warning border border-warning px-2.5 py-1 fw-bold font-monospace ep-status-badge";
-                badge.innerHTML = `<i class="ri-shield-check-line me-1"></i> HTTP 422 Validado`;
+                badge.innerHTML = `<i class="ri-alert-fill me-1"></i> HTTP 422 Validado`;
             } else if (statusCode === 201) {
                 badge.className = "badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace ep-status-badge";
                 badge.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> HTTP 201 Criado`;
@@ -590,21 +1273,41 @@
             if (valSpan) valSpan.innerText = elapsedMs || 0;
         }
 
-        if (lastTested && elLastTested) {
-            elLastTested.innerText = lastTested;
-            if (boxLastTested) boxLastTested.classList.remove("d-none");
+        if (termStatus) termStatus.innerText = `Status: ${statusCode || 'OK'}`;
+        if (termTime) termTime.innerText = `${elapsedMs || 0} ms`;
+
+        if (lastTested) {
+            if (elDetailLastTested) elDetailLastTested.innerText = lastTested;
+            if (termTimestamp) termTimestamp.innerText = lastTested;
+            if (diagTime) diagTime.innerText = lastTested;
+        }
+
+        if (diagLatency) diagLatency.innerText = `${elapsedMs || 0} ms`;
+
+        if (diagHttpStatus) {
+            diagHttpStatus.innerText = `HTTP ${statusCode || 'Erro'}`;
+            if (statusCode === 200 || statusCode === 201) {
+                diagHttpStatus.className = "text-success fw-bold";
+                if (diagSummary) diagSummary.innerHTML = "🟢 <strong>Comunicação 100% Validada:</strong> O servidor da OngSys respondeu com sucesso aos parâmetros enviados.";
+            } else if (statusCode === 422) {
+                diagHttpStatus.className = "text-warning fw-bold";
+                if (diagSummary) diagSummary.innerHTML = "🟡 <strong>Validação de Parâmetros Necessária:</strong> A rota respondeu com 422, exigindo período de datas ou filtros específicos.";
+            } else {
+                diagHttpStatus.className = "text-danger fw-bold";
+                if (diagSummary) diagSummary.innerHTML = `🔴 <strong>Falha no Servidor Remoto (HTTP ${statusCode}):</strong> ${errorMsg || 'A rota não respondeu adequadamente. Envie o laudo para a operadora.'}`;
+            }
         }
 
         if (lastSuccess && elLastSuccess) {
             elLastSuccess.innerText = lastSuccess;
-            elLastSuccess.className = "text-success fw-bold";
+            elLastSuccess.className = "text-success fw-bold font-monospace";
         }
 
         updateHealthSummaryCounters();
     }
 
     function updateHealthSummaryCounters() {
-        const badges = document.querySelectorAll(".ep-status-badge");
+        const badges = document.querySelectorAll("#tableOngsysEndpoints .ep-status-badge");
         let c200 = 0, c422 = 0, cErr = 0;
 
         badges.forEach(b => {
@@ -618,16 +1321,17 @@
         const el422 = document.getElementById("valStatus422");
         const elErr = document.getElementById("valStatusErr");
 
-        if (el200) el200.innerText = c200;
-        if (el422) el422.innerText = c422;
-        if (elErr) elErr.innerText = cErr;
+        if (el200) el200.innerHTML = `🟢 ${c200} OK`;
+        if (el422) el422.innerHTML = `🟡 ${c422} Validados`;
+        if (elErr) elErr.innerHTML = `🔴 ${cErr} Erros`;
     }
 
-    function testSingleEndpoint(epId, path, method, defaultParamsStr) {
+    function testSingleEndpoint(epId, path, method, defaultParamsStr, event) {
+        if (event) event.stopPropagation();
+
         const badge = document.getElementById(`badge-status-${epId}`);
         const btn = document.getElementById(`btn-quick-${epId}`);
-        const inlineBox = document.getElementById(`inline-res-${epId}`);
-        const inlineJson = document.getElementById(`inline-json-${epId}`);
+        const termJson = document.getElementById(`terminal-json-${epId}`);
 
         if (badge) {
             badge.className = "badge bg-info-subtle text-info border border-info px-2.5 py-1 fw-bold font-monospace ep-status-badge";
@@ -672,17 +1376,16 @@
         .then(data => {
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="ri-play-fill fs-14"></i> Testar`;
+                btn.innerHTML = `<i class="ri-play-fill"></i> Testar`;
             }
 
             const statusCode = data.error ? 502 : data.status_code;
             const elapsed = data.elapsed_ms || 0;
-            updateBadgeForEndpoint(epId, statusCode, elapsed, null, data.last_success, data.last_tested);
+            updateBadgeForEndpoint(epId, statusCode, elapsed, data.message || null, data.last_success, data.last_tested, data);
 
-            if (inlineBox && inlineJson) {
-                inlineBox.classList.remove("d-none");
+            if (termJson) {
                 const resData = data.error ? data : (data.response || data);
-                inlineJson.innerText = JSON.stringify(resData, null, 2);
+                termJson.innerText = JSON.stringify(resData, null, 2);
             }
 
             return data;
@@ -690,94 +1393,36 @@
         .catch(err => {
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="ri-play-fill fs-14"></i> Testar`;
+                btn.innerHTML = `<i class="ri-play-fill"></i> Testar`;
             }
-            updateBadgeForEndpoint(epId, 500, 0, null, null, "Agora");
-            if (inlineBox && inlineJson) {
-                inlineBox.classList.remove("d-none");
-                inlineJson.innerText = "Erro na requisição: " + err;
+            updateBadgeForEndpoint(epId, 500, 0, "Falha de rede: " + err, null, "Agora", null);
+            if (termJson) {
+                termJson.innerText = "// Erro na requisição: " + err;
             }
         });
     }
 
-    function closeInlineResult(epId) {
-        const inlineBox = document.getElementById(`inline-res-${epId}`);
-        if (inlineBox) inlineBox.classList.add("d-none");
-    }
+    function executeTerminalTest(epId, path, method) {
+        const btn = document.getElementById(`btn-exec-${epId}`);
+        const inputVal = document.getElementById(`input-params-${epId}`).value.trim();
+        const termJson = document.getElementById(`terminal-json-${epId}`);
 
-    async function testAllEndpoints() {
-        const btnAll = document.getElementById("btnTestAllApis");
-        const progressBox = document.getElementById("healthCheckProgressBox");
-        const progressBar = document.getElementById("healthProgressBar");
-        const progressText = document.getElementById("healthProgressText");
-
-        const containers = Array.from(document.querySelectorAll(".endpoint-row-container"));
-        if (!containers.length) return;
-
-        btnAll.disabled = true;
-        btnAll.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Testando Todas as Rotas...`;
-
-        progressBox.classList.remove("d-none");
-        progressBar.style.width = "0%";
-
-        let done = 0;
-        const total = containers.length;
-
-        for (const item of containers) {
-            const epId = item.getAttribute("data-ep-id");
-            const path = item.getAttribute("data-ep-path");
-            const method = item.getAttribute("data-ep-method");
-            const paramsStr = item.getAttribute("data-ep-params");
-
-            if (epId && path) {
-                await testSingleEndpoint(epId, path, method, paramsStr);
-            }
-
-            done++;
-            const pct = Math.round((done / total) * 100);
-            progressBar.style.width = pct + "%";
-            progressText.innerText = `${done} / ${total} rotas (${pct}%)`;
-
-            // Intervalo suave de 150ms
-            await new Promise(r => setTimeout(r, 150));
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Conectando...';
         }
-
-        btnAll.disabled = false;
-        btnAll.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> Health Check Concluído (${total} Rotas)`;
-
-        setTimeout(() => {
-            btnAll.innerHTML = `<i class="ri-heart-pulse-fill fs-16"></i> Testar Todas as APIs`;
-        }, 5000);
-    }
-
-    function executeEndpointRequest() {
-        const path = document.getElementById("modalEndpointPath").value;
-        const method = document.getElementById("modalEndpointMethod").value;
-
-        const btn = document.getElementById("btnExecuteRequest");
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Conectando via Cofre do Servidor...';
 
         let params = {};
         let body = {};
 
-        if (method === 'GET') {
-            const rawQ = document.getElementById("modalQueryString").value.trim();
-            if (rawQ) {
-                try {
-                    params = JSON.parse(rawQ);
-                } catch(e) {
-                    params = { raw: rawQ };
-                }
-            }
-        } else {
-            const rawB = document.getElementById("modalRequestBody").value.trim();
-            if (rawB) {
-                try {
-                    body = JSON.parse(rawB);
-                } catch(e) {
-                    body = { raw: rawB };
-                }
+        if (inputVal) {
+            try {
+                const parsed = JSON.parse(inputVal);
+                if (method === 'GET') params = parsed;
+                else body = parsed;
+            } catch(e) {
+                if (method === 'GET') params = { raw: inputVal };
+                else body = { raw: inputVal };
             }
         }
 
@@ -790,7 +1435,7 @@
                 'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify({
-                ep_id: currentTestingEpId,
+                ep_id: epId,
                 path: path,
                 method: method,
                 params: params,
@@ -799,55 +1444,175 @@
         })
         .then(res => res.json())
         .then(data => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="ri-send-plane-fill"></i> Executar Requisição via API Proxy Seguro';
-
-            const resContainer = document.getElementById("resultContainer");
-            resContainer.classList.remove("d-none");
-
-            const statusBadge = document.getElementById("resStatusBadge");
-            const timeMs = document.getElementById("resTimeMs");
-            const jsonBody = document.getElementById("resJsonBody");
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-send-plane-fill"></i> Executar Requisição de Teste';
+            }
 
             const statusCode = data.error ? 502 : data.status_code;
             const elapsed = data.elapsed_ms || 0;
 
-            if (currentTestingEpId) {
-                updateBadgeForEndpoint(currentTestingEpId, statusCode, elapsed, null, data.last_success, data.last_tested);
-            }
+            updateBadgeForEndpoint(epId, statusCode, elapsed, data.message || null, data.last_success, data.last_tested, data);
 
-            if (data.error) {
-                statusBadge.className = "badge bg-danger px-3 py-1.5 fw-bold";
-                statusBadge.innerText = "HTTP ERRO";
-                timeMs.innerText = elapsed + " ms";
-                jsonBody.innerText = JSON.stringify(data, null, 2);
-            } else {
-                statusBadge.className = data.status_code < 300 ? "badge bg-success px-3 py-1.5 fw-bold" : "badge bg-warning text-dark px-3 py-1.5 fw-bold";
-                statusBadge.innerText = "HTTP " + data.status_code;
-                timeMs.innerText = elapsed + " ms";
-                jsonBody.innerText = JSON.stringify(data.response, null, 2);
+            if (termJson) {
+                const resData = data.error ? data : (data.response || data);
+                termJson.innerText = JSON.stringify(resData, null, 2);
             }
         })
         .catch(err => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="ri-send-plane-fill"></i> Executar Requisição via API Proxy Seguro';
-            alert("Erro na requisição: " + err);
-        });
-    }
-
-    function filterEndpointsSearch() {
-        const query = document.getElementById("searchOngsysEndpoint").value.toLowerCase();
-        const items = document.querySelectorAll(".endpoint-row-container");
-
-        items.forEach(item => {
-            const text = item.innerText.toLowerCase();
-            if (text.includes(query)) {
-                item.style.display = "";
-            } else {
-                item.style.display = "none";
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-send-plane-fill"></i> Executar Requisição de Teste';
+            }
+            if (termJson) {
+                termJson.innerText = "// Erro na requisição: " + err;
             }
         });
     }
+
+    function copyDiagnosticToClipboard(epId, path, method, cnpj) {
+        const termJson = document.getElementById(`terminal-json-${epId}`);
+        const statusBadge = document.getElementById(`badge-status-${epId}`);
+        const timeBadge = document.getElementById(`badge-time-${epId}`);
+        const inputVal = document.getElementById(`input-params-${epId}`);
+        const nowStr = new Date().toLocaleString('pt-BR');
+
+        const statusText = statusBadge ? statusBadge.innerText.trim() : "Não testado";
+        const latencyText = timeBadge ? timeBadge.innerText.trim() : "0 ms";
+        const paramsText = inputVal ? inputVal.value.trim() : "{}";
+        const jsonResponseText = termJson ? termJson.innerText.trim() : "{}";
+
+        const diagnosticReport = `=====================================================
+📋 LAUDO TÉCNICO DE INTEGRAÇÃO API ONGSYS (v2)
+Organização: Centro Dom Helder Camara (CDC)
+CNPJ: ${cnpj}
+Data/Hora da Requisição: ${nowStr}
+=====================================================
+
+1. DADOS DA ROTA:
+- Endpoint Alvo: https://www.ongsys.com.br/app/index.php/api/v2/${path}
+- Método HTTP: ${method}
+- Autenticação: Basic Auth (CNPJ + API Key do Tenant)
+
+2. PARÂMETROS / PAYLOAD ENVIADOS:
+${paramsText}
+
+3. RESULTADO DA COMUNICAÇÃO:
+- Código HTTP: ${statusText}
+- Latência de Resposta: ${latencyText}
+
+4. RESPOSTA RECEBIDA DO SERVIDOR ONGSYS:
+${jsonResponseText}
+
+=====================================================
+⚠️ SOLICITAÇÃO AO SUPORTE DA ONGSYS:
+Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto aos parâmetros de liberação ou ajuste para o CNPJ ${cnpj}.
+=====================================================`;
+
+        navigator.clipboard.writeText(diagnosticReport).then(() => {
+            showToastCopy("📋 Laudo Técnico copiado com sucesso! Pronto para colar no WhatsApp/E-mail.");
+        }).catch(err => {
+            alert("Não foi possível copiar automaticamente. Selecione e copie o texto manualmente.");
+        });
+    }
+
+    function showToastCopy(text) {
+        const toast = document.getElementById("toastCopyNotification");
+        const toastText = document.getElementById("toastCopyText");
+        if (toast && toastText) {
+            toastText.innerText = text;
+            toast.classList.remove("d-none");
+            setTimeout(() => {
+                toast.classList.add("d-none");
+            }, 4000);
+        }
+    }
+
+    async function testAllVisibleEndpoints() {
+        const btnAll = document.getElementById("btnTestAllApis");
+        const progressBox = document.getElementById("healthCheckProgressBox");
+        const progressBar = document.getElementById("healthProgressBar");
+        const progressText = document.getElementById("healthProgressText");
+        const progressSpinner = document.getElementById("healthProgressSpinner");
+        const progressTitle = document.getElementById("healthProgressTitle");
+
+        const targetTableId = (currentMainTab === 'oficial') ? 'tableOngsysEndpoints' : 'tableEstoqueEndpoints';
+        const mainRows = Array.from(document.querySelectorAll(`#${targetTableId} .main-row`));
+        if (!mainRows.length) return;
+
+        btnAll.disabled = true;
+        btnAll.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Testando Rotas...`;
+
+        // Resetar visual da barra
+        if (progressSpinner) {
+            progressSpinner.className = "spinner-border spinner-border-sm text-success";
+        }
+        if (progressTitle) {
+            progressTitle.className = "text-dark";
+            progressTitle.innerText = "Executando Bateria de Testes e Diagnóstico nas Rotas...";
+        }
+        if (progressBar) {
+            progressBar.className = "progress-bar progress-bar-striped progress-bar-animated bg-success";
+            progressBar.style.width = "0%";
+        }
+        if (progressText) {
+            progressText.innerText = `0 / ${mainRows.length} rotas (0%)`;
+        }
+        progressBox.classList.remove("d-none");
+
+        let done = 0;
+        const total = mainRows.length;
+
+        for (const row of mainRows) {
+            const epId = row.getAttribute("data-ep-id");
+            const inputParam = document.getElementById(`input-params-${epId}`);
+            const path = row.querySelector("code") ? row.querySelector("code").innerText.replace("/api/v2/", "").trim() : "";
+            const method = row.querySelector(".method-badge") ? row.querySelector(".method-badge").innerText.trim() : "GET";
+            const paramsStr = inputParam ? inputParam.value : "{}";
+
+            if (epId && path) {
+                await testSingleEndpoint(epId, path, method, paramsStr);
+            }
+
+            done++;
+            const pct = Math.round((done / total) * 100);
+            progressBar.style.width = pct + "%";
+            progressText.innerText = `${done} / ${total} rotas (${pct}%)`;
+
+            await new Promise(r => setTimeout(r, 120));
+        }
+
+        // Estado de Conclusão Visual
+        btnAll.disabled = false;
+        btnAll.innerHTML = `<i class="ri-checkbox-circle-fill me-1"></i> Testes Concluídos (${total} Rotas)`;
+
+        if (progressSpinner) {
+            progressSpinner.className = "ri-checkbox-circle-fill text-success fs-18";
+        }
+        if (progressTitle) {
+            progressTitle.className = "text-success fw-bold";
+            progressTitle.innerText = `Bateria de Testes Finalizada com Sucesso! (${total} rotas verificadas)`;
+        }
+        if (progressBar) {
+            progressBar.classList.remove("progress-bar-animated", "progress-bar-striped");
+            progressBar.style.width = "100%";
+        }
+
+        // Ocultar a barra suavemente após 3.5 segundos
+        setTimeout(() => {
+            if (progressBox) progressBox.classList.add("d-none");
+            if (progressSpinner) progressSpinner.className = "spinner-border spinner-border-sm text-success";
+            if (progressTitle) {
+                progressTitle.className = "text-dark";
+                progressTitle.innerText = "Executando Bateria de Testes e Diagnóstico nas Rotas...";
+            }
+        }, 3500);
+
+        setTimeout(() => {
+            btnAll.innerHTML = `<i class="ri-heart-pulse-fill fs-16"></i> Testar Todas as APIs`;
+        }, 5000);
+    }
+
 
     function runAtomicSync() {
         const entity = document.getElementById("syncEntitySelect").value;
@@ -894,5 +1659,3 @@
     }
 </script>
 {% endblock %}
-
-

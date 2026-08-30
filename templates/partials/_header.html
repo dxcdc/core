@@ -1,52 +1,123 @@
 {% load static %}
-<header class="navbar navbar-expand-lg sticky-top" style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 10px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-    <div class="container-fluid p-0 d-flex align-items-center justify-content-between">
-        
-        <!-- Left Section: Search & Actions -->
-        <div class="d-flex align-items-center gap-3">
-            <!-- Sidebar Toggle -->
-            <button class="btn btn-light btn-sm border-0" id="button-toggle-sidebar" type="button" style="background: #f1f5f9; color: #475569;">
-                <i class="ri-menu-2-line fs-18"></i>
-            </button>
+<style>
+    .topbar-action-btn {
+        background: transparent !important;
+        border: none !important;
+        color: #64748b !important;
+        width: 36px !important;
+        height: 36px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 8px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+        padding: 0 !important;
+    }
+    .topbar-action-btn:hover {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+    }
+    .topbar-action-btn i {
+        font-size: 1.18rem !important;
+        line-height: 1 !important;
+    }
+    .status-dot-online {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background-color: #22c55e;
+        border-radius: 50%;
+        margin-left: 6px;
+        box-shadow: 0 0 0 2px #ffffff;
+    }
+</style>
 
-            <!-- Operational Search Bar -->
-            <form class="d-none d-md-flex align-items-center" style="position: relative; width: 320px;">
-                <i class="ri-search-line" style="position: absolute; left: 12px; color: #94a3b8; font-size: 1.1em;"></i>
-                <input type="text" class="form-control form-control-sm border-0" placeholder="Buscar servidores, VPNs, ferramentas..." style="background: #f1f5f9; color: #0f172a; padding-left: 38px; border-radius: 8px; height: 38px;">
-            </form>
-        </div>
+<header class="topbar">
+    <div class="container-fluid p-0">
+        <div class="navbar-header d-flex align-items-center justify-content-between h-100">
+            
+            <!-- Left Side: Hamburger + System Pill (No Linktree) -->
+            <div class="d-flex align-items-center gap-3">
+                <!-- Clean Hamburger -->
+                <button type="button" class="topbar-action-btn" id="button-toggle-sidebar" title="Menu">
+                    <i class="ri-menu-line" style="font-size: 1.25rem;"></i>
+                </button>
 
-        <!-- Right Section: System Status & User Profile -->
-        <div class="d-flex align-items-center gap-3">
-            <!-- Status Badge -->
-            <div class="d-none d-sm-flex align-items-center gap-2 px-3 py-1" style="background: rgba(34, 197, 94, 0.1); color: #16a34a; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
-                <i class="ri-checkbox-circle-fill"></i> Sistemas Operacionais
+                <!-- Blue System Pill Badge -->
+                <span class="badge rounded-pill d-inline-flex align-items-center" style="background: #2563eb; color: #ffffff; font-weight: 700; padding: 6px 14px; font-size: 0.78rem; letter-spacing: 0.3px; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);">
+                    CDC Core
+                </span>
             </div>
 
-            <!-- Notifications Button -->
-            <button class="btn btn-light btn-sm rounded-circle p-2" type="button" style="background: #f1f5f9; color: #475569; width: 38px; height: 38px;">
-                <i class="ri-notification-3-line fs-18"></i>
-            </button>
+            <!-- Right Side: Clean Icon Actions & User Avatar -->
+            <div class="d-flex align-items-center gap-1.5">
+                
+                <!-- 1. Dark/Light Mode -->
+                <button type="button" class="topbar-action-btn" id="light-dark-mode" title="Modo Claro / Escuro">
+                    <i class="ri-moon-line"></i>
+                </button>
 
-            <!-- User Profile Dropdown -->
-            <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="color: #0f172a;">
-                    <img src="{% static 'img/placeholders/avatars/avatar2.jpg' %}" alt="avatar" class="rounded-circle" style="width: 36px; height: 36px; border: 2px solid #e2e8f0;">
-                    <div class="d-none d-md-block text-start">
-                        <span class="d-block fw-bold" style="font-size: 0.9em; line-height: 1.2;">{{ user.username|default:"dxcdc" }}</span>
-                        <small class="text-muted" style="font-size: 0.75em;">Equipe de Operações</small>
-                    </div>
+                <!-- 2. Theme / Palette -->
+                <button type="button" class="topbar-action-btn" id="theme-palette-btn" title="Personalizar Tema">
+                    <i class="ri-palette-line"></i>
+                </button>
+
+                <!-- 3. Fullscreen Toggle -->
+                <button type="button" class="topbar-action-btn" id="fullscreen-toggle-btn" title="Tela Cheia">
+                    <i class="ri-fullscreen-line"></i>
+                </button>
+
+                <!-- 4. Settings -->
+                <a href="{% url 'dashboard:workspace' %}" class="topbar-action-btn" title="Configurações">
+                    <i class="ri-settings-3-line"></i>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="border-radius: 10px; padding: 8px;">
-                    <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.75em;">Minha Conta</h6></li>
-                    <li><a class="dropdown-item rounded py-2" href="#"><i class="ri-user-line me-2"></i> Perfil</a></li>
-                    <li><a class="dropdown-item rounded py-2" href="#"><i class="ri-settings-3-line me-2"></i> Configurações</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item rounded py-2 text-danger" href="{% url 'dashboard:logout' %}"><i class="ri-logout-box-r-line me-2"></i> Sair</a></li>
-                </ul>
+
+                <!-- 5. Home -->
+                <a href="{% url 'dashboard:index' %}" class="topbar-action-btn" title="Início">
+                    <i class="ri-home-4-line"></i>
+                </a>
+
+                <!-- 6. User Profile Dropdown with Avatar + Name + Status Dot -->
+                <div class="dropdown ms-1">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle gap-2 px-2 py-1 rounded-2" data-bs-toggle="dropdown" aria-expanded="false" style="color: #334155;">
+                        <img src="{% static 'img/placeholders/avatars/avatar2.jpg' %}" alt="avatar" class="rounded-circle" style="width: 30px; height: 30px; border: 1.5px solid #e2e8f0; object-fit: cover;">
+                        <span class="fw-semibold d-none d-sm-inline" style="font-size: 0.84rem; color: #1e293b;">
+                            {{ user.username|default:"admin" }}
+                        </span>
+                        <span class="status-dot-online" title="Online"></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="border-radius: 10px; padding: 8px; min-width: 180px;">
+                        <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.68em; letter-spacing: 0.5px;">Minha Conta</h6></li>
+                        <li><a class="dropdown-item rounded py-1.5" href="{% url 'dashboard:workspace' %}" style="font-size: 0.82rem;"><i class="ri-user-line me-2 text-primary"></i> Perfil & Workspace</a></li>
+                        <li><a class="dropdown-item rounded py-1.5" href="{% url 'dashboard:cofre' %}" style="font-size: 0.82rem;"><i class="ri-key-line me-2 text-success"></i> Chaves & Cofre</a></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item rounded py-1.5 text-danger" href="{% url 'dashboard:logout' %}" style="font-size: 0.82rem;"><i class="ri-logout-box-r-line me-2"></i> Sair do Sistema</a></li>
+                    </ul>
+                </div>
+
             </div>
 
         </div>
-
     </div>
 </header>
+
+<!-- SCRIPT: FULLSCREEN TOGGLE -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fullBtn = document.getElementById('fullscreen-toggle-btn');
+        if (fullBtn) {
+            fullBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => console.log(err));
+                    fullBtn.querySelector('i').className = 'ri-fullscreen-exit-line';
+                } else {
+                    document.exitFullscreen();
+                    fullBtn.querySelector('i').className = 'ri-fullscreen-line';
+                }
+            });
+        }
+    });
+</script>

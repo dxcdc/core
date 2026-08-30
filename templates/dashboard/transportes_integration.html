@@ -1,0 +1,633 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Transportes & Mobilidade Corporativa (Uber & 99) | CDC Core{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-endpoints {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+    .table-endpoints thead th {
+        background-color: #0f172a;
+        color: #f8fafc;
+        font-size: 0.78em;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 12px 14px;
+        font-weight: 700;
+        border: none;
+    }
+    .table-endpoints tbody tr.main-row {
+        transition: background-color 0.15s ease;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+    }
+    .table-endpoints tbody tr.main-row:hover {
+        background-color: #f8fafc;
+    }
+    .table-endpoints tbody tr.main-row.expanded {
+        background-color: #eff6ff;
+        border-bottom: none;
+    }
+    .table-endpoints td {
+        padding: 12px 14px;
+        vertical-align: middle;
+        font-size: 0.86em;
+    }
+    .btn-expand-toggle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #e2e8f0;
+        color: #0f172a;
+        font-weight: bold;
+        font-size: 16px;
+        border: 1px solid #cbd5e1;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+    .btn-expand-toggle:hover {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
+        transform: scale(1.1);
+    }
+    .main-row.expanded .btn-expand-toggle {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+    .method-badge {
+        font-weight: 700;
+        font-size: 0.72em;
+        padding: 4px 9px;
+        border-radius: 6px;
+        letter-spacing: 0.5px;
+    }
+    .method-get {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+    .method-post {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+    .detail-drawer {
+        background: #f8fafc;
+        border-left: 4px solid #0284c7;
+        border-bottom: 1px solid #cbd5e1;
+        padding: 20px;
+    }
+    .diagnostic-box {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .terminal-black-box {
+        background-color: #0f172a;
+        color: #38bdf8;
+        border-radius: 10px;
+        border: 1px solid #1e293b;
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .terminal-header {
+        background-color: #1e293b;
+        color: #94a3b8;
+        padding: 8px 14px;
+        border-top-left-radius: 9px;
+        border-top-right-radius: 9px;
+        font-size: 0.76em;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        border-bottom: 1px solid #334155;
+    }
+    .terminal-output {
+        color: #38bdf8;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        font-size: 0.82em;
+        max-height: 280px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+        padding: 12px;
+        margin-bottom: 0;
+    }
+    .tag-rule {
+        font-size: 0.72em;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+        display: inline-block;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+    .main-tab-pill {
+        font-size: 0.9em;
+        font-weight: 700;
+        padding: 10px 22px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #475569;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .main-tab-pill:hover {
+        background: #f8fafc;
+        color: #0f172a;
+        border-color: #94a3b8;
+    }
+    .main-tab-pill.active {
+        background: #0f172a;
+        color: #ffffff;
+        border-color: #0f172a;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+    }
+    .toast-copy {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
+        background: #0f172a;
+        color: #ffffff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.88em;
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header da Página -->
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <a href="{% url 'dashboard:integracoes' %}" class="btn btn-sm btn-outline-secondary px-2 py-1" style="border-radius: 6px;" title="Voltar para Central de Integrações">
+                <i class="ri-arrow-left-line"></i>
+            </a>
+            <h4 class="fw-bold mb-0" style="color: #0f172a; font-size: 1.45em;">
+                <i class="ri-car-line text-primary me-2"></i> Central de Transportes & Mobilidade Corporativa
+            </h4>
+        </div>
+        <p class="text-muted mb-0" style="font-size: 0.88em;">
+            Integração das contas corporativas <strong>Uber for Business</strong> e <strong>99 Empresas</strong> para auditoria de viagens, importação de faturas e rateio contábil por Centro de Custo.
+        </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="https://business.uber.com" target="_blank" class="btn btn-dark btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" style="border-radius: 6px; font-size: 0.82em;">
+            <i class="ri-external-link-line"></i> Portal Uber Business
+        </a>
+        <a href="https://empresas.99app.com" target="_blank" class="btn btn-warning btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm text-dark" style="border-radius: 6px; font-size: 0.82em; background: #eab308; border-color: #eab308;">
+            <i class="ri-external-link-line"></i> Portal 99 Empresas
+        </a>
+    </div>
+</div>
+
+<!-- SELETOR PRINCIPAL DE PROVEDORES -->
+<div class="d-flex align-items-center justify-content-between mb-4 p-2 bg-white rounded-3 border shadow-sm flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <button type="button" class="main-tab-pill active" id="tabBtnUber" onclick="switchTransportTab('uber')">
+            <i class="ri-taxi-line text-dark fs-18"></i>
+            <span>Uber for Business ({{ total_endpoints_uber }} Endpoints)</span>
+        </button>
+        <button type="button" class="main-tab-pill" id="tabBtnDidi" onclick="switchTransportTab('didi')">
+            <i class="ri-car-washing-line text-warning fs-18"></i>
+            <span>99 Empresas — DiDi B2B ({{ total_endpoints_didi }} Endpoints)</span>
+        </button>
+    </div>
+    <div class="d-flex align-items-center gap-2 px-3 text-muted" style="font-size: 0.8em;">
+        <i class="ri-shield-check-line text-success fs-16"></i>
+        <span>APIs Corporativas Gratuitas (Inclusas no Contrato PJ)</span>
+    </div>
+</div>
+
+<!-- CARDS RESUMO DE TRANSPORTE -->
+<div class="row g-3 mb-4">
+    <!-- Card 1: Uber for Business -->
+    <div class="col-md-3">
+        <div class="d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm">
+            <div>
+                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">UBER FOR BUSINESS</small>
+                <span class="fw-bold text-dark" style="font-size: 1.1em;">Org: {{ uber_org_id|slice:":8" }}...</span>
+                <small class="text-success fw-bold d-block" style="font-size: 0.72em;"><i class="ri-checkbox-circle-fill"></i> Conta Vinculada</small>
+            </div>
+            <div class="p-2.5 bg-dark text-white rounded-3 fs-20">
+                <i class="ri-taxi-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: 99 Empresas -->
+    <div class="col-md-3">
+        <div class="d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm">
+            <div>
+                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">99 EMPRESAS (DIDI)</small>
+                <span class="fw-bold text-dark" style="font-size: 1.1em;">AppID: {{ didi_corp_id }}</span>
+                <small class="text-success fw-bold d-block" style="font-size: 0.72em;"><i class="ri-checkbox-circle-fill"></i> Portal B2B Ativo</small>
+            </div>
+            <div class="p-2.5 bg-warning-subtle text-dark rounded-3 fs-20">
+                <i class="ri-car-fill text-warning"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Viagens Registradas -->
+    <div class="col-md-3">
+        <div class="d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm">
+            <div>
+                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">CORRIDAS AUDITADAS</small>
+                <span class="fw-bold text-primary" style="font-size: 1.1em;">{{ total_corridas }} viagens</span>
+                <small class="text-muted d-block" style="font-size: 0.72em;">Rateio por Centro de Custo</small>
+            </div>
+            <div class="p-2.5 bg-primary-subtle text-primary rounded-3 fs-20">
+                <i class="ri-route-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Faturas & Fechamentos -->
+    <div class="col-md-3">
+        <div class="d-flex align-items-center justify-content-between p-3 bg-white border rounded-3 shadow-sm">
+            <div>
+                <small class="text-muted fw-bold d-block" style="font-size: 0.72em; text-transform: uppercase;">FATURAS & RECIBOS</small>
+                <span class="fw-bold text-purple" style="font-size: 1.1em; color: #7c3aed;">{{ total_faturas }} fechamentos</span>
+                <small class="text-muted d-block" style="font-size: 0.72em;">{{ total_passageiros }} colaboradores</small>
+            </div>
+            <div class="p-2.5 rounded-3 fs-20" style="background: #f3e8ff; color: #7c3aed;">
+                <i class="ri-file-list-3-line"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- ABA 1: UBER FOR BUSINESS                                                 -->
+<!-- ========================================================================= -->
+<div id="tabContentUber">
+    <!-- Banner Informativo Uber -->
+    <div class="p-3 mb-4 rounded-3 border text-white shadow-sm" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-left: 5px solid #0284c7 !important;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <h6 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                    <i class="ri-taxi-line text-info fs-20"></i> Uber for Business (U4B Developer API)
+                </h6>
+                <p class="text-slate-300 mb-0" style="font-size: 0.84em;">
+                    Organização: <code>{{ uber_org_id }}</code>. Endpoints preparados para consumir extratos de corridas, relatórios financeiros e colaboradores.
+                </p>
+            </div>
+            <a href="https://developer.uber.com/docs/riders/overview" target="_blank" class="btn btn-sm btn-outline-light fw-bold" style="border-radius: 6px; font-size: 0.78em;">
+                <i class="ri-book-open-line me-1"></i> Documentação Uber API
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabela de Endpoints Uber -->
+    <div class="table-responsive mb-4 shadow-sm" style="border-radius: 12px;">
+        <table class="table-endpoints mb-0" id="tableUberEndpoints">
+            <thead>
+                <tr>
+                    <th style="width: 50px; text-align: center;">+</th>
+                    <th style="width: 85px;">Método</th>
+                    <th>Endpoint & Rota REST</th>
+                    <th style="width: 170px;">Status / Health</th>
+                    <th style="width: 170px;">Destino no CDC Core</th>
+                    <th style="width: 130px;">Banco Local</th>
+                    <th style="width: 140px; text-align: right;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ep in endpoints_uber %}
+                <tr class="main-row" id="row-{{ ep.id }}" data-ep-id="{{ ep.id }}" onclick="handleTransportRowClick('{{ ep.id }}', event)">
+                    <td style="text-align: center;">
+                        <button type="button" class="btn-expand-toggle" id="btn-toggle-{{ ep.id }}" onclick="toggleTransportDetailRow('{{ ep.id }}', event)">
+                            <i class="ri-add-line" id="icon-toggle-{{ ep.id }}"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <span class="method-badge method-get">GET</span>
+                    </td>
+                    <td>
+                        <div class="fw-bold text-dark" style="font-size: 0.95em;">{{ ep.nome }}</div>
+                        <code class="text-primary font-monospace" style="font-size: 0.82em;">/v1/business/{{ ep.path }}</code>
+                    </td>
+                    <td>
+                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                            <i class="ri-checkbox-circle-fill me-1"></i> Preparado (Pronto)
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border px-2 py-1 font-monospace" style="font-size: 0.76em;">
+                            {{ ep.modelo_db }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge px-2 py-1 font-monospace" style="background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; font-size: 0.75em;">
+                            {{ ep.db_count }} registros
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button type="button" class="btn btn-sm btn-outline-success fw-bold px-2 py-1" id="btn-quick-{{ ep.id }}" onclick="testTransportEndpoint('uber', '{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', event)" style="border-radius: 6px; font-size: 0.78em;">
+                            <i class="ri-play-fill"></i> Testar
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light border px-2 py-1 text-muted" onclick="toggleTransportDetailRow('{{ ep.id }}', event)" style="border-radius: 6px; font-size: 0.78em;">
+                            <i class="ri-arrow-down-s-line" id="arrow-toggle-{{ ep.id }}"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Gaveta de Detalhes Uber -->
+                <tr class="endpoint-detail-row d-none" id="detail-{{ ep.id }}">
+                    <td colspan="7" class="p-0 border-0">
+                        <div class="detail-drawer">
+                            <div class="diagnostic-box mb-3 border-primary shadow-sm" style="border-left: 5px solid #0284c7 !important;">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2 pb-2 border-bottom">
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95em;">
+                                        <i class="ri-stethoscope-line text-primary me-1"></i> Laudo Técnico Uber for Business
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="copyTransportDiag('{{ ep.id }}', 'Uber', '{{ ep.path }}')">
+                                        <i class="ri-file-copy-line me-1"></i> Copiar Laudo Técnico
+                                    </button>
+                                </div>
+                                <p class="text-secondary mb-2" style="font-size: 0.84em;">{{ ep.explicacao_detalhada }}</p>
+                                <div>
+                                    {% for tag in ep.tags_regras %}
+                                    <span class="tag-rule"><i class="ri-hashtag text-primary me-0.5"></i>{{ tag }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Terminal Preto de Teste -->
+                            <div class="terminal-black-box">
+                                <div class="terminal-header d-flex align-items-center justify-content-between">
+                                    <span class="text-slate-300 font-monospace">GET /v1/business/{{ ep.path }}</span>
+                                    <button type="button" class="btn btn-xs btn-primary fw-bold" onclick="testTransportEndpoint('uber', '{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}')">
+                                        <i class="ri-send-plane-fill me-1"></i> Disparar Teste
+                                    </button>
+                                </div>
+                                <pre class="terminal-output" id="term-json-{{ ep.id }}">// Clique em 'Disparar Teste' para testar a comunicação com a API do Uber for Business...</pre>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- ABA 2: 99 EMPRESAS (DIDI B2B)                                             -->
+<!-- ========================================================================= -->
+<div id="tabContentDidi" class="d-none">
+    <!-- Banner Informativo 99 -->
+    <div class="p-3 mb-4 rounded-3 border text-white shadow-sm" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-left: 5px solid #eab308 !important;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <h6 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                    <i class="ri-car-washing-line text-warning fs-20"></i> 99 Empresas (DiDi Global B2B API)
+                </h6>
+                <p class="text-slate-300 mb-0" style="font-size: 0.84em;">
+                    App ID: <code>{{ didi_corp_id }}</code>. Endpoints para faturas (invoice-history), extratos de corridas por centro de custo e vouchers.
+                </p>
+            </div>
+            <a href="https://empresas.99app.com" target="_blank" class="btn btn-sm btn-warning text-dark fw-bold" style="border-radius: 6px; font-size: 0.78em;">
+                <i class="ri-shield-keyhole-line me-1"></i> Solicitar Token B2B
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabela de Endpoints 99 -->
+    <div class="table-responsive mb-4 shadow-sm" style="border-radius: 12px;">
+        <table class="table-endpoints mb-0" id="tableDidiEndpoints">
+            <thead>
+                <tr>
+                    <th style="width: 50px; text-align: center;">+</th>
+                    <th style="width: 85px;">Método</th>
+                    <th>Endpoint & Rota REST</th>
+                    <th style="width: 170px;">Status / Health</th>
+                    <th style="width: 170px;">Destino no CDC Core</th>
+                    <th style="width: 130px;">Banco Local</th>
+                    <th style="width: 140px; text-align: right;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ep in endpoints_didi %}
+                <tr class="main-row" id="row-{{ ep.id }}" data-ep-id="{{ ep.id }}" onclick="handleTransportRowClick('{{ ep.id }}', event)">
+                    <td style="text-align: center;">
+                        <button type="button" class="btn-expand-toggle" id="btn-toggle-{{ ep.id }}" onclick="toggleTransportDetailRow('{{ ep.id }}', event)">
+                            <i class="ri-add-line" id="icon-toggle-{{ ep.id }}"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <span class="method-badge method-get">GET</span>
+                    </td>
+                    <td>
+                        <div class="fw-bold text-dark" style="font-size: 0.95em;">{{ ep.nome }}</div>
+                        <code class="text-primary font-monospace" style="font-size: 0.82em;">/v4/{{ ep.path }}</code>
+                    </td>
+                    <td>
+                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                            <i class="ri-checkbox-circle-fill me-1"></i> Preparado (Pronto)
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border px-2 py-1 font-monospace" style="font-size: 0.76em;">
+                            {{ ep.modelo_db }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge px-2 py-1 font-monospace" style="background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; font-size: 0.75em;">
+                            {{ ep.db_count }} registros
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button type="button" class="btn btn-sm btn-outline-success fw-bold px-2 py-1" id="btn-quick-{{ ep.id }}" onclick="testTransportEndpoint('99', '{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', event)" style="border-radius: 6px; font-size: 0.78em;">
+                            <i class="ri-play-fill"></i> Testar
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light border px-2 py-1 text-muted" onclick="toggleTransportDetailRow('{{ ep.id }}', event)" style="border-radius: 6px; font-size: 0.78em;">
+                            <i class="ri-arrow-down-s-line" id="arrow-toggle-{{ ep.id }}"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Gaveta de Detalhes 99 -->
+                <tr class="endpoint-detail-row d-none" id="detail-{{ ep.id }}">
+                    <td colspan="7" class="p-0 border-0">
+                        <div class="detail-drawer" style="border-left-color: #eab308 !important;">
+                            <div class="diagnostic-box mb-3 border-warning shadow-sm" style="border-left: 5px solid #eab308 !important;">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2 pb-2 border-bottom">
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95em;">
+                                        <i class="ri-stethoscope-line text-warning me-1"></i> Laudo Técnico 99 Empresas (DiDi B2B)
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-outline-warning text-dark fw-bold" onclick="copyTransportDiag('{{ ep.id }}', '99 Empresas', '{{ ep.path }}')">
+                                        <i class="ri-file-copy-line me-1"></i> Copiar Laudo Técnico
+                                    </button>
+                                </div>
+                                <p class="text-secondary mb-2" style="font-size: 0.84em;">{{ ep.explicacao_detalhada }}</p>
+                                <div>
+                                    {% for tag in ep.tags_regras %}
+                                    <span class="tag-rule"><i class="ri-hashtag text-warning me-0.5"></i>{{ tag }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Terminal Preto de Teste -->
+                            <div class="terminal-black-box">
+                                <div class="terminal-header d-flex align-items-center justify-content-between">
+                                    <span class="text-slate-300 font-monospace">GET /v4/{{ ep.path }}</span>
+                                    <button type="button" class="btn btn-xs btn-warning text-dark fw-bold" onclick="testTransportEndpoint('99', '{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}')">
+                                        <i class="ri-send-plane-fill me-1"></i> Disparar Teste
+                                    </button>
+                                </div>
+                                <pre class="terminal-output" id="term-json-{{ ep.id }}">// Clique em 'Disparar Teste' para testar a comunicação com a API do 99 Empresas...</pre>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="toastCopyNotification" class="toast-copy d-none">
+    <i class="ri-checkbox-circle-fill text-success fs-18"></i>
+    <span id="toastCopyText">Laudo de Diagnóstico copiado para a área de transferência!</span>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchTransportTab(provider) {
+        const btnUber = document.getElementById("tabBtnUber");
+        const btnDidi = document.getElementById("tabBtnDidi");
+        const contentUber = document.getElementById("tabContentUber");
+        const contentDidi = document.getElementById("tabContentDidi");
+
+        if (provider === 'uber') {
+            btnUber.classList.add("active");
+            btnDidi.classList.remove("active");
+            contentUber.classList.remove("d-none");
+            contentDidi.classList.add("d-none");
+        } else {
+            btnDidi.classList.add("active");
+            btnUber.classList.remove("active");
+            contentDidi.classList.remove("d-none");
+            contentUber.classList.add("d-none");
+        }
+    }
+
+    function handleTransportRowClick(epId, event) {
+        if (event.target.closest(".btn-expand-toggle") || event.target.closest("button")) return;
+        toggleTransportDetailRow(epId, event);
+    }
+
+    function toggleTransportDetailRow(epId, event) {
+        if (event) event.stopPropagation();
+        const mainRow = document.getElementById(`row-${epId}`);
+        const detailRow = document.getElementById(`detail-${epId}`);
+        const iconToggle = document.getElementById(`icon-toggle-${epId}`);
+        const arrowToggle = document.getElementById(`arrow-toggle-${epId}`);
+
+        if (!detailRow) return;
+
+        if (detailRow.classList.contains("d-none")) {
+            detailRow.classList.remove("d-none");
+            if (mainRow) mainRow.classList.add("expanded");
+            if (iconToggle) iconToggle.className = "ri-subtract-line";
+            if (arrowToggle) arrowToggle.className = "ri-arrow-up-s-line";
+        } else {
+            detailRow.classList.add("d-none");
+            if (mainRow) mainRow.classList.remove("expanded");
+            if (iconToggle) iconToggle.className = "ri-add-line";
+            if (arrowToggle) arrowToggle.className = "ri-arrow-down-s-line";
+        }
+    }
+
+    function testTransportEndpoint(provider, epId, path, method, event) {
+        if (event) event.stopPropagation();
+        const termJson = document.getElementById(`term-json-${epId}`);
+        const btn = document.getElementById(`btn-quick-${epId}`);
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
+        }
+
+        const proxyUrl = `{% url 'dashboard:transportes_api_proxy' provider='uber' endpoint_key='test' %}`.replace('uber', provider).replace('test', epId);
+
+        fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ path: path, method: method })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ri-play-fill"></i> Testar`;
+            }
+            if (termJson) {
+                termJson.innerText = JSON.stringify(data, null, 2);
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ri-play-fill"></i> Testar`;
+            }
+            if (termJson) {
+                termJson.innerText = "// Erro na requisição: " + err;
+            }
+        });
+    }
+
+    function copyTransportDiag(epId, provider, path) {
+        const nowStr = new Date().toLocaleString('pt-BR');
+        const report = `=====================================================
+📋 LAUDO TÉCNICO DE INTEGRAÇÃO - ${provider.toUpperCase()}
+Organização: Centro Dom Helder Camara (CDC)
+Data/Hora: ${nowStr}
+Endpoint: ${path}
+Status: Homologado & Preparado no CDC Core
+=====================================================`;
+
+        navigator.clipboard.writeText(report).then(() => {
+            const toast = document.getElementById("toastCopyNotification");
+            if (toast) {
+                toast.classList.remove("d-none");
+                setTimeout(() => toast.classList.add("d-none"), 3500);
+            }
+        });
+    }
+</script>
+{% endblock %}
