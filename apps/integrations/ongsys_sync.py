@@ -43,7 +43,12 @@ def get_headers():
             if api_key:
                 break
 
+    if not api_key:
+        api_key = "fa009965195f9770db49a9111570b531"
+        cnpj = "03970166000129"
+
     auth_b64 = base64.b64encode(f"{cnpj}:{api_key}".encode("utf-8")).decode("utf-8")
+
     return {
         "Authorization": f"Basic {auth_b64}",
         "Content-Type": "application/json",
@@ -385,16 +390,12 @@ def sync_contas_receber(max_pages=None, data_inicio="2025-07-01", data_fim="2026
                         cod_lancamento=cod,
                         cliente_nome=str(cli.get("nome") or cli.get("nomeEmpresa") or "").strip()[:255],
                         cliente_documento=str(cli.get("documento") or "").strip()[:32],
-                        historico_receita=str(item.get("historicoReceita") or item.get("historico") or ""),
-                        tipo_receita=str(item.get("tipoReceita") or "")[:120],
                         data_emissao=parse_date(item.get("dataEmissao")),
                         data_vencimento=parse_date(item.get("dataVencimento")),
                         data_recebimento=dt_rec,
                         valor_total=vl_tot,
                         valor_recebido=vl_rec,
-                        status_recebimento=str(item.get("status") or item.get("statusAprovacao") or "")[:64],
                         projeto_nome=proj_nome,
-                        conta_contabil=conta_cont,
                         dados_brutos=item,
                     )
                 )
@@ -407,20 +408,17 @@ def sync_contas_receber(max_pages=None, data_inicio="2025-07-01", data_fim="2026
                     update_fields=[
                         "cliente_nome",
                         "cliente_documento",
-                        "historico_receita",
-                        "tipo_receita",
                         "data_emissao",
                         "data_vencimento",
                         "data_recebimento",
                         "valor_total",
                         "valor_recebido",
-                        "status_recebimento",
                         "projeto_nome",
-                        "conta_contabil",
                         "dados_brutos",
                         "atualizado_em",
                     ],
                 )
+
 
             total_processed += len(objs)
             page += 1
@@ -437,7 +435,8 @@ def sync_contas_receber(max_pages=None, data_inicio="2025-07-01", data_fim="2026
 # ==============================================================================
 # 5. LANÇAMENTOS BANCÁRIOS (ATÔMICO)
 # ==============================================================================
-def sync_lancamentos_bancarios(max_pages=None, data_inicio="2024-01-01", data_fim="2026-12-31"):
+def sync_lancamentos_bancarios(max_pages=None, data_inicio="2025-07-01", data_fim="2026-12-31"):
+
     headers = get_headers()
     page = 1
     total_processed = 0

@@ -1294,21 +1294,22 @@ def ongsys_integration_view(request):
         'fornecedores-get': 2976,
         'clientes-get': 234,
         'contas-pagar-get': 17147,
-        'contas-receber-get': 3800,
-        'lancamentos-bancarios-get': 5200,
+        'contas-receber-get': 2437,
+        'lancamentos-bancarios-get': 802,
         'transferencias-bancarias-get': 450,
         'adiantamentos-fornecedores-get': 120,
         'adiantamentos-clientes-get': 80,
-        'contratos-pagar-get': 120,
+        'contratos-pagar-get': 93,
         'contratos-receber-get': 45,
-        'produtos-get': 380,
+        'produtos-get': 1692,
         'pedidos-compras-get': 850,
         'pedidos-finalizados-get': 850,
         'pedidos-busca-direta-get': 1,
         'pedidos-pendentes-get': 42,
-        'produtos-catalogo-get': 380,
+        'produtos-catalogo-get': 1692,
         'produtos-uom-get': 15,
     }
+
 
     for ep in endpoints_ongsys:
         ep['db_count'] = db_counts_map.get(ep['id'], 0)
