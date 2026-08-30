@@ -445,7 +445,7 @@
                     <th style="width: 170px;">Módulo</th>
                     <th style="width: 160px;">Status / Health</th>
                     <th style="width: 170px;">Último Uso c/ Sucesso</th>
-                    <th style="width: 130px;">Banco Local</th>
+                    <th style="width: 175px;">Sincronia Atômica</th>
                     <th style="width: 140px; text-align: right;">Ações</th>
                 </tr>
             </thead>
@@ -519,18 +519,53 @@
                         </div>
                     </td>
 
-                    <!-- Banco Local / Registros -->
+                    <!-- Sincronia Atômica / Banco Local -->
                     <td>
                         {% if ep.modelo_db and ep.modelo_db != 'Nenhum (Auditoria em Memória)' %}
-                        <span class="badge px-2 py-1 font-monospace" style="background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; font-size: 0.75em;" title="Espelho PostgreSQL Atômico: {{ ep.modelo_db }}">
-                            <i class="ri-database-2-line me-0.5"></i> {{ ep.db_count }} reg.
-                        </span>
+                            {% if ep.sync_percent >= 100 %}
+                            <div class="d-flex flex-column gap-1" style="min-width: 140px;" title="Sincronização 100% íntegra no PostgreSQL: {{ ep.modelo_db }}">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="badge bg-success-subtle text-success border border-success px-2 py-0.5 fw-bold font-monospace" style="font-size: 0.72em; border-radius: 5px;">
+                                        <i class="ri-checkbox-circle-fill me-0.5"></i> 100% OK
+                                    </span>
+                                    <small class="text-success fw-bold font-monospace" style="font-size: 0.72em;">{{ ep.db_count }} reg.</small>
+                                </div>
+                                <div class="progress" style="height: 5px; border-radius: 4px; background: #e2e8f0;">
+                                    <div class="progress-bar bg-success" style="width: 100%;"></div>
+                                </div>
+                            </div>
+                            {% elif ep.sync_percent > 0 %}
+                            <div class="d-flex flex-column gap-1" style="min-width: 140px;" title="Sincronização em andamento no PostgreSQL: {{ ep.modelo_db }}">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary px-2 py-0.5 fw-bold font-monospace" style="font-size: 0.72em; border-radius: 5px;">
+                                        <i class="ri-loader-4-line me-0.5"></i> {{ ep.sync_percent }}% Parcial
+                                    </span>
+                                    <small class="text-muted font-monospace" style="font-size: 0.70em;">{{ ep.db_count }} / {{ ep.sync_total_estimado }}</small>
+                                </div>
+                                <div class="progress" style="height: 5px; border-radius: 4px; background: #e2e8f0;">
+                                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" style="width: {{ ep.sync_percent }}%;"></div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="d-flex flex-column gap-1" style="min-width: 140px;" title="Aguardando carga atômica no PostgreSQL: {{ ep.modelo_db }}">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-0.5 fw-bold font-monospace" style="font-size: 0.72em; border-radius: 5px;">
+                                        <i class="ri-time-line me-0.5"></i> 0% Pendente
+                                    </span>
+                                    <small class="text-muted font-monospace" style="font-size: 0.70em;">0 / ~{{ ep.sync_total_estimado }}</small>
+                                </div>
+                                <div class="progress" style="height: 5px; border-radius: 4px; background: #f1f5f9;">
+                                    <div class="progress-bar bg-warning" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                            {% endif %}
                         {% else %}
-                        <span class="badge bg-light text-muted border px-2 py-1" style="font-size: 0.72em;">
+                        <span class="badge bg-light text-muted border px-2 py-1 font-monospace" style="font-size: 0.72em;">
                             REST Direto
                         </span>
                         {% endif %}
                     </td>
+
 
                     <!-- Ações Rápidas -->
                     <td style="text-align: right;">
@@ -779,7 +814,7 @@
                         <th style="width: 170px;">Módulo</th>
                         <th style="width: 160px;">Status / Health</th>
                         <th style="width: 170px;">Último Uso c/ Sucesso</th>
-                        <th style="width: 140px;">Destino no ERP</th>
+                        <th style="width: 175px;">Sincronia Atômica</th>
                         <th style="width: 140px; text-align: right;">Ações</th>
                     </tr>
                 </thead>
@@ -820,11 +855,53 @@
                                 </span>
                             </div>
                         </td>
+                        <!-- Sincronia Atômica / Banco Local -->
                         <td>
-                            <span class="badge px-2 py-1 font-monospace" style="background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; font-size: 0.75em;">
-                                <i class="ri-inbox-archive-line me-0.5"></i> {{ ep.modelo_db }}
+                            {% if ep.modelo_db and ep.modelo_db != 'Nenhum (Auditoria em Memória)' %}
+                                {% if ep.sync_percent >= 100 %}
+                                <div class="d-flex flex-column gap-1" style="min-width: 140px;" title="Espelho no NextERP: {{ ep.modelo_db }}">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="badge bg-success-subtle text-success border border-success px-2 py-0.5 fw-bold font-monospace" style="font-size: 0.72em; border-radius: 5px;">
+                                            <i class="ri-checkbox-circle-fill me-0.5"></i> 100% OK
+                                        </span>
+                                        <small class="text-success fw-bold font-monospace" style="font-size: 0.72em;">{{ ep.db_count }} reg.</small>
+                                    </div>
+                                    <div class="progress" style="height: 5px; border-radius: 4px; background: #e2e8f0;">
+                                        <div class="progress-bar bg-success" style="width: 100%;"></div>
+                                    </div>
+                                </div>
+                                {% elif ep.sync_percent > 0 %}
+                                <div class="d-flex flex-column gap-1" style="min-width: 140px;" title="Espelho no NextERP: {{ ep.modelo_db }}">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary px-2 py-0.5 fw-bold font-monospace" style="font-size: 0.72em; border-radius: 5px;">
+                                            <i class="ri-loader-4-line me-0.5"></i> {{ ep.sync_percent }}% Parcial
+                                        </span>
+                                        <small class="text-muted font-monospace" style="font-size: 0.70em;">{{ ep.db_count }} / {{ ep.sync_total_estimado }}</small>
+                                    </div>
+                                    <div class="progress" style="height: 5px; border-radius: 4px; background: #e2e8f0;">
+                                        <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" style="width: {{ ep.sync_percent }}%;"></div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="d-flex flex-column gap-1" style="min-width: 140px;" title="Espelho no NextERP: {{ ep.modelo_db }}">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-0.5 fw-bold font-monospace" style="font-size: 0.72em; border-radius: 5px;">
+                                            <i class="ri-time-line me-0.5"></i> 0% Pendente
+                                        </span>
+                                        <small class="text-muted font-monospace" style="font-size: 0.70em;">0 / ~{{ ep.sync_total_estimado }}</small>
+                                    </div>
+                                    <div class="progress" style="height: 5px; border-radius: 4px; background: #f1f5f9;">
+                                        <div class="progress-bar bg-warning" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                            <span class="badge bg-light text-muted border px-2 py-1 font-monospace" style="font-size: 0.72em;">
+                                REST Direto
                             </span>
+                            {% endif %}
                         </td>
+
                         <td style="text-align: right;">
                             <button type="button" class="btn btn-sm btn-outline-success fw-bold px-2 py-1" id="btn-quick-{{ ep.id }}" onclick="testSingleEndpoint('{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', '{{ ep.parametros|escapejs }}', event)" style="border-radius: 6px; font-size: 0.78em;" title="Testar Rota de Estoque">
                                 <i class="ri-play-fill"></i> Testar

@@ -1290,8 +1290,49 @@ def ongsys_integration_view(request):
         'produtos-uom-get': 15,
     }
 
+    sync_target_map = {
+        'fornecedores-get': 2976,
+        'clientes-get': 234,
+        'contas-pagar-get': 17147,
+        'contas-receber-get': 3800,
+        'lancamentos-bancarios-get': 5200,
+        'transferencias-bancarias-get': 450,
+        'adiantamentos-fornecedores-get': 120,
+        'adiantamentos-clientes-get': 80,
+        'contratos-pagar-get': 120,
+        'contratos-receber-get': 45,
+        'produtos-get': 380,
+        'pedidos-compras-get': 850,
+        'pedidos-finalizados-get': 850,
+        'pedidos-busca-direta-get': 1,
+        'pedidos-pendentes-get': 42,
+        'produtos-catalogo-get': 380,
+        'produtos-uom-get': 15,
+    }
+
     for ep in endpoints_ongsys:
         ep['db_count'] = db_counts_map.get(ep['id'], 0)
+        target = sync_target_map.get(ep['id'], 0)
+        ep['sync_total_estimado'] = target
+        
+        has_model = ep.get('modelo_db') and ep.get('modelo_db') != 'Nenhum (Auditoria em Memória)'
+        if has_model and target > 0:
+            pct = min(100, int((ep['db_count'] / target) * 100))
+            ep['sync_percent'] = pct
+            if pct >= 100:
+                ep['sync_status_badge'] = 'success'
+                ep['sync_status_label'] = '100% OK'
+            elif pct > 0:
+                ep['sync_status_badge'] = 'primary'
+                ep['sync_status_label'] = f'{pct}% Parcial'
+            else:
+                ep['sync_status_badge'] = 'warning'
+                ep['sync_status_label'] = '0% Pendente'
+        else:
+            ep['sync_percent'] = 0
+            ep['sync_status_badge'] = 'light'
+            ep['sync_status_label'] = 'REST Direto'
+
         st = status_map.get(ep['id'])
         if st:
             ep['ultimo_status_http'] = st.ultimo_status_http
@@ -1319,6 +1360,27 @@ def ongsys_integration_view(request):
 
     for ep in endpoints_ongsys_estoque:
         ep['db_count'] = db_counts_map.get(ep['id'], 0)
+        target = sync_target_map.get(ep['id'], 0)
+        ep['sync_total_estimado'] = target
+        
+        has_model = ep.get('modelo_db') and ep.get('modelo_db') != 'Nenhum (Auditoria em Memória)'
+        if has_model and target > 0:
+            pct = min(100, int((ep['db_count'] / target) * 100))
+            ep['sync_percent'] = pct
+            if pct >= 100:
+                ep['sync_status_badge'] = 'success'
+                ep['sync_status_label'] = '100% OK'
+            elif pct > 0:
+                ep['sync_status_badge'] = 'primary'
+                ep['sync_status_label'] = f'{pct}% Parcial'
+            else:
+                ep['sync_status_badge'] = 'warning'
+                ep['sync_status_label'] = '0% Pendente'
+        else:
+            ep['sync_percent'] = 0
+            ep['sync_status_badge'] = 'light'
+            ep['sync_status_label'] = 'REST Direto'
+
         st = status_map.get(ep['id'])
         if st:
             ep['ultimo_status_http'] = st.ultimo_status_http
@@ -1339,6 +1401,7 @@ def ongsys_integration_view(request):
             ep['ultima_vez_testado'] = timezone.now()
             ep['ultima_vez_sucesso'] = timezone.now()
             cnt_estoque_200 += 1
+
 
     context = {
         'endpoints': endpoints_ongsys,
