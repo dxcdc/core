@@ -1,7 +1,9 @@
 import os
 import re
 import json
+import logging
 import requests
+from django.core.cache import cache
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -15,6 +17,66 @@ from apps.dataops.models import (
 )
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
+
+
+def _get_official_ongsys_warehouse_mappings():
+    """Return the persisted NextERP mapping; never substitute fixture data."""
+    cache_key = "dashboard:ongsys-warehouse-mappings:v1"
+    cached = cache.get(cache_key)
+    if isinstance(cached, dict):
+        return cached
+
+    from apps.integrations.models import Warehouse
+    from apps.integrations.services.nexterp import NextERPAnalyticsClient, NextERPError
+
+    try:
+        mappings = NextERPAnalyticsClient().fetch_ongsys_warehouse_mappings()
+        warehouse_projects = {}
+        for warehouse in Warehouse.objects.filter(active=True).only(
+            "source_name", "warehouse_name", "project_id"
+        ):
+            if warehouse.project_id:
+                warehouse_projects[warehouse.source_name] = warehouse.project_id
+                warehouse_projects[warehouse.warehouse_name] = warehouse.project_id
+
+        rows = []
+        active_statuses = {"Ativo", "Ativo automático", "Ativo manual"}
+        for mapping in mappings:
+            warehouse = (mapping.get("warehouse") or "").strip()
+            status = mapping["status"].strip()
+            rows.append(
+                {
+                    "codigo": mapping["cost_center_code"].strip(),
+                    "centro_custo": (
+                        str(mapping.get("description") or "").strip()
+                        or "Não informado pelo NextERP"
+                    ),
+                    "armazem": warehouse or "Não definido",
+                    "projeto": (
+                        str(mapping.get("project_id") or "").strip()
+                        or warehouse_projects.get(warehouse)
+                        or "Não informado pelo NextERP"
+                    ),
+                    "status": status,
+                    "ativo": bool(mapping.get("enabled")) or status in active_statuses,
+                }
+            )
+        result = {"available": True, "rows": rows, "error": ""}
+        cache.set(cache_key, result, 300)
+        return result
+    except NextERPError as exc:
+        logger.warning(
+            "Mapeamento ONGSYS do NextERP indisponível",
+            extra={"error_code": getattr(exc, "code", "nexterp_error")},
+        )
+        result = {
+            "available": False,
+            "rows": [],
+            "error": "O cadastro oficial do NextERP está temporariamente indisponível.",
+        }
+        cache.set(cache_key, result, 60)
+        return result
 
 def landing_view(request):
     """Renderiza a Landing Page pública do CDC Core."""
@@ -812,11 +874,6 @@ def ongsys_integration_view(request):
             if vault_api_key:
                 break
 
-    # Fallback seguro para as credenciais oficiais homologadas
-    if not vault_api_key:
-        vault_api_key = 'fa009965195f9770db49a9111570b531'
-        vault_cnpj = '03970166000129'
-
     has_api_key = bool(vault_api_key)
     formatted_cnpj = f"{vault_cnpj[:2]}.{vault_cnpj[2:5]}.{vault_cnpj[5:8]}/{vault_cnpj[8:12]}-{vault_cnpj[12:]}" if len(vault_cnpj) == 14 else vault_cnpj
 
@@ -1213,16 +1270,8 @@ def ongsys_integration_view(request):
         }
     ]
 
-    centros_custo_armazens = [
-        {"codigo": "1.01.02.01", "centro_custo": "CAB ATITUDE II.I", "armazem": "CAB ATITUDE II.I - DESPESAS DIRETAS - BREVE - C", "projeto": "Projeto Atitude II.I", "status": "Ativo", "tipo": "Operacional"},
-        {"codigo": "1.01.02.02", "centro_custo": "REC ATITUDE II.I", "armazem": "REC ATITUDE II.I - DESPESAS DIRETAS - BREVE - C", "projeto": "Projeto Atitude II.I", "status": "Ativo", "tipo": "Operacional"},
-        {"codigo": "1.01.02.03", "centro_custo": "JAB ATITUDE II.I", "armazem": "JAB ATITUDE II.I - DESPESAS DIRETAS - BREVE - C", "projeto": "Projeto Atitude II.I", "status": "Ativo", "tipo": "Operacional"},
-        {"codigo": "1.01.02.04", "centro_custo": "CAR ATITUDE II.I", "armazem": "CAR ATITUDE II.I - DESPESAS DIRETAS - BREVE - C", "projeto": "Projeto Atitude II.I", "status": "Ativo", "tipo": "Operacional"},
-        {"codigo": "1.02.01.01", "centro_custo": "SEDE CDC GERAL", "armazem": "SEDE - ADMINISTRATIVO - C", "projeto": "Institucional / Geral", "status": "Ativo", "tipo": "Sede / Matriz"},
-        {"codigo": "1.03.01.01", "centro_custo": "PROVITA PE", "armazem": "PROVITA - OPERACIONAL - C", "projeto": "Projeto Provita", "status": "Ativo", "tipo": "Direitos Humanos"},
-        {"codigo": "1.03.02.01", "centro_custo": "PPCAM PE", "armazem": "PPCAM - OPERACIONAL - C", "projeto": "Projeto PPCAM", "status": "Ativo", "tipo": "Proteção à Criança"},
-        {"codigo": "1.03.03.01", "centro_custo": "PPDDH PE", "armazem": "PPDDH - OPERACIONAL - C", "projeto": "Projeto PPDDH", "status": "Ativo", "tipo": "Defensores DH"},
-    ]
+    official_mappings = _get_official_ongsys_warehouse_mappings()
+    centros_custo_armazens = official_mappings["rows"]
 
     # Contagens locais do espelho PostgreSQL atômico e Status dos Endpoints
     try:
@@ -1409,6 +1458,8 @@ def ongsys_integration_view(request):
         'endpoints_estoque': endpoints_ongsys_estoque,
         'centros_custo_armazens': centros_custo_armazens,
         'total_centros_custo': len(centros_custo_armazens),
+        'mapeamentos_disponiveis': official_mappings["available"],
+        'mapeamentos_erro': official_mappings["error"],
         'base_url': 'https://www.ongsys.com.br/app/index.php/api/v2/',
         'docs_url': 'https://ajuda.ongsys.com.br/api-v1',
         'vault_cnpj': vault_cnpj,
@@ -1642,10 +1693,6 @@ def ongsys_api_proxy_view(request, endpoint_key):
                     pass
             if api_key:
                 break
-
-    if not api_key:
-        api_key = 'fa009965195f9770db49a9111570b531'
-        cnpj = '03970166000129'
 
     path = str(data.get('path', '')).strip().lstrip('/')
 

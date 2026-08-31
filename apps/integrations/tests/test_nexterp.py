@@ -75,3 +75,24 @@ class NextERPClientTests(SimpleTestCase):
         }})])
         catalog = client.fetch_catalog()
         self.assertEqual(catalog["datasets"][0]["records"], 3)
+
+    def test_fetches_persisted_ongsys_warehouse_mappings(self):
+        client, session = self.make_client([self.response(200, {"message": [{
+            "cost_center_code": "CC-01",
+            "warehouse": "Armazem Central - C",
+            "status": "Ativo",
+        }]})])
+
+        mappings = client.fetch_ongsys_warehouse_mappings()
+
+        self.assertEqual("CC-01", mappings[0]["cost_center_code"])
+        self.assertEqual(client.ongsys_mappings_path, session.get.call_args.args[0].replace(client.base_url, ""))
+
+    def test_rejects_incomplete_ongsys_warehouse_mapping(self):
+        client, _ = self.make_client([self.response(200, {"message": [{
+            "warehouse": "Armazem Central - C",
+            "status": "Ativo",
+        }]})])
+
+        with self.assertRaisesRegex(NextERPContractError, "sem centro de custo"):
+            client.fetch_ongsys_warehouse_mappings()

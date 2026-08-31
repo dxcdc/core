@@ -50,6 +50,9 @@ class DatasetPage:
 class NextERPAnalyticsClient:
     dataset_path = "/api/method/cdc_theme.api.get_cdc_analytics_dataset"
     catalog_path = "/api/method/cdc_theme.api.get_cdc_analytics_catalog"
+    ongsys_mappings_path = (
+        "/api/method/cdc_theme.api.get_ongsys_warehouse_mappings_for_extractor"
+    )
 
     def __init__(
         self,
@@ -87,6 +90,10 @@ class NextERPAnalyticsClient:
     def fetch_catalog(self, *, correlation_id=None):
         payload = self._get(self.catalog_path, {}, correlation_id or uuid.uuid4())
         return self._validate_catalog(payload)
+
+    def fetch_ongsys_warehouse_mappings(self, *, correlation_id=None):
+        payload = self._get(self.ongsys_mappings_path, {}, correlation_id or uuid.uuid4())
+        return self._validate_ongsys_warehouse_mappings(payload)
 
     def _get(self, path, params, correlation_id):
         headers = {
@@ -190,3 +197,26 @@ class NextERPAnalyticsClient:
         if not warehouses or warehouses.get("read_only") is not True:
             raise NextERPContractError("Catálogo sem conjunto warehouses somente leitura.")
         return body
+
+    @staticmethod
+    def _validate_ongsys_warehouse_mappings(payload):
+        if not isinstance(payload, dict):
+            raise NextERPContractError("Mapeamentos do NextERP não são um objeto JSON.")
+        mappings = payload.get("message")
+        if not isinstance(mappings, list):
+            raise NextERPContractError("Resposta sem lista de mapeamentos ONGSYS.")
+        validated = []
+        for mapping in mappings:
+            if not isinstance(mapping, dict):
+                raise NextERPContractError("Mapeamento ONGSYS inválido.")
+            code = mapping.get("cost_center_code")
+            warehouse = mapping.get("warehouse")
+            status = mapping.get("status")
+            if not isinstance(code, str) or not code.strip():
+                raise NextERPContractError("Mapeamento ONGSYS sem centro de custo.")
+            if warehouse is not None and not isinstance(warehouse, str):
+                raise NextERPContractError("Mapeamento ONGSYS com armazém inválido.")
+            if not isinstance(status, str) or not status.strip():
+                raise NextERPContractError("Mapeamento ONGSYS sem situação.")
+            validated.append(mapping)
+        return validated
