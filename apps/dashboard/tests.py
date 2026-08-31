@@ -74,3 +74,14 @@ class OngsysWarehouseMappingTests(TestCase):
         self.assertNotIn("centros_custo_armazens = [", source)
         legacy_key = "fa009965" + "195f9770db49a9111570b531"
         self.assertNotIn(legacy_key, source)
+
+    def test_mapping_template_has_search_and_combined_filters(self):
+        template = (
+            Path(__file__).resolve().parents[2]
+            / "templates/dashboard/ongsys_integration.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn('id="mappingSearchInput"', template)
+        self.assertIn('id="mappingWarehouseFilter"', template)
+        self.assertIn('id="mappingValidationFilter"', template)
+        self.assertIn('id="mappingFiltersClear"', template)
+        self.assertIn('function initMappingFilters()', template)

@@ -1065,8 +1065,41 @@
             {{ mapeamentos_erro }} Nenhum valor fixo ou estimado foi exibido.
         </div>
         {% endif %}
+        {% if mapeamentos_disponiveis %}
+        <div class="p-3 bg-light border-bottom">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-lg-5">
+                    <label class="visually-hidden" for="mappingSearchInput">Pesquisar mapeamentos</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white"><i class="ri-search-line text-muted"></i></span>
+                        <input type="search" class="form-control" id="mappingSearchInput" placeholder="Pesquisar código, centro de custo, armazém ou evidência" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="visually-hidden" for="mappingWarehouseFilter">Situação do armazém</label>
+                    <select class="form-select form-select-sm" id="mappingWarehouseFilter">
+                        <option value="">Todos os armazéns</option>
+                    </select>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="visually-hidden" for="mappingValidationFilter">Validação OngSys</label>
+                    <select class="form-select form-select-sm" id="mappingValidationFilter">
+                        <option value="">Todas as validações</option>
+                    </select>
+                </div>
+                <div class="col-7 col-lg-2">
+                    <span class="text-muted fw-semibold" id="mappingFilterCount" aria-live="polite">{{ total_centros_custo }} resultados</span>
+                </div>
+                <div class="col-5 col-lg-1 text-end">
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" id="mappingFiltersClear" title="Limpar pesquisa e filtros">
+                        <i class="ri-filter-off-line"></i> Limpar
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         <div class="table-responsive">
-            <table class="table table-hover mb-0" style="font-size: 0.86em;">
+            <table class="table table-hover mb-0" id="tableOngsysMappings" style="font-size: 0.86em;">
                 <thead class="bg-light text-muted" style="font-size: 0.78em; text-transform: uppercase;">
                     <tr>
                         <th style="width: 140px;">Código OngSys</th>
@@ -1077,9 +1110,9 @@
                         <th style="width: 130px;">Evidência</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="mappingTableBody">
                     {% for c in centros_custo_armazens %}
-                    <tr>
+                    <tr class="mapping-row" data-warehouse-status="{{ c.armazem_status }}" data-validation-status="{{ c.validacao_status }}">
                         <td>
                             <code class="text-primary fw-bold font-monospace">{{ c.codigo }}</code>
                         </td>
@@ -1109,6 +1142,12 @@
                             Nenhum mapeamento oficial foi retornado pelo NextERP.
                         </td>
                     {% endfor %}
+                    <tr id="mappingNoResults" class="d-none">
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="ri-search-eye-line d-block fs-24 mb-1"></i>
+                            Nenhum vínculo corresponde à pesquisa e aos filtros selecionados.
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -1706,6 +1745,65 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         }, 5000);
     }
 
+
+    function initMappingFilters() {
+        const search = document.getElementById("mappingSearchInput");
+        const warehouseFilter = document.getElementById("mappingWarehouseFilter");
+        const validationFilter = document.getElementById("mappingValidationFilter");
+        const clearButton = document.getElementById("mappingFiltersClear");
+        const counter = document.getElementById("mappingFilterCount");
+        const noResults = document.getElementById("mappingNoResults");
+        const rows = Array.from(document.querySelectorAll("#mappingTableBody .mapping-row"));
+        if (!search || !warehouseFilter || !validationFilter || !clearButton) return;
+
+        const normalize = value => String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+
+        function populateFilter(select, values) {
+            Array.from(values).sort((a, b) => a.localeCompare(b, "pt-BR")).forEach(value => {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+        }
+
+        populateFilter(warehouseFilter, new Set(rows.map(row => row.dataset.warehouseStatus).filter(Boolean)));
+        populateFilter(validationFilter, new Set(rows.map(row => row.dataset.validationStatus).filter(Boolean)));
+
+        function applyFilters() {
+            const query = normalize(search.value);
+            const warehouse = warehouseFilter.value;
+            const validation = validationFilter.value;
+            let visible = 0;
+            rows.forEach(row => {
+                const matches = (!query || normalize(row.textContent).includes(query))
+                    && (!warehouse || row.dataset.warehouseStatus === warehouse)
+                    && (!validation || row.dataset.validationStatus === validation);
+                row.classList.toggle("d-none", !matches);
+                if (matches) visible += 1;
+            });
+            if (counter) counter.textContent = `${visible} de ${rows.length} resultados`;
+            if (noResults) noResults.classList.toggle("d-none", visible !== 0);
+        }
+
+        search.addEventListener("input", applyFilters);
+        warehouseFilter.addEventListener("change", applyFilters);
+        validationFilter.addEventListener("change", applyFilters);
+        clearButton.addEventListener("click", () => {
+            search.value = "";
+            warehouseFilter.value = "";
+            validationFilter.value = "";
+            applyFilters();
+            search.focus();
+        });
+        applyFilters();
+    }
+
+    initMappingFilters();
 
     function runAtomicSync() {
         const entity = document.getElementById("syncEntitySelect").value;
