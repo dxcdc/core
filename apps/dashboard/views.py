@@ -837,43 +837,24 @@ def ongsys_integration_view(request):
     Renderiza a Central de Integração com a API do OngSys (v2).
     Utiliza o Cofre de Segredos do Servidor (Server-Side Vault / Env) para proteger a API Key.
     """
-    from django.conf import settings
-
     if request.method == 'POST':
-        new_cnpj = re.sub(r'\D', '', request.POST.get('ongsys_cnpj', '').strip())
-        new_api_key = request.POST.get('ongsys_api_key', '').strip()
+        return JsonResponse(
+            {'error': 'Credenciais são administradas somente pelo Rundeck Key Storage.'},
+            status=405,
+        )
 
-        if new_cnpj:
-            os.environ['ONGSYS_CNPJ'] = new_cnpj
-        if new_api_key:
-            os.environ['ONGSYS_API_KEY'] = new_api_key
-
-        messages.success(request, 'Credenciais do OngSys salvas com segurança no Cofre do Servidor!')
-        return redirect('dashboard:ongsys_integration')
-
-    vault_cnpj = os.environ.get('ONGSYS_CNPJ') or getattr(settings, 'ONGSYS_CNPJ', '03970166000129')
-    vault_cnpj = re.sub(r'\D', '', vault_cnpj)
-    vault_api_key = os.environ.get('ONGSYS_API_KEY') or getattr(settings, 'ONGSYS_API_KEY', '')
-
-    if not vault_api_key:
-        for p in ('/app/.env', '/root/cdc-core/.env', str(settings.BASE_DIR / '.env'), '.env'):
-            if os.path.exists(p):
-                try:
-                    with open(p, 'r', encoding='utf-8') as f:
-                        for line in f:
-                            if line.strip().startswith('ONGSYS_API_KEY='):
-                                vault_api_key = line.strip().split('=', 1)[1].strip().strip('"').strip("'")
-                            elif line.strip().startswith('ONGSYS_CNPJ='):
-                                vault_cnpj = re.sub(r'\D', '', line.strip().split('=', 1)[1].strip().strip('"').strip("'"))
-                except Exception:
-                    pass
-            if vault_api_key:
-                break
-
-    has_api_key = bool(vault_api_key)
+    from apps.integrations.ongsys_credentials import (
+        OngsysCredentialsError,
+        get_ongsys_credentials,
+    )
+    try:
+        credentials = get_ongsys_credentials()
+        vault_cnpj = credentials.username
+        has_api_key = True
+    except OngsysCredentialsError:
+        vault_cnpj = ''
+        has_api_key = False
     formatted_cnpj = f"{vault_cnpj[:2]}.{vault_cnpj[2:5]}.{vault_cnpj[5:8]}/{vault_cnpj[8:12]}-{vault_cnpj[12:]}" if len(vault_cnpj) == 14 else vault_cnpj
-
-    masked_api_key = f"{vault_api_key[:4]}••••••••••••••••{vault_api_key[-4:]}" if len(vault_api_key) > 8 else ("••••••••••••" if has_api_key else "Não Configurada")
 
 
     endpoints_ongsys = [
@@ -1307,6 +1288,25 @@ def ongsys_integration_view(request):
         statuses = []
         status_map = {}
 
+    tested_statuses = [status for status in statuses if status.ultima_vez_testado]
+    latest_status = max(tested_statuses, key=lambda status: status.ultima_vez_testado, default=None)
+    if not has_api_key:
+        connection_state = 'missing'
+        connection_label = 'Pendente'
+        connection_detail = 'Credencial ausente no cofre protegido'
+    elif latest_status and latest_status.status_classificacao in {'success', 'validated'}:
+        connection_state = 'operational'
+        connection_label = 'Operacional'
+        connection_detail = 'Último teste autenticado concluído'
+    elif latest_status and latest_status.status_classificacao == 'error':
+        connection_state = 'error'
+        connection_label = 'Falha no último teste'
+        connection_detail = 'Credencial configurada; consulte o diagnóstico'
+    else:
+        connection_state = 'configured'
+        connection_label = 'Configurada'
+        connection_detail = 'Aguardando primeiro teste autenticado'
+
     cnt_200 = 0
     cnt_422 = 0
     cnt_err = 0
@@ -1460,15 +1460,17 @@ def ongsys_integration_view(request):
         'docs_url': 'https://ajuda.ongsys.com.br/api-v1',
         'vault_cnpj': vault_cnpj,
         'formatted_cnpj': '03.970.166/0001-29' if vault_cnpj == '03970166000129' else vault_cnpj,
-        'masked_api_key': masked_api_key,
         'has_api_key': has_api_key,
+        'connection_state': connection_state,
+        'connection_label': connection_label,
+        'connection_detail': connection_detail,
         'total_endpoints': len(endpoints_ongsys),
         'total_endpoints_estoque': len(endpoints_ongsys_estoque),
         'total_endpoints_all': len(endpoints_ongsys) + len(endpoints_ongsys_estoque),
         'total_modulos': 4,
 
         'latency_ms': 120,
-        'health_status': 'Operacional (Basic Auth OK)' if has_api_key else 'Aguardando API Key',
+        'health_status': connection_label,
         'cnt_200': cnt_200,
         'cnt_422': cnt_422,
         'cnt_err': cnt_err,
@@ -1654,7 +1656,6 @@ def ongsys_api_proxy_view(request, endpoint_key):
     Lê a API Key com segurança diretamente do Cofre do Servidor (Server-Side Vault / Env).
     O cliente/browser NUNCA enxerga nem trafega a credencial sensível!
     """
-    import base64
     import json
     import time
     import os
@@ -1669,26 +1670,18 @@ def ongsys_api_proxy_view(request, endpoint_key):
     except Exception as e:
         return JsonResponse({'error': f'Payload JSON inválido: {e}'}, status=400)
 
-    from django.conf import settings
-    cnpj = str(data.get('cnpj') or os.environ.get('ONGSYS_CNPJ') or getattr(settings, 'ONGSYS_CNPJ', '03970166000129')).strip()
-    cnpj = re.sub(r'\D', '', cnpj)
-
-    api_key = str(data.get('api_key') or os.environ.get('ONGSYS_API_KEY') or getattr(settings, 'ONGSYS_API_KEY', '')).strip()
-
-    if not api_key:
-        for p in ('/app/.env', '/root/cdc-core/.env', str(settings.BASE_DIR / '.env'), '.env'):
-            if os.path.exists(p):
-                try:
-                    with open(p, 'r', encoding='utf-8') as f:
-                        for line in f:
-                            if line.strip().startswith('ONGSYS_API_KEY='):
-                                api_key = line.strip().split('=', 1)[1].strip().strip('"').strip("'")
-                            elif line.strip().startswith('ONGSYS_CNPJ='):
-                                cnpj = re.sub(r'\D', '', line.strip().split('=', 1)[1].strip().strip('"').strip("'"))
-                except Exception:
-                    pass
-            if api_key:
-                break
+    from apps.integrations.ongsys_credentials import (
+        OngsysCredentialsError,
+        get_ongsys_credentials,
+        get_ongsys_headers,
+    )
+    try:
+        credentials = get_ongsys_credentials()
+        headers = get_ongsys_headers()
+    except OngsysCredentialsError:
+        return JsonResponse({
+            'error': 'Credencial OngSys ausente no cofre protegido. A rotação é feita pelo Rundeck.'
+        }, status=503)
 
     path = str(data.get('path', '')).strip().lstrip('/')
 
@@ -1697,23 +1690,9 @@ def ongsys_api_proxy_view(request, endpoint_key):
     custom_body = data.get('body', {})
     ep_id = str(data.get('ep_id') or endpoint_key or '').strip()
 
-    if not cnpj or not api_key:
-        return JsonResponse({
-            'error': 'API Key do OngSys não encontrada no Cofre do Servidor. Por favor, configure a chave no painel de segredos.'
-        }, status=400)
-
-
-    # Constrói o cabeçalho Authorization: Basic Base64(CNPJ:API_KEY)
-    auth_str = f"{cnpj}:{api_key}"
-    auth_b64 = base64.b64encode(auth_str.encode('utf-8')).decode('utf-8')
-    headers = {
-        'Authorization': f'Basic {auth_b64}',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'CDC-Core-Integration-Hub/1.0'
-    }
-
-    target_url = f"https://www.ongsys.com.br/app/index.php/api/v2/{path}"
+    headers['Content-Type'] = 'application/json'
+    headers['User-Agent'] = 'CDC-Core-Integration-Hub/1.0'
+    target_url = f"{credentials.url_base}/{path}"
 
     req_timeout = 90 if 'pedidos' in path else 30
     start_time = time.time()

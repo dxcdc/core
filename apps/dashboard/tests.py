@@ -85,3 +85,27 @@ class OngsysWarehouseMappingTests(TestCase):
         self.assertIn('id="mappingValidationFilter"', template)
         self.assertIn('id="mappingFiltersClear"', template)
         self.assertIn('function initMappingFilters()', template)
+
+
+class OngsysConnectionStatusTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username='ongsys-status-test', password='test-password'
+        )
+        self.client.force_login(self.user)
+
+    @patch('apps.integrations.ongsys_credentials.get_ongsys_credentials')
+    def test_configured_secret_is_not_reported_as_validated_without_test(self, resolver):
+        resolver.return_value.username = '03970166000129'
+        response = self.client.get(reverse('dashboard:ongsys_integration'))
+        self.assertContains(response, 'Configurada')
+        self.assertContains(response, 'Aguardando primeiro teste autenticado')
+        self.assertNotContains(response, 'Basic Auth Validado')
+
+    def test_dashboard_rejects_credential_submission(self):
+        response = self.client.post(
+            reverse('dashboard:ongsys_integration'),
+            {'ongsys_cnpj': '00000000000000', 'ongsys_api_key': 'never-store-me'},
+        )
+        self.assertEqual(405, response.status_code)
+        self.assertNotIn('never-store-me', response.content.decode())

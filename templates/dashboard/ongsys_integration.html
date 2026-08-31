@@ -269,16 +269,16 @@
         <div class="p-3 bg-white border rounded-3 shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-radius: 10px; border-color: #e2e8f0;">
             <div class="d-flex align-items-center justify-content-between mb-1.5">
                 <span class="text-muted fw-bold" style="font-size: 0.70rem; letter-spacing: 0.5px; text-transform: uppercase;">STATUS DA CONEXÃO</span>
-                <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 28px; height: 28px; background: {% if has_api_key %}#ecfdf5; color: #10b981;{% else %}#fffbeb; color: #f59e0b;{% endif %}">
-                    <i class="{% if has_api_key %}ri-shield-check-line{% else %}ri-alert-line{% endif %} fs-15"></i>
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 28px; height: 28px; background: {% if connection_state == 'operational' %}#ecfdf5; color: #10b981;{% elif connection_state == 'error' %}#fef2f2; color: #ef4444;{% else %}#fffbeb; color: #f59e0b;{% endif %}">
+                    <i class="{% if connection_state == 'operational' %}ri-shield-check-line{% else %}ri-alert-line{% endif %} fs-15"></i>
                 </span>
             </div>
             <div>
-                <div class="fw-bold {% if has_api_key %}text-success{% else %}text-warning{% endif %}" style="font-size: 1.15rem; line-height: 1.2;">
-                    {% if has_api_key %}🟢 Operacional{% else %}⚠️ Pendente{% endif %}
+                <div class="fw-bold {% if connection_state == 'operational' %}text-success{% elif connection_state == 'error' %}text-danger{% else %}text-warning{% endif %}" style="font-size: 1.15rem; line-height: 1.2;">
+                    {{ connection_label }}
                 </div>
                 <small class="text-muted d-block mt-0.5" style="font-size: 0.74rem;">
-                    {% if has_api_key %}Basic Auth Validado{% else %}Requer Chave API{% endif %}
+                    {{ connection_detail }}
                 </small>
             </div>
         </div>
