@@ -1,7 +1,4 @@
-import os
-import re
 import time
-import base64
 import logging
 import requests
 from decimal import Decimal
@@ -24,36 +21,9 @@ BASE_URL = "https://www.ongsys.com.br/app/index.php/api/v2/"
 
 
 def get_headers():
-    from django.conf import settings
-    cnpj = os.environ.get("ONGSYS_CNPJ") or getattr(settings, "ONGSYS_CNPJ", "03970166000129")
-    cnpj = re.sub(r"\D", "", cnpj)
-    api_key = os.environ.get("ONGSYS_API_KEY") or getattr(settings, "ONGSYS_API_KEY", "")
-    
-    if not api_key:
-        for env_path in ("/app/.env", "/root/cdc-core/.env", ".env"):
-            if os.path.exists(env_path):
-                try:
-                    with open(env_path, "r", encoding="utf-8") as f:
-                        for line in f:
-                            if line.strip().startswith("ONGSYS_API_KEY="):
-                                api_key = line.strip().split("=", 1)[1].strip().strip('"').strip("'")
-                                break
-                except Exception:
-                    pass
-            if api_key:
-                break
+    from apps.integrations.ongsys_credentials import get_ongsys_headers
 
-    if not api_key:
-        api_key = "fa009965195f9770db49a9111570b531"
-        cnpj = "03970166000129"
-
-    auth_b64 = base64.b64encode(f"{cnpj}:{api_key}".encode("utf-8")).decode("utf-8")
-
-    return {
-        "Authorization": f"Basic {auth_b64}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
+    return get_ongsys_headers()
 
 
 
