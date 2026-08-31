@@ -79,8 +79,11 @@ class NextERPClientTests(SimpleTestCase):
     def test_fetches_persisted_ongsys_warehouse_mappings(self):
         client, session = self.make_client([self.response(200, {"message": [{
             "cost_center_code": "CC-01",
+            "description": "Centro confirmado",
             "warehouse": "Armazem Central - C",
+            "warehouse_status": "Ativo",
             "status": "Ativo",
+            "enabled": 1,
         }]})])
 
         mappings = client.fetch_ongsys_warehouse_mappings()
@@ -91,6 +94,7 @@ class NextERPClientTests(SimpleTestCase):
     def test_rejects_incomplete_ongsys_warehouse_mapping(self):
         client, _ = self.make_client([self.response(200, {"message": [{
             "warehouse": "Armazem Central - C",
+            "warehouse_status": "Ativo",
             "status": "Ativo",
         }]})])
 

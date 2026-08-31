@@ -212,11 +212,19 @@ class NextERPAnalyticsClient:
             code = mapping.get("cost_center_code")
             warehouse = mapping.get("warehouse")
             status = mapping.get("status")
+            description = mapping.get("description")
+            warehouse_status = mapping.get("warehouse_status")
             if not isinstance(code, str) or not code.strip():
                 raise NextERPContractError("Mapeamento ONGSYS sem centro de custo.")
             if warehouse is not None and not isinstance(warehouse, str):
                 raise NextERPContractError("Mapeamento ONGSYS com armazém inválido.")
             if not isinstance(status, str) or not status.strip():
                 raise NextERPContractError("Mapeamento ONGSYS sem situação.")
+            if description is not None and not isinstance(description, str):
+                raise NextERPContractError("Mapeamento ONGSYS com descrição inválida.")
+            if warehouse_status not in {
+                "Ativo", "Desativado", "Grupo", "Não definido", "Não encontrado",
+            }:
+                raise NextERPContractError("Mapeamento ONGSYS sem situação válida do armazém.")
             validated.append(mapping)
         return validated

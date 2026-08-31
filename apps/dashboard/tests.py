@@ -43,16 +43,21 @@ class OngsysWarehouseMappingTests(TestCase):
             "cost_center_code": "CC-REAL",
             "description": "Centro confirmado",
             "warehouse": "Armazem confirmado - C",
-            "project_id": "Projeto confirmado",
+            "warehouse_status": "Ativo",
             "status": "Ativo",
             "enabled": 1,
+            "evidence_order_id": "12345",
+            "confidence": 100,
+            "validation_detail": "Correspondência exata.",
         }]
 
         result = _get_official_ongsys_warehouse_mappings()
 
         self.assertTrue(result["available"])
         self.assertEqual("CC-REAL", result["rows"][0]["codigo"])
-        self.assertEqual("Projeto confirmado", result["rows"][0]["projeto"])
+        self.assertEqual("Centro confirmado", result["rows"][0]["centro_custo"])
+        self.assertEqual("Ativo", result["rows"][0]["armazem_status"])
+        self.assertEqual("12345", result["rows"][0]["evidencia"])
         self.assertTrue(result["rows"][0]["ativo"])
 
     @patch("apps.integrations.services.nexterp.NextERPAnalyticsClient")

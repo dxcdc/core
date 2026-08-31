@@ -22,24 +22,15 @@ logger = logging.getLogger(__name__)
 
 def _get_official_ongsys_warehouse_mappings():
     """Return the persisted NextERP mapping; never substitute fixture data."""
-    cache_key = "dashboard:ongsys-warehouse-mappings:v1"
+    cache_key = "dashboard:ongsys-warehouse-mappings:v2"
     cached = cache.get(cache_key)
     if isinstance(cached, dict):
         return cached
 
-    from apps.integrations.models import Warehouse
     from apps.integrations.services.nexterp import NextERPAnalyticsClient, NextERPError
 
     try:
         mappings = NextERPAnalyticsClient().fetch_ongsys_warehouse_mappings()
-        warehouse_projects = {}
-        for warehouse in Warehouse.objects.filter(active=True).only(
-            "source_name", "warehouse_name", "project_id"
-        ):
-            if warehouse.project_id:
-                warehouse_projects[warehouse.source_name] = warehouse.project_id
-                warehouse_projects[warehouse.warehouse_name] = warehouse.project_id
-
         rows = []
         active_statuses = {"Ativo", "Ativo automático", "Ativo manual"}
         for mapping in mappings:
@@ -53,12 +44,17 @@ def _get_official_ongsys_warehouse_mappings():
                         or "Não informado pelo NextERP"
                     ),
                     "armazem": warehouse or "Não definido",
-                    "projeto": (
-                        str(mapping.get("project_id") or "").strip()
-                        or warehouse_projects.get(warehouse)
-                        or "Não informado pelo NextERP"
+                    "armazem_status": mapping["warehouse_status"],
+                    "validacao_status": status,
+                    "evidencia": (
+                        str(mapping.get("evidence_order_id") or "").strip()
+                        or "Sem evidência"
                     ),
-                    "status": status,
+                    "confianca": mapping.get("confidence"),
+                    "detalhe_validacao": (
+                        str(mapping.get("validation_detail") or "").strip()
+                        or "Sem detalhe registrado"
+                    ),
                     "ativo": bool(mapping.get("enabled")) or status in active_statuses,
                 }
             )

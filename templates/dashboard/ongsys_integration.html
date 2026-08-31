@@ -1056,7 +1056,7 @@
                 <span class="fw-bold" style="font-size: 0.9em;">Mapeamento de Centros de Custo (De ➔ Para OngSys x Armazéns do CDC)</span>
             </div>
             <span class="badge {% if mapeamentos_disponiveis %}bg-warning-subtle text-warning border-warning{% else %}bg-danger-subtle text-danger border-danger{% endif %} border px-2.5 py-1 fw-bold" style="font-size: 0.75em;">
-                {% if mapeamentos_disponiveis %}{{ total_centros_custo }} Mapeamentos Oficiais{% else %}Fonte Indisponível{% endif %}
+                {% if mapeamentos_disponiveis %}{{ total_centros_custo }} Vínculos Oficiais{% else %}Fonte Indisponível{% endif %}
             </span>
         </div>
         {% if not mapeamentos_disponiveis %}
@@ -1072,8 +1072,9 @@
                         <th style="width: 140px;">Código OngSys</th>
                         <th>Centro de Custo Contábil</th>
                         <th>Armazém Físico de Destino no CDC</th>
-                        <th style="width: 180px;">Projeto Vinculado</th>
-                        <th style="width: 110px; text-align: center;">Status</th>
+                        <th style="width: 140px; text-align: center;">Situação do Armazém</th>
+                        <th style="width: 160px; text-align: center;">Validação OngSys</th>
+                        <th style="width: 130px;">Evidência</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1089,19 +1090,22 @@
                             <span class="text-dark font-monospace" style="font-size: 0.92em;">{{ c.armazem }}</span>
                         </td>
                         <td>
-                            <span class="badge bg-slate-100 text-slate-700 border px-2 py-1" style="background: #f1f5f9; color: #334155; font-size: 0.78em;">
-                                {{ c.projeto }}
+                            <span class="badge {% if c.armazem_status == 'Ativo' %}bg-success-subtle text-success border-success{% elif c.armazem_status == 'Desativado' %}bg-danger-subtle text-danger border-danger{% else %}bg-warning-subtle text-warning border-warning{% endif %} border px-2 py-0.5 fw-bold" style="font-size: 0.74em;">
+                                {{ c.armazem_status }}
                             </span>
                         </td>
                         <td style="text-align: center;">
                             <span class="badge {% if c.ativo %}bg-success-subtle text-success border-success{% else %}bg-warning-subtle text-warning border-warning{% endif %} border px-2 py-0.5 fw-bold" style="font-size: 0.74em;">
-                                <i class="{% if c.ativo %}ri-checkbox-circle-line{% else %}ri-error-warning-line{% endif %}"></i> {{ c.status }}
+                                <i class="{% if c.ativo %}ri-checkbox-circle-line{% else %}ri-error-warning-line{% endif %}"></i> {{ c.validacao_status }}
                             </span>
+                        </td>
+                        <td>
+                            <span class="font-monospace text-muted" title="{{ c.detalhe_validacao }}">{{ c.evidencia }}</span>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">
+                        <td colspan="6" class="text-center text-muted py-4">
                             Nenhum mapeamento oficial foi retornado pelo NextERP.
                         </td>
                     {% endfor %}
