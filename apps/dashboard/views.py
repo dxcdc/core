@@ -2106,13 +2106,19 @@ def _get_task_state(task_id):
     return None
 
 
-@login_required(login_url='dashboard:login')
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
+
+
+@csrf_exempt
 def ongsys_trigger_test_all_async_view(request):
     """
     Dispara a bateria de testes de todos os endpoints em segundo plano (background thread).
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Somente POST permitido'}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Sessão expirada. Faça login novamente.'}, status=401)
 
     task_id = str(uuid.uuid4())
     initial_task = {
@@ -2234,13 +2240,15 @@ def ongsys_trigger_test_all_async_view(request):
     return JsonResponse({'task_id': task_id, 'status': 'started'})
 
 
-@login_required(login_url='dashboard:login')
+@csrf_exempt
 def ongsys_trigger_sync_async_view(request):
     """
     Dispara a sincronização atômica em segundo plano (background thread).
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Somente POST permitido'}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Sessão expirada. Faça login novamente.'}, status=401)
 
     import json
     try:
@@ -2345,10 +2353,8 @@ def ongsys_trigger_sync_async_view(request):
     return JsonResponse({'task_id': task_id, 'status': 'started'})
 
 
-from django.views.decorators.cache import never_cache
-
+@csrf_exempt
 @never_cache
-@login_required(login_url='dashboard:login')
 def ongsys_task_status_view(request, task_id):
     """
     Retorna o progresso em tempo real da tarefa em segundo plano de forma multi-processo e resiliente.
