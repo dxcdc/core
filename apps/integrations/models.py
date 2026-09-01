@@ -348,3 +348,32 @@ class OngsysEndpointStatus(models.Model):
     def __str__(self):
         return f"{self.endpoint_id} - HTTP {self.ultimo_status_http} ({self.status_classificacao})"
 
+
+class OngsysAuditLog(models.Model):
+    """
+    Trilha de Auditoria e Governança da API OngSys (/logs).
+    Registra ações de usuários, logins, inclusões, alterações e exclusões com integridade transacional.
+    """
+    log_id = models.CharField(max_length=32, unique=True, db_index=True)
+    usuario_id = models.CharField(max_length=32, blank=True, db_index=True)
+    usuario_nome = models.CharField(max_length=255, blank=True, db_index=True)
+    origem = models.CharField(max_length=120, blank=True, db_index=True)
+    descricao_transacao = models.TextField(blank=True)
+    data_evento = models.DateTimeField(null=True, blank=True, db_index=True)
+    dados_brutos = models.JSONField(default=dict)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Log de Auditoria OngSys"
+        verbose_name_plural = "Logs de Auditoria OngSys"
+        ordering = ["-data_evento", "-log_id"]
+        indexes = [
+            models.Index(fields=["usuario_nome", "data_evento"]),
+            models.Index(fields=["origem", "data_evento"]),
+        ]
+
+    def __str__(self):
+        return f"Log #{self.log_id} - {self.usuario_nome} ({self.origem}) [{self.data_evento}]"
+
+

@@ -15,7 +15,9 @@ from apps.integrations.models import (
     OngsysProduto,
     OngsysNotaServico,
     OngsysNotaProduto,
+    OngsysAuditLog,
 )
+
 
 
 logger = logging.getLogger(__name__)
@@ -873,6 +875,88 @@ def sync_notas_produto(max_pages=None, data_inicio="2025-07-01", data_fim="2026-
 
 
 # ==============================================================================
+# 10. LOGS DE AUDITORIA (ATÔMICO & BULK UPSERT)
+# ==============================================================================
+def sync_logs(data_inicio="2025-09-01", data_fim="2026-09-01", max_pages=None):
+    """
+    Sincroniza atomicamente a trilha de auditoria e governança (/logs) da OngSys.
+    """
+    headers = get_headers()
+    page = 1
+    total_processed = 0
+    t0 = time.time()
+
+    while True:
+        if max_pages and page > max_pages:
+            break
+        try:
+            params = {"data_inicio": data_inicio, "data_fim": data_fim, "pageNumber": page}
+            r = requests.get(f"{BASE_URL}logs", headers=headers, params=params, timeout=12)
+            if r.status_code != 200:
+                break
+            data = r.json()
+            items = data.get("data", [])
+            if not items:
+                break
+
+            objs = []
+            for item in items:
+                log_id = str(item.get("logId") or "").strip()
+                if not log_id:
+                    continue
+
+                raw_date = item.get("data")
+                dt_evento = None
+                if raw_date:
+                    try:
+                        dt_evento = datetime.strptime(str(raw_date).strip(), "%Y-%m-%d %H:%M:%S")
+                        if timezone.is_naive(dt_evento):
+                            dt_evento = timezone.make_aware(dt_evento)
+                    except Exception:
+                        dt_evento = None
+
+                objs.append(
+                    OngsysAuditLog(
+                        log_id=log_id,
+                        usuario_id=str(item.get("usuarioId") or "").strip(),
+                        usuario_nome=str(item.get("usuarioNome") or "").strip(),
+                        origem=str(item.get("origem") or "").strip(),
+                        descricao_transacao=str(item.get("descricaoTransacao") or "").strip(),
+                        data_evento=dt_evento,
+                        dados_brutos=item,
+                    )
+                )
+
+            if objs:
+                with transaction.atomic():
+                    OngsysAuditLog.objects.bulk_create(
+                        objs,
+                        update_conflicts=True,
+                        unique_fields=["log_id"],
+                        update_fields=[
+                            "usuario_id",
+                            "usuario_nome",
+                            "origem",
+                            "descricao_transacao",
+                            "data_evento",
+                            "dados_brutos",
+                            "atualizado_em",
+                        ],
+                    )
+                total_processed += len(objs)
+
+            page += 1
+            if len(items) < 100:
+                break
+        except Exception as e:
+            logger.error(f"Erro ao sincronizar Logs de Auditoria pág {page}: {e}")
+            break
+
+    duracao = round(time.time() - t0, 2)
+    return {"entidade": "Logs de Auditoria", "total": total_processed, "duracao": duracao}
+
+
+# ==============================================================================
 # SINCRONIZAÇÃO COMPLETA
 # ==============================================================================
 def sync_all_ongsys(max_pages_per_entity=3):
@@ -886,5 +970,7 @@ def sync_all_ongsys(max_pages_per_entity=3):
     results.append(sync_lancamentos_bancarios(max_pages=max_pages_per_entity))
     results.append(sync_notas_servico(max_pages=max_pages_per_entity))
     results.append(sync_notas_produto(max_pages=max_pages_per_entity))
+    results.append(sync_logs(max_pages=max_pages_per_entity))
     return results
+
 

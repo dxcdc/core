@@ -2243,6 +2243,7 @@ def ongsys_trigger_sync_async_view(request):
             sync_produtos,
             sync_notas_servico,
             sync_notas_produto,
+            sync_logs,
         )
 
         steps = []
@@ -2255,6 +2256,7 @@ def ongsys_trigger_sync_async_view(request):
                 ('Lançamentos Bancários', lambda: sync_lancamentos_bancarios(max_pages=pgs)),
                 ('Contratos', lambda: sync_contratos(max_pages=pgs)),
                 ('Produtos / Almoxarifado', lambda: sync_produtos(max_pages=pgs)),
+                ('Logs de Auditoria', lambda: sync_logs(max_pages=pgs)),
             ]
         elif ent == 'fornecedores':
             steps = [('Fornecedores', lambda: sync_fornecedores(max_pages=pgs))]
@@ -2270,8 +2272,11 @@ def ongsys_trigger_sync_async_view(request):
             steps = [('Contratos', lambda: sync_contratos(max_pages=pgs))]
         elif ent == 'produtos':
             steps = [('Produtos / Almoxarifado', lambda: sync_produtos(max_pages=pgs))]
+        elif ent == 'logs':
+            steps = [('Logs de Auditoria', lambda: sync_logs(max_pages=pgs))]
         else:
             steps = [('Fornecedores', lambda: sync_fornecedores(max_pages=pgs))]
+
 
         total_steps = len(steps)
         results = []
