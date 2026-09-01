@@ -2292,7 +2292,7 @@ def ongsys_trigger_sync_async_view(request):
             steps = [('Contas a Pagar', lambda: sync_contas_pagar(max_pages=pgs))]
         elif ent == 'contas_receber':
             steps = [('Contas a Receber', lambda: sync_contas_receber(max_pages=pgs))]
-        elif ent == 'lancamentos':
+        elif ent in ('lancamentos', 'lancamentos_bancarios'):
             steps = [('Lançamentos Bancários', lambda: sync_lancamentos_bancarios(max_pages=pgs))]
         elif ent == 'contratos':
             steps = [('Contratos', lambda: sync_contratos(max_pages=pgs))]
@@ -2302,6 +2302,7 @@ def ongsys_trigger_sync_async_view(request):
             steps = [('Logs de Auditoria', lambda: sync_logs(max_pages=pgs))]
         else:
             steps = [('Fornecedores', lambda: sync_fornecedores(max_pages=pgs))]
+
 
 
         total_steps = len(steps)
