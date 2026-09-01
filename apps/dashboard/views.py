@@ -1159,14 +1159,15 @@ def ongsys_integration_view(request):
             'nome': 'Logs de Auditoria do Sistema',
             'metodo': 'GET',
             'path': 'logs',
-            'modelo_db': 'Nenhum (Auditoria em Memória)',
-            'tabela_sql': 'Consumo via REST',
+            'modelo_db': 'OngsysAuditLog (Atômico)',
+            'tabela_sql': 'integrations_ongsysauditlog',
             'descricao': 'Histórico de ações e alterações realizadas na base de dados do OngSys.',
             'explicacao_detalhada': 'Trilha de auditoria e conformidade (Compliance/LGPD) registrando usuários, IPs, timestamps e alterações cadastrais ou financeiras efetuadas no ERP OngSys.',
-            'tags_regras': ['Basic Auth', 'Trilha de Auditoria', 'Compliance & LGPD'],
+            'tags_regras': ['Basic Auth', 'Trilha de Auditoria', 'Compliance & LGPD', 'Espelho Atômico PostgreSQL'],
             'especificidades': 'Endpoint /logs. Exige data_inicio, data_fim e pageNumber.',
-            'parametros': '{"data_inicio": "2025-07-01", "data_fim": "2026-12-31", "pageNumber": 1}'
+            'parametros': '{"data_inicio": "2025-09-01", "data_fim": "2026-09-01", "pageNumber": 1}'
         }
+
 
     ]
 
@@ -1264,6 +1265,7 @@ def ongsys_integration_view(request):
             OngsysProduto,
             OngsysNotaServico,
             OngsysNotaProduto,
+            OngsysAuditLog,
             OngsysEndpointStatus,
         )
         db_fornecedores = OngsysFornecedor.objects.count()
@@ -1275,6 +1277,7 @@ def ongsys_integration_view(request):
         db_produtos = OngsysProduto.objects.count()
         db_notas_servico = OngsysNotaServico.objects.count()
         db_notas_produto = OngsysNotaProduto.objects.count()
+        db_logs = OngsysAuditLog.objects.count()
         db_total = (
             db_fornecedores
             + db_clientes
@@ -1285,6 +1288,7 @@ def ongsys_integration_view(request):
             + db_produtos
             + db_notas_servico
             + db_notas_produto
+            + db_logs
         )
         
         # Mapeamento de status dos endpoints
@@ -1292,7 +1296,7 @@ def ongsys_integration_view(request):
         status_map = {s.endpoint_id: s for s in statuses}
     except Exception:
         db_fornecedores = db_clientes = db_contas_pagar = db_contas_receber = 0
-        db_lancamentos = db_contratos = db_produtos = db_notas_servico = db_notas_produto = db_total = 0
+        db_lancamentos = db_contratos = db_produtos = db_notas_servico = db_notas_produto = db_logs = db_total = 0
         statuses = []
         status_map = {}
 
@@ -1368,8 +1372,9 @@ def ongsys_integration_view(request):
         'contratos-pagar-get': db_contratos,
         'contratos-receber-get': db_contratos,
         'produtos-get': db_produtos,
-        'nfse-get': db_notas_servico,
-        'nfe-get': db_notas_produto,
+        'notas-servico-get': db_notas_servico,
+        'notas-produto-get': db_notas_produto,
+        'logs-get': db_logs,
         'pedidos-finalizados-get': 850,
         'pedidos-busca-direta-get': 1,
         'pedidos-pendentes-get': 42,
@@ -1389,8 +1394,9 @@ def ongsys_integration_view(request):
         'contratos-pagar-get': 93,
         'contratos-receber-get': 45,
         'produtos-get': 1692,
-        'nfse-get': max(db_notas_servico, 1),
-        'nfe-get': max(db_notas_produto, 1),
+        'notas-servico-get': max(db_notas_servico, 1),
+        'notas-produto-get': max(db_notas_produto, 1),
+        'logs-get': max(db_logs, 20000),
         'pedidos-compras-get': 850,
         'pedidos-finalizados-get': 850,
         'pedidos-busca-direta-get': 1,
@@ -1398,6 +1404,7 @@ def ongsys_integration_view(request):
         'produtos-catalogo-get': 1692,
         'produtos-uom-get': 15,
     }
+
 
 
 
@@ -1539,8 +1546,10 @@ def ongsys_integration_view(request):
         'db_lancamentos': db_lancamentos,
         'db_contratos': db_contratos,
         'db_produtos': db_produtos,
+        'db_logs': db_logs,
     }
     return render(request, 'dashboard/ongsys_integration.html', context)
+
 
 
 @login_required(login_url='dashboard:login')
