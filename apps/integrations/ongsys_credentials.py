@@ -59,11 +59,14 @@ def get_ongsys_credentials():
                 pass
 
     if not username:
-        username = os.environ.get("ONGSYS_USERNAME") or os.environ.get("ONGSYS_CNPJ") or getattr(settings, "ONGSYS_USERNAME", None) or getattr(settings, "ONGSYS_CNPJ", "03970166000129")
+        username = os.environ.get("ONGSYS_USERNAME") or os.environ.get("ONGSYS_CNPJ") or getattr(settings, "ONGSYS_USERNAME", None) or getattr(settings, "ONGSYS_CNPJ", None)
     if not password:
-        password = os.environ.get("ONGSYS_PASSWORD") or os.environ.get("ONGSYS_API_KEY") or getattr(settings, "ONGSYS_PASSWORD", None) or getattr(settings, "ONGSYS_API_KEY", "f0c28a9ffe51402b345b637281bb2f5e")
+        password = os.environ.get("ONGSYS_PASSWORD") or os.environ.get("ONGSYS_API_KEY") or getattr(settings, "ONGSYS_PASSWORD", None) or getattr(settings, "ONGSYS_API_KEY", None)
     if not base_url:
         base_url = os.environ.get("ONGSYS_BASE_URL") or os.environ.get("ONGSYS_URL_BASE") or getattr(settings, "ONGSYS_URL_BASE", None) or getattr(settings, "ONGSYS_BASE_URL", "https://www.ongsys.com.br/app/index.php/api/v2/")
+
+    if not username or not password:
+        raise OngsysCredentialsError("Credencial OngSys v2 não configurada no ambiente / cofre.")
 
     username = re.sub(r"\D", "", str(username))
     base_url = str(base_url).strip().rstrip("/") + "/"
