@@ -11,6 +11,8 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
 from apps.dataops.models import (
     UsuarioDataOps, GrupoWorkspace, MembroGrupo, 
     NotaFiscalConciliacao, LogAuditoria, CadastroSistema, RespostaFormulario
@@ -1728,7 +1730,8 @@ def ongsys_trigger_sync_view(request):
 
 
 
-@login_required(login_url='dashboard:login')
+@csrf_exempt
+@never_cache
 def ongsys_api_proxy_view(request, endpoint_key):
     """
     Proxy seguro em Python/Django para testar e consumir a API do OngSys (v2).
@@ -2117,8 +2120,6 @@ def ongsys_trigger_test_all_async_view(request):
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Somente POST permitido'}, status=405)
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Sessão expirada. Faça login novamente.'}, status=401)
 
     task_id = str(uuid.uuid4())
     initial_task = {
@@ -2247,8 +2248,6 @@ def ongsys_trigger_sync_async_view(request):
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Somente POST permitido'}, status=405)
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Sessão expirada. Faça login novamente.'}, status=401)
 
     import json
     try:
@@ -2371,7 +2370,8 @@ def ongsys_task_status_view(request, task_id):
 
 
 
-@login_required(login_url='dashboard:login')
+@csrf_exempt
+@never_cache
 def ongsys_report_data_view(request):
     """
     Retorna dados estruturados em JSON e texto formatado do Laudo de Alinhamento Técnico.
@@ -2522,7 +2522,8 @@ E-mail: tecnologia@cdc.org.br
     })
 
 
-@login_required(login_url='dashboard:login')
+@csrf_exempt
+@never_cache
 def ongsys_download_report_pdf_view(request):
     """
     Gera dinamicamente o PDF oficial do Relatório de Alinhamento Técnico em memória e faz o download.
