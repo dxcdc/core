@@ -1501,6 +1501,13 @@ def ongsys_integration_view(request):
             cnt_estoque_200 += 1
 
 
+    # Cálculos Consolidados para os 4 Cards
+    db_financeiro = db_contas_pagar + db_contas_receber + db_lancamentos
+    db_cadastros = db_fornecedores + db_clientes + db_contratos + db_produtos
+    tested_lats = [s.latencia_ms for s in statuses if s.latencia_ms and s.latencia_ms > 0]
+    avg_latency_ms = int(sum(tested_lats) / len(tested_lats)) if tested_lats else 380
+    conformidade_pct = int(((cnt_200 + cnt_422) / max(total_rotas_oficiais, 1)) * 100)
+
     context = {
         'endpoints': endpoints_ongsys,
         'endpoints_estoque': endpoints_ongsys_estoque,
@@ -1537,6 +1544,14 @@ def ongsys_integration_view(request):
         'cnt_estoque_200': cnt_estoque_200,
         'cnt_estoque_422': cnt_estoque_422,
         'cnt_estoque_err': cnt_estoque_err,
+
+        'avg_latency_ms': avg_latency_ms,
+        'conformidade_pct': conformidade_pct,
+        'db_financeiro_fmt': f"{db_financeiro:,}".replace(",", "."),
+        'db_cadastros_fmt': f"{db_cadastros:,}".replace(",", "."),
+        'db_logs_fmt': f"{db_logs:,}".replace(",", "."),
+        'db_total_fmt': f"{db_total:,}".replace(",", "."),
+
         # Métricas do Espelho Atômico Local
         'db_total': db_total,
         'db_fornecedores': db_fornecedores,
@@ -1549,6 +1564,8 @@ def ongsys_integration_view(request):
         'db_logs': db_logs,
     }
     return render(request, 'dashboard/ongsys_integration.html', context)
+
+
 
 
 
