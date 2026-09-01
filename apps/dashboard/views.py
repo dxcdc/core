@@ -1134,7 +1134,7 @@ def ongsys_integration_view(request):
             'explicacao_detalhada': 'Permite auditar notas fiscais eletrônicas de serviços (NFS-e) emitidas contra o CNPJ do CDC ou lançadas por prestadores de serviços nos projetos.',
             'tags_regras': ['Basic Auth', 'NFS-e Municipal', 'Escrituração Fiscal', 'Auditoria'],
             'especificidades': 'Endpoint /notas-servico. Exige data_inicio, data_fim e pageNumber.',
-            'parametros': '{"data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
+            'parametros': '{"data_inicio": "2025-07-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
         {
             'id': 'nfe-get',
@@ -1149,7 +1149,7 @@ def ongsys_integration_view(request):
             'explicacao_detalhada': 'Consulta os documentos fiscais eletrônicos de produtos e mercadorias (NF-e / Danfe), garantindo conferência com os itens físicos entregues nos depósitos.',
             'tags_regras': ['Basic Auth', 'NF-e Estadual', 'DANFE', 'Conferência de Estoque'],
             'especificidades': 'Endpoint /notas-produto. Exige data_inicio, data_fim e pageNumber.',
-            'parametros': '{"data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
+            'parametros': '{"data_inicio": "2025-07-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
         {
             'id': 'logs-get',
@@ -1164,8 +1164,9 @@ def ongsys_integration_view(request):
             'explicacao_detalhada': 'Trilha de auditoria e conformidade (Compliance/LGPD) registrando usuários, IPs, timestamps e alterações cadastrais ou financeiras efetuadas no ERP OngSys.',
             'tags_regras': ['Basic Auth', 'Trilha de Auditoria', 'Compliance & LGPD'],
             'especificidades': 'Endpoint /logs. Exige data_inicio, data_fim e pageNumber.',
-            'parametros': '{"data_inicio": "2024-01-01", "data_fim": "2026-12-31", "pageNumber": 1}'
+            'parametros': '{"data_inicio": "2025-07-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         }
+
     ]
 
 
