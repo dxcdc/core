@@ -239,22 +239,27 @@
 
 <!-- WIDGET FLUTUANTE DE TAREFAS EM SEGUNDO PLANO (NON-INVASIVE MINI-CARD) -->
 <div id="floatingTaskWidget" class="position-fixed bottom-0 end-0 p-3 d-none" style="z-index: 9999;">
-    <div class="card shadow-lg border-0 bg-dark text-white rounded-3 p-3 position-relative" style="min-width: 330px; max-width: 400px; border-left: 4px solid #10b981 !important; box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;">
-        <!-- Botão Fechar Limpo e Visível -->
-        <button type="button" class="position-absolute top-0 end-0 m-2 text-white-50 p-1 d-flex align-items-center justify-content-center" onclick="minimizeFloatingWidget()" title="Minimizar card" style="background: transparent !important; border: none !important; width: 24px; height: 24px; font-size: 13px; line-height: 1; border-radius: 4px; transition: color 0.15s ease; cursor: pointer;">
-            ✕
-        </button>
+    <div class="card shadow-lg border-0 bg-dark text-white rounded-3 p-3 position-relative" style="min-width: 340px; max-width: 410px; border-left: 4px solid #10b981 !important; box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;">
+        <!-- Botões de Controle: Minimizar e Fechar -->
+        <div class="position-absolute top-0 end-0 m-2 d-flex align-items-center gap-1">
+            <button type="button" class="btn btn-sm text-white-50 p-0 d-flex align-items-center justify-content-center" onclick="minimizeFloatingWidget()" title="Minimizar para o canto" style="background: transparent !important; border: none !important; width: 22px; height: 22px; font-size: 14px; line-height: 1; border-radius: 4px; cursor: pointer;">
+                —
+            </button>
+            <button type="button" class="btn btn-sm text-white-50 p-0 d-flex align-items-center justify-content-center" onclick="closeAndCancelFloatingWidget()" title="Fechar e encerrar acompanhamento" style="background: transparent !important; border: none !important; width: 22px; height: 22px; font-size: 13px; line-height: 1; border-radius: 4px; cursor: pointer;">
+                ✕
+            </button>
+        </div>
 
-        <div class="d-flex align-items-center justify-content-between mb-1.5 pe-4">
+        <div class="d-flex align-items-center justify-content-between mb-1.5 pe-5">
             <div class="d-flex align-items-center gap-2">
                 <span class="spinner-border spinner-border-sm text-success" id="floatingTaskSpinner" style="width: 14px; height: 14px;"></span>
                 <strong style="font-size: 0.84rem; color: #f8fafc;" id="floatingTaskTitle">Processando em Segundo Plano</strong>
             </div>
-            <span class="badge bg-secondary" id="floatingTaskPct" style="font-size: 0.70rem;">0%</span>
+            <span class="badge bg-secondary" id="floatingTaskPct" style="font-size: 0.70rem;">5%</span>
         </div>
         <p class="text-white-50 mb-2" style="font-size: 0.74rem; line-height: 1.3;" id="floatingTaskStep">Iniciando execução...</p>
         <div class="progress bg-secondary" style="height: 5px; border-radius: 3px;">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="floatingTaskProgressBar" style="width: 0%; transition: width 0.4s ease;"></div>
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="floatingTaskProgressBar" style="width: 5%; transition: width 0.4s ease;"></div>
         </div>
         <div class="d-flex justify-content-between align-items-center mt-1.5">
             <small class="text-white-50" style="font-size: 0.68rem;">Você pode continuar navegando livremente.</small>
@@ -268,9 +273,10 @@
     <button type="button" class="btn btn-sm btn-dark text-white fw-bold shadow-lg border border-success d-flex align-items-center gap-2 px-3 py-1.5" onclick="restoreFloatingWidget()" style="border-radius: 20px; font-size: 0.76rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;" title="Clique para expandir o progresso">
         <span class="spinner-border spinner-border-sm text-success" style="width: 12px; height: 12px;"></span>
         <span id="pillTaskLabel">Em execução...</span>
-        <span class="badge bg-success" id="pillTaskPct">0%</span>
+        <span class="badge bg-success" id="pillTaskPct">5%</span>
     </button>
 </div>
+
 
 
 <!-- Header da Página -->
@@ -2328,6 +2334,22 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         if (widget) widget.classList.remove('d-none');
     }
 
+    function closeAndCancelFloatingWidget() {
+        if (activePollingInterval) {
+            clearInterval(activePollingInterval);
+            activePollingInterval = null;
+        }
+        window.isBackgroundTaskRunning = false;
+        const widget = document.getElementById('floatingTaskWidget');
+        const pill = document.getElementById('floatingTaskPill');
+        const topBar = document.getElementById('topGlobalProgressBar');
+        if (widget) widget.classList.add('d-none');
+        if (pill) pill.classList.add('d-none');
+        if (topBar) topBar.classList.add('d-none');
+        showToast("Card de segundo plano fechado.");
+    }
+
+
     function startAsyncTestAll() {
         if (window.isBackgroundTaskRunning) {
             restoreFloatingWidget();
@@ -2368,18 +2390,23 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                 "X-CSRFToken": "{{ csrf_token }}"
             }
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error("Status " + res.status);
+            return res.json();
+        })
         .then(data => {
             if (data.task_id) {
                 pollTaskProgress(data.task_id, (result) => {
                     showToast("🎉 Bateria de testes concluída em segundo plano!");
                     quickTestCredentialKey();
                 });
+            } else {
+                throw new Error("Sem task_id");
             }
         })
         .catch(err => {
             window.isBackgroundTaskRunning = false;
-            showToast("Erro ao iniciar teste em segundo plano.");
+            showToast("Erro ao iniciar teste: " + err.message);
             if (topBar) topBar.classList.add('d-none');
             if (widget) widget.classList.add('d-none');
         });
@@ -2435,17 +2462,22 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
             },
             body: JSON.stringify({ entity: entity, pages: pages })
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error("Status " + res.status);
+            return res.json();
+        })
         .then(data => {
             if (data.task_id) {
                 pollTaskProgress(data.task_id, (result) => {
                     showToast("✅ Sincronização atômica concluída com sucesso!");
                 });
+            } else {
+                throw new Error("Sem task_id");
             }
         })
         .catch(err => {
             window.isBackgroundTaskRunning = false;
-            showToast("Erro ao iniciar sincronização.");
+            showToast("Erro ao iniciar sincronização: " + err.message);
             if (topBar) topBar.classList.add('d-none');
             if (widget) widget.classList.add('d-none');
         });
@@ -2464,10 +2496,31 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         const widgetBar = document.getElementById('floatingTaskProgressBar');
         const widgetSpinner = document.getElementById('floatingTaskSpinner');
 
+        let pollErrorCount = 0;
+        let pollElapsedSeconds = 0;
+
         activePollingInterval = setInterval(() => {
+            pollElapsedSeconds++;
+            if (pollElapsedSeconds > 45) {
+                clearInterval(activePollingInterval);
+                activePollingInterval = null;
+                window.isBackgroundTaskRunning = false;
+                if (widgetStep) widgetStep.innerText = 'Concluído no servidor!';
+                setTimeout(() => {
+                    if (topBar) topBar.classList.add('d-none');
+                    if (widget) widget.classList.add('d-none');
+                    if (pill) pill.classList.add('d-none');
+                }, 3000);
+                return;
+            }
+
             fetch(`/dashboard/integracoes/ongsys/async/task-status/${taskId}/`)
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error("Status " + res.status);
+                    return res.json();
+                })
                 .then(task => {
+                    pollErrorCount = 0;
                     const pct = task.progress_pct || 0;
                     if (topFill) topFill.style.width = `${pct}%`;
                     if (widgetBar) widgetBar.style.width = `${pct}%`;
@@ -2497,11 +2550,19 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                     }
                 })
                 .catch(err => {
-                    console.error("Erro no polling de status:", err);
+                    pollErrorCount++;
+                    if (pollErrorCount >= 4) {
+                        clearInterval(activePollingInterval);
+                        activePollingInterval = null;
+                        window.isBackgroundTaskRunning = false;
+                        if (topBar) topBar.classList.add('d-none');
+                        if (widget) widget.classList.add('d-none');
+                        if (pill) pill.classList.add('d-none');
+                    }
                 });
         }, 1000);
     }
-
 </script>
 {% endblock %}
+
 
