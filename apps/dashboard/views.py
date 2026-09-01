@@ -1374,6 +1374,8 @@ def ongsys_integration_view(request):
         'contratos-pagar-get': db_contratos,
         'contratos-receber-get': db_contratos,
         'produtos-get': db_produtos,
+        'nfse-get': db_notas_servico,
+        'nfe-get': db_notas_produto,
         'notas-servico-get': db_notas_servico,
         'notas-produto-get': db_notas_produto,
         'logs-get': db_logs,
@@ -1396,8 +1398,10 @@ def ongsys_integration_view(request):
         'contratos-pagar-get': 93,
         'contratos-receber-get': 45,
         'produtos-get': 1692,
-        'notas-servico-get': max(db_notas_servico, 1),
-        'notas-produto-get': max(db_notas_produto, 1),
+        'nfse-get': 119,
+        'nfe-get': 5469,
+        'notas-servico-get': 119,
+        'notas-produto-get': 5469,
         'logs-get': max(db_logs, 20000),
         'pedidos-compras-get': 850,
         'pedidos-finalizados-get': 850,
@@ -2265,7 +2269,7 @@ def ongsys_trigger_sync_async_view(request):
         'status': 'running',
         'progress_pct': 5,
         'current_step': 'Iniciando conexão e carga atômica...',
-        'total_items': 7 if entity == 'all' else 1,
+        'total_items': 10 if entity == 'all' else 1,
         'completed_items': 0,
         'results': [],
         'error': None,
@@ -2298,6 +2302,8 @@ def ongsys_trigger_sync_async_view(request):
                 ('Lançamentos Bancários', lambda: sync_lancamentos_bancarios(max_pages=pgs)),
                 ('Contratos', lambda: sync_contratos(max_pages=pgs)),
                 ('Produtos / Almoxarifado', lambda: sync_produtos(max_pages=pgs)),
+                ('Notas Fiscais de Serviço (NFS-e)', lambda: sync_notas_servico(max_pages=pgs)),
+                ('Notas Fiscais de Produto (NF-e)', lambda: sync_notas_produto(max_pages=pgs)),
                 ('Logs de Auditoria', lambda: sync_logs(max_pages=pgs)),
             ]
         elif ent == 'fornecedores':
@@ -2314,6 +2320,10 @@ def ongsys_trigger_sync_async_view(request):
             steps = [('Contratos', lambda: sync_contratos(max_pages=pgs))]
         elif ent == 'produtos':
             steps = [('Produtos / Almoxarifado', lambda: sync_produtos(max_pages=pgs))]
+        elif ent in ('notas_servico', 'nfse'):
+            steps = [('Notas Fiscais de Serviço (NFS-e)', lambda: sync_notas_servico(max_pages=pgs))]
+        elif ent in ('notas_produto', 'nfe'):
+            steps = [('Notas Fiscais de Produto (NF-e)', lambda: sync_notas_produto(max_pages=pgs))]
         elif ent == 'logs':
             steps = [('Logs de Auditoria', lambda: sync_logs(max_pages=pgs))]
         else:

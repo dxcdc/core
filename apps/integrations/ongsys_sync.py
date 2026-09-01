@@ -845,8 +845,8 @@ def sync_notas_produto(max_pages=None, data_inicio=None, data_fim=None):
                     continue
                 seen.add(id_val)
 
-                emit = item.get("emitente") or {}
-                dest = item.get("destinatario") or {}
+                emit = item.get("vendedor") or item.get("emitente") or {}
+                dest = item.get("comprador") or item.get("destinatario") or {}
 
                 objs.append(
                     OngsysNotaProduto(
