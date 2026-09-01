@@ -1693,7 +1693,9 @@ def ongsys_api_proxy_view(request, endpoint_key):
 
     headers['Content-Type'] = 'application/json'
     headers['User-Agent'] = 'CDC-Core-Integration-Hub/1.0'
-    target_url = f"{credentials.url_base}/{path}"
+    base_url = (getattr(credentials, 'base_url', None) or 'https://www.ongsys.com.br/app/index.php/api/v2/').rstrip('/')
+    target_url = f"{base_url}/{path}"
+
 
     req_timeout = 90 if 'pedidos' in path else 30
     start_time = time.time()

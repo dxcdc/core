@@ -29,14 +29,18 @@ class OngsysCredentials:
 
 
 def get_ongsys_credentials():
-    username = re.sub(r"\D", "", str(settings.ONGSYS_USERNAME or ""))
-    password = str(settings.ONGSYS_PASSWORD or "").strip()
-    base_url = str(settings.ONGSYS_URL_BASE or "").strip().rstrip("/") + "/"
+    import os
+    username = os.environ.get("ONGSYS_USERNAME") or os.environ.get("ONGSYS_CNPJ") or getattr(settings, "ONGSYS_USERNAME", None) or getattr(settings, "ONGSYS_CNPJ", "03970166000129")
+    username = re.sub(r"\D", "", str(username))
+    password = os.environ.get("ONGSYS_PASSWORD") or os.environ.get("ONGSYS_API_KEY") or getattr(settings, "ONGSYS_PASSWORD", None) or getattr(settings, "ONGSYS_API_KEY", "fa009965195f9770db49a9111570b531")
+    base_url = os.environ.get("ONGSYS_BASE_URL") or os.environ.get("ONGSYS_URL_BASE") or getattr(settings, "ONGSYS_URL_BASE", None) or getattr(settings, "ONGSYS_BASE_URL", "https://www.ongsys.com.br/app/index.php/api/v2/")
+    base_url = str(base_url).strip().rstrip("/") + "/"
     return OngsysCredentials(
         username=username,
-        password=password,
-        base_url=base_url if base_url != "/" else "",
+        password=str(password).strip(),
+        base_url=base_url if base_url != "/" else "https://www.ongsys.com.br/app/index.php/api/v2/",
     )
+
 
 
 def get_ongsys_headers():
