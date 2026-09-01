@@ -265,7 +265,59 @@ class OngsysProduto(models.Model):
         return f"{self.nome_produto} ({self.grupo})"
 
 
+class OngsysNotaServico(models.Model):
+    id_ongsys = models.CharField(max_length=64, unique=True, db_index=True)
+    numero_nota = models.CharField(max_length=64, blank=True, db_index=True)
+    codigo_verificacao = models.CharField(max_length=64, blank=True)
+    prestador_nome = models.CharField(max_length=255, blank=True)
+    prestador_documento = models.CharField(max_length=32, blank=True, db_index=True)
+    tomador_nome = models.CharField(max_length=255, blank=True)
+    tomador_documento = models.CharField(max_length=32, blank=True, db_index=True)
+    data_emissao = models.DateField(null=True, blank=True, db_index=True)
+    data_competencia = models.DateField(null=True, blank=True)
+    valor_servicos = models.DecimalField(max_digits=14, decimal_places=2, default=0.0)
+    valor_liquido = models.DecimalField(max_digits=14, decimal_places=2, default=0.0)
+    discriminacao_servicos = models.TextField(blank=True)
+    dados_brutos = models.JSONField(default=dict)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Nota Fiscal de Serviço (NFS-e)"
+        verbose_name_plural = "Notas Fiscais de Serviço (NFS-e)"
+        ordering = ["-data_emissao", "-criado_em"]
+
+    def __str__(self):
+        return f"NFS-e {self.numero_nota} - {self.prestador_nome} (R$ {self.valor_servicos})"
+
+
+class OngsysNotaProduto(models.Model):
+    id_ongsys = models.CharField(max_length=64, unique=True, db_index=True)
+    numero_nfe = models.CharField(max_length=64, blank=True, db_index=True)
+    serie = models.CharField(max_length=16, blank=True)
+    chave_acesso = models.CharField(max_length=44, blank=True, db_index=True)
+    emitente_nome = models.CharField(max_length=255, blank=True)
+    emitente_documento = models.CharField(max_length=32, blank=True, db_index=True)
+    destinatario_nome = models.CharField(max_length=255, blank=True)
+    destinatario_documento = models.CharField(max_length=32, blank=True, db_index=True)
+    data_emissao = models.DateField(null=True, blank=True, db_index=True)
+    valor_total = models.DecimalField(max_digits=14, decimal_places=2, default=0.0)
+    natureza_operacao = models.CharField(max_length=255, blank=True)
+    dados_brutos = models.JSONField(default=dict)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Nota Fiscal de Produto (NF-e)"
+        verbose_name_plural = "Notas Fiscais de Produto (NF-e)"
+        ordering = ["-data_emissao", "-criado_em"]
+
+    def __str__(self):
+        return f"NF-e {self.numero_nfe} - {self.emitente_nome} (R$ {self.valor_total})"
+
+
 class OngsysEndpointStatus(models.Model):
+
     class Classificacao(models.TextChoices):
         SUCCESS = "success", "Operacional (HTTP 200)"
         VALIDATED = "validated", "Requer Parâmetros (HTTP 422)"

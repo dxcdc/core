@@ -1128,11 +1128,11 @@ def ongsys_integration_view(request):
             'nome': 'Notas Fiscais de Serviço (NFS-e)',
             'metodo': 'GET',
             'path': 'notas-servico',
-            'modelo_db': 'Nenhum (Auditoria em Memória)',
-            'tabela_sql': 'Consumo via REST',
+            'modelo_db': 'OngsysNotaServico',
+            'tabela_sql': 'integrations_ongsysnotaservico',
             'descricao': 'Consulta Notas Fiscais de Serviço capturadas e escrituradas.',
             'explicacao_detalhada': 'Permite auditar notas fiscais eletrônicas de serviços (NFS-e) emitidas contra o CNPJ do CDC ou lançadas por prestadores de serviços nos projetos.',
-            'tags_regras': ['Basic Auth', 'NFS-e Municipal', 'Escrituração Fiscal', 'Auditoria'],
+            'tags_regras': ['Basic Auth', 'NFS-e Municipal', 'Escrituração Fiscal', 'Espelho Atômico PostgreSQL'],
             'especificidades': 'Endpoint /notas-servico. Exige data_inicio, data_fim e pageNumber.',
             'parametros': '{"data_inicio": "2025-07-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
@@ -1143,14 +1143,15 @@ def ongsys_integration_view(request):
             'nome': 'Notas Fiscais de Produto (NF-e)',
             'metodo': 'GET',
             'path': 'notas-produto',
-            'modelo_db': 'Nenhum (Auditoria em Memória)',
-            'tabela_sql': 'Consumo via REST',
+            'modelo_db': 'OngsysNotaProduto',
+            'tabela_sql': 'integrations_ongsysnotaproduto',
             'descricao': 'Consulta Notas Fiscais de Produto (danfe) importadas.',
             'explicacao_detalhada': 'Consulta os documentos fiscais eletrônicos de produtos e mercadorias (NF-e / Danfe), garantindo conferência com os itens físicos entregues nos depósitos.',
-            'tags_regras': ['Basic Auth', 'NF-e Estadual', 'DANFE', 'Conferência de Estoque'],
+            'tags_regras': ['Basic Auth', 'NF-e Estadual', 'DANFE', 'Espelho Atômico PostgreSQL'],
             'especificidades': 'Endpoint /notas-produto. Exige data_inicio, data_fim e pageNumber.',
             'parametros': '{"data_inicio": "2025-07-01", "data_fim": "2026-12-31", "pageNumber": 1}'
         },
+
         {
             'id': 'logs-get',
             'modulo': 'notas_fiscais',
@@ -1261,6 +1262,8 @@ def ongsys_integration_view(request):
             OngsysLancamentoBancario,
             OngsysContrato,
             OngsysProduto,
+            OngsysNotaServico,
+            OngsysNotaProduto,
             OngsysEndpointStatus,
         )
         db_fornecedores = OngsysFornecedor.objects.count()
@@ -1270,6 +1273,8 @@ def ongsys_integration_view(request):
         db_lancamentos = OngsysLancamentoBancario.objects.count()
         db_contratos = OngsysContrato.objects.count()
         db_produtos = OngsysProduto.objects.count()
+        db_notas_servico = OngsysNotaServico.objects.count()
+        db_notas_produto = OngsysNotaProduto.objects.count()
         db_total = (
             db_fornecedores
             + db_clientes
@@ -1278,6 +1283,8 @@ def ongsys_integration_view(request):
             + db_lancamentos
             + db_contratos
             + db_produtos
+            + db_notas_servico
+            + db_notas_produto
         )
         
         # Mapeamento de status dos endpoints
@@ -1285,7 +1292,7 @@ def ongsys_integration_view(request):
         status_map = {s.endpoint_id: s for s in statuses}
     except Exception:
         db_fornecedores = db_clientes = db_contas_pagar = db_contas_receber = 0
-        db_lancamentos = db_contratos = db_produtos = db_total = 0
+        db_lancamentos = db_contratos = db_produtos = db_notas_servico = db_notas_produto = db_total = 0
         statuses = []
         status_map = {}
 
@@ -1329,6 +1336,8 @@ def ongsys_integration_view(request):
         'contratos-pagar-get': db_contratos,
         'contratos-receber-get': db_contratos,
         'produtos-get': db_produtos,
+        'nfse-get': db_notas_servico,
+        'nfe-get': db_notas_produto,
         'pedidos-finalizados-get': 850,
         'pedidos-busca-direta-get': 1,
         'pedidos-pendentes-get': 42,
@@ -1348,6 +1357,8 @@ def ongsys_integration_view(request):
         'contratos-pagar-get': 93,
         'contratos-receber-get': 45,
         'produtos-get': 1692,
+        'nfse-get': max(db_notas_servico, 1),
+        'nfe-get': max(db_notas_produto, 1),
         'pedidos-compras-get': 850,
         'pedidos-finalizados-get': 850,
         'pedidos-busca-direta-get': 1,
@@ -1355,6 +1366,7 @@ def ongsys_integration_view(request):
         'produtos-catalogo-get': 1692,
         'produtos-uom-get': 15,
     }
+
 
 
     for ep in endpoints_ongsys:

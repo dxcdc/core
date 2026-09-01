@@ -13,7 +13,10 @@ from apps.integrations.models import (
     OngsysLancamentoBancario,
     OngsysContrato,
     OngsysProduto,
+    OngsysNotaServico,
+    OngsysNotaProduto,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -690,6 +693,186 @@ def sync_produtos(max_pages=None):
 
 
 # ==============================================================================
+# 8. NOTAS FISCAIS DE SERVIÇO (NFS-e ATÔMICO)
+# ==============================================================================
+def sync_notas_servico(max_pages=None, data_inicio="2025-07-01", data_fim="2026-12-31"):
+    headers = get_headers()
+    page = 1
+    total_processed = 0
+    t0 = time.time()
+
+    while True:
+        if max_pages and page > max_pages:
+            break
+
+        try:
+            resp = requests.get(
+                f"{BASE_URL}notas-servico",
+                headers=headers,
+                params={
+                    "data_inicio": data_inicio,
+                    "data_fim": data_fim,
+                    "pageNumber": page,
+                },
+                timeout=25,
+            )
+            if resp.status_code != 200:
+                break
+            payload = resp.json()
+            items = payload.get("data", [])
+            if not items:
+                break
+
+            objs = []
+            for item in items:
+                id_val = str(item.get("id") or item.get("idNota") or item.get("numeroNota") or "").strip()
+                if not id_val:
+                    continue
+                prest = item.get("prestador") or {}
+                tomad = item.get("tomador") or {}
+
+                objs.append(
+                    OngsysNotaServico(
+                        id_ongsys=id_val,
+                        numero_nota=str(item.get("numeroNota") or item.get("numero") or "")[:64],
+                        codigo_verificacao=str(item.get("codigoVerificacao") or "")[:64],
+                        prestador_nome=str(prest.get("nome") or prest.get("razaoSocial") or item.get("prestadorNome") or "")[:255],
+                        prestador_documento=str(prest.get("documento") or prest.get("cnpj") or item.get("prestadorDocumento") or "")[:32],
+                        tomador_nome=str(tomad.get("nome") or tomad.get("razaoSocial") or item.get("tomadorNome") or "")[:255],
+                        tomador_documento=str(tomad.get("documento") or tomad.get("cnpj") or item.get("tomadorDocumento") or "")[:32],
+                        data_emissao=parse_date(item.get("dataEmissao")),
+                        data_competencia=parse_date(item.get("dataCompetencia")),
+                        valor_servicos=parse_decimal(item.get("valorServicos") or item.get("valorTotal") or item.get("valor")),
+                        valor_liquido=parse_decimal(item.get("valorLiquido") or item.get("valorLiquidoNfse")),
+                        discriminacao_servicos=str(item.get("discriminacao") or item.get("descricaoServico") or ""),
+                        dados_brutos=item,
+                    )
+                )
+
+            with transaction.atomic():
+                OngsysNotaServico.objects.bulk_create(
+                    objs,
+                    update_conflicts=True,
+                    unique_fields=["id_ongsys"],
+                    update_fields=[
+                        "numero_nota",
+                        "codigo_verificacao",
+                        "prestador_nome",
+                        "prestador_documento",
+                        "tomador_nome",
+                        "tomador_documento",
+                        "data_emissao",
+                        "data_competencia",
+                        "valor_servicos",
+                        "valor_liquido",
+                        "discriminacao_servicos",
+                        "dados_brutos",
+                        "atualizado_em",
+                    ],
+                )
+
+            total_processed += len(objs)
+            page += 1
+            if len(items) < 100:
+                break
+        except Exception as e:
+            logger.error(f"Erro ao sincronizar NFS-e pág {page}: {e}")
+            break
+
+    duracao = round(time.time() - t0, 2)
+    return {"entidade": "Notas de Servico (NFS-e)", "total": total_processed, "duracao": duracao}
+
+
+# ==============================================================================
+# 9. NOTAS FISCAIS DE PRODUTO (NF-e ATÔMICO)
+# ==============================================================================
+def sync_notas_produto(max_pages=None, data_inicio="2025-07-01", data_fim="2026-12-31"):
+    headers = get_headers()
+    page = 1
+    total_processed = 0
+    t0 = time.time()
+
+    while True:
+        if max_pages and page > max_pages:
+            break
+
+        try:
+            resp = requests.get(
+                f"{BASE_URL}notas-produto",
+                headers=headers,
+                params={
+                    "data_inicio": data_inicio,
+                    "data_fim": data_fim,
+                    "pageNumber": page,
+                },
+                timeout=25,
+            )
+            if resp.status_code != 200:
+                break
+            payload = resp.json()
+            items = payload.get("data", [])
+            if not items:
+                break
+
+            objs = []
+            for item in items:
+                id_val = str(item.get("id") or item.get("chaveAcesso") or item.get("numeroNfe") or "").strip()
+                if not id_val:
+                    continue
+                emit = item.get("emitente") or {}
+                dest = item.get("destinatario") or {}
+
+                objs.append(
+                    OngsysNotaProduto(
+                        id_ongsys=id_val,
+                        numero_nfe=str(item.get("numeroNfe") or item.get("numero") or "")[:64],
+                        serie=str(item.get("serie") or "")[:16],
+                        chave_acesso=str(item.get("chaveAcesso") or item.get("chave") or "")[:44],
+                        emitente_nome=str(emit.get("nome") or emit.get("razaoSocial") or item.get("emitenteNome") or "")[:255],
+                        emitente_documento=str(emit.get("documento") or emit.get("cnpj") or item.get("emitenteDocumento") or "")[:32],
+                        destinatario_nome=str(dest.get("nome") or dest.get("razaoSocial") or item.get("destinatarioNome") or "")[:255],
+                        destinatario_documento=str(dest.get("documento") or dest.get("cnpj") or item.get("destinatarioDocumento") or "")[:32],
+                        data_emissao=parse_date(item.get("dataEmissao")),
+                        valor_total=parse_decimal(item.get("valorTotal") or item.get("valorNfe") or item.get("valor")),
+                        natureza_operacao=str(item.get("naturezaOperacao") or "")[:255],
+                        dados_brutos=item,
+                    )
+                )
+
+            with transaction.atomic():
+                OngsysNotaProduto.objects.bulk_create(
+                    objs,
+                    update_conflicts=True,
+                    unique_fields=["id_ongsys"],
+                    update_fields=[
+                        "numero_nfe",
+                        "serie",
+                        "chave_acesso",
+                        "emitente_nome",
+                        "emitente_documento",
+                        "destinatario_nome",
+                        "destinatario_documento",
+                        "data_emissao",
+                        "valor_total",
+                        "natureza_operacao",
+                        "dados_brutos",
+                        "atualizado_em",
+                    ],
+                )
+
+            total_processed += len(objs)
+            page += 1
+            if len(items) < 100:
+                break
+        except Exception as e:
+            logger.error(f"Erro ao sincronizar NF-e pág {page}: {e}")
+            break
+
+    duracao = round(time.time() - t0, 2)
+    return {"entidade": "Notas de Produto (NF-e)", "total": total_processed, "duracao": duracao}
+
+
+# ==============================================================================
 # SINCRONIZAÇÃO COMPLETA
 # ==============================================================================
 def sync_all_ongsys(max_pages_per_entity=3):
@@ -701,4 +884,7 @@ def sync_all_ongsys(max_pages_per_entity=3):
     results.append(sync_contas_pagar(max_pages=max_pages_per_entity))
     results.append(sync_contas_receber(max_pages=max_pages_per_entity))
     results.append(sync_lancamentos_bancarios(max_pages=max_pages_per_entity))
+    results.append(sync_notas_servico(max_pages=max_pages_per_entity))
+    results.append(sync_notas_produto(max_pages=max_pages_per_entity))
     return results
+
