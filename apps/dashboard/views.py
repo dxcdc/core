@@ -2292,57 +2292,72 @@ def ongsys_trigger_sync_async_view(request):
             sync_logs,
         )
 
+        def make_progress_cb(step_name, step_idx, total_steps_count, max_pages_requested):
+            def cb(page, max_pages_actual, total_proc, total_recs):
+                target_pages = max_pages_requested or (int(total_recs / 100) + 1 if total_recs else 10)
+                sub_pct = min(1.0, page / max(target_pages, 1))
+                if total_steps_count == 1:
+                    pct = int(5 + sub_pct * 90)
+                else:
+                    base_pct = int(((step_idx - 1) / total_steps_count) * 90) + 5
+                    step_span = int(90 / total_steps_count)
+                    pct = int(base_pct + sub_pct * step_span)
+
+                task_data['progress_pct'] = min(98, max(5, pct))
+                task_data['current_step'] = f"{step_name}: Pág {page}/{target_pages} ({total_proc} salvos)..."
+                _save_task_state(tid, task_data)
+            return cb
+
         steps = []
         if ent == 'all':
             steps = [
-                ('Fornecedores', lambda: sync_fornecedores(max_pages=pgs)),
-                ('Clientes & Projetos', lambda: sync_clientes(max_pages=pgs)),
-                ('Contas a Pagar', lambda: sync_contas_pagar(max_pages=pgs)),
-                ('Contas a Receber', lambda: sync_contas_receber(max_pages=pgs)),
-                ('Lançamentos Bancários', lambda: sync_lancamentos_bancarios(max_pages=pgs)),
-                ('Contratos', lambda: sync_contratos(max_pages=pgs)),
-                ('Produtos / Almoxarifado', lambda: sync_produtos(max_pages=pgs)),
-                ('Notas Fiscais de Serviço (NFS-e)', lambda: sync_notas_servico(max_pages=pgs)),
-                ('Notas Fiscais de Produto (NF-e)', lambda: sync_notas_produto(max_pages=pgs)),
-                ('Logs de Auditoria', lambda: sync_logs(max_pages=pgs)),
+                ('Fornecedores', lambda cb: sync_fornecedores(max_pages=pgs)),
+                ('Clientes & Projetos', lambda cb: sync_clientes(max_pages=pgs)),
+                ('Contas a Pagar', lambda cb: sync_contas_pagar(max_pages=pgs)),
+                ('Contas a Receber', lambda cb: sync_contas_receber(max_pages=pgs)),
+                ('Lançamentos Bancários', lambda cb: sync_lancamentos_bancarios(max_pages=pgs)),
+                ('Contratos', lambda cb: sync_contratos(max_pages=pgs)),
+                ('Produtos / Almoxarifado', lambda cb: sync_produtos(max_pages=pgs)),
+                ('Notas Fiscais de Serviço (NFS-e)', lambda cb: sync_notas_servico(max_pages=pgs, on_progress=cb)),
+                ('Notas Fiscais de Produto (NF-e)', lambda cb: sync_notas_produto(max_pages=pgs, on_progress=cb)),
+                ('Logs de Auditoria', lambda cb: sync_logs(max_pages=pgs)),
             ]
         elif ent == 'fornecedores':
-            steps = [('Fornecedores', lambda: sync_fornecedores(max_pages=pgs))]
+            steps = [('Fornecedores', lambda cb: sync_fornecedores(max_pages=pgs))]
         elif ent == 'clientes':
-            steps = [('Clientes & Projetos', lambda: sync_clientes(max_pages=pgs))]
+            steps = [('Clientes & Projetos', lambda cb: sync_clientes(max_pages=pgs))]
         elif ent == 'contas_pagar':
-            steps = [('Contas a Pagar', lambda: sync_contas_pagar(max_pages=pgs))]
+            steps = [('Contas a Pagar', lambda cb: sync_contas_pagar(max_pages=pgs))]
         elif ent == 'contas_receber':
-            steps = [('Contas a Receber', lambda: sync_contas_receber(max_pages=pgs))]
+            steps = [('Contas a Receber', lambda cb: sync_contas_receber(max_pages=pgs))]
         elif ent in ('lancamentos', 'lancamentos_bancarios'):
-            steps = [('Lançamentos Bancários', lambda: sync_lancamentos_bancarios(max_pages=pgs))]
+            steps = [('Lançamentos Bancários', lambda cb: sync_lancamentos_bancarios(max_pages=pgs))]
         elif ent == 'contratos':
-            steps = [('Contratos', lambda: sync_contratos(max_pages=pgs))]
+            steps = [('Contratos', lambda cb: sync_contratos(max_pages=pgs))]
         elif ent == 'produtos':
-            steps = [('Produtos / Almoxarifado', lambda: sync_produtos(max_pages=pgs))]
+            steps = [('Produtos / Almoxarifado', lambda cb: sync_produtos(max_pages=pgs))]
         elif ent in ('notas_servico', 'nfse'):
-            steps = [('Notas Fiscais de Serviço (NFS-e)', lambda: sync_notas_servico(max_pages=pgs))]
+            steps = [('Notas Fiscais de Serviço (NFS-e)', lambda cb: sync_notas_servico(max_pages=pgs, on_progress=cb))]
         elif ent in ('notas_produto', 'nfe'):
-            steps = [('Notas Fiscais de Produto (NF-e)', lambda: sync_notas_produto(max_pages=pgs))]
+            steps = [('Notas Fiscais de Produto (NF-e)', lambda cb: sync_notas_produto(max_pages=pgs, on_progress=cb))]
         elif ent == 'logs':
-            steps = [('Logs de Auditoria', lambda: sync_logs(max_pages=pgs))]
+            steps = [('Logs de Auditoria', lambda cb: sync_logs(max_pages=pgs))]
         else:
-            steps = [('Fornecedores', lambda: sync_fornecedores(max_pages=pgs))]
-
-
+            steps = [('Fornecedores', lambda cb: sync_fornecedores(max_pages=pgs))]
 
         total_steps = len(steps)
         results = []
         task_data = _get_task_state(tid) or initial_task
 
         for i, (name, func) in enumerate(steps, 1):
+            cb = make_progress_cb(name, i, total_steps, pgs)
             task_data['current_step'] = f"Sincronizando {name} ({i}/{total_steps})..."
             task_data['progress_pct'] = max(5, int((i - 1) / total_steps * 100))
             task_data['completed_items'] = i - 1
             _save_task_state(tid, task_data)
 
             try:
-                res = func()
+                res = func(cb)
                 results.append(res)
             except Exception as e:
                 results.append({'entidade': name, 'total': 0, 'erro': str(e)})

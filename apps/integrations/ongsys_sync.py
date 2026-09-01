@@ -711,7 +711,7 @@ def sync_produtos(max_pages=None):
 # ==============================================================================
 # 8. NOTAS FISCAIS DE SERVIÇO (NFS-e ATÔMICO)
 # ==============================================================================
-def sync_notas_servico(max_pages=None, data_inicio=None, data_fim=None):
+def sync_notas_servico(max_pages=None, data_inicio=None, data_fim=None, on_progress=None):
     headers = get_headers()
     page = 1
     total_processed = 0
@@ -793,6 +793,11 @@ def sync_notas_servico(max_pages=None, data_inicio=None, data_fim=None):
                 )
 
             total_processed += len(objs)
+            if on_progress:
+                try:
+                    on_progress(page, max_pages, total_processed, payload.get("totalRecords"))
+                except Exception:
+                    pass
             page += 1
             if len(items) < 100:
                 break
@@ -807,7 +812,7 @@ def sync_notas_servico(max_pages=None, data_inicio=None, data_fim=None):
 # ==============================================================================
 # 9. NOTAS FISCAIS DE PRODUTO (NF-e ATÔMICO)
 # ==============================================================================
-def sync_notas_produto(max_pages=None, data_inicio=None, data_fim=None):
+def sync_notas_produto(max_pages=None, data_inicio=None, data_fim=None, on_progress=None):
     headers = get_headers()
     page = 1
     total_processed = 0
@@ -887,6 +892,11 @@ def sync_notas_produto(max_pages=None, data_inicio=None, data_fim=None):
                 )
 
             total_processed += len(objs)
+            if on_progress:
+                try:
+                    on_progress(page, max_pages, total_processed, payload.get("totalRecords"))
+                except Exception:
+                    pass
             page += 1
             if len(items) < 100:
                 break
