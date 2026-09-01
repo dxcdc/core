@@ -239,24 +239,39 @@
 
 <!-- WIDGET FLUTUANTE DE TAREFAS EM SEGUNDO PLANO (NON-INVASIVE MINI-CARD) -->
 <div id="floatingTaskWidget" class="position-fixed bottom-0 end-0 p-3 d-none" style="z-index: 9999;">
-    <div class="card shadow-lg border-0 bg-dark text-white rounded-3 p-3" style="min-width: 320px; max-width: 400px; border-left: 4px solid #10b981 !important; box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important;">
-        <div class="d-flex align-items-center justify-content-between mb-1.5">
+    <div class="card shadow-lg border-0 bg-dark text-white rounded-3 p-3 position-relative" style="min-width: 330px; max-width: 400px; border-left: 4px solid #10b981 !important; box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;">
+        <!-- Botão Fechar Limpo e Visível -->
+        <button type="button" class="position-absolute top-0 end-0 m-2 text-white-50 p-1 d-flex align-items-center justify-content-center" onclick="minimizeFloatingWidget()" title="Minimizar card" style="background: transparent !important; border: none !important; width: 24px; height: 24px; font-size: 13px; line-height: 1; border-radius: 4px; transition: color 0.15s ease; cursor: pointer;">
+            ✕
+        </button>
+
+        <div class="d-flex align-items-center justify-content-between mb-1.5 pe-4">
             <div class="d-flex align-items-center gap-2">
-                <span class="spinner-border spinner-border-sm text-success" id="floatingTaskSpinner"></span>
-                <strong style="font-size: 0.84rem;" id="floatingTaskTitle">Processando em Segundo Plano</strong>
+                <span class="spinner-border spinner-border-sm text-success" id="floatingTaskSpinner" style="width: 14px; height: 14px;"></span>
+                <strong style="font-size: 0.84rem; color: #f8fafc;" id="floatingTaskTitle">Processando em Segundo Plano</strong>
             </div>
             <span class="badge bg-secondary" id="floatingTaskPct" style="font-size: 0.70rem;">0%</span>
         </div>
         <p class="text-white-50 mb-2" style="font-size: 0.74rem; line-height: 1.3;" id="floatingTaskStep">Iniciando execução...</p>
         <div class="progress bg-secondary" style="height: 5px; border-radius: 3px;">
-            <div class="progress-bar bg-success" id="floatingTaskProgressBar" style="width: 0%; transition: width 0.3s ease;"></div>
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="floatingTaskProgressBar" style="width: 0%; transition: width 0.4s ease;"></div>
         </div>
         <div class="d-flex justify-content-between align-items-center mt-1.5">
             <small class="text-white-50" style="font-size: 0.68rem;">Você pode continuar navegando livremente.</small>
-            <button class="btn btn-link btn-sm text-white-50 p-0 text-decoration-none" onclick="document.getElementById('floatingTaskWidget').classList.add('d-none')" title="Minimizar">✕</button>
+            <small class="text-success fw-bold" id="floatingTaskStatusTag" style="font-size: 0.68rem;">● Ativo</small>
         </div>
     </div>
 </div>
+
+<!-- MINI-PILL DE TAREFA EM SEGUNDO PLANO (QUANDO MINIMIZADO) -->
+<div id="floatingTaskPill" class="position-fixed bottom-0 end-0 p-3 d-none" style="z-index: 9999;">
+    <button type="button" class="btn btn-sm btn-dark text-white fw-bold shadow-lg border border-success d-flex align-items-center gap-2 px-3 py-1.5" onclick="restoreFloatingWidget()" style="border-radius: 20px; font-size: 0.76rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;" title="Clique para expandir o progresso">
+        <span class="spinner-border spinner-border-sm text-success" style="width: 12px; height: 12px;"></span>
+        <span id="pillTaskLabel">Em execução...</span>
+        <span class="badge bg-success" id="pillTaskPct">0%</span>
+    </button>
+</div>
+
 
 <!-- Header da Página -->
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
@@ -2294,25 +2309,53 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
     // =========================================================================
     // 🚀 EXECUTOR DE TAREFAS EM SEGUNDO PLANO (ASYNC BACKGROUND RUNNER)
     // =========================================================================
+    window.isBackgroundTaskRunning = false;
     let activePollingInterval = null;
 
+    function minimizeFloatingWidget() {
+        const widget = document.getElementById('floatingTaskWidget');
+        const pill = document.getElementById('floatingTaskPill');
+        if (widget) widget.classList.add('d-none');
+        if (pill && window.isBackgroundTaskRunning) pill.classList.remove('d-none');
+    }
+
+    function restoreFloatingWidget() {
+        const widget = document.getElementById('floatingTaskWidget');
+        const pill = document.getElementById('floatingTaskPill');
+        if (pill) pill.classList.add('d-none');
+        if (widget) widget.classList.remove('d-none');
+    }
+
     function startAsyncTestAll() {
+        if (window.isBackgroundTaskRunning) {
+            restoreFloatingWidget();
+            showToast("ℹ️ Uma bateria de testes já está em andamento. Acompanhe pelo card!");
+            return;
+        }
+
+        window.isBackgroundTaskRunning = true;
+
         const topBar = document.getElementById('topGlobalProgressBar');
         const topFill = document.getElementById('topGlobalProgressBarFill');
         const widget = document.getElementById('floatingTaskWidget');
+        const pill = document.getElementById('floatingTaskPill');
         const widgetTitle = document.getElementById('floatingTaskTitle');
         const widgetStep = document.getElementById('floatingTaskStep');
         const widgetPct = document.getElementById('floatingTaskPct');
         const widgetBar = document.getElementById('floatingTaskProgressBar');
         const widgetSpinner = document.getElementById('floatingTaskSpinner');
+        const pillLabel = document.getElementById('pillTaskLabel');
 
+        if (pill) pill.classList.add('d-none');
         if (topBar) topBar.classList.remove('d-none');
         if (widget) widget.classList.remove('d-none');
         if (widgetTitle) widgetTitle.innerText = 'Testando 18 Rotas da API OngSys';
-        if (widgetStep) widgetStep.innerText = 'Disparando bateria de testes no servidor...';
-        if (widgetPct) widgetPct.innerText = '0%';
-        if (widgetBar) widgetBar.style.width = '0%';
+        if (widgetStep) widgetStep.innerText = 'Iniciando bateria de testes no servidor...';
+        if (widgetPct) widgetPct.innerText = '5%';
+        if (widgetBar) widgetBar.style.width = '5%';
+        if (topFill) topFill.style.width = '5%';
         if (widgetSpinner) widgetSpinner.className = 'spinner-border spinner-border-sm text-success';
+        if (pillLabel) pillLabel.innerText = 'Testando APIs...';
 
         showToast("⏳ Bateria de testes iniciada em segundo plano!");
 
@@ -2328,12 +2371,12 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
             if (data.task_id) {
                 pollTaskProgress(data.task_id, (result) => {
                     showToast("🎉 Bateria de testes concluída em segundo plano!");
-                    // Atualizar o card de saúde da credencial dinamicamente
                     quickTestCredentialKey();
                 });
             }
         })
         .catch(err => {
+            window.isBackgroundTaskRunning = false;
             showToast("Erro ao iniciar teste em segundo plano.");
             if (topBar) topBar.classList.add('d-none');
             if (widget) widget.classList.add('d-none');
@@ -2347,25 +2390,38 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
             if (modalInstance) modalInstance.hide();
         }
 
+        if (window.isBackgroundTaskRunning) {
+            restoreFloatingWidget();
+            showToast("ℹ️ Uma sincronização já está em andamento. Acompanhe pelo card!");
+            return;
+        }
+
+        window.isBackgroundTaskRunning = true;
+
         const entity = document.getElementById("syncEntitySelect").value;
         const pages = parseInt(document.getElementById("syncPagesInput").value) || 3;
 
         const topBar = document.getElementById('topGlobalProgressBar');
         const topFill = document.getElementById('topGlobalProgressBarFill');
         const widget = document.getElementById('floatingTaskWidget');
+        const pill = document.getElementById('floatingTaskPill');
         const widgetTitle = document.getElementById('floatingTaskTitle');
         const widgetStep = document.getElementById('floatingTaskStep');
         const widgetPct = document.getElementById('floatingTaskPct');
         const widgetBar = document.getElementById('floatingTaskProgressBar');
         const widgetSpinner = document.getElementById('floatingTaskSpinner');
+        const pillLabel = document.getElementById('pillTaskLabel');
 
+        if (pill) pill.classList.add('d-none');
         if (topBar) topBar.classList.remove('d-none');
         if (widget) widget.classList.remove('d-none');
         if (widgetTitle) widgetTitle.innerText = 'Sincronização Atômica PostgreSQL';
-        if (widgetStep) widgetStep.innerText = 'Iniciando extração e upsert em segundo plano...';
-        if (widgetPct) widgetPct.innerText = '0%';
-        if (widgetBar) widgetBar.style.width = '0%';
+        if (widgetStep) widgetStep.innerText = 'Iniciando extração e upserts em segundo plano...';
+        if (widgetPct) widgetPct.innerText = '5%';
+        if (widgetBar) widgetBar.style.width = '5%';
+        if (topFill) topFill.style.width = '5%';
         if (widgetSpinner) widgetSpinner.className = 'spinner-border spinner-border-sm text-primary';
+        if (pillLabel) pillLabel.innerText = 'Sincronizando DB...';
 
         showToast("🚀 Carga atômica iniciada em segundo plano! Você pode navegar livremente.");
 
@@ -2386,6 +2442,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
             }
         })
         .catch(err => {
+            window.isBackgroundTaskRunning = false;
             showToast("Erro ao iniciar sincronização.");
             if (topBar) topBar.classList.add('d-none');
             if (widget) widget.classList.add('d-none');
@@ -2398,6 +2455,8 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         const topFill = document.getElementById('topGlobalProgressBarFill');
         const topBar = document.getElementById('topGlobalProgressBar');
         const widget = document.getElementById('floatingTaskWidget');
+        const pill = document.getElementById('floatingTaskPill');
+        const pillPct = document.getElementById('pillTaskPct');
         const widgetStep = document.getElementById('floatingTaskStep');
         const widgetPct = document.getElementById('floatingTaskPct');
         const widgetBar = document.getElementById('floatingTaskProgressBar');
@@ -2411,22 +2470,26 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                     if (topFill) topFill.style.width = `${pct}%`;
                     if (widgetBar) widgetBar.style.width = `${pct}%`;
                     if (widgetPct) widgetPct.innerText = `${pct}%`;
+                    if (pillPct) pillPct.innerText = `${pct}%`;
                     if (widgetStep && task.current_step) widgetStep.innerText = task.current_step;
 
                     if (task.status === 'completed' || task.status === 'error') {
                         clearInterval(activePollingInterval);
                         activePollingInterval = null;
+                        window.isBackgroundTaskRunning = false;
 
                         if (topFill) topFill.style.width = '100%';
                         if (widgetBar) widgetBar.style.width = '100%';
                         if (widgetPct) widgetPct.innerText = '100%';
+                        if (pillPct) pillPct.innerText = '100%';
                         if (widgetSpinner) widgetSpinner.className = 'ri-checkbox-circle-fill text-success fs-18';
                         if (widgetStep) widgetStep.innerText = task.current_step || 'Processo finalizado com sucesso!';
 
                         setTimeout(() => {
                             if (topBar) topBar.classList.add('d-none');
                             if (widget) widget.classList.add('d-none');
-                        }, 4000);
+                            if (pill) pill.classList.add('d-none');
+                        }, 3500);
 
                         if (onComplete) onComplete(task);
                     }
@@ -2434,8 +2497,9 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                 .catch(err => {
                     console.error("Erro no polling de status:", err);
                 });
-        }, 1200);
+        }, 1000);
     }
+
 </script>
 {% endblock %}
 

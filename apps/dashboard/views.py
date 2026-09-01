@@ -2065,9 +2065,9 @@ def ongsys_trigger_test_all_async_view(request):
             'id': task_id,
             'type': 'test_all',
             'status': 'running',
-            'progress_pct': 0,
-            'current_step': 'Iniciando bateria de testes nas rotas...',
-            'total_items': 17,
+            'progress_pct': 5,
+            'current_step': 'Iniciando conexão e bateria de testes nas rotas...',
+            'total_items': 18,
             'completed_items': 0,
             'results': [],
             'error': None,
@@ -2107,7 +2107,7 @@ def ongsys_trigger_test_all_async_view(request):
         for i, (ep_id, path, method, params) in enumerate(endpoints, 1):
             with TASKS_LOCK:
                 BACKGROUND_TASKS[tid]['current_step'] = f"Avaliando endpoint /{path} ({i}/{total})..."
-                BACKGROUND_TASKS[tid]['progress_pct'] = int((i - 1) / total * 100)
+                BACKGROUND_TASKS[tid]['progress_pct'] = max(5, int((i - 1) / total * 100))
 
             url = f"https://www.ongsys.com.br/app/index.php/api/v2/{path}"
             status_code = 0
@@ -2115,9 +2115,9 @@ def ongsys_trigger_test_all_async_view(request):
             classification = 'error'
             try:
                 if method == 'GET':
-                    r = requests.get(url, headers=h, params=params, timeout=12)
+                    r = requests.get(url, headers=h, params=params, timeout=10)
                 else:
-                    r = requests.post(url, headers=h, json=params, timeout=12)
+                    r = requests.post(url, headers=h, json=params, timeout=10)
                 
                 status_code = r.status_code
                 latencia = int(r.elapsed.total_seconds() * 1000)
@@ -2138,7 +2138,7 @@ def ongsys_trigger_test_all_async_view(request):
                 )
             except Exception as e:
                 status_code = 504
-                latencia = 12000
+                latencia = 10000
                 classification = 'error'
 
             results.append({
@@ -2156,6 +2156,7 @@ def ongsys_trigger_test_all_async_view(request):
 
         with TASKS_LOCK:
             BACKGROUND_TASKS[tid]['status'] = 'completed'
+            BACKGROUND_TASKS[tid]['progress_pct'] = 100
             BACKGROUND_TASKS[tid]['current_step'] = 'Bateria de testes concluída com sucesso!'
             BACKGROUND_TASKS[tid]['results'] = results
             BACKGROUND_TASKS[tid]['finished_at'] = timezone.now().isoformat()
@@ -2187,8 +2188,8 @@ def ongsys_trigger_sync_async_view(request):
             'id': task_id,
             'type': 'sync_db',
             'status': 'running',
-            'progress_pct': 0,
-            'current_step': 'Iniciando carga atômica no banco de dados...',
+            'progress_pct': 5,
+            'current_step': 'Iniciando conexão e carga atômica...',
             'total_items': 7 if entity == 'all' else 1,
             'completed_items': 0,
             'results': [],
@@ -2196,6 +2197,7 @@ def ongsys_trigger_sync_async_view(request):
             'started_at': timezone.now().isoformat(),
             'finished_at': None,
         }
+
 
     def run_sync_worker(tid, ent, pgs):
         from apps.integrations.ongsys_sync import (
