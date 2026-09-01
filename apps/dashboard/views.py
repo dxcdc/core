@@ -2345,15 +2345,23 @@ def ongsys_trigger_sync_async_view(request):
     return JsonResponse({'task_id': task_id, 'status': 'started'})
 
 
+from django.views.decorators.cache import never_cache
+
+@never_cache
 @login_required(login_url='dashboard:login')
 def ongsys_task_status_view(request, task_id):
     """
     Retorna o progresso em tempo real da tarefa em segundo plano de forma multi-processo e resiliente.
+    Garante que Cloudflare e navegadores nunca façam cache do status.
     """
     task = _get_task_state(task_id)
     if not task:
-        return JsonResponse({'error': 'Tarefa não encontrada'}, status=404)
-    return JsonResponse(task)
+        resp = JsonResponse({'error': 'Tarefa não encontrada'}, status=404)
+    else:
+        resp = JsonResponse(task)
+    resp['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp['Pragma'] = 'no-cache'
+    return resp
 
 
 

@@ -2616,7 +2616,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         let pollElapsedSeconds = 0;
 
         activePollingInterval = setInterval(() => {
-            pollElapsedSeconds++;
+            pollElapsedSeconds += 0.4;
             if (pollElapsedSeconds > 300) {
                 clearInterval(activePollingInterval);
                 activePollingInterval = null;
@@ -2630,7 +2630,13 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                 return;
             }
 
-            fetch(`/dashboard/integracoes/ongsys/async/task-status/${taskId}/`)
+            fetch(`/dashboard/integracoes/ongsys/async/task-status/${taskId}/?_=${Date.now()}`, {
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
                 .then(res => {
                     if (!res.ok) throw new Error("Status " + res.status);
                     return res.json();
@@ -2667,7 +2673,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                 })
                 .catch(err => {
                     pollErrorCount++;
-                    if (pollErrorCount >= 10) {
+                    if (pollErrorCount >= 15) {
                         clearInterval(activePollingInterval);
                         activePollingInterval = null;
                         window.isBackgroundTaskRunning = false;
@@ -2676,7 +2682,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                         if (pill) pill.classList.add('d-none');
                     }
                 });
-        }, 1000);
+        }, 400);
     }
 </script>
 {% endblock %}
