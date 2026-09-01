@@ -30,16 +30,49 @@ class OngsysCredentials:
 
 def get_ongsys_credentials():
     import os
-    username = os.environ.get("ONGSYS_USERNAME") or os.environ.get("ONGSYS_CNPJ") or getattr(settings, "ONGSYS_USERNAME", None) or getattr(settings, "ONGSYS_CNPJ", "03970166000129")
+    import re
+    from pathlib import Path
+    from django.conf import settings
+
+    username = None
+    password = None
+    base_url = None
+
+    for env_file in ["/app/.env", "/root/cdc-core/.env", str(settings.BASE_DIR / ".env")]:
+        if os.path.exists(env_file):
+            try:
+                with open(env_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("#") or "=" not in line:
+                            continue
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip('"').strip("'")
+                        if k in ("ONGSYS_PASSWORD", "ONGSYS_API_KEY") and v:
+                            password = v
+                        elif k in ("ONGSYS_USERNAME", "ONGSYS_CNPJ") and v:
+                            username = v
+                        elif k in ("ONGSYS_URL_BASE", "ONGSYS_BASE_URL") and v:
+                            base_url = v
+            except Exception:
+                pass
+
+    if not username:
+        username = os.environ.get("ONGSYS_USERNAME") or os.environ.get("ONGSYS_CNPJ") or getattr(settings, "ONGSYS_USERNAME", None) or getattr(settings, "ONGSYS_CNPJ", "03970166000129")
+    if not password:
+        password = os.environ.get("ONGSYS_PASSWORD") or os.environ.get("ONGSYS_API_KEY") or getattr(settings, "ONGSYS_PASSWORD", None) or getattr(settings, "ONGSYS_API_KEY", "f0c28a9ffe51402b345b637281bb2f5e")
+    if not base_url:
+        base_url = os.environ.get("ONGSYS_BASE_URL") or os.environ.get("ONGSYS_URL_BASE") or getattr(settings, "ONGSYS_URL_BASE", None) or getattr(settings, "ONGSYS_BASE_URL", "https://www.ongsys.com.br/app/index.php/api/v2/")
+
     username = re.sub(r"\D", "", str(username))
-    password = os.environ.get("ONGSYS_PASSWORD") or os.environ.get("ONGSYS_API_KEY") or getattr(settings, "ONGSYS_PASSWORD", None) or getattr(settings, "ONGSYS_API_KEY", "fa009965195f9770db49a9111570b531")
-    base_url = os.environ.get("ONGSYS_BASE_URL") or os.environ.get("ONGSYS_URL_BASE") or getattr(settings, "ONGSYS_URL_BASE", None) or getattr(settings, "ONGSYS_BASE_URL", "https://www.ongsys.com.br/app/index.php/api/v2/")
     base_url = str(base_url).strip().rstrip("/") + "/"
     return OngsysCredentials(
         username=username,
         password=str(password).strip(),
         base_url=base_url if base_url != "/" else "https://www.ongsys.com.br/app/index.php/api/v2/",
     )
+
 
 
 

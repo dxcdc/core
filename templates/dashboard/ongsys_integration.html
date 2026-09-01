@@ -264,25 +264,43 @@
 
 <!-- CARDS RESUMO MINIMALISTAS (4 COLUNAS EQUILIBRADAS) -->
 <div class="row g-3 mb-4">
-    <!-- Card 1: Status da Conexão -->
+    <!-- Card 1: Saúde da Credencial & Teste Rápido -->
     <div class="col-md-3">
-        <div class="p-3 bg-white border rounded-3 shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-radius: 10px; border-color: #e2e8f0;">
-            <div class="d-flex align-items-center justify-content-between mb-1.5">
-                <span class="text-muted fw-bold" style="font-size: 0.70rem; letter-spacing: 0.5px; text-transform: uppercase;">STATUS DA CONEXÃO</span>
-                <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 28px; height: 28px; background: {% if connection_state == 'operational' %}#ecfdf5; color: #10b981;{% elif connection_state == 'error' %}#fef2f2; color: #ef4444;{% else %}#fffbeb; color: #f59e0b;{% endif %}">
-                    <i class="{% if connection_state == 'operational' %}ri-shield-check-line{% else %}ri-alert-line{% endif %} fs-15"></i>
-                </span>
-            </div>
+        <div class="p-3 bg-white border rounded-3 shadow-2xs h-100 d-flex flex-column justify-content-between" style="border-radius: 10px; border-color: #e2e8f0;" id="cardKeyHealth">
             <div>
-                <div class="fw-bold {% if connection_state == 'operational' %}text-success{% elif connection_state == 'error' %}text-danger{% else %}text-warning{% endif %}" style="font-size: 1.15rem; line-height: 1.2;">
-                    {{ connection_label }}
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-bold" style="font-size: 0.70rem; letter-spacing: 0.5px; text-transform: uppercase;">SAÚDE DA CREDENCIAL</span>
+                    <span id="badgeKeyHealth" class="badge rounded-pill px-2 py-1 fw-bold {% if key_health_state == 'active' %}bg-success-subtle text-success border border-success-subtle{% elif key_health_state == 'expired' %}bg-danger-subtle text-danger border border-danger-subtle{% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}" style="font-size: 0.70rem;">
+                        <i id="iconKeyHealth" class="{% if key_health_state == 'active' %}ri-checkbox-circle-fill{% elif key_health_state == 'expired' %}ri-close-circle-fill{% else %}ri-error-warning-fill{% endif %} me-0.5"></i>
+                        <span id="labelKeyHealth">{{ key_health_label }}</span>
+                    </span>
                 </div>
-                <small class="text-muted d-block mt-0.5" style="font-size: 0.74rem;">
-                    {{ connection_detail }}
-                </small>
+                
+                <div class="d-flex flex-column gap-1 mb-2.5" style="font-size: 0.75rem;">
+                    <div class="d-flex justify-content-between text-muted">
+                        <span>Última avaliação:</span>
+                        <span class="fw-semibold text-dark" id="textKeyLastVerified">{{ key_last_verified }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted">
+                        <span>Latência:</span>
+                        <span class="fw-semibold text-dark" id="textKeyLatency">
+                            {% if key_latency_ms %}{{ key_latency_ms }} ms <span class="badge bg-light text-muted border px-1" style="font-size: 0.65rem;" id="badgeKeyQuality">{{ key_latency_quality }}</span>{% else %}—{% endif %}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted">
+                        <span>Cobertura:</span>
+                        <span class="fw-semibold text-dark" id="textKeyCoverage">{{ key_coverage_text }}</span>
+                    </div>
+                </div>
             </div>
+
+            <button type="button" class="btn btn-xs btn-outline-primary w-100 fw-semibold d-flex align-items-center justify-content-center gap-1.5 py-1" id="btnQuickTestKey" onclick="quickTestCredentialKey()" style="border-radius: 6px; font-size: 0.75rem; border-color: #cbd5e1;" title="Testar credencial agora">
+                <i class="ri-flashlight-line fs-13" id="iconBtnQuickTest"></i>
+                <span id="labelBtnQuickTest">Testar Chave Agora</span>
+            </button>
         </div>
     </div>
+
 
     <!-- Card 2: Rotas Mapeadas -->
     <div class="col-md-3">
@@ -1744,6 +1762,84 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
             btnAll.innerHTML = `<i class="ri-heart-pulse-fill fs-16"></i> Testar Todas as APIs`;
         }, 5000);
     }
+
+    function quickTestCredentialKey() {
+        const btn = document.getElementById("btnQuickTestKey");
+        const icon = document.getElementById("iconBtnQuickTest");
+        const label = document.getElementById("labelBtnQuickTest");
+        const badge = document.getElementById("badgeKeyHealth");
+        const badgeIcon = document.getElementById("iconKeyHealth");
+        const badgeLabel = document.getElementById("labelKeyHealth");
+        const textVerified = document.getElementById("textKeyLastVerified");
+        const textLatency = document.getElementById("textKeyLatency");
+
+        if (!btn) return;
+
+        btn.disabled = true;
+        if (icon) icon.className = "spinner-border spinner-border-sm";
+        if (label) label.innerText = "Avaliando...";
+
+        const startTime = performance.now();
+
+        fetch("{% url 'dashboard:ongsys_api_proxy' endpoint_key='test' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                path: "fornecedores",
+                method: "GET",
+                params: { pageNumber: 1 },
+                ep_id: "fornecedores-get"
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const elapsed = Math.round(performance.now() - startTime);
+            const nowStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
+            btn.disabled = false;
+            if (icon) icon.className = "ri-flashlight-line fs-13";
+            if (label) label.innerText = "Testar Novamente";
+
+            if (data.status_code === 200) {
+                if (badge) badge.className = "badge rounded-pill px-2 py-1 fw-bold bg-success-subtle text-success border border-success-subtle";
+                if (badgeIcon) badgeIcon.className = "ri-checkbox-circle-fill me-0.5";
+                if (badgeLabel) badgeLabel.innerText = "Ativa & Válida";
+                if (textVerified) textVerified.innerText = `Hoje às ${nowStr} (agora)`;
+                
+                const quality = elapsed < 600 ? "Excelente" : (elapsed < 1500 ? "Normal" : "Lenta");
+                if (textLatency) {
+                    textLatency.innerHTML = `${elapsed} ms <span class="badge bg-light text-muted border px-1" style="font-size: 0.65rem;">${quality}</span>`;
+                }
+
+                showToast("✅ Chave validada com sucesso na OngSys!");
+            } else if (data.status_code === 401) {
+                if (badge) badge.className = "badge rounded-pill px-2 py-1 fw-bold bg-danger-subtle text-danger border border-danger-subtle";
+                if (badgeIcon) badgeIcon.className = "ri-close-circle-fill me-0.5";
+                if (badgeLabel) badgeLabel.innerText = "Expirada / Inválida";
+                if (textVerified) textVerified.innerText = `Hoje às ${nowStr}`;
+                if (textLatency) textLatency.innerText = "401 Unauthorized";
+
+                showToast("❌ Erro 401: Chave não autorizada ou expirada na OngSys.");
+            } else {
+                if (badge) badge.className = "badge rounded-pill px-2 py-1 fw-bold bg-warning-subtle text-warning border border-warning-subtle";
+                if (badgeIcon) badgeIcon.className = "ri-error-warning-fill me-0.5";
+                if (badgeLabel) badgeLabel.innerText = `HTTP ${data.status_code}`;
+                if (textVerified) textVerified.innerText = `Hoje às ${nowStr}`;
+                
+                showToast(`⚠️ Servidor retornou HTTP ${data.status_code}`);
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            if (icon) icon.className = "ri-flashlight-line fs-13";
+            if (label) label.innerText = "Testar Novamente";
+            showToast("Erro na comunicação com a API Proxy.");
+        });
+    }
+
 
 
     function initMappingFilters() {

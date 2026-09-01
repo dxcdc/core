@@ -8,10 +8,11 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Carrega variáveis de ambiente do arquivo .env se existir
+# Carrega variáveis de ambiente do arquivo .env com prioridade (override=True)
 env_path = BASE_DIR / '.env'
 if env_path.exists():
-    load_dotenv(env_path)
+    load_dotenv(env_path, override=True)
+
 
 # OngSys API v2 Settings
 ONGSYS_USERNAME = os.getenv('ONGSYS_USERNAME', os.getenv('ONGSYS_CNPJ', ''))

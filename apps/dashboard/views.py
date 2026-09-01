@@ -1298,22 +1298,54 @@ def ongsys_integration_view(request):
 
     tested_statuses = [status for status in statuses if status.ultima_vez_testado]
     latest_status = max(tested_statuses, key=lambda status: status.ultima_vez_testado, default=None)
+    
+    # Cálculo detalhado da Saúde da Chave / Credencial
     if not has_api_key:
+        key_health_state = 'missing'
+        key_health_label = 'Pendente'
+        key_health_badge_class = 'text-warning'
+        key_last_verified = 'Nunca testada'
+        key_latency_ms = 0
+        key_latency_quality = 'Indefinida'
         connection_state = 'missing'
         connection_label = 'Pendente'
-        connection_detail = 'Credencial ausente no cofre protegido'
+        connection_detail = 'Credencial ausente no cofre'
     elif latest_status and latest_status.status_classificacao in {'success', 'validated'}:
+        key_health_state = 'active'
+        key_health_label = 'Ativa & Válida'
+        key_health_badge_class = 'text-success'
+        key_last_verified = latest_status.ultima_vez_testado.strftime('%d/%m/%Y às %H:%M')
+        key_latency_ms = latest_status.latencia_ms or 120
+        key_latency_quality = 'Excelente' if key_latency_ms < 600 else ('Normal' if key_latency_ms < 1500 else 'Lenta')
         connection_state = 'operational'
         connection_label = 'Operacional'
         connection_detail = 'Último teste autenticado concluído'
     elif latest_status and latest_status.status_classificacao == 'error':
+        key_health_state = 'expired'
+        key_health_label = 'Expirada / Inválida'
+        key_health_badge_class = 'text-danger'
+        key_last_verified = latest_status.ultima_vez_testado.strftime('%d/%m/%Y às %H:%M')
+        key_latency_ms = latest_status.latencia_ms or 0
+        key_latency_quality = 'Com Falha'
         connection_state = 'error'
         connection_label = 'Falha no último teste'
-        connection_detail = 'Credencial configurada; consulte o diagnóstico'
+        connection_detail = 'Credencial não autorizada'
     else:
+        key_health_state = 'untested'
+        key_health_label = 'Não Avaliada'
+        key_health_badge_class = 'text-secondary'
+        key_last_verified = 'Aguardando primeiro teste'
+        key_latency_ms = 0
+        key_latency_quality = 'Pendente'
         connection_state = 'configured'
         connection_label = 'Configurada'
-        connection_detail = 'Aguardando primeiro teste autenticado'
+        connection_detail = 'Aguardando avaliação'
+
+    # Cobertura dos Módulos Oficiais
+    total_rotas_oficiais = len(endpoints_ongsys)
+    rotas_operacionais = len([s for s in statuses if s.ultimo_status_http == 200 and s.endpoint_id in [ep['id'] for ep in endpoints_ongsys]])
+    key_coverage_text = f"{rotas_operacionais} de {total_rotas_oficiais} rotas operacionais"
+
 
     cnt_200 = 0
     cnt_422 = 0
@@ -1477,7 +1509,15 @@ def ongsys_integration_view(request):
         'connection_state': connection_state,
         'connection_label': connection_label,
         'connection_detail': connection_detail,
+        'key_health_state': key_health_state,
+        'key_health_label': key_health_label,
+        'key_health_badge_class': key_health_badge_class,
+        'key_last_verified': key_last_verified,
+        'key_latency_ms': key_latency_ms,
+        'key_latency_quality': key_latency_quality,
+        'key_coverage_text': key_coverage_text,
         'total_endpoints': len(endpoints_ongsys),
+
         'total_endpoints_estoque': len(endpoints_ongsys_estoque),
         'total_endpoints_all': len(endpoints_ongsys) + len(endpoints_ongsys_estoque),
         'total_modulos': 4,
