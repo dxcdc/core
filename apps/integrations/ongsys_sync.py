@@ -711,25 +711,28 @@ def sync_produtos(max_pages=None):
 # ==============================================================================
 # 8. NOTAS FISCAIS DE SERVIÇO (NFS-e ATÔMICO)
 # ==============================================================================
-def sync_notas_servico(max_pages=None, data_inicio="2025-07-01", data_fim="2026-12-31"):
+def sync_notas_servico(max_pages=None, data_inicio=None, data_fim=None):
     headers = get_headers()
     page = 1
     total_processed = 0
     t0 = time.time()
+    seen = set()
 
     while True:
         if max_pages and page > max_pages:
             break
 
         try:
+            params = {"pageNumber": page}
+            if data_inicio:
+                params["data_inicio"] = data_inicio
+            if data_fim:
+                params["data_fim"] = data_fim
+
             resp = requests.get(
                 f"{BASE_URL}notas-servico",
                 headers=headers,
-                params={
-                    "data_inicio": data_inicio,
-                    "data_fim": data_fim,
-                    "pageNumber": page,
-                },
+                params=params,
                 timeout=25,
             )
             if resp.status_code != 200:
@@ -741,26 +744,28 @@ def sync_notas_servico(max_pages=None, data_inicio="2025-07-01", data_fim="2026-
 
             objs = []
             for item in items:
-                id_val = str(item.get("id") or item.get("idNota") or item.get("numeroNota") or "").strip()
-                if not id_val:
+                id_val = str(item.get("cod") or item.get("id") or item.get("idNota") or item.get("numeroNfe") or item.get("numeroNota") or "").strip()
+                if not id_val or id_val in seen:
                     continue
+                seen.add(id_val)
+
                 prest = item.get("prestador") or {}
-                tomad = item.get("tomador") or {}
+                tomad = item.get("contratante") or item.get("tomador") or {}
 
                 objs.append(
                     OngsysNotaServico(
                         id_ongsys=id_val,
-                        numero_nota=str(item.get("numeroNota") or item.get("numero") or "")[:64],
+                        numero_nota=str(item.get("numeroNfe") or item.get("numeroNota") or item.get("numero") or "")[:64],
                         codigo_verificacao=str(item.get("codigoVerificacao") or "")[:64],
-                        prestador_nome=str(prest.get("nome") or prest.get("razaoSocial") or item.get("prestadorNome") or "")[:255],
-                        prestador_documento=str(prest.get("documento") or prest.get("cnpj") or item.get("prestadorDocumento") or "")[:32],
-                        tomador_nome=str(tomad.get("nome") or tomad.get("razaoSocial") or item.get("tomadorNome") or "")[:255],
-                        tomador_documento=str(tomad.get("documento") or tomad.get("cnpj") or item.get("tomadorDocumento") or "")[:32],
+                        prestador_nome=str(prest.get("razaoSocial") or prest.get("nome") or item.get("prestadorNome") or "")[:255],
+                        prestador_documento=str(prest.get("cnpj") or prest.get("cpf") or prest.get("documento") or item.get("prestadorDocumento") or "")[:32],
+                        tomador_nome=str(tomad.get("razaoSocial") or tomad.get("nome") or item.get("tomadorNome") or "")[:255],
+                        tomador_documento=str(tomad.get("cnpj") or tomad.get("cpf") or tomad.get("documento") or item.get("tomadorDocumento") or "")[:32],
                         data_emissao=parse_date(item.get("dataEmissao")),
-                        data_competencia=parse_date(item.get("dataCompetencia")),
+                        data_competencia=parse_date(item.get("dataCompetencia") or item.get("dataEmissao")),
                         valor_servicos=parse_decimal(item.get("valorServicos") or item.get("valorTotal") or item.get("valor")),
                         valor_liquido=parse_decimal(item.get("valorLiquido") or item.get("valorLiquidoNfse")),
-                        discriminacao_servicos=str(item.get("discriminacao") or item.get("descricaoServico") or ""),
+                        discriminacao_servicos=str(item.get("nomeServico") or item.get("discriminacao") or item.get("descricaoServico") or item.get("naturezaOperacao") or ""),
                         dados_brutos=item,
                     )
                 )
@@ -802,25 +807,28 @@ def sync_notas_servico(max_pages=None, data_inicio="2025-07-01", data_fim="2026-
 # ==============================================================================
 # 9. NOTAS FISCAIS DE PRODUTO (NF-e ATÔMICO)
 # ==============================================================================
-def sync_notas_produto(max_pages=None, data_inicio="2025-07-01", data_fim="2026-12-31"):
+def sync_notas_produto(max_pages=None, data_inicio=None, data_fim=None):
     headers = get_headers()
     page = 1
     total_processed = 0
     t0 = time.time()
+    seen = set()
 
     while True:
         if max_pages and page > max_pages:
             break
 
         try:
+            params = {"pageNumber": page}
+            if data_inicio:
+                params["data_inicio"] = data_inicio
+            if data_fim:
+                params["data_fim"] = data_fim
+
             resp = requests.get(
                 f"{BASE_URL}notas-produto",
                 headers=headers,
-                params={
-                    "data_inicio": data_inicio,
-                    "data_fim": data_fim,
-                    "pageNumber": page,
-                },
+                params=params,
                 timeout=25,
             )
             if resp.status_code != 200:
@@ -832,9 +840,11 @@ def sync_notas_produto(max_pages=None, data_inicio="2025-07-01", data_fim="2026-
 
             objs = []
             for item in items:
-                id_val = str(item.get("id") or item.get("chaveAcesso") or item.get("numeroNfe") or "").strip()
-                if not id_val:
+                id_val = str(item.get("cod") or item.get("id") or item.get("chaveAcesso") or item.get("numeroNfe") or "").strip()
+                if not id_val or id_val in seen:
                     continue
+                seen.add(id_val)
+
                 emit = item.get("emitente") or {}
                 dest = item.get("destinatario") or {}
 
@@ -844,13 +854,13 @@ def sync_notas_produto(max_pages=None, data_inicio="2025-07-01", data_fim="2026-
                         numero_nfe=str(item.get("numeroNfe") or item.get("numero") or "")[:64],
                         serie=str(item.get("serie") or "")[:16],
                         chave_acesso=str(item.get("chaveAcesso") or item.get("chave") or "")[:44],
-                        emitente_nome=str(emit.get("nome") or emit.get("razaoSocial") or item.get("emitenteNome") or "")[:255],
-                        emitente_documento=str(emit.get("documento") or emit.get("cnpj") or item.get("emitenteDocumento") or "")[:32],
-                        destinatario_nome=str(dest.get("nome") or dest.get("razaoSocial") or item.get("destinatarioNome") or "")[:255],
-                        destinatario_documento=str(dest.get("documento") or dest.get("cnpj") or item.get("destinatarioDocumento") or "")[:32],
+                        emitente_nome=str(emit.get("razaoSocial") or emit.get("nome") or item.get("emitenteNome") or "")[:255],
+                        emitente_documento=str(emit.get("cnpj") or emit.get("cpf") or emit.get("documento") or item.get("emitenteDocumento") or "")[:32],
+                        destinatario_nome=str(dest.get("razaoSocial") or dest.get("nome") or item.get("destinatarioNome") or "")[:255],
+                        destinatario_documento=str(dest.get("cnpj") or dest.get("cpf") or dest.get("documento") or item.get("destinatarioDocumento") or "")[:32],
                         data_emissao=parse_date(item.get("dataEmissao")),
                         valor_total=parse_decimal(item.get("valorTotal") or item.get("valorNfe") or item.get("valor")),
-                        natureza_operacao=str(item.get("naturezaOperacao") or "")[:255],
+                        natureza_operacao=str(item.get("naturezaOperacao") or item.get("nomeProduto") or "")[:255],
                         dados_brutos=item,
                     )
                 )

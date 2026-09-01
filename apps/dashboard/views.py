@@ -1132,11 +1132,11 @@ def ongsys_integration_view(request):
             'path': 'notas-servico',
             'modelo_db': 'OngsysNotaServico',
             'tabela_sql': 'integrations_ongsysnotaservico',
-            'descricao': 'Consulta Notas Fiscais de Serviço capturadas e escrituradas.',
+            'descricao': 'Consulta Notas Fiscais de Serviço capturadas e escrituradas (119+ registros).',
             'explicacao_detalhada': 'Permite auditar notas fiscais eletrônicas de serviços (NFS-e) emitidas contra o CNPJ do CDC ou lançadas por prestadores de serviços nos projetos.',
-            'tags_regras': ['Basic Auth', 'NFS-e Municipal', 'Escrituração Fiscal', 'Espelho Atômico PostgreSQL'],
-            'especificidades': 'Endpoint /notas-servico. Exige data_inicio, data_fim e pageNumber.',
-            'parametros': '{"data_inicio": "2025-07-01", "data_fim": "2026-12-31", "pageNumber": 1}'
+            'tags_regras': ['200 OK Paginado', 'NFS-e Municipal', 'Escrituração Fiscal', 'Espelho Atômico PostgreSQL'],
+            'especificidades': 'Endpoint /notas-servico. Paginado por pageNumber (>=1).',
+            'parametros': '{"pageNumber": 1}'
         },
         {
             'id': 'nfe-get',
@@ -1149,9 +1149,9 @@ def ongsys_integration_view(request):
             'tabela_sql': 'integrations_ongsysnotaproduto',
             'descricao': 'Consulta Notas Fiscais de Produto (danfe) importadas.',
             'explicacao_detalhada': 'Consulta os documentos fiscais eletrônicos de produtos e mercadorias (NF-e / Danfe), garantindo conferência com os itens físicos entregues nos depósitos.',
-            'tags_regras': ['Basic Auth', 'NF-e Estadual', 'DANFE', 'Espelho Atômico PostgreSQL'],
-            'especificidades': 'Endpoint /notas-produto. Exige data_inicio, data_fim e pageNumber.',
-            'parametros': '{"data_inicio": "2025-07-01", "data_fim": "2026-12-31", "pageNumber": 1}'
+            'tags_regras': ['200 OK Paginado', 'NF-e Estadual', 'DANFE', 'Espelho Atômico PostgreSQL'],
+            'especificidades': 'Endpoint /notas-produto. Paginado por pageNumber (>=1).',
+            'parametros': '{"pageNumber": 1}'
         },
 
         {
@@ -2160,8 +2160,8 @@ def ongsys_trigger_test_all_async_view(request):
             ('contas-receber-get', 'contas-receber', 'GET', {'filtro': 1, 'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
             ('contas-receber-post', 'create-contas-receber', 'POST', {}),
             ('baixa-contas-receber-post', 'baixa-contas-receber', 'POST', {}),
-            ('notas-servico-get', 'notas-servico', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('notas-produto-get', 'notas-produto', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
+            ('notas-servico-get', 'notas-servico', 'GET', {'pageNumber': 1}),
+            ('notas-produto-get', 'notas-produto', 'GET', {'pageNumber': 1}),
             ('logs-get', 'logs', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
         ]
 
