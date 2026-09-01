@@ -38,7 +38,12 @@ def get_ongsys_credentials():
     password = None
     base_url = None
 
-    for env_file in ["/app/.env", "/root/cdc-core/.env", str(settings.BASE_DIR / ".env")]:
+    for env_file in [
+        "/etc/cdc/secrets/ongsys.env",
+        "/app/.env",
+        "/root/cdc-core/.env",
+        str(settings.BASE_DIR / ".env"),
+    ]:
         if os.path.exists(env_file):
             try:
                 with open(env_file, "r", encoding="utf-8") as f:
@@ -57,6 +62,8 @@ def get_ongsys_credentials():
                             base_url = v
             except Exception:
                 pass
+        if username and password:
+            break
 
     if not username:
         username = os.environ.get("ONGSYS_USERNAME") or os.environ.get("ONGSYS_CNPJ") or getattr(settings, "ONGSYS_USERNAME", None) or getattr(settings, "ONGSYS_CNPJ", None)
