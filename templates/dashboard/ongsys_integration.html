@@ -2595,11 +2595,11 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
 
         activePollingInterval = setInterval(() => {
             pollElapsedSeconds++;
-            if (pollElapsedSeconds > 45) {
+            if (pollElapsedSeconds > 300) {
                 clearInterval(activePollingInterval);
                 activePollingInterval = null;
                 window.isBackgroundTaskRunning = false;
-                if (widgetStep) widgetStep.innerText = 'Concluído no servidor!';
+                if (widgetStep) widgetStep.innerText = 'Processo em segundo plano concluído no servidor!';
                 setTimeout(() => {
                     if (topBar) topBar.classList.add('d-none');
                     if (widget) widget.classList.add('d-none');
@@ -2645,7 +2645,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                 })
                 .catch(err => {
                     pollErrorCount++;
-                    if (pollErrorCount >= 4) {
+                    if (pollErrorCount >= 10) {
                         clearInterval(activePollingInterval);
                         activePollingInterval = null;
                         window.isBackgroundTaskRunning = false;
