@@ -80,11 +80,13 @@ def sync_fornecedores(max_pages=None):
             if not items:
                 break
 
+            seen = set()
             objs = []
             for item in items:
                 id_val = str(item.get("id") or item.get("idFornecedor") or "").strip()
-                if not id_val:
+                if not id_val or id_val in seen:
                     continue
+                seen.add(id_val)
                 objs.append(
                     OngsysFornecedor(
                         id_ongsys=id_val,
@@ -154,11 +156,13 @@ def sync_clientes(max_pages=None):
             if not items:
                 break
 
+            seen = set()
             objs = []
             for item in items:
                 id_val = str(item.get("id") or item.get("idCliente") or "").strip()
-                if not id_val:
+                if not id_val or id_val in seen:
                     continue
+                seen.add(id_val)
                 objs.append(
                     OngsysCliente(
                         id_ongsys=id_val,
@@ -513,9 +517,13 @@ def sync_contratos(max_pages=None):
             if not items:
                 break
 
+            seen = set()
             objs = []
             for item in items:
                 id_val = f"PAGAR_{item.get('id')}"
+                if not item.get('id') or id_val in seen:
+                    continue
+                seen.add(id_val)
                 forn = item.get("fornecedor") or {}
                 objs.append(
                     OngsysContrato(
@@ -574,9 +582,13 @@ def sync_contratos(max_pages=None):
             if not items:
                 break
 
+            seen = set()
             objs = []
             for item in items:
                 id_val = f"RECEBER_{item.get('id')}"
+                if not item.get('id') or id_val in seen:
+                    continue
+                seen.add(id_val)
                 cli = item.get("cliente") or {}
                 objs.append(
                     OngsysContrato(
@@ -647,11 +659,13 @@ def sync_produtos(max_pages=None):
             if not items:
                 break
 
+            seen = set()
             objs = []
             for item in items:
                 id_val = str(item.get("id") or item.get("idProduto") or "").strip()
-                if not id_val:
+                if not id_val or id_val in seen:
                     continue
+                seen.add(id_val)
                 objs.append(
                     OngsysProduto(
                         id_ongsys=id_val,

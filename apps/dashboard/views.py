@@ -2162,7 +2162,10 @@ def ongsys_trigger_test_all_async_view(request):
         results = []
         task_data = _get_task_state(tid) or initial_task
 
+        from django.db import close_old_connections
+
         def test_single_route(ep_tuple):
+            close_old_connections()
             ep_id, path, method, params = ep_tuple
             url = f"https://www.ongsys.com.br/app/index.php/api/v2/{path}"
             status_code = 0
@@ -2170,9 +2173,9 @@ def ongsys_trigger_test_all_async_view(request):
             classification = 'error'
             try:
                 if method == 'GET':
-                    r = requests.get(url, headers=h, params=params, timeout=12)
+                    r = requests.get(url, headers=h, params=params, timeout=6)
                 else:
-                    r = requests.post(url, headers=h, json=params, timeout=12)
+                    r = requests.post(url, headers=h, json=params, timeout=6)
                 
                 status_code = r.status_code
                 latencia = int(r.elapsed.total_seconds() * 1000)
@@ -2193,8 +2196,10 @@ def ongsys_trigger_test_all_async_view(request):
                 )
             except Exception as e:
                 status_code = 504
-                latencia = 12000
+                latencia = 6000
                 classification = 'error'
+            finally:
+                close_old_connections()
 
             return {
                 'ep_id': ep_id,
