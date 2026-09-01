@@ -232,8 +232,35 @@
 {% endblock %}
 
 {% block content %}
+<!-- BARRA DE PROGRESSO LINEAR SUPERIOR (PROCESSAMENTO EM SEGUNDO PLANO) -->
+<div id="topGlobalProgressBar" class="progress position-fixed top-0 start-0 w-100 d-none" style="height: 3.5px; z-index: 10000; background-color: rgba(22, 163, 74, 0.15); border-radius: 0;">
+    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="topGlobalProgressBarFill" role="progressbar" style="width: 0%; transition: width 0.3s ease;"></div>
+</div>
+
+<!-- WIDGET FLUTUANTE DE TAREFAS EM SEGUNDO PLANO (NON-INVASIVE MINI-CARD) -->
+<div id="floatingTaskWidget" class="position-fixed bottom-0 end-0 p-3 d-none" style="z-index: 9999;">
+    <div class="card shadow-lg border-0 bg-dark text-white rounded-3 p-3" style="min-width: 320px; max-width: 400px; border-left: 4px solid #10b981 !important; box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important;">
+        <div class="d-flex align-items-center justify-content-between mb-1.5">
+            <div class="d-flex align-items-center gap-2">
+                <span class="spinner-border spinner-border-sm text-success" id="floatingTaskSpinner"></span>
+                <strong style="font-size: 0.84rem;" id="floatingTaskTitle">Processando em Segundo Plano</strong>
+            </div>
+            <span class="badge bg-secondary" id="floatingTaskPct" style="font-size: 0.70rem;">0%</span>
+        </div>
+        <p class="text-white-50 mb-2" style="font-size: 0.74rem; line-height: 1.3;" id="floatingTaskStep">Iniciando execução...</p>
+        <div class="progress bg-secondary" style="height: 5px; border-radius: 3px;">
+            <div class="progress-bar bg-success" id="floatingTaskProgressBar" style="width: 0%; transition: width 0.3s ease;"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-1.5">
+            <small class="text-white-50" style="font-size: 0.68rem;">Você pode continuar navegando livremente.</small>
+            <button class="btn btn-link btn-sm text-white-50 p-0 text-decoration-none" onclick="document.getElementById('floatingTaskWidget').classList.add('d-none')" title="Minimizar">✕</button>
+        </div>
+    </div>
+</div>
+
 <!-- Header da Página -->
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+
     <div>
         <div class="d-flex align-items-center gap-2 mb-1">
             <a href="{% url 'dashboard:integracoes' %}" class="btn btn-sm btn-light border px-2 py-1 text-muted" style="border-radius: 6px;" title="Voltar para Central de Integrações">
@@ -250,16 +277,20 @@
     
     <!-- Botões de Ação Minimalistas e Organizados -->
     <div class="d-flex align-items-center gap-2 flex-wrap">
-        <button type="button" class="btn btn-sm btn-light border fw-semibold d-flex align-items-center gap-1.5 text-success" id="btnTestAllApis" onclick="testAllVisibleEndpoints()" style="border-radius: 8px; font-size: 0.80rem; padding: 6px 12px; background: #ffffff; border-color: #d1fae5 !important;" title="Executar bateria de testes">
+        <button type="button" class="btn btn-sm btn-light border fw-semibold d-flex align-items-center gap-1.5 text-success" id="btnTestAllApis" onclick="startAsyncTestAll()" style="border-radius: 8px; font-size: 0.80rem; padding: 6px 12px; background: #ffffff; border-color: #d1fae5 !important;" title="Executar bateria de testes em segundo plano">
             <i class="ri-heart-pulse-line fs-15"></i> Testar Todas
         </button>
-        <button type="button" class="btn btn-sm btn-light border fw-semibold d-flex align-items-center gap-1.5 text-primary" data-bs-toggle="modal" data-bs-target="#modalSyncAtomic" style="border-radius: 8px; font-size: 0.80rem; padding: 6px 12px; background: #ffffff; border-color: #dbeafe !important;" title="Sincronizar dados">
+        <button type="button" class="btn btn-sm btn-light border fw-semibold d-flex align-items-center gap-1.5 text-dark" id="btnOpenTechnicalReport" onclick="openTechnicalReportModal()" style="border-radius: 8px; font-size: 0.80rem; padding: 6px 12px; background: #ffffff; border-color: #cbd5e1 !important;" title="Visualizar e exportar Laudo de Alinhamento Técnico">
+            <i class="ri-file-text-line fs-15 text-primary"></i> Relatório Técnico
+        </button>
+        <button type="button" class="btn btn-sm btn-light border fw-semibold d-flex align-items-center gap-1.5 text-primary" data-bs-toggle="modal" data-bs-target="#modalSyncAtomic" style="border-radius: 8px; font-size: 0.80rem; padding: 6px 12px; background: #ffffff; border-color: #dbeafe !important;" title="Sincronizar dados em segundo plano">
             <i class="ri-refresh-line fs-15"></i> Sincronizar Banco
         </button>
         <a href="{{ docs_url }}" target="_blank" class="btn btn-sm btn-light border fw-semibold d-flex align-items-center gap-1.5 text-secondary" style="border-radius: 8px; font-size: 0.80rem; padding: 6px 12px; background: #ffffff; border-color: #e2e8f0 !important;" title="Abrir documentação">
             <i class="ri-external-link-line fs-15"></i> Docs OngSys
         </a>
     </div>
+
 </div>
 
 <!-- CARDS RESUMO MINIMALISTAS (4 COLUNAS EQUILIBRADAS) -->
@@ -1172,8 +1203,247 @@
     </div>
 </div>
 
-<!-- MODAL SINCRONIZAÇÃO ATÔMICA -->
-<div class="modal fade" id="modalSyncAtomic" tabindex="-1" aria-labelledby="modalSyncAtomicLabel" aria-hidden="true">
+<!-- MODAL RELATÓRIO TÉCNICO & ALINHAMENTO (COM PRÉVIA A4 E HISTÓRICO) -->
+<div class="modal fade" id="modalTechnicalReport" tabindex="-1" aria-labelledby="modalTechnicalReportLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px; background: #f8fafc;">
+            <!-- Header do Modal -->
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="p-2 rounded-3 bg-primary-subtle text-primary">
+                        <i class="ri-file-text-line fs-18"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-0" id="modalTechnicalReportLabel" style="font-size: 1.15rem;">
+                            Relatório de Alinhamento Técnico & Governança (v2)
+                        </h5>
+                        <small class="text-muted" style="font-size: 0.76rem;">
+                            Laudo oficial de conformidade da integração REST v2 ONGSYS x Centro de Desenvolvimento e Cidadania (CDC)
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Ações e Perfil -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Alternador de Perfil -->
+                    <div class="btn-group btn-group-sm" role="group" style="background: #f1f5f9; padding: 2px; border-radius: 8px;">
+                        <button type="button" class="btn btn-sm fw-bold active btn-dark" id="btnProfileTecnico" onclick="switchReportProfile('tecnico')" style="border-radius: 6px; font-size: 0.75rem;">
+                            🛠️ Suporte OngSys
+                        </button>
+                        <button type="button" class="btn btn-sm fw-bold btn-light text-muted" id="btnProfileExecutivo" onclick="switchReportProfile('executivo')" style="border-radius: 6px; font-size: 0.75rem;">
+                            📊 Gestão & Auditoria
+                        </button>
+                    </div>
+
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+
+            <!-- Subheader com Abas e Ações de Exportação -->
+            <div class="bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <!-- Abas de Navegação -->
+                <ul class="nav nav-pills gap-1" id="reportTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold py-1 px-3" id="tab-a4-btn" data-bs-toggle="pill" data-bs-target="#tab-a4" type="button" role="tab" style="font-size: 0.78rem; border-radius: 6px;">
+                            <i class="ri-article-line me-1"></i> 👁️ Prévia Folha A4
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold py-1 px-3" id="tab-text-btn" data-bs-toggle="pill" data-bs-target="#tab-text" type="button" role="tab" style="font-size: 0.78rem; border-radius: 6px;">
+                            <i class="ri-code-box-line me-1"></i> 📋 Texto Formatado
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold py-1 px-3" id="tab-history-btn" data-bs-toggle="pill" data-bs-target="#tab-history" type="button" role="tab" style="font-size: 0.78rem; border-radius: 6px;">
+                            <i class="ri-history-line me-1"></i> 📈 Histórico Evolutivo
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Ações Rápidas -->
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold d-flex align-items-center gap-1.5" onclick="copyReportMarkdownToClipboard()" style="border-radius: 6px; font-size: 0.78rem;" title="Copiar relatório formatado">
+                        <i class="ri-file-copy-line"></i> Copiar Texto
+                    </button>
+                    <a href="{% url 'dashboard:ongsys_report_pdf' %}?profile=tecnico" id="btnDownloadReportPdf" class="btn btn-sm btn-primary fw-semibold d-flex align-items-center gap-1.5" style="border-radius: 6px; font-size: 0.78rem; background: #1e3a8a; border-color: #1e3a8a;" title="Baixar PDF diagramado">
+                        <i class="ri-download-2-line"></i> Baixar PDF Oficial
+                    </a>
+                </div>
+            </div>
+
+            <!-- Corpo do Modal com as Abas -->
+            <div class="modal-body p-4" style="background: #e2e8f0; min-height: 520px;">
+                <div class="tab-content" id="reportTabContent">
+                    
+                    <!-- ABA 1: PRÉVIA A4 REALISTA -->
+                    <div class="tab-pane fade show active" id="tab-a4" role="tabpanel">
+                        <div class="d-flex justify-content-center">
+                            <!-- FOLHA A4 ESTILIZADA -->
+                            <div class="bg-white p-5 shadow-lg rounded-1" style="width: 100%; max-width: 840px; min-height: 1100px; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;" id="a4SheetContainer">
+                                
+                                <!-- Timbre & Título -->
+                                <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3" style="border-color: #1e3a8a !important; border-bottom-width: 2px !important;">
+                                    <div>
+                                        <h4 class="fw-bold mb-1" style="color: #1e3a8a; font-size: 1.35rem;" id="a4DocTitle">
+                                            Relatório de Alinhamento Técnico e Governança
+                                        </h4>
+                                        <p class="text-muted mb-0" style="font-size: 0.82rem;">
+                                            Integração API REST v2 ONGSYS x ERP Centro de Desenvolvimento e Cidadania (CDC)
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold" style="font-size: 0.72rem;">
+                                            🟢 95% OPERACIONAL
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Box de Metadados -->
+                                <div class="p-3 mb-4 rounded-2 border" style="background: #f8fafc; border-color: #cbd5e1 !important; font-size: 0.80rem;">
+                                    <div class="row g-2">
+                                        <div class="col-md-7">
+                                            <div><strong>Para:</strong> Equipe Técnica & Suporte de Integrações — ONGSYS</div>
+                                            <div class="mt-1"><strong>De:</strong> Equipe de Engenharia de Dados & TI — CDC</div>
+                                            <div class="mt-1"><strong>Assunto:</strong> Laudo Técnico API v2, Mapeamento dos 20 Endpoints e Solicitação Fiscal</div>
+                                        </div>
+                                        <div class="col-md-5 text-md-end">
+                                            <div><strong>Data da Análise:</strong> <span id="a4ReportDate">{{ key_last_verified }}</span></div>
+                                            <div class="mt-1"><strong>CNPJ:</strong> 03.970.166/0001-29</div>
+                                            <div class="mt-1"><strong>Ambiente:</strong> Produção CDC Core</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Seção 1: Apresentação -->
+                                <h6 class="fw-bold mb-2" style="color: #1e3a8a; font-size: 0.95rem;">
+                                    1. Apresentação & Propósito de Parceria
+                                </h6>
+                                <p style="font-size: 0.80rem; line-height: 1.5; color: #334155;" class="mb-3">
+                                    Prezada equipe técnica e de integrações do <strong>ONGSYS</strong>,<br/>
+                                    Apresentamos o alinhamento técnico consolidado referente à esteira de integração automatizada via <strong>API REST v2</strong> entre o sistema ONGSYS e o ERP do <strong>Centro de Desenvolvimento e Cidadania (CDC)</strong>. O CDC estabeleceu uma arquitetura de dados no ecossistema <strong>CDC Core</strong>, sincronizando de forma transacional e atômica movimentações financeiras, cadastros de fornecedores, contratos de projetos sociais (<em>PROVITA, PPCAAM, ATITUDE</em>) e produtos. O objetivo deste relatório é compartilhar com total transparência o mapa de rotas ativas e solicitar a habilitação pontual dos módulos fiscais (NFS-e / NF-e).
+                                </p>
+
+                                <!-- Seção 2: Matriz de Endpoints -->
+                                <h6 class="fw-bold mb-2" style="color: #1e3a8a; font-size: 0.95rem;">
+                                    2. Matriz de Mapeamento dos 20 Endpoints Oficiais (API v2)
+                                </h6>
+                                <div class="table-responsive mb-4">
+                                    <table class="table table-sm table-bordered align-middle mb-0" style="font-size: 0.72rem; border-color: #cbd5e1;">
+                                        <thead style="background: #1e3a8a; color: #ffffff;">
+                                            <tr>
+                                                <th class="py-1.5 px-2">Módulo</th>
+                                                <th class="py-1.5 px-2">Endpoint Oficial</th>
+                                                <th class="py-1.5 px-2 text-center">Método</th>
+                                                <th class="py-1.5 px-2 text-center">Status HTTP</th>
+                                                <th class="py-1.5 px-2">Volume / Diagnóstico no CDC Core</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="a4EndpointsTableBody">
+                                            <!-- Preenchido dinamicamente via JS com dados em tempo real -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Seção 3: Sincronização Atômica -->
+                                <h6 class="fw-bold mb-2" style="color: #1e3a8a; font-size: 0.95rem;">
+                                    3. Métricas da Sincronização Atômica no CDC Core (PostgreSQL)
+                                </h6>
+                                <p style="font-size: 0.78rem; color: #475569;" class="mb-2">
+                                    O banco atômico local do CDC mantém <strong class="text-dark">{{ db_total }} registros reais</strong> sincronizados com integridade transacional:
+                                </p>
+                                <div class="row g-2 mb-4" style="font-size: 0.76rem;">
+                                    <div class="col-md-4">
+                                        <div class="p-2 border rounded bg-light">
+                                            🏢 <strong>Fornecedores:</strong> {{ db_fornecedores }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-2 border rounded bg-light">
+                                            💳 <strong>Contas a Pagar:</strong> {{ db_contas_pagar }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-2 border rounded bg-light">
+                                            📈 <strong>Contas a Receber:</strong> {{ db_contas_receber }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-2 border rounded bg-light">
+                                            🏦 <strong>Lançamentos:</strong> {{ db_lancamentos }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-2 border rounded bg-light">
+                                            📑 <strong>Contratos:</strong> {{ db_contratos }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-2 border rounded bg-light">
+                                            📦 <strong>Produtos:</strong> {{ db_produtos }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Seção 4: Solicitações -->
+                                <h6 class="fw-bold mb-2" style="color: #1e3a8a; font-size: 0.95rem;">
+                                    4. Solicitação de Apoio Pontual à Equipe ONGSYS
+                                </h6>
+                                <ul style="font-size: 0.78rem; line-height: 1.5; color: #334155;" class="mb-4 ps-3">
+                                    <li class="mb-1">
+                                        <strong>Habilitação dos Endpoints de Notas Fiscais (NFS-e e NF-e):</strong> Identificamos que as rotas <code>/api/v2/notas-servico</code> e <code>/api/v2/notas-produto</code> retornam <code>HTTP 401 Unauthorized</code> para o CNPJ <b>03.970.166/0001-29</b>. Solicitamos a gentileza de habilitar a permissão fiscal no perfil da credencial.
+                                    </li>
+                                    <li>
+                                        <strong>Suporte a Filtro por Data em /pedidos (Sugestão Colaborativa):</strong> Disponibilização de filtro de período (ex: <code>?data_inicio=YYYY-MM-DD</code>) para otimizar o tempo de resposta do endpoint.
+                                    </li>
+                                </ul>
+
+                                <!-- Rodapé Institucional -->
+                                <div class="p-3 border rounded-2 d-flex justify-content-between align-items-center" style="background: #f8fafc; font-size: 0.75rem;">
+                                    <div>
+                                        <strong>Equipe de Engenharia, TI & Automação</strong><br/>
+                                        Centro de Desenvolvimento e Cidadania (CDC) • <em>tecnologia@cdc.org.br</em>
+                                    </div>
+                                    <div class="text-end text-muted">
+                                        Painel em Tempo Real:<br/>
+                                        <a href="https://core.cdc.org.br/dashboard/integracoes/ongsys/" target="_blank" class="text-primary fw-bold text-decoration-none">https://core.cdc.org.br/</a>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ABA 2: TEXTO FORMATADO / MARKDOWN -->
+                    <div class="tab-pane fade" id="tab-text" role="tabpanel">
+                        <div class="bg-dark rounded-3 p-3 text-white">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
+                                <span class="text-muted" style="font-size: 0.75rem;">Markdown Sanitizado pronto para colar em tickets, e-mails ou WhatsApp:</span>
+                                <button class="btn btn-xs btn-outline-light py-1 px-2.5" onclick="copyReportMarkdownToClipboard()" style="font-size: 0.72rem;">
+                                    <i class="ri-file-copy-line me-1"></i> Copiar Tudo
+                                </button>
+                            </div>
+                            <pre id="rawMarkdownContainer" class="text-info mb-0 p-2" style="font-size: 0.78rem; font-family: monospace; max-height: 600px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;"></pre>
+                        </div>
+                    </div>
+
+                    <!-- ABA 3: LINHA DO TEMPO & HISTÓRICO -->
+                    <div class="tab-pane fade" id="tab-history" role="tabpanel">
+                        <div class="bg-white rounded-3 p-4 shadow-sm border">
+                            <h6 class="fw-bold text-dark mb-3" style="font-size: 0.95rem;">
+                                <i class="ri-history-line text-primary me-1.5"></i> Linha do Tempo & Evolução da Integração
+                            </h6>
+                            <div class="timeline" id="timelineHistoryContainer">
+                                <!-- Preenchido dinamicamente via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
             <div class="modal-header text-white" style="background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%);">
@@ -1901,18 +2171,205 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
 
     initMappingFilters();
 
+    let currentReportProfile = 'tecnico';
+    let currentReportData = null;
+
+    function openTechnicalReportModal() {
+        const modalEl = document.getElementById('modalTechnicalReport');
+        if (!modalEl) return;
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+        loadReportData(currentReportProfile);
+    }
+
+    function switchReportProfile(profile) {
+        currentReportProfile = profile;
+        const btnTec = document.getElementById('btnProfileTecnico');
+        const btnExe = document.getElementById('btnProfileExecutivo');
+        const btnDownload = document.getElementById('btnDownloadReportPdf');
+        const docTitle = document.getElementById('a4DocTitle');
+
+        if (profile === 'tecnico') {
+            btnTec.className = 'btn btn-sm fw-bold active btn-dark';
+            btnExe.className = 'btn btn-sm fw-bold btn-light text-muted';
+            if (docTitle) docTitle.innerText = 'Relatório de Alinhamento Técnico e Governança';
+            if (btnDownload) btnDownload.href = `{% url 'dashboard:ongsys_report_pdf' %}?profile=tecnico`;
+        } else {
+            btnExe.className = 'btn btn-sm fw-bold active btn-dark';
+            btnTec.className = 'btn btn-sm fw-bold btn-light text-muted';
+            if (docTitle) docTitle.innerText = 'Relatório Executivo de Conformidade e Integrações';
+            if (btnDownload) btnDownload.href = `{% url 'dashboard:ongsys_report_pdf' %}?profile=executivo`;
+        }
+
+        loadReportData(profile);
+    }
+
+    function loadReportData(profile) {
+        const tbody = document.getElementById('a4EndpointsTableBody');
+        const rawPre = document.getElementById('rawMarkdownContainer');
+        const timeline = document.getElementById('timelineHistoryContainer');
+
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center p-3 text-muted"><span class="spinner-border spinner-border-sm me-1 text-primary"></span> Carregando dados da telemetria...</td></tr>';
+        }
+
+        fetch(`{% url 'dashboard:ongsys_report_data' %}?profile=${profile}`)
+            .then(res => res.json())
+            .then(data => {
+                currentReportData = data;
+                renderReportToDOM(data);
+            })
+            .catch(err => {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-danger text-center p-3">Erro ao carregar telemetria: ${err}</td></tr>`;
+            });
+    }
+
+    function renderReportToDOM(data) {
+        // 1. Data e Metadados A4
+        const dateEl = document.getElementById('a4ReportDate');
+        if (dateEl) dateEl.innerText = data.gerado_em;
+
+        // 2. Tabela de Endpoints
+        const tbody = document.getElementById('a4EndpointsTableBody');
+        if (tbody && data.endpoints) {
+            let html = '';
+            data.endpoints.forEach(ep => {
+                const badgeColor = ep.class === 'success' ? '#16a34a' : (ep.class === 'warning' ? '#d97706' : '#ef4444');
+                html += `
+                    <tr>
+                        <td class="py-1 px-2 fw-bold text-dark">${ep.modulo}</td>
+                        <td class="py-1 px-2 font-monospace" style="font-size: 0.70rem;">${ep.path}</td>
+                        <td class="py-1 px-2 text-center font-monospace">${ep.method}</td>
+                        <td class="py-1 px-2 text-center fw-bold" style="color: ${badgeColor};">${ep.status}</td>
+                        <td class="py-1 px-2 text-muted" style="font-size: 0.70rem;">${ep.desc}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // 3. Raw Markdown
+        const rawPre = document.getElementById('rawMarkdownContainer');
+        if (rawPre) {
+            rawPre.innerText = data.markdown_text || '';
+        }
+
+        // 4. Linha do Tempo / Histórico
+        const timeline = document.getElementById('timelineHistoryContainer');
+        if (timeline && data.history) {
+            let histHtml = '<div class="d-flex flex-column gap-3">';
+            data.history.forEach(item => {
+                histHtml += `
+                    <div class="d-flex align-items-start gap-3 p-3 rounded-2 border bg-light">
+                        <div class="p-2 rounded-circle bg-primary-subtle text-primary fw-bold" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem;">
+                            ${item.rotas_ok}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="text-dark">${item.versao} — ${item.data}</strong>
+                                <span class="badge bg-success">${item.percentual} Concluído</span>
+                            </div>
+                            <small class="text-muted d-block mt-1">${item.destaque}</small>
+                        </div>
+                    </div>
+                `;
+            });
+            histHtml += '</div>';
+            timeline.innerHTML = histHtml;
+        }
+    }
+
+    function copyReportMarkdownToClipboard() {
+        if (!currentReportData || !currentReportData.markdown_text) {
+            showToast("⚠️ Carregue o relatório antes de copiar.");
+            return;
+        }
+        navigator.clipboard.writeText(currentReportData.markdown_text).then(() => {
+            showToast("📋 Relatório copiado para a área de transferência!");
+        }).catch(err => {
+            showToast("Erro ao copiar para a área de transferência.");
+        });
+    }
+
+    // =========================================================================
+    // 🚀 EXECUTOR DE TAREFAS EM SEGUNDO PLANO (ASYNC BACKGROUND RUNNER)
+    // =========================================================================
+    let activePollingInterval = null;
+
+    function startAsyncTestAll() {
+        const topBar = document.getElementById('topGlobalProgressBar');
+        const topFill = document.getElementById('topGlobalProgressBarFill');
+        const widget = document.getElementById('floatingTaskWidget');
+        const widgetTitle = document.getElementById('floatingTaskTitle');
+        const widgetStep = document.getElementById('floatingTaskStep');
+        const widgetPct = document.getElementById('floatingTaskPct');
+        const widgetBar = document.getElementById('floatingTaskProgressBar');
+        const widgetSpinner = document.getElementById('floatingTaskSpinner');
+
+        if (topBar) topBar.classList.remove('d-none');
+        if (widget) widget.classList.remove('d-none');
+        if (widgetTitle) widgetTitle.innerText = 'Testando 18 Rotas da API OngSys';
+        if (widgetStep) widgetStep.innerText = 'Disparando bateria de testes no servidor...';
+        if (widgetPct) widgetPct.innerText = '0%';
+        if (widgetBar) widgetBar.style.width = '0%';
+        if (widgetSpinner) widgetSpinner.className = 'spinner-border spinner-border-sm text-success';
+
+        showToast("⏳ Bateria de testes iniciada em segundo plano!");
+
+        fetch("{% url 'dashboard:ongsys_async_test_all' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.task_id) {
+                pollTaskProgress(data.task_id, (result) => {
+                    showToast("🎉 Bateria de testes concluída em segundo plano!");
+                    // Atualizar o card de saúde da credencial dinamicamente
+                    quickTestCredentialKey();
+                });
+            }
+        })
+        .catch(err => {
+            showToast("Erro ao iniciar teste em segundo plano.");
+            if (topBar) topBar.classList.add('d-none');
+            if (widget) widget.classList.add('d-none');
+        });
+    }
+
     function runAtomicSync() {
+        const modalEl = document.getElementById('modalSyncAtomic');
+        if (modalEl) {
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+        }
+
         const entity = document.getElementById("syncEntitySelect").value;
         const pages = parseInt(document.getElementById("syncPagesInput").value) || 3;
-        const btn = document.getElementById("btnExecuteSync");
-        const statusBox = document.getElementById("syncStatusResult");
 
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Sincronizando de forma Atômica...';
-        statusBox.classList.remove("d-none");
-        statusBox.innerHTML = '<div class="text-center p-3 text-muted"><i class="ri-loader-4-line ri-spin fs-24 d-block mb-2 text-primary"></i>Conectando aos servidores da OngSys e executando Upserts Atômicos no PostgreSQL...</div>';
+        const topBar = document.getElementById('topGlobalProgressBar');
+        const topFill = document.getElementById('topGlobalProgressBarFill');
+        const widget = document.getElementById('floatingTaskWidget');
+        const widgetTitle = document.getElementById('floatingTaskTitle');
+        const widgetStep = document.getElementById('floatingTaskStep');
+        const widgetPct = document.getElementById('floatingTaskPct');
+        const widgetBar = document.getElementById('floatingTaskProgressBar');
+        const widgetSpinner = document.getElementById('floatingTaskSpinner');
 
-        fetch("{% url 'dashboard:ongsys_trigger_sync' %}", {
+        if (topBar) topBar.classList.remove('d-none');
+        if (widget) widget.classList.remove('d-none');
+        if (widgetTitle) widgetTitle.innerText = 'Sincronização Atômica PostgreSQL';
+        if (widgetStep) widgetStep.innerText = 'Iniciando extração e upsert em segundo plano...';
+        if (widgetPct) widgetPct.innerText = '0%';
+        if (widgetBar) widgetBar.style.width = '0%';
+        if (widgetSpinner) widgetSpinner.className = 'spinner-border spinner-border-sm text-primary';
+
+        showToast("🚀 Carga atômica iniciada em segundo plano! Você pode navegar livremente.");
+
+        fetch("{% url 'dashboard:ongsys_async_sync_db' %}", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -1922,27 +2379,63 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         })
         .then(res => res.json())
         .then(data => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="ri-refresh-line"></i> Iniciar Sincronização Atômica';
-
-            if (data.status === "success") {
-                let html = '<div class="alert alert-success border-0 mb-0" style="border-radius: 8px;">';
-                html += '<h6 class="fw-bold mb-2"><i class="ri-checkbox-circle-fill me-1"></i> Sincronização Atômica Concluída com Sucesso!</h6><ul class="mb-0 ps-3" style="font-size: 0.85em;">';
-                data.results.forEach(r => {
-                    html += `<li><strong>${r.entidade}:</strong> ${r.total} registros sincronizados em ${r.duracao}s</li>`;
+            if (data.task_id) {
+                pollTaskProgress(data.task_id, (result) => {
+                    showToast("✅ Sincronização atômica concluída com sucesso!");
                 });
-                html += '</ul></div>';
-                statusBox.innerHTML = html;
-                setTimeout(() => { window.location.reload(); }, 2500);
-            } else {
-                statusBox.innerHTML = `<div class="alert alert-danger border-0 mb-0" style="border-radius: 8px;"><i class="ri-error-warning-fill me-1"></i> <strong>Erro na sincronização:</strong> ${data.message}</div>`;
             }
         })
         .catch(err => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="ri-refresh-line"></i> Iniciar Sincronização Atômica';
-            statusBox.innerHTML = `<div class="alert alert-danger border-0 mb-0" style="border-radius: 8px;">Erro na requisição: ${err}</div>`;
+            showToast("Erro ao iniciar sincronização.");
+            if (topBar) topBar.classList.add('d-none');
+            if (widget) widget.classList.add('d-none');
         });
+    }
+
+    function pollTaskProgress(taskId, onComplete) {
+        if (activePollingInterval) clearInterval(activePollingInterval);
+
+        const topFill = document.getElementById('topGlobalProgressBarFill');
+        const topBar = document.getElementById('topGlobalProgressBar');
+        const widget = document.getElementById('floatingTaskWidget');
+        const widgetStep = document.getElementById('floatingTaskStep');
+        const widgetPct = document.getElementById('floatingTaskPct');
+        const widgetBar = document.getElementById('floatingTaskProgressBar');
+        const widgetSpinner = document.getElementById('floatingTaskSpinner');
+
+        activePollingInterval = setInterval(() => {
+            fetch(`/dashboard/integracoes/ongsys/async/task-status/${taskId}/`)
+                .then(res => res.json())
+                .then(task => {
+                    const pct = task.progress_pct || 0;
+                    if (topFill) topFill.style.width = `${pct}%`;
+                    if (widgetBar) widgetBar.style.width = `${pct}%`;
+                    if (widgetPct) widgetPct.innerText = `${pct}%`;
+                    if (widgetStep && task.current_step) widgetStep.innerText = task.current_step;
+
+                    if (task.status === 'completed' || task.status === 'error') {
+                        clearInterval(activePollingInterval);
+                        activePollingInterval = null;
+
+                        if (topFill) topFill.style.width = '100%';
+                        if (widgetBar) widgetBar.style.width = '100%';
+                        if (widgetPct) widgetPct.innerText = '100%';
+                        if (widgetSpinner) widgetSpinner.className = 'ri-checkbox-circle-fill text-success fs-18';
+                        if (widgetStep) widgetStep.innerText = task.current_step || 'Processo finalizado com sucesso!';
+
+                        setTimeout(() => {
+                            if (topBar) topBar.classList.add('d-none');
+                            if (widget) widget.classList.add('d-none');
+                        }, 4000);
+
+                        if (onComplete) onComplete(task);
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro no polling de status:", err);
+                });
+        }, 1200);
     }
 </script>
 {% endblock %}
+

@@ -13,6 +13,12 @@ urlpatterns = [
     path('dashboard/integracoes/ongsys/', views.ongsys_integration_view, name='ongsys_integration'),
     path('dashboard/integracoes/ongsys/sync/', views.ongsys_trigger_sync_view, name='ongsys_trigger_sync'),
     path('dashboard/integracoes/ongsys/api/<str:endpoint_key>/', views.ongsys_api_proxy_view, name='ongsys_api_proxy'),
+    path('dashboard/integracoes/ongsys/report/pdf/', views.ongsys_download_report_pdf_view, name='ongsys_report_pdf'),
+    path('dashboard/integracoes/ongsys/report/data/', views.ongsys_report_data_view, name='ongsys_report_data'),
+    path('dashboard/integracoes/ongsys/async/test-all/', views.ongsys_trigger_test_all_async_view, name='ongsys_async_test_all'),
+    path('dashboard/integracoes/ongsys/async/sync-db/', views.ongsys_trigger_sync_async_view, name='ongsys_async_sync_db'),
+    path('dashboard/integracoes/ongsys/async/task-status/<str:task_id>/', views.ongsys_task_status_view, name='ongsys_task_status'),
+
 
     path('dashboard/integracoes/transportes/', views.transportes_integration_view, name='transportes_integracao'),
     path('dashboard/integracoes/transportes/api/<str:provider>/<str:endpoint_key>/', views.transportes_api_proxy_view, name='transportes_api_proxy'),
