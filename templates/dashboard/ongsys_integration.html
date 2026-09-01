@@ -1572,8 +1572,20 @@
                     O motor atômico conectará à API do OngSys, baixará os lotes de dados e executará <strong>Upserts Atômicos (ACID)</strong> no banco PostgreSQL do CDC Core.
                 </p>
 
+                <div class="p-3 mb-3 bg-light rounded-3 border">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <strong class="d-block text-dark" style="font-size: 0.85rem;">Sincronização Completa (Recomendada)</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Sincroniza todos os 8 módulos principais em segundo plano.</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-success fw-bold px-3 py-1.5 d-flex align-items-center gap-1.5 shadow-sm" onclick="runAtomicSync('all', 5)" style="border-radius: 6px;">
+                            <i class="ri-flashlight-line"></i> Sincronizar Tudo
+                        </button>
+                    </div>
+                </div>
+
                 <div class="mb-3">
-                    <label class="form-label fw-bold" style="font-size: 0.82em;">Módulo / Entidade para Sincronizar:</label>
+                    <label class="form-label fw-bold" style="font-size: 0.82em;">Ou sincronize uma Entidade Específica:</label>
                     <select class="form-select form-select-sm" id="syncEntitySelect" style="border-radius: 6px;">
                         <option value="all" selected>🌟 Todas as Entidades (Completo)</option>
                         <option value="fornecedores">🏢 Fornecedores (2.900+ registros)</option>
@@ -1585,7 +1597,6 @@
                         <option value="produtos">📦 Produtos / Itens (1.600+ itens)</option>
                         <option value="logs">🛡️ Logs de Auditoria & Governança (/logs)</option>
                     </select>
-
                 </div>
 
                 <div class="mb-3">
@@ -1594,12 +1605,10 @@
                     <small class="text-muted" style="font-size: 0.72em;">5 páginas = ~500 registros por entidade para sincronização rápida.</small>
                 </div>
 
-                <div id="syncStatusResult" class="d-none mb-3"></div>
-
                 <div class="d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-light btn-sm fw-bold px-3" data-bs-dismiss="modal" style="border-radius: 6px;">Fechar</button>
                     <button type="button" class="btn btn-primary btn-sm fw-bold px-3 d-flex align-items-center gap-1.5" id="btnExecuteSync" onclick="runAtomicSync()" style="border-radius: 6px; background: #0284c7; border-color: #0284c7;">
-                        <i class="ri-refresh-line"></i> Iniciar Sincronização Atômica
+                        <i class="ri-refresh-line"></i> Iniciar Seleção
                     </button>
                 </div>
             </div>
@@ -2506,23 +2515,33 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         });
     }
 
-    function runAtomicSync() {
+    function runAtomicSync(customEntity, customPages) {
         const modalEl = document.getElementById('modalSyncAtomic');
         if (modalEl) {
-            const modalInstance = bootstrap.Modal.getInstance(modalEl);
-            if (modalInstance) modalInstance.hide();
+            try {
+                const modalInstance = (window.bootstrap && bootstrap.Modal) ? (bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl)) : null;
+                if (modalInstance) modalInstance.hide();
+            } catch (e) {}
+            setTimeout(() => {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }, 300);
         }
 
         if (window.isBackgroundTaskRunning) {
             restoreFloatingWidget();
-            showToast("ℹ️ Uma sincronização já está em andamento. Acompanhe pelo card!");
+            showToast("ℹ️ Uma tarefa em segundo plano já está em andamento. Acompanhe pelo card!");
             return;
         }
 
         window.isBackgroundTaskRunning = true;
 
-        const entity = document.getElementById("syncEntitySelect").value;
-        const pages = parseInt(document.getElementById("syncPagesInput").value) || 3;
+        const entitySelect = document.getElementById("syncEntitySelect");
+        const pagesInput = document.getElementById("syncPagesInput");
+        const entity = customEntity || (entitySelect ? entitySelect.value : 'all');
+        const pages = customPages || (pagesInput ? parseInt(pagesInput.value) : 5) || 5;
 
         const topBar = document.getElementById('topGlobalProgressBar');
         const topFill = document.getElementById('topGlobalProgressBarFill');
@@ -2539,7 +2558,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         if (topBar) topBar.classList.remove('d-none');
         if (widget) widget.classList.remove('d-none');
         if (widgetTitle) widgetTitle.innerText = 'Sincronização Atômica PostgreSQL';
-        if (widgetStep) widgetStep.innerText = 'Iniciando extração e upserts em segundo plano...';
+        if (widgetStep) widgetStep.innerText = 'Iniciando extração e upserts no banco...';
         if (widgetPct) widgetPct.innerText = '5%';
         if (widgetBar) widgetBar.style.width = '5%';
         if (topFill) topFill.style.width = '5%';
@@ -2564,6 +2583,9 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
             if (data.task_id) {
                 pollTaskProgress(data.task_id, (result) => {
                     showToast("✅ Sincronização atômica concluída com sucesso!");
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1800);
                 });
             } else {
                 throw new Error("Sem task_id");

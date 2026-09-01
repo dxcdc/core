@@ -1770,7 +1770,7 @@ def ongsys_api_proxy_view(request, endpoint_key):
     ep_id = str(data.get('ep_id') or endpoint_key or '').strip()
 
     headers['Content-Type'] = 'application/json'
-    headers['User-Agent'] = 'CDC-Core-Integration-Hub/1.0'
+    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     base_url = (getattr(credentials, 'base_url', None) or 'https://www.ongsys.com.br/app/index.php/api/v2/').rstrip('/')
     target_url = f"{base_url}/{path}"
 
@@ -2092,13 +2092,17 @@ def _save_task_state(task_id, task_data):
 
 
 def _get_task_state(task_id):
+    import time
     final_p = TASKS_DIR / f"{task_id}.json"
-    if final_p.exists():
-        try:
-            with open(final_p, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception:
-            return None
+    for _ in range(3):
+        if final_p.exists():
+            try:
+                with open(final_p, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception:
+                time.sleep(0.04)
+        else:
+            time.sleep(0.04)
     return None
 
 
