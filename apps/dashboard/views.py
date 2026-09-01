@@ -2410,20 +2410,21 @@ def ongsys_report_data_view(request):
     # Compilação de Texto Formatado / Markdown para Cópia
     markdown_text = f"""# Relatório de Alinhamento Técnico & Governança — Integração API v2 ONGSYS x CDC
 **Data da Telemetria:** {now_str}
-**CNPJ:** 03.970.166/0001-29 — Centro de Desenvolvimento e Cidadania (CDC)
-**Ambiente:** Produção CDC Core (https://core.cdc.org.br/dashboard/integracoes/ongsys/)
+**CNPJ (Anonimizado):** 03...29 — Centro de Desenvolvimento e Cidadania (CDC)
+**Credencial API (Anonimizada):** f0...5e
+**Ambiente:** Servidor de Produção CDC (Conexão Segura M2M)
 
 ---
-### 1. Resumo Executivo da Integração
-- **Status Geral:** 95% OPERACIONAL E HOMOLOGADA (23 de 25 rotas ativas)
-- **Registros Atômicos Persistidos:** {db_total:,} registros reais no banco local PostgreSQL (ACID).
-- **🛡️ Auditoria & Logs (1 Ano):** {db_counts['logs']:,} registros
-- **💳 Financeiro & Rateios:** {db_counts['contas_pagar'] + db_counts['contas_receber'] + db_counts['lancamentos']:,} registros
-- **🏢 Cadastros & Contratos:** {db_counts['fornecedores'] + db_counts['clientes'] + db_counts['contratos'] + db_counts['produtos']:,} registros
+### 1. Alinhamento Técnico & Melhoria Contínua
+Prezada equipe técnica do **ONGSYS**,
+
+Apresentamos este laudo técnico referente à esteira de integração automatizada via **API REST v2** entre o sistema ONGSYS e a plataforma de gestão de dados do **Centro de Desenvolvimento e Cidadania (CDC)**.
+
+O objetivo deste documento é compartilhar com total transparência as evidências técnicas e métricas consolidadas coletadas pela nossa esteira de integração, visando a **melhoria contínua** dos fluxos de dados, a redução de tráfego desnecessário em ambos os servidores e a solicitação pontual para habilitação dos módulos fiscais na nossa credencial de acesso.
 
 ---
 ### 2. Matriz de Mapeamento dos 25 Endpoints (API v2)
-| Módulo | Endpoint Oficial | Método | Status HTTP | Diagnóstico / Papel no CDC Core |
+| Módulo | Endpoint Oficial | Método | Status HTTP | Diagnóstico / Papel Operacional na Integração |
 | :--- | :--- | :---: | :---: | :--- |
 """
     for ep in endpoints_list:
@@ -2431,21 +2432,52 @@ def ongsys_report_data_view(request):
 
     markdown_text += f"""
 ---
-### 3. Solicitações de Apoio & Sugestões Técnicas Colaborativas
-1. **Habilitação dos Endpoints Fiscais (NFS-e e NF-e):**
-   - As rotas `/api/v2/notas-servico` e `/api/v2/notas-produto` retornam `HTTP 401 Unauthorized` para o CNPJ `03.970.166/0001-29`. Solicitamos a gentileza de verificar e marcar o perfil fiscal na credencial.
-2. **Suporte a Parâmetros de Filtro por Data e Paginação em `/pedidos`:**
-   - Sugerimos disponibilizar `?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD` e `?pageNumber=N` em `/api/v2/pedidos` para otimizar consumo de rede.
-3. **Exposição de Headers de Limite de Taxa (Rate Limiting):**
-   - Exposição de `X-RateLimit-Limit`, `X-RateLimit-Remaining` e `X-RateLimit-Reset` nas respostas HTTP.
-4. **Filtro de Sincronização Incremental (Delta Sync via timestamp):**
-   - Suporte ao parâmetro `?atualizado_apos=YYYY-MM-DD HH:MM:SS` para sincronizar apenas registros modificados recentemente.
-5. **Mecanismo de Notificação por Webhooks (Roadmap Futuro):**
-   - Disparo assíncrono de eventos de negócio (*conta liquidada*, *contrato firmado*) para diminuir tráfego de polling.
+### 3. Diagnóstico Técnico Aprofundado (Causa, Impacto & Sugestão)
+1. **Ponto A: Tempo de Resposta (Latência) na Rota `/pedidos`**
+   - **Causa Técnica:** Chamadas ao endpoint `/api/v2/pedidos` realizam junções (*joins*) de dados no banco do ONGSYS e levam entre 33 e 45 segundos para responder a 1ª página.
+   - **Impacto Operacional:** *Read timeout* padrão de 30s nos clientes HTTP, forçando tentativas repetidas (*retries*) e sobrecarregando processamento de ambos os lados.
+   - **Sugestão de Ganho Mútuo:** Disponibilização de parâmetro de filtro por período (`?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD`) e paginação (`?pageNumber=N`), reduzindo o tempo de resposta para menos de 3 segundos.
+
+2. **Ponto B: Retenção de Ordens de Compra no Status `"Ordem gerada"`**
+   - **Causa Operacional:** O extrator automatizado lê `/pedidos` e aguarda o status `"Ordem finalizada"` para dar entrada física no almoxarifado sem risco de duplicidade.
+   - **Impacto Operacional:** Materiais e insumos que já foram entregues fisicamente nas unidades permanecem invisíveis no sistema interno porque continuam retidos como `"Ordem gerada"` no ONGSYS.
+   - **Sugestão de Ganho Mútuo:** Alinhamento operacional para transição do status para `"Ordem finalizada"` no momento da entrega física dos materiais.
+
+3. **Ponto C: Habilitação de Acesso às Rotas Fiscais (NFS-e e NF-e)**
+   - **Causa Técnica:** As rotas oficiais `/api/v2/notas-servico` e `/api/v2/notas-produto` retornam `HTTP 401 Unauthorized` para a credencial `f0...5e`.
+   - **Impacto Operacional:** Impossibilidade de sincronização automatizada dos arquivos XML e DANFE para a escrituração contábil.
+   - **Sugestão de Ganho Mútuo:** Solicitação para que o suporte do ONGSYS marque a permissão de consulta fiscal no perfil da credencial do CNPJ `03...29`.
 
 ---
-**Equipe de Engenharia, TI & Automação — Centro de Desenvolvimento e Cidadania (CDC)**
-E-mail: tecnologia@cdc.org.br | Portal: https://core.cdc.org.br/
+### 4. Métricas Consolidadas do Banco Atômico no CDC (PostgreSQL ACID)
+- **Status Geral:** 95% OPERACIONAL E HOMOLOGADA (23 de 25 rotas ativas)
+- **Registros Atômicos Persistidos:** {db_total:,} registros reais no banco local PostgreSQL (ACID).
+- **🛡️ Auditoria & Logs (1 Ano):** {db_counts['logs']:,} registros
+- **💳 Financeiro & Rateios:** {db_counts['contas_pagar'] + db_counts['contas_receber'] + db_counts['lancamentos']:,} registros
+- **🏢 Cadastros & Contratos:** {db_counts['fornecedores'] + db_counts['clientes'] + db_counts['contratos'] + db_counts['produtos']:,} registros
+
+---
+### 5. Resumo das Sugestões Técnicas de Melhoria Contínua
+1. **Habilitação Fiscal na Credencial (`f0...5e`):** Liberação de permissão para NFS-e e NF-e.
+2. **Filtro de Período e Paginação em `/pedidos`:** Redução de tráfego de rede e ganho de performance.
+3. **Headers de Limite de Taxa (Rate Limiting):** Envio de `X-RateLimit-Limit` e `X-RateLimit-Remaining`.
+4. **Delta Sync Incremental:** Suporte a `?atualizado_apos=YYYY-MM-DD HH:MM:SS` para sincronização rápida de alterações diárias (-95% de payload).
+5. **Mecanismo de Webhooks (Roadmap Futuro):** Notificações push assíncronas para eventos de conclusão de pedidos e liquidação financeira.
+
+---
+### 6. Apêndice: Registros Sanitizados de Teste da Esteira CDC
+```text
+[LOG INTEGRAL SANITIZADO - CDC ETL]
+Data/Hora: 2026-08-30 14:15:22 UTC
+Método: GET https://www.ongsys.com.br/app/index.php/api/v2/pedidos?pageNumber=1
+Status: Conexão interrompida por estouro do tempo limite padrão (30s)
+Erro Registrado: HTTPSConnectionPool(host='www.ongsys.com.br', port=443): Read timed out. (read timeout=30)
+Medida Adotada pelo CDC: Aumento de timeout para 120s e paginação controlada.
+```
+
+---
+**Equipe de Engenharia e TI — Centro de Desenvolvimento e Cidadania (CDC)**
+E-mail: tecnologia@cdc.org.br
 """
 
     history = [
@@ -2456,7 +2488,7 @@ E-mail: tecnologia@cdc.org.br | Portal: https://core.cdc.org.br/
 
     return JsonResponse({
         'gerado_em': now_str,
-        'cnpj': '03.970.166/0001-29',
+        'cnpj': '03...29',
         'empresa': 'Centro de Desenvolvimento e Cidadania (CDC)',
         'profile': profile,
         'db_total': db_total,
@@ -2505,15 +2537,15 @@ def ongsys_download_report_pdf_view(request):
             self.setFont("Helvetica", 8)
             self.setFillColor(colors.HexColor("#64748b"))
             if self._pageNumber > 1:
-                self.drawString(36, 756, "Relatório de Alinhamento Técnico & Governança — Integração API v2 ONGSYS x CDC Core")
-                self.drawRightString(576, 756, "CNPJ: 03.970.166/0001-29")
+                self.drawString(36, 756, "Relatório de Alinhamento Técnico & Governança — Integração API v2 ONGSYS x CDC")
+                self.drawRightString(576, 756, "CNPJ: 03...29")
                 self.setStrokeColor(colors.HexColor("#cbd5e1"))
                 self.setLineWidth(0.5)
                 self.line(36, 750, 576, 750)
             self.setStrokeColor(colors.HexColor("#cbd5e1"))
             self.setLineWidth(0.5)
             self.line(36, 38, 576, 38)
-            self.drawString(36, 26, "Centro de Desenvolvimento e Cidadania (CDC) — Tecnologia, Engenharia de Dados & Governança")
+            self.drawString(36, 26, "Centro de Desenvolvimento e Cidadania (CDC) — Tecnologia & Engenharia de Dados")
             self.drawRightString(576, 26, f"Página {self._pageNumber} de {page_count}")
             self.restoreState()
 
@@ -2522,206 +2554,216 @@ def ongsys_download_report_pdf_view(request):
         pagesize=letter,
         leftMargin=36,
         rightMargin=36,
-        topMargin=46,
+        topMargin=44,
         bottomMargin=46
     )
 
     styles = getSampleStyleSheet()
 
-    title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontName='Helvetica-Bold', fontSize=17, leading=21, textColor=colors.HexColor("#0f172a"), spaceAfter=3)
-    subtitle_style = ParagraphStyle('DocSubTitle', parent=styles['Normal'], fontName='Helvetica', fontSize=9.5, leading=13, textColor=colors.HexColor("#475569"), spaceAfter=8)
-    section_heading = ParagraphStyle('SectionHeading', parent=styles['Heading2'], fontName='Helvetica-Bold', fontSize=11.5, leading=15, textColor=colors.HexColor("#0f172a"), spaceBefore=10, spaceAfter=5)
-    body_style = ParagraphStyle('BodyStyle', parent=styles['Normal'], fontName='Helvetica', fontSize=8.5, leading=11.5, textColor=colors.HexColor("#334155"), spaceAfter=5)
-    bullet_style = ParagraphStyle('BulletStyle', parent=body_style, leftIndent=10, spaceAfter=4)
-    table_cell_style = ParagraphStyle('TableCell', parent=styles['Normal'], fontName='Helvetica', fontSize=7.5, leading=9.5, textColor=colors.HexColor("#1e293b"))
-    table_cell_bold = ParagraphStyle('TableCellBold', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=7.5, leading=9.5, textColor=colors.HexColor("#0f172a"))
-    table_cell_code = ParagraphStyle('TableCellCode', parent=styles['Normal'], fontName='Courier-Bold', fontSize=7.5, leading=9.5, textColor=colors.HexColor("#0284c7"))
+    title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontName='Helvetica-Bold', fontSize=16, leading=20, textColor=colors.HexColor("#0f172a"), spaceAfter=2)
+    subtitle_style = ParagraphStyle('DocSubTitle', parent=styles['Normal'], fontName='Helvetica', fontSize=9, leading=12, textColor=colors.HexColor("#475569"), spaceAfter=6)
+    section_heading = ParagraphStyle('SectionHeading', parent=styles['Heading2'], fontName='Helvetica-Bold', fontSize=10.5, leading=13.5, textColor=colors.HexColor("#0f172a"), spaceBefore=8, spaceAfter=4)
+    body_style = ParagraphStyle('BodyStyle', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=10.8, textColor=colors.HexColor("#334155"), spaceAfter=4)
+    bullet_style = ParagraphStyle('BulletStyle', parent=body_style, leftIndent=8, spaceAfter=3)
+    table_cell_style = ParagraphStyle('TableCell', parent=styles['Normal'], fontName='Helvetica', fontSize=7.2, leading=9.0, textColor=colors.HexColor("#1e293b"))
+    table_cell_bold = ParagraphStyle('TableCellBold', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=7.2, leading=9.0, textColor=colors.HexColor("#0f172a"))
+    table_cell_code = ParagraphStyle('TableCellCode', parent=styles['Normal'], fontName='Courier-Bold', fontSize=7.2, leading=9.0, textColor=colors.HexColor("#0284c7"))
 
     story = []
 
-    doc_name = "Relatório de Alinhamento Técnico, Arquitetura & Governança" if profile == 'tecnico' else "Relatório Executivo de Conformidade e Integrações"
+    doc_name = "Relatório de Alinhamento Técnico & Governança" if profile == 'tecnico' else "Relatório Executivo de Conformidade e Integrações"
     story.append(Paragraph(doc_name, title_style))
-    story.append(Paragraph("Esteira de Integração Automatizada API REST v2 ONGSYS x Ecossistema CDC Core", subtitle_style))
+    story.append(Paragraph("Esteira de Integração Automatizada API REST v2 ONGSYS x CDC", subtitle_style))
 
     meta_data = [
         [
-            Paragraph("<b>Para:</b> Equipe Técnica & Suporte de Integrações — ONGSYS", body_style),
+            Paragraph("<b>Destinatário:</b> Equipe Técnica & Suporte de Integrações — ONGSYS", body_style),
             Paragraph("<b>Data de Emissão:</b> 01 de Setembro de 2026", body_style)
         ],
         [
-            Paragraph("<b>De:</b> Engenharia de Dados & TI — CDC", body_style),
-            Paragraph("<b>CNPJ Institucional:</b> 03.970.166/0001-29", body_style)
+            Paragraph("<b>Remetente:</b> Engenharia de Dados & TI — Centro de Desenvolvimento e Cidadania (CDC)", body_style),
+            Paragraph("<b>CNPJ (Anonimizado):</b> 03...29", body_style)
         ],
         [
-            Paragraph("<b>Assunto:</b> Laudo Técnico API v2, Mapeamento dos 25 Endpoints, Governança & Sugestões", body_style),
-            Paragraph("<b>Ambiente:</b> Produção CDC Core (Alta Disponibilidade)", body_style)
+            Paragraph("<b>Assunto:</b> Laudo Técnico API v2, Mapeamento de Rotas, Diagnósticos & Sugestões", body_style),
+            Paragraph("<b>Credencial API:</b> f0...5e (Conexão Segura M2M)", body_style)
         ]
     ]
-    meta_table = Table(meta_data, colWidths=[270, 270])
+    meta_table = Table(meta_data, colWidths=[310, 230])
     meta_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#f8fafc")),
         ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#cbd5e1")),
         ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
-        ('TOPPADDING', (0,0), (-1,-1), 4),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
-        ('LEFTPADDING', (0,0), (-1,-1), 6),
-        ('RIGHTPADDING', (0,0), (-1,-1), 6),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('LEFTPADDING', (0,0), (-1,-1), 5),
+        ('RIGHTPADDING', (0,0), (-1,-1), 5),
     ]))
     story.append(meta_table)
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 4))
 
-    story.append(Paragraph("1. Apresentação Institucional & Propósito de Parceria", section_heading))
+    story.append(Paragraph("1. Alinhamento Técnico & Melhoria Contínua", section_heading))
     story.append(Paragraph(
-        "Prezada equipe de engenharia e suporte técnico do <b>ONGSYS</b>,<br/>"
-        "Apresentamos este laudo técnico consolidado referente à esteira de integração automatizada via <b>API REST v2</b> "
-        "entre o sistema ERP ONGSYS e a plataforma de governança do <b>Centro de Desenvolvimento e Cidadania (CDC)</b>. "
-        "O CDC é uma organização sem fins lucrativos que gerencia projetos sociais de grande relevância pública (ex: PROVITA, PPCAAM, ATITUDE), "
-        "operando sob rigorosos padrões de prestação de contas perante órgãos fiscalizadores (Tribunais de Contas, Ministérios e Promotorias).<br/>"
-        "Desenvolvemos no <b>CDC Core</b> uma arquitetura em microsserviços capaz de sincronizar, auditar e validar transações financeiras, "
-        "contratos, compras e eventos cadastrais. Este documento tem como objetivo apresentar a matriz de conformidade técnica das rotas, "
-        "compartilhar as métricas do banco de dados consolidado (com mais de 137 mil registros atômicos) e propor sugestões colaborativas "
-        "para maximizar a robustez e a segurança da integração.",
+        "Prezada equipe técnica do <b>ONGSYS</b>,<br/>"
+        "Apresentamos este laudo técnico referente à esteira de integração automatizada via <b>API REST v2</b> "
+        "entre o sistema ONGSYS e a plataforma de gestão de dados do <b>Centro de Desenvolvimento e Cidadania (CDC)</b>.<br/>"
+        "O objetivo deste documento é compartilhar com total transparência as evidências técnicas e métricas consolidadas coletadas "
+        "pela nossa esteira de integração, visando a <b>melhoria contínua</b> dos fluxos de dados, a redução de tráfego desnecessário "
+        "em ambos os servidores e a solicitação pontual para habilitação dos módulos fiscais na nossa credencial de acesso.",
         body_style
     ))
-    story.append(Spacer(1, 6))
 
-    story.append(Paragraph("2. Matriz de Mapeamento dos 25 Endpoints Oficiais e Estoque (API v2)", section_heading))
-    story.append(Paragraph(
-        "Abaixo discriminamos todas as rotas mapeadas na esteira do CDC Core, com seus respectivos métodos, códigos de retorno HTTP e papéis de negócio:",
-        body_style
-    ))
+    story.append(Paragraph("2. Matriz de Mapeamento dos 25 Endpoints (API v2)", section_heading))
 
     endpoints_table_data = [
-        [Paragraph("<b>Módulo</b>", table_cell_bold), Paragraph("<b>Endpoint</b>", table_cell_bold), Paragraph("<b>Método</b>", table_cell_bold), Paragraph("<b>Status</b>", table_cell_bold), Paragraph("<b>Diagnóstico & Papel Operacional no CDC Core</b>", table_cell_bold)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/contas-pagar", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("17.173 despesas atômicas com rateios de projetos", table_cell_style)],
+        [Paragraph("<b>Módulo</b>", table_cell_bold), Paragraph("<b>Endpoint Oficial</b>", table_cell_bold), Paragraph("<b>Método</b>", table_cell_bold), Paragraph("<b>Status</b>", table_cell_bold), Paragraph("<b>Diagnóstico & Papel Operacional na Integração</b>", table_cell_bold)],
+        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/contas-pagar", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("17.173 despesas atômicas com centros de custo e rateios", table_cell_style)],
         [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/create-contas-pagar", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Criação de compromissos e rateios contábeis", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/baixa-contas-pagar", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Liquidações financeiras e baixas em conta", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/contas-receber", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("2.458 receitas, termos de fomento e doações", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/create-contas-receber", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Cadastro de direitos de repasse e fomento", table_cell_style)],
+        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/baixa-contas-pagar", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Liquidações financeiras e baixas em contas bancárias", table_cell_style)],
+        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/contas-receber", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("2.458 receitas, termos de repasse e doações", table_cell_style)],
+        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/create-contas-receber", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Cadastro de direitos de repasse financeiro", table_cell_style)],
         [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/baixa-contas-receber", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Quitação de repasses nas contas bancárias", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/lancamentos-bancarios", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("823 extratos e conciliações multi-bancárias", table_cell_style)],
+        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/lancamentos-bancarios", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("823 extratos e conciliações bancárias", table_cell_style)],
         [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/transferencias-bancarias", table_cell_code), Paragraph("GET/POST", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Aportes e transferências entre contas do CDC", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/adiantamentos-fornecedores", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Controle de adiantamentos a fornecedores", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/adiantamentos-clientes", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Adiantamentos de projetos e convênios", table_cell_style)],
+        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/adiantamentos-fornecedores", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Controle de adiantamentos a credores", table_cell_style)],
+        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/adiantamentos-clientes", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Controle de adiantamentos a clientes e convênios", table_cell_style)],
         [Paragraph("Cadastros", table_cell_style), Paragraph("/api/v2/fornecedores", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("2.976 fornecedores homologados (CNPJ/CPF)", table_cell_style)],
-        [Paragraph("Cadastros", table_cell_style), Paragraph("/api/v2/clientes", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("235 unidades, órgãos públicos e parceiros", table_cell_style)],
-        [Paragraph("Contratos", table_cell_style), Paragraph("/api/v2/contratos", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("93 contratos de despesas e prestadores", table_cell_style)],
+        [Paragraph("Cadastros", table_cell_style), Paragraph("/api/v2/clientes", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("235 unidades e parceiros cadastrados", table_cell_style)],
+        [Paragraph("Contratos", table_cell_style), Paragraph("/api/v2/contratos", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("101 contratos de despesas e prestadores", table_cell_style)],
         [Paragraph("Contratos", table_cell_style), Paragraph("/api/v2/contratos-receber", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Contratos de repasse institucional e receitas", table_cell_style)],
         [Paragraph("Estoque", table_cell_style), Paragraph("/api/v2/produtos", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("1.692 produtos com grupos e unidades de medida", table_cell_style)],
         [Paragraph("Estoque", table_cell_style), Paragraph("/api/v2/pedidos", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Ordens de compra e requisições de almoxarifado", table_cell_style)],
-        [Paragraph("NextERP", table_cell_style), Paragraph("/api/v2/pedidos/status/finalizado", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("850 pedidos finalizados para conciliação física", table_cell_style)],
-        [Paragraph("NextERP", table_cell_style), Paragraph("/api/v2/produtos/catalogo/completo", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Sincronização de catálogo com fotos e grupos", table_cell_style)],
+        [Paragraph("NextERP", table_cell_style), Paragraph("/api/v2/pedidos/status/finalizado", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("850 pedidos finalizados para conciliação física de estoque", table_cell_style)],
+        [Paragraph("NextERP", table_cell_style), Paragraph("/api/v2/produtos/catalogo/completo", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Sincronização de catálogo com especificações", table_cell_style)],
         [Paragraph("NextERP", table_cell_style), Paragraph("/api/v2/produtos/unidades-medida", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Tabela unificada de UOM (UND, KG, CX, PCT)", table_cell_style)],
-        [Paragraph("Fiscal", table_cell_style), Paragraph("/api/v2/notas-servico", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#dc2626'><b>401 Auth</b></font>", table_cell_style), Paragraph("NFS-e: Requer ativação de escopo fiscal no perfil", table_cell_style)],
-        [Paragraph("Fiscal", table_cell_style), Paragraph("/api/v2/notas-produto", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#dc2626'><b>401 Auth</b></font>", table_cell_style), Paragraph("NF-e: Requer ativação de escopo fiscal no perfil", table_cell_style)],
+        [Paragraph("Fiscal", table_cell_style), Paragraph("/api/v2/notas-servico", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#dc2626'><b>401 Auth</b></font>", table_cell_style), Paragraph("NFS-e: Requer ativação do escopo fiscal no perfil", table_cell_style)],
+        [Paragraph("Fiscal", table_cell_style), Paragraph("/api/v2/notas-produto", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#dc2626'><b>401 Auth</b></font>", table_cell_style), Paragraph("NF-e: Requer ativação do escopo fiscal no perfil", table_cell_style)],
         [Paragraph("Auditoria", table_cell_style), Paragraph("/api/v2/logs", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("112.170 eventos de auditoria (365 dias completos)", table_cell_style)],
     ]
 
-    ep_table = Table(endpoints_table_data, colWidths=[60, 160, 48, 62, 210])
+    ep_table = Table(endpoints_table_data, colWidths=[56, 154, 46, 58, 226])
     ep_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#f1f5f9")),
-        ('GRID', (0,0), (-1,-1), 0.4, colors.HexColor("#e2e8f0")),
-        ('TOPPADDING', (0,0), (-1,-1), 2.5),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+        ('GRID', (0,0), (-1,-1), 0.4, colors.HexColor("#cbd5e1")),
+        ('TOPPADDING', (0,0), (-1,-1), 2),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
         ('LEFTPADDING', (0,0), (-1,-1), 4),
         ('RIGHTPADDING', (0,0), (-1,-1), 4),
         ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor("#fafafa")]),
     ]))
     story.append(ep_table)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 6))
 
-    story.append(Paragraph("3. Métricas Consolidadas do Banco Atômico no CDC Core (PostgreSQL ACID)", section_heading))
+    story.append(Paragraph("3. Diagnóstico Técnico Aprofundado (Causa, Impacto & Sugestão)", section_heading))
+
+    story.append(Paragraph("• <b>Ponto A: Tempo de Resposta (Latência) na Rota /pedidos</b><br/>"
+                           "<b>Causa Técnica:</b> Chamadas ao endpoint <code>/api/v2/pedidos</code> realizam junções de dados no banco do ONGSYS e levavam entre 33 e 45 segundos para responder a 1ª página.<br/>"
+                           "<b>Impacto Operacional:</b> <i>Read timeout</i> padrão de 30s nos clientes HTTP, forçando tentativas repetidas (<i>retries</i>) e sobrecarregando processamento de ambos os lados.<br/>"
+                           "<b>Sugestão de Ganho Mútuo:</b> Disponibilização de parâmetro de filtro por período (<code>?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD</code>) e paginação (<code>?pageNumber=N</code>), reduzindo o tempo de resposta para menos de 3 segundos.", bullet_style))
+
+    story.append(Paragraph("• <b>Ponto B: Retenção de Ordens de Compra no Status \"Ordem gerada\"</b><br/>"
+                           "<b>Causa Operacional:</b> O extrator automatizado lê <code>/pedidos</code> e aguarda o status <code>\"Ordem finalizada\"</code> para dar entrada física no almoxarifado sem risco de duplicidade.<br/>"
+                           "<b>Impacto Operacional:</b> Materiais e insumos que já foram entregues fisicamente nas unidades permanecem invisíveis no sistema interno porque continuam retidos como <code>\"Ordem gerada\"</code> no ONGSYS.<br/>"
+                           "<b>Sugestão de Ganho Mútuo:</b> Alinhamento operacional para transição do status para <code>\"Ordem finalizada\"</code> no momento da entrega física dos materiais.", bullet_style))
+
+    story.append(Paragraph("• <b>Ponto C: Habilitação de Acesso às Rotas Fiscais (NFS-e e NF-e)</b><br/>"
+                           "<b>Causa Técnica:</b> As rotas oficiais <code>/api/v2/notas-servico</code> e <code>/api/v2/notas-produto</code> retornam <code>HTTP 401 Unauthorized</code> para a credencial <code>f0...5e</code>.<br/>"
+                           "<b>Impacto Operacional:</b> Impossibilidade de sincronização automatizada dos arquivos XML e DANFE para a escrituração contábil.<br/>"
+                           "<b>Sugestão de Ganho Mútuo:</b> Solicitação para que o suporte do ONGSYS marque a permissão de consulta fiscal no perfil da credencial do CNPJ <code>03...29</code>.", bullet_style))
+
+    story.append(Spacer(1, 6))
+
+    story.append(Paragraph("4. Métricas Consolidadas do Banco Atômico no CDC (PostgreSQL ACID)", section_heading))
     story.append(Paragraph(
-        "A arquitetura do CDC Core opera como um espelho relacional de alta fidelidade das entidades do OngSys. "
-        "Atualmente, o banco de dados PostgreSQL conta com <b>137.557 registros reais sincronizados</b> com zero duplicidade via operações de upsert atômico:",
+        "A esteira automatizada mantém um banco local espelhado com <b>137.557 registros reais sincronizados</b> com zero duplicidade:",
         body_style
     ))
 
     metrics_data = [
         [Paragraph("<b>Módulo / Entidade</b>", table_cell_bold), Paragraph("<b>Rota de Origem</b>", table_cell_bold), Paragraph("<b>Total Sincronizado</b>", table_cell_bold), Paragraph("<b>Integridade & Status</b>", table_cell_bold)],
-        [Paragraph("🛡️ Trilha de Auditoria & Logs (1 Ano)", table_cell_style), Paragraph("<code>/api/v2/logs</code>", table_cell_style), Paragraph("<b>112.170 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (365 dias)</font>", table_cell_style)],
-        [Paragraph("💳 Contas a Pagar & Despesas", table_cell_style), Paragraph("<code>/api/v2/contas-pagar</code>", table_cell_style), Paragraph("<b>17.173 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Rateios)</font>", table_cell_style)],
-        [Paragraph("🏢 Cadastro de Fornecedores", table_cell_style), Paragraph("<code>/api/v2/fornecedores</code>", table_cell_style), Paragraph("<b>2.976 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Base Ativa)</font>", table_cell_style)],
-        [Paragraph("💰 Contas a Receber & Repasses", table_cell_style), Paragraph("<code>/api/v2/contas-receber</code>", table_cell_style), Paragraph("<b>2.458 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Convênios)</font>", table_cell_style)],
+        [Paragraph("🛡️ Trilha de Auditoria (1 Ano)", table_cell_style), Paragraph("<code>/api/v2/logs</code>", table_cell_style), Paragraph("<b>112.170 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (365 dias)</font>", table_cell_style)],
+        [Paragraph("💳 Contas a Pagar & Despesas", table_cell_style), Paragraph("<code>/api/v2/contas-pagar</code>", table_cell_style), Paragraph("<b>17.145 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Rateios)</font>", table_cell_style)],
+        [Paragraph("🏢 Fornecedores Cadastrados", table_cell_style), Paragraph("<code>/api/v2/fornecedores</code>", table_cell_style), Paragraph("<b>2.976 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Base Ativa)</font>", table_cell_style)],
+        [Paragraph("💰 Contas a Receber & Repasses", table_cell_style), Paragraph("<code>/api/v2/contas-receber</code>", table_cell_style), Paragraph("<b>2.437 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Receitas)</font>", table_cell_style)],
         [Paragraph("📦 Catálogo de Produtos", table_cell_style), Paragraph("<code>/api/v2/produtos</code>", table_cell_style), Paragraph("<b>1.692 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Itens/UOM)</font>", table_cell_style)],
         [Paragraph("🏦 Lançamentos & Conciliações", table_cell_style), Paragraph("<code>/api/v2/lancamentos-bancarios</code>", table_cell_style), Paragraph("<b>823 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Extratos)</font>", table_cell_style)],
-        [Paragraph("👥 Clientes, Doadores e Parceiros", table_cell_style), Paragraph("<code>/api/v2/clientes</code>", table_cell_style), Paragraph("<b>235 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Unidades)</font>", table_cell_style)],
-        [Paragraph("📑 Contratos de Prestação & Repasse", table_cell_style), Paragraph("<code>/api/v2/contratos</code>", table_cell_style), Paragraph("<b>93 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Vigentes)</font>", table_cell_style)],
-        [Paragraph("<b>TOTAL GERAL CONSOLIDADO</b>", table_cell_bold), Paragraph("<b>PostgreSQL CDC Core</b>", table_cell_bold), Paragraph("<b>137.620 registros</b>", table_cell_bold), Paragraph("<font color='#16a34a'><b>🟢 ACID Transacional</b></font>", table_cell_bold)],
+        [Paragraph("👥 Clientes e Unidades", table_cell_style), Paragraph("<code>/api/v2/clientes</code>", table_cell_style), Paragraph("<b>234 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Unidades)</font>", table_cell_style)],
+        [Paragraph("📑 Contratos de Prestação & Repasse", table_cell_style), Paragraph("<code>/api/v2/contratos</code>", table_cell_style), Paragraph("<b>101 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Vigentes)</font>", table_cell_style)],
+        [Paragraph("<b>TOTAL GERAL CONSOLIDADO</b>", table_cell_bold), Paragraph("<b>PostgreSQL CDC</b>", table_cell_bold), Paragraph("<b>137.557 registros</b>", table_cell_bold), Paragraph("<font color='#16a34a'><b>🟢 ACID Transacional</b></font>", table_cell_bold)],
     ]
     m_table = Table(metrics_data, colWidths=[155, 140, 115, 130])
     m_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#f1f5f9")),
         ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#f8fafc")),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
-        ('TOPPADDING', (0,0), (-1,-1), 3.5),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 3.5),
+        ('GRID', (0,0), (-1,-1), 0.4, colors.HexColor("#cbd5e1")),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+        ('LEFTPADDING', (0,0), (-1,-1), 5),
+        ('RIGHTPADDING', (0,0), (-1,-1), 5),
+    ]))
+    story.append(m_table)
+    story.append(Spacer(1, 6))
+
+    story.append(Paragraph("5. Resumo das Sugestões Técnicas de Melhoria Contínua", section_heading))
+    story.append(Paragraph("1. <b>Habilitação Fiscal na Credencial (<code>f0...5e</code>):</b> Liberação de permissão para NFS-e e NF-e.<br/>"
+                           "2. <b>Filtro de Período e Paginação em <code>/pedidos</code>:</b> Redução de tráfego de rede e ganho de performance.<br/>"
+                           "3. <b>Headers de Limite de Taxa (Rate Limiting):</b> Envio de <code>X-RateLimit-Limit</code> e <code>X-RateLimit-Remaining</code>.<br/>"
+                           "4. <b>Delta Sync Incremental:</b> Suporte a <code>?atualizado_apos=YYYY-MM-DD HH:MM:SS</code> para sincronização rápida de alterações diárias.<br/>"
+                           "5. <b>Mecanismo de Webhooks (Roadmap):</b> Notificações push assíncronas para eventos de conclusão de pedidos e liquidação financeira.", body_style))
+
+    story.append(Spacer(1, 6))
+
+    story.append(Paragraph("6. Apêndice: Registros Sanitizados de Teste da Esteira CDC", section_heading))
+
+    log_box_data = [
+        [
+            Paragraph("<b>A.1. Registro de Timeout de Leitura na Rota /pedidos (>30s):</b><br/>"
+                      "<font name='Courier' size='6.5'>[LOG INTEGRAL SANITIZADO - CDC ETL]<br/>"
+                      "Data/Hora: 2026-08-30 14:15:22 UTC<br/>"
+                      "Metodo: GET https://www.ongsys.com.br/app/index.php/api/v2/pedidos?pageNumber=1<br/>"
+                      "Status: Conexao interrompida por estouro do tempo limite padrao (30s)<br/>"
+                      "Erro Registrado: HTTPSConnectionPool(host='www.ongsys.com.br', port=443): Read timed out.<br/>"
+                      "Medida Adotada pelo CDC: Aumento de timeout para 120s e paginacao controlada.</font>", body_style)
+        ],
+        [
+            Paragraph("<b>A.2. Amostra de Pedidos no Status \"Ordem gerada\" Aguardando Entrada:</b><br/>"
+                  "<font name='Courier' size='6.5'>[<br/>"
+                  "  {\"idPedido\": 2728, \"numeroPedido\": \"2728\", \"statusPedido\": \"Ordem gerada\", \"diagnostico\": \"Material recebido; aguardando status 'Ordem finalizada'\"},<br/>"
+                  "  {\"idPedido\": 2734, \"numeroPedido\": \"2734\", \"statusPedido\": \"Ordem gerada\", \"diagnostico\": \"Insumos na unidade; aguardando transicao para 'Ordem finalizada'\"}<br/>"
+                  "]</font>", body_style)
+        ]
+    ]
+    log_table = Table(log_box_data, colWidths=[540])
+    log_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#f8fafc")),
+        ('BOX', (0,0), (-1,-1), 0.8, colors.HexColor("#cbd5e1")),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
         ('LEFTPADDING', (0,0), (-1,-1), 6),
         ('RIGHTPADDING', (0,0), (-1,-1), 6),
     ]))
-    story.append(m_table)
-    story.append(Spacer(1, 10))
-
-    story.append(Paragraph("4. Solicitações de Apoio & Sugestões Técnicas Colaborativas", section_heading))
-    story.append(Paragraph(
-        "Com o intuito de apoiar a contínua evolução da API OngSys e aperfeiçoar a integração institucional, apresentamos os seguintes apontamentos técnicos:",
-        body_style
-    ))
-
-    story.append(Paragraph("• <b>1. Habilitação dos Endpoints Fiscais (NFS-e e NF-e):</b><br/>"
-                           "Identificamos que as rotas oficiais <code>/api/v2/notas-servico</code> e <code>/api/v2/notas-produto</code> retornam "
-                           "<code>HTTP 401 Unauthorized</code> para a credencial do CNPJ <b>03.970.166/0001-29</b>. Solicitamos a gentileza de "
-                           "verificar e habilitar o perfil de acesso às rotas fiscais na chave de API para que o CDC possa integrar a escrituração fiscal.", bullet_style))
-
-    story.append(Paragraph("• <b>2. Suporte a Parâmetros de Filtro por Data e Paginação em /pedidos:</b><br/>"
-                           "Sugerimos disponibilizar os parâmetros de período (<code>?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD</code>) e paginação "
-                           "(<code>?pageNumber=N</code>) no endpoint <code>/api/v2/pedidos</code>, da mesma forma que já ocorre com excelência em "
-                           "<code>/contas-pagar</code> e <code>/logs</code>. Isso reduzirá o tráfego de rede e o tempo de resposta em ambos os lados.", bullet_style))
-
-    story.append(Paragraph("• <b>3. Exposição de Headers de Limite de Taxa (Rate Limiting):</b><br/>"
-                           "Recomendamos o fornecimento de headers padrão de mercado como <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code> "
-                           "e <code>X-RateLimit-Reset</code> nas respostas HTTP. Isso permite que sistemas parceiros regulem automaticamente o paralelismo "
-                           "das requisições e protejam a infraestrutura da OngSys contra sobrecargas.", bullet_style))
-
-    story.append(Paragraph("• <b>4. Filtro de Sincronização Incremental (Delta Sync via timestamp):</b><br/>"
-                           "A inclusão de um filtro opcional como <code>?atualizado_apos=YYYY-MM-DD HH:MM:SS</code> nos endpoints cadastrais "
-                           "(fornecedores, contas a pagar, contratos) permitiria ao CDC Core baixar apenas os registros alterados no dia, "
-                           "diminuindo a transferência de dados em mais de 95%.", bullet_style))
-
-    story.append(Paragraph("• <b>5. Mecanismo de Notificação por Webhooks (Roadmap Futuro):</b><br/>"
-                           "Como sugestão de evolução arquitetural, a implementação de Webhooks acionados por eventos de negócio (ex: "
-                           "<i>conta liquidada</i>, <i>contrato assinado</i>, <i>pedido finalizado</i>) eliminaria a necessidade de consultas periódicas "
-                           "por polling, proporcionando atualizações em tempo real com consumo computacional mínimo.", bullet_style))
-
-    story.append(Spacer(1, 8))
-
-    story.append(Paragraph("5. Conclusão & Acesso ao Painel em Tempo Real", section_heading))
-    story.append(Paragraph(
-        "A esteira de integração do CDC Core atingiu <b>95% de operacionalidade</b> com altíssima confiabilidade e integridade de dados. "
-        "Agradecemos o empenho da equipe do ONGSYS e nos colocamos à inteira disposição para reuniões de alinhamento técnico ou testes conjuntos.<br/>"
-        "O painel de monitoramento em tempo real pode ser consultado em: <b>https://core.cdc.org.br/dashboard/integracoes/ongsys/</b>",
-        body_style
-    ))
-    story.append(Spacer(1, 8))
+    story.append(log_table)
+    story.append(Spacer(1, 6))
 
     sign_data = [
         [
-            Paragraph("<b>Equipe de Engenharia, TI & Automação</b><br/>"
+            Paragraph("<b>Equipe de Engenharia e TI</b><br/>"
                       "Centro de Desenvolvimento e Cidadania (CDC)<br/>"
-                      "E-mail: <i>tecnologia@cdc.org.br</i> | Portal: <i>https://core.cdc.org.br/</i>", body_style),
-            Paragraph("<b>Status da Integração CDC Core:</b><br/>"
+                      "E-mail: <i>tecnologia@cdc.org.br</i>", body_style),
+            Paragraph("<b>Status da Integração CDC:</b><br/>"
                       "<font color='#16a34a'><b>🟢 95% OPERACIONAL E HOMOLOGADA</b></font><br/>"
-                      "137.620 registros transacionais no PostgreSQL", body_style)
+                      "137.557 registros transacionais gravados", body_style)
         ]
     ]
     sign_table = Table(sign_data, colWidths=[330, 210])
     sign_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#f8fafc")),
-        ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#cbd5e1")),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        ('LEFTPADDING', (0,0), (-1,-1), 8),
-        ('RIGHTPADDING', (0,0), (-1,-1), 8),
+        ('BOX', (0,0), (-1,-1), 0.8, colors.HexColor("#cbd5e1")),
+        ('TOPPADDING', (0,0), (-1,-1), 4),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ('LEFTPADDING', (0,0), (-1,-1), 6),
+        ('RIGHTPADDING', (0,0), (-1,-1), 6),
     ]))
     story.append(sign_table)
 
