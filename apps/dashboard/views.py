@@ -2041,14 +2041,39 @@ def transportes_api_proxy_view(request, provider, endpoint_key):
 
 
 # ==============================================================================
-# 🚀 MOTOR DE TAREFAS EM SEGUNDO PLANO & GERADOR DE RELATÓRIOS TÉCNICOS
+# 🚀 MOTOR DE TAREFAS EM SEGUNDO PLANO (MULTI-WORKER RESILIENTE)
 # ==============================================================================
 import threading
 import uuid
 import io
+import os
+import json
+from pathlib import Path
 
-BACKGROUND_TASKS = {}
-TASKS_LOCK = threading.Lock()
+TASKS_DIR = Path('/tmp/cdc_tasks')
+TASKS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _save_task_state(task_id, task_data):
+    try:
+        tmp_p = TASKS_DIR / f"{task_id}.tmp"
+        final_p = TASKS_DIR / f"{task_id}.json"
+        with open(tmp_p, 'w', encoding='utf-8') as f:
+            json.dump(task_data, f, ensure_ascii=False)
+        os.replace(tmp_p, final_p)
+    except Exception as e:
+        pass
+
+
+def _get_task_state(task_id):
+    final_p = TASKS_DIR / f"{task_id}.json"
+    if final_p.exists():
+        try:
+            with open(final_p, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            return None
+    return None
 
 
 @login_required(login_url='dashboard:login')
@@ -2060,64 +2085,64 @@ def ongsys_trigger_test_all_async_view(request):
         return JsonResponse({'error': 'Somente POST permitido'}, status=405)
 
     task_id = str(uuid.uuid4())
-    with TASKS_LOCK:
-        BACKGROUND_TASKS[task_id] = {
-            'id': task_id,
-            'type': 'test_all',
-            'status': 'running',
-            'progress_pct': 5,
-            'current_step': 'Iniciando conexão e bateria de testes nas rotas...',
-            'total_items': 18,
-            'completed_items': 0,
-            'results': [],
-            'error': None,
-            'started_at': timezone.now().isoformat(),
-            'finished_at': None,
-        }
+    initial_task = {
+        'id': task_id,
+        'type': 'test_all',
+        'status': 'running',
+        'progress_pct': 5,
+        'current_step': 'Iniciando conexão e bateria de testes nas rotas...',
+        'total_items': 18,
+        'completed_items': 0,
+        'results': [],
+        'error': None,
+        'started_at': timezone.now().isoformat(),
+        'finished_at': None,
+    }
+    _save_task_state(task_id, initial_task)
 
     def run_tests_worker(tid):
         import requests
+        from concurrent.futures import ThreadPoolExecutor, as_completed
         from apps.integrations.ongsys_credentials import get_ongsys_headers
         from apps.integrations.models import OngsysEndpointStatus
 
         h = get_ongsys_headers()
         endpoints = [
+            ('fornecedores-get', 'fornecedores', 'GET', {'pageNumber': 1}),
+            ('clientes-get', 'clientes', 'GET', {'pageNumber': 1}),
+            ('produtos-get', 'produtos', 'GET', {'pageNumber': 1}),
+            ('contratos-pagar-get', 'contratos', 'GET', {'pageNumber': 1}),
+            ('contratos-receber-get', 'contratos-receber', 'GET', {'pageNumber': 1}),
+            ('lancamentos-bancarios-get', 'lancamentos-bancarios', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
+            ('transferencias-bancarias-get', 'transferencias-bancarias', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
+            ('adiantamentos-fornecedores-get', 'adiantamentos-fornecedores', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
+            ('adiantamentos-clientes-get', 'adiantamentos-clientes', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
             ('contas-pagar-get', 'contas-pagar', 'GET', {'filtro': 1, 'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
             ('contas-pagar-post', 'create-contas-pagar', 'POST', {}),
             ('baixa-contas-pagar-post', 'baixa-contas-pagar', 'POST', {}),
             ('contas-receber-get', 'contas-receber', 'GET', {'filtro': 1, 'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
             ('contas-receber-post', 'create-contas-receber', 'POST', {}),
             ('baixa-contas-receber-post', 'baixa-contas-receber', 'POST', {}),
-            ('lancamentos-bancarios-get', 'lancamentos-bancarios', 'GET', {'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('transferencias-bancarias-get', 'transferencias-bancarias', 'GET', {'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('adiantamentos-fornecedores-get', 'adiantamentos-fornecedores', 'GET', {'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('adiantamentos-clientes-get', 'adiantamentos-clientes', 'GET', {'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('fornecedores-get', 'fornecedores', 'GET', {'pageNumber': 1}),
-            ('clientes-get', 'clientes', 'GET', {'pageNumber': 1}),
-            ('contratos-pagar-get', 'contratos', 'GET', {'pageNumber': 1}),
-            ('contratos-receber-get', 'contratos-receber', 'GET', {'pageNumber': 1}),
-            ('produtos-get', 'produtos', 'GET', {'pageNumber': 1}),
-            ('notas-servico-get', 'notas-servico', 'GET', {'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('notas-produto-get', 'notas-produto', 'GET', {'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('logs-get', 'logs', 'GET', {'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
+            ('notas-servico-get', 'notas-servico', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
+            ('notas-produto-get', 'notas-produto', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
+            ('logs-get', 'logs', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
         ]
 
         total = len(endpoints)
         results = []
-        for i, (ep_id, path, method, params) in enumerate(endpoints, 1):
-            with TASKS_LOCK:
-                BACKGROUND_TASKS[tid]['current_step'] = f"Avaliando endpoint /{path} ({i}/{total})..."
-                BACKGROUND_TASKS[tid]['progress_pct'] = max(5, int((i - 1) / total * 100))
+        task_data = _get_task_state(tid) or initial_task
 
+        def test_single_route(ep_tuple):
+            ep_id, path, method, params = ep_tuple
             url = f"https://www.ongsys.com.br/app/index.php/api/v2/{path}"
             status_code = 0
             latencia = 0
             classification = 'error'
             try:
                 if method == 'GET':
-                    r = requests.get(url, headers=h, params=params, timeout=10)
+                    r = requests.get(url, headers=h, params=params, timeout=12)
                 else:
-                    r = requests.post(url, headers=h, json=params, timeout=10)
+                    r = requests.post(url, headers=h, json=params, timeout=12)
                 
                 status_code = r.status_code
                 latencia = int(r.elapsed.total_seconds() * 1000)
@@ -2138,28 +2163,37 @@ def ongsys_trigger_test_all_async_view(request):
                 )
             except Exception as e:
                 status_code = 504
-                latencia = 10000
+                latencia = 12000
                 classification = 'error'
 
-            results.append({
+            return {
                 'ep_id': ep_id,
                 'path': path,
                 'method': method,
                 'status_code': status_code,
                 'latency_ms': latencia,
                 'classification': classification
-            })
+            }
 
-            with TASKS_LOCK:
-                BACKGROUND_TASKS[tid]['completed_items'] = i
-                BACKGROUND_TASKS[tid]['progress_pct'] = int(i / total * 100)
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_ep = {executor.submit(test_single_route, ep): ep for ep in endpoints}
+            completed_count = 0
+            for future in as_completed(future_to_ep):
+                res = future.result()
+                results.append(res)
+                completed_count += 1
+                task_data['completed_items'] = completed_count
+                task_data['progress_pct'] = max(5, int(completed_count / total * 100))
+                task_data['current_step'] = f"Avaliando /{res['path']} ({completed_count}/{total})..."
+                _save_task_state(tid, task_data)
 
-        with TASKS_LOCK:
-            BACKGROUND_TASKS[tid]['status'] = 'completed'
-            BACKGROUND_TASKS[tid]['progress_pct'] = 100
-            BACKGROUND_TASKS[tid]['current_step'] = 'Bateria de testes concluída com sucesso!'
-            BACKGROUND_TASKS[tid]['results'] = results
-            BACKGROUND_TASKS[tid]['finished_at'] = timezone.now().isoformat()
+        task_data['status'] = 'completed'
+        task_data['progress_pct'] = 100
+        task_data['current_step'] = f"Bateria de testes finalizada! ({total} rotas verificadas)"
+        task_data['results'] = results
+        task_data['finished_at'] = timezone.now().isoformat()
+        _save_task_state(tid, task_data)
+
 
     threading.Thread(target=run_tests_worker, args=(task_id,), daemon=True).start()
     return JsonResponse({'task_id': task_id, 'status': 'started'})
@@ -2183,21 +2217,20 @@ def ongsys_trigger_sync_async_view(request):
     pages = int(data.get('pages', 3))
 
     task_id = str(uuid.uuid4())
-    with TASKS_LOCK:
-        BACKGROUND_TASKS[task_id] = {
-            'id': task_id,
-            'type': 'sync_db',
-            'status': 'running',
-            'progress_pct': 5,
-            'current_step': 'Iniciando conexão e carga atômica...',
-            'total_items': 7 if entity == 'all' else 1,
-            'completed_items': 0,
-            'results': [],
-            'error': None,
-            'started_at': timezone.now().isoformat(),
-            'finished_at': None,
-        }
-
+    initial_task = {
+        'id': task_id,
+        'type': 'sync_db',
+        'status': 'running',
+        'progress_pct': 5,
+        'current_step': 'Iniciando conexão e carga atômica...',
+        'total_items': 7 if entity == 'all' else 1,
+        'completed_items': 0,
+        'results': [],
+        'error': None,
+        'started_at': timezone.now().isoformat(),
+        'finished_at': None,
+    }
+    _save_task_state(task_id, initial_task)
 
     def run_sync_worker(tid, ent, pgs):
         from apps.integrations.ongsys_sync import (
@@ -2242,10 +2275,13 @@ def ongsys_trigger_sync_async_view(request):
 
         total_steps = len(steps)
         results = []
+        task_data = _get_task_state(tid) or initial_task
+
         for i, (name, func) in enumerate(steps, 1):
-            with TASKS_LOCK:
-                BACKGROUND_TASKS[tid]['current_step'] = f"Sincronizando {name} ({i}/{total_steps})..."
-                BACKGROUND_TASKS[tid]['progress_pct'] = int((i - 1) / total_steps * 100)
+            task_data['current_step'] = f"Sincronizando {name} ({i}/{total_steps})..."
+            task_data['progress_pct'] = max(5, int((i - 1) / total_steps * 100))
+            task_data['completed_items'] = i - 1
+            _save_task_state(tid, task_data)
 
             try:
                 res = func()
@@ -2253,15 +2289,16 @@ def ongsys_trigger_sync_async_view(request):
             except Exception as e:
                 results.append({'entidade': name, 'total': 0, 'erro': str(e)})
 
-            with TASKS_LOCK:
-                BACKGROUND_TASKS[tid]['completed_items'] = i
-                BACKGROUND_TASKS[tid]['progress_pct'] = int(i / total_steps * 100)
+            task_data['completed_items'] = i
+            task_data['progress_pct'] = int(i / total_steps * 100)
+            _save_task_state(tid, task_data)
 
-        with TASKS_LOCK:
-            BACKGROUND_TASKS[tid]['status'] = 'completed'
-            BACKGROUND_TASKS[tid]['current_step'] = 'Sincronização atômica concluída com sucesso!'
-            BACKGROUND_TASKS[tid]['results'] = results
-            BACKGROUND_TASKS[tid]['finished_at'] = timezone.now().isoformat()
+        task_data['status'] = 'completed'
+        task_data['progress_pct'] = 100
+        task_data['current_step'] = 'Sincronização atômica concluída com sucesso!'
+        task_data['results'] = results
+        task_data['finished_at'] = timezone.now().isoformat()
+        _save_task_state(tid, task_data)
 
     threading.Thread(target=run_sync_worker, args=(task_id, entity, pages), daemon=True).start()
     return JsonResponse({'task_id': task_id, 'status': 'started'})
@@ -2270,13 +2307,13 @@ def ongsys_trigger_sync_async_view(request):
 @login_required(login_url='dashboard:login')
 def ongsys_task_status_view(request, task_id):
     """
-    Retorna o progresso em tempo real da tarefa em segundo plano.
+    Retorna o progresso em tempo real da tarefa em segundo plano de forma multi-processo e resiliente.
     """
-    with TASKS_LOCK:
-        task = BACKGROUND_TASKS.get(task_id)
-        if not task:
-            return JsonResponse({'error': 'Tarefa não encontrada'}, status=404)
-        return JsonResponse(task)
+    task = _get_task_state(task_id)
+    if not task:
+        return JsonResponse({'error': 'Tarefa não encontrada'}, status=404)
+    return JsonResponse(task)
+
 
 
 @login_required(login_url='dashboard:login')
