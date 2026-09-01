@@ -2062,7 +2062,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         });
     }
 
-    function showToastCopy(text) {
+    function showToast(text) {
         const toast = document.getElementById("toastCopyNotification");
         const toastText = document.getElementById("toastCopyText");
         if (toast && toastText) {
@@ -2070,8 +2070,14 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
             toast.classList.remove("d-none");
             setTimeout(() => {
                 toast.classList.add("d-none");
-            }, 4000);
+            }, 3500);
+        } else {
+            console.log("[Toast]", text);
         }
+    }
+
+    function showToastCopy(text) {
+        showToast(text);
     }
 
     async function testAllVisibleEndpoints() {
