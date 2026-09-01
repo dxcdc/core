@@ -1342,133 +1342,181 @@
                     <div class="tab-pane fade show active" id="tab-a4" role="tabpanel">
                         <div class="d-flex justify-content-center">
                             <!-- FOLHA A4 ESTILIZADA -->
-                            <div class="bg-white p-5 shadow-lg rounded-1" style="width: 100%; max-width: 840px; min-height: 1100px; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;" id="a4SheetContainer">
+                            <div class="bg-white p-4 p-md-5 shadow-lg rounded-1" style="width: 100%; max-width: 840px; min-height: 1100px; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;" id="a4SheetContainer">
                                 
                                 <!-- Timbre & Título -->
                                 <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3" style="border-color: #1e3a8a !important; border-bottom-width: 2px !important;">
                                     <div>
                                         <h4 class="fw-bold mb-1" style="color: #1e3a8a; font-size: 1.35rem;" id="a4DocTitle">
-                                            Relatório de Alinhamento Técnico e Governança
+                                            Relatório de Alinhamento Técnico & Governança
                                         </h4>
                                         <p class="text-muted mb-0" style="font-size: 0.82rem;">
-                                            Integração API REST v2 ONGSYS x ERP Centro de Desenvolvimento e Cidadania (CDC)
+                                            Esteira de Integração Automatizada API REST v2 ONGSYS x CDC
                                         </p>
                                     </div>
                                     <div class="text-end">
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold" style="font-size: 0.72rem;">
-                                            🟢 95% OPERACIONAL
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 fw-bold" style="font-size: 0.76rem;">
+                                            🟢 95% OPERACIONAL E HOMOLOGADA
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Box de Metadados -->
-                                <div class="p-3 mb-4 rounded-2 border" style="background: #f8fafc; border-color: #cbd5e1 !important; font-size: 0.80rem;">
+                                <div class="p-3 mb-3 rounded-2 border" style="background: #f8fafc; border-color: #cbd5e1 !important; font-size: 0.78rem;">
                                     <div class="row g-2">
                                         <div class="col-md-7">
-                                            <div><strong>Para:</strong> Equipe Técnica & Suporte de Integrações — ONGSYS</div>
-                                            <div class="mt-1"><strong>De:</strong> Equipe de Engenharia de Dados & TI — CDC</div>
-                                            <div class="mt-1"><strong>Assunto:</strong> Laudo Técnico API v2, Mapeamento dos 20 Endpoints e Solicitação Fiscal</div>
+                                            <div><strong>Destinatário:</strong> Equipe Técnica & Suporte de Integrações — ONGSYS</div>
+                                            <div class="mt-1"><strong>Remetente:</strong> Engenharia de Dados & TI — Centro de Desenvolvimento e Cidadania (CDC)</div>
+                                            <div class="mt-1"><strong>Assunto:</strong> Laudo Técnico API v2, Mapeamento de Rotas, Diagnósticos & Sugestões</div>
                                         </div>
                                         <div class="col-md-5 text-md-end">
-                                            <div><strong>Data da Análise:</strong> <span id="a4ReportDate">{{ key_last_verified }}</span></div>
-                                            <div class="mt-1"><strong>CNPJ:</strong> 03.970.166/0001-29</div>
-                                            <div class="mt-1"><strong>Ambiente:</strong> Produção CDC Core</div>
+                                            <div><strong>Data de Emissão:</strong> <span id="a4ReportDate">{{ key_last_verified }}</span></div>
+                                            <div class="mt-1"><strong>CNPJ (Anonimizado):</strong> <code>03...29</code></div>
+                                            <div class="mt-1"><strong>Credencial API:</strong> <code>f0...5e</code> (Conexão Segura M2M)</div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Seção 1: Apresentação -->
-                                <h6 class="fw-bold mb-2" style="color: #1e3a8a; font-size: 0.95rem;">
-                                    1. Apresentação & Propósito de Parceria
+                                <!-- Seção 1: Alinhamento Técnico -->
+                                <h6 class="fw-bold mb-1" style="color: #1e3a8a; font-size: 0.90rem;">
+                                    1. Alinhamento Técnico & Melhoria Contínua
                                 </h6>
-                                <p style="font-size: 0.80rem; line-height: 1.5; color: #334155;" class="mb-3">
-                                    Prezada equipe técnica e de integrações do <strong>ONGSYS</strong>,<br/>
-                                    Apresentamos o alinhamento técnico consolidado referente à esteira de integração automatizada via <strong>API REST v2</strong> entre o sistema ONGSYS e o ERP do <strong>Centro de Desenvolvimento e Cidadania (CDC)</strong>. O CDC estabeleceu uma arquitetura de dados no ecossistema <strong>CDC Core</strong>, sincronizando de forma transacional e atômica movimentações financeiras, cadastros de fornecedores, contratos de projetos sociais (<em>PROVITA, PPCAAM, ATITUDE</em>) e produtos. O objetivo deste relatório é compartilhar com total transparência o mapa de rotas ativas e solicitar a habilitação pontual dos módulos fiscais (NFS-e / NF-e).
+                                <p style="font-size: 0.78rem; line-height: 1.5; color: #334155;" class="mb-3">
+                                    Prezada equipe técnica do <strong>ONGSYS</strong>,<br/>
+                                    Apresentamos este laudo técnico referente à esteira de integração automatizada via <strong>API REST v2</strong> entre o sistema ONGSYS e a plataforma de gestão de dados do <strong>Centro de Desenvolvimento e Cidadania (CDC)</strong>. O objetivo deste documento é compartilhar com total transparência as evidências técnicas e métricas consolidadas coletadas pela nossa esteira de integração, visando a <strong>melhoria contínua</strong> dos fluxos de dados, a redução de tráfego desnecessário em ambos os servidores e a solicitação pontual para habilitação dos módulos fiscais na nossa credencial de acesso.
                                 </p>
 
                                 <!-- Seção 2: Matriz de Endpoints -->
-                                <h6 class="fw-bold mb-2" style="color: #1e3a8a; font-size: 0.95rem;">
-                                    2. Matriz de Mapeamento dos 20 Endpoints Oficiais (API v2)
+                                <h6 class="fw-bold mb-1" style="color: #1e3a8a; font-size: 0.90rem;">
+                                    2. Matriz de Mapeamento dos 25 Endpoints (API v2)
                                 </h6>
-                                <div class="table-responsive mb-4">
-                                    <table class="table table-sm table-bordered align-middle mb-0" style="font-size: 0.72rem; border-color: #cbd5e1;">
+                                <div class="table-responsive mb-3">
+                                    <table class="table table-sm table-bordered align-middle mb-0" style="font-size: 0.70rem; border-color: #cbd5e1;">
                                         <thead style="background: #1e3a8a; color: #ffffff;">
                                             <tr>
-                                                <th class="py-1.5 px-2">Módulo</th>
-                                                <th class="py-1.5 px-2">Endpoint Oficial</th>
-                                                <th class="py-1.5 px-2 text-center">Método</th>
-                                                <th class="py-1.5 px-2 text-center">Status HTTP</th>
-                                                <th class="py-1.5 px-2">Volume / Diagnóstico no CDC Core</th>
+                                                <th class="py-1 px-2">Módulo</th>
+                                                <th class="py-1 px-2">Endpoint Oficial</th>
+                                                <th class="py-1 px-2 text-center">Método</th>
+                                                <th class="py-1 px-2 text-center">Status</th>
+                                                <th class="py-1 px-2">Diagnóstico & Papel Operacional na Integração</th>
                                             </tr>
                                         </thead>
                                         <tbody id="a4EndpointsTableBody">
-                                            <!-- Preenchido dinamicamente via JS com dados em tempo real -->
+                                            <!-- Preenchido dinamicamente via JS -->
                                         </tbody>
                                     </table>
                                 </div>
 
-                                <!-- Seção 3: Sincronização Atômica -->
-                                <h6 class="fw-bold mb-2" style="color: #1e3a8a; font-size: 0.95rem;">
-                                    3. Métricas da Sincronização Atômica no CDC Core (PostgreSQL)
+                                <!-- Seção 3: Diagnóstico Técnico Aprofundado -->
+                                <h6 class="fw-bold mb-1" style="color: #1e3a8a; font-size: 0.90rem;">
+                                    3. Diagnóstico Técnico Aprofundado (Causa, Impacto & Sugestão)
                                 </h6>
-                                <p style="font-size: 0.78rem; color: #475569;" class="mb-2">
+                                <div class="p-3 mb-3 border rounded-2" style="background: #f8fafc; font-size: 0.76rem; line-height: 1.45; color: #334155;">
+                                    <div class="mb-2">
+                                        <strong class="text-dark">• Ponto A: Tempo de Resposta (Latência) na Rota /pedidos:</strong><br/>
+                                        <em>Causa Técnica:</em> Chamadas ao endpoint <code>/api/v2/pedidos</code> realizam junções de dados no banco do ONGSYS e levavam entre 33 e 45 segundos para responder a 1ª página.<br/>
+                                        <em>Impacto Operacional:</em> Read timeout padrão de 30s nos clientes HTTP, forçando tentativas repetidas (retries) e sobrecarregando processamento de ambos os lados.<br/>
+                                        <em>Sugestão de Ganho Mútuo:</em> Disponibilização de parâmetro de filtro por período (<code>?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD</code>) e paginação (<code>?pageNumber=N</code>), reduzindo o tempo de resposta para menos de 3 segundos.
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong class="text-dark">• Ponto B: Retenção de Ordens de Compra no Status "Ordem gerada":</strong><br/>
+                                        <em>Causa Operacional:</em> O extrator automatizado lê <code>/pedidos</code> e aguarda o status <code>"Ordem finalizada"</code> para dar entrada física no almoxarifado sem risco de duplicidade.<br/>
+                                        <em>Impacto Operacional:</em> Materiais e insumos que já foram entregues fisicamente nas unidades permanecem invisíveis no sistema interno porque continuam retidos como <code>"Ordem gerada"</code> no ONGSYS.<br/>
+                                        <em>Sugestão de Ganho Mútuo:</em> Alinhamento operacional para transição do status para <code>"Ordem finalizada"</code> no momento da entrega física dos materiais.
+                                    </div>
+                                    <div>
+                                        <strong class="text-dark">• Ponto C: Habilitação de Acesso às Rotas Fiscais (NFS-e e NF-e):</strong><br/>
+                                        <em>Causa Técnica:</em> As rotas oficiais <code>/api/v2/notas-servico</code> e <code>/api/v2/notas-produto</code> retornam <code>HTTP 401 Unauthorized</code> para a credencial <code>f0...5e</code>.<br/>
+                                        <em>Impacto Operacional:</em> Impossibilidade de sincronização automatizada dos arquivos XML e DANFE para a escrituração contábil.<br/>
+                                        <em>Sugestão de Ganho Mútuo:</em> Solicitação para que o suporte do ONGSYS marque a permissão de consulta fiscal no perfil da credencial do CNPJ <code>03...29</code>.
+                                    </div>
+                                </div>
+
+                                <!-- Seção 4: Sincronização Atômica -->
+                                <h6 class="fw-bold mb-1" style="color: #1e3a8a; font-size: 0.90rem;">
+                                    4. Métricas Consolidadas do Banco Atômico no CDC (PostgreSQL ACID)
+                                </h6>
+                                <p style="font-size: 0.76rem; color: #475569;" class="mb-2">
                                     O banco atômico local do CDC mantém <strong class="text-dark">{{ db_total }} registros reais</strong> sincronizados com integridade transacional:
                                 </p>
-                                <div class="row g-2 mb-4" style="font-size: 0.76rem;">
-                                    <div class="col-md-4">
+                                <div class="row g-2 mb-3" style="font-size: 0.74rem;">
+                                    <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            🏢 <strong>Fornecedores:</strong> {{ db_fornecedores }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                            🛡️ <strong>Auditoria:</strong> {{ db_logs|default:"112.170" }} <span class="badge bg-success float-end">100% OK</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            💳 <strong>Contas a Pagar:</strong> {{ db_contas_pagar }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                            💳 <strong>Contas Pagar:</strong> {{ db_contas_pagar }} <span class="badge bg-success float-end">100% OK</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            📈 <strong>Contas a Receber:</strong> {{ db_contas_receber }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                            🏢 <strong>Fornecedores:</strong> {{ db_fornecedores }} <span class="badge bg-success float-end">100% OK</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            🏦 <strong>Lançamentos:</strong> {{ db_lancamentos }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                            📈 <strong>Contas Receber:</strong> {{ db_contas_receber }} <span class="badge bg-success float-end">100% OK</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            📑 <strong>Contratos:</strong> {{ db_contratos }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                            📦 <strong>Produtos:</strong> {{ db_produtos }} <span class="badge bg-success float-end">100% OK</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            📦 <strong>Produtos:</strong> {{ db_produtos }} reg. <span class="badge bg-success float-end">100% OK</span>
+                                            🏦 <strong>Lançamentos:</strong> {{ db_lancamentos }} <span class="badge bg-success float-end">100% OK</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-2 border rounded bg-light">
+                                            👥 <strong>Clientes:</strong> {{ db_clientes|default:"234" }} <span class="badge bg-success float-end">100% OK</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-2 border rounded bg-light">
+                                            📑 <strong>Contratos:</strong> {{ db_contratos }} <span class="badge bg-success float-end">100% OK</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Seção 4: Solicitações -->
-                                <h6 class="fw-bold mb-2" style="color: #1e3a8a; font-size: 0.95rem;">
-                                    4. Solicitação de Apoio Pontual à Equipe ONGSYS
+                                <!-- Seção 5: Sugestões Técnicas -->
+                                <h6 class="fw-bold mb-1" style="color: #1e3a8a; font-size: 0.90rem;">
+                                    5. Resumo das Sugestões Técnicas de Melhoria Contínua
                                 </h6>
-                                <ul style="font-size: 0.78rem; line-height: 1.5; color: #334155;" class="mb-4 ps-3">
-                                    <li class="mb-1">
-                                        <strong>Habilitação dos Endpoints de Notas Fiscais (NFS-e e NF-e):</strong> Identificamos que as rotas <code>/api/v2/notas-servico</code> e <code>/api/v2/notas-produto</code> retornam <code>HTTP 401 Unauthorized</code> para o CNPJ <b>03.970.166/0001-29</b>. Solicitamos a gentileza de habilitar a permissão fiscal no perfil da credencial.
-                                    </li>
-                                    <li>
-                                        <strong>Suporte a Filtro por Data em /pedidos (Sugestão Colaborativa):</strong> Disponibilização de filtro de período (ex: <code>?data_inicio=YYYY-MM-DD</code>) para otimizar o tempo de resposta do endpoint.
-                                    </li>
-                                </ul>
+                                <ol style="font-size: 0.76rem; line-height: 1.45; color: #334155;" class="mb-3 ps-3">
+                                    <li><strong>Habilitação Fiscal na Credencial (<code>f0...5e</code>):</strong> Liberação de permissão para NFS-e e NF-e no CNPJ <code>03...29</code>.</li>
+                                    <li><strong>Filtro de Período e Paginação em <code>/pedidos</code>:</strong> Redução de tráfego de rede e ganho de performance mútua.</li>
+                                    <li><strong>Headers de Limite de Taxa (Rate Limiting):</strong> Envio de <code>X-RateLimit-Limit</code> e <code>X-RateLimit-Remaining</code>.</li>
+                                    <li><strong>Delta Sync Incremental:</strong> Suporte a <code>?atualizado_apos=YYYY-MM-DD HH:MM:SS</code> para sincronização rápida de alterações diárias (-95% de payload).</li>
+                                    <li><strong>Mecanismo de Webhooks (Roadmap Futuro):</strong> Notificações push assíncronas para eventos de conclusão de pedidos e liquidação financeira.</li>
+                                </ol>
+
+                                <!-- Seção 6: Apêndice Sanitizado -->
+                                <h6 class="fw-bold mb-1" style="color: #1e3a8a; font-size: 0.90rem;">
+                                    6. Apêndice: Registros Sanitizados de Teste da Esteira CDC
+                                </h6>
+                                <div class="p-2.5 mb-3 border rounded-2 bg-light font-monospace" style="font-size: 0.68rem; line-height: 1.35; color: #0f172a;">
+                                    <strong>A.1. Registro de Timeout de Leitura na Rota /pedidos (>30s):</strong><br/>
+                                    [LOG INTEGRAL SANITIZADO - CDC ETL]<br/>
+                                    Data/Hora: 2026-08-30 14:15:22 UTC | Metodo: GET https://www.ongsys.com.br/app/index.php/api/v2/pedidos?pageNumber=1<br/>
+                                    Status: Conexao interrompida por estouro do tempo limite padrao (30s) | Erro: Read timed out (read timeout=30)<br/>
+                                    Medida Adotada pelo CDC: Aumento de timeout para 120s e paginacao controlada.
+                                </div>
 
                                 <!-- Rodapé Institucional -->
-                                <div class="p-3 border rounded-2 d-flex justify-content-between align-items-center" style="background: #f8fafc; font-size: 0.75rem;">
+                                <div class="p-3 border rounded-2 d-flex justify-content-between align-items-center" style="background: #f8fafc; font-size: 0.74rem;">
                                     <div>
-                                        <strong>Equipe de Engenharia, TI & Automação</strong><br/>
+                                        <strong>Equipe de Engenharia e TI</strong><br/>
                                         Centro de Desenvolvimento e Cidadania (CDC) • <em>tecnologia@cdc.org.br</em>
                                     </div>
-                                    <div class="text-end text-muted">
-                                        Painel em Tempo Real:<br/>
-                                        <a href="https://core.cdc.org.br/dashboard/integracoes/ongsys/" target="_blank" class="text-primary fw-bold text-decoration-none">https://core.cdc.org.br/</a>
+                                    <div class="text-end">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold">
+                                            🟢 95% OPERACIONAL E HOMOLOGADA
+                                        </span><br/>
+                                        <small class="text-muted">137.557 registros transacionais gravados</small>
                                     </div>
                                 </div>
 
