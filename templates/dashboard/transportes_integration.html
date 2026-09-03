@@ -949,13 +949,22 @@
         setupDragAndDrop();
     });
 
-    function switchMainTab(tabName) {
-        const tabs = ['arquivos', 'apidoc', 'corridas', 'uber', 'didi'];
-        tabs.forEach(t => {
-            const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
-            const content = document.getElementById(`tabContent${t.charAt(0).toUpperCase() + t.slice(1)}`);
-            if (btn) btn.classList.toggle("active", t === tabName);
-            if (content) content.classList.toggle("d-none", t !== tabName);
+    function switchMainTab(tabKey) {
+        const tabMap = {
+            'arquivos': { btn: 'tabBtnArquivos', content: 'tabContentArquivos' },
+            'apidoc': { btn: 'tabBtnApiDoc', content: 'tabContentApiDoc' },
+            'corridas': { btn: 'tabBtnCorridas', content: 'tabContentCorridas' },
+            'uber': { btn: 'tabBtnUber', content: 'tabContentUber' },
+            'didi': { btn: 'tabBtnDidi', content: 'tabContentDidi' }
+        };
+
+        Object.keys(tabMap).forEach(k => {
+            const item = tabMap[k];
+            const btnEl = document.getElementById(item.btn);
+            const contentEl = document.getElementById(item.content);
+            const isActive = (k === tabKey);
+            if (btnEl) btnEl.classList.toggle("active", isActive);
+            if (contentEl) contentEl.classList.toggle("d-none", !isActive);
         });
     }
 
