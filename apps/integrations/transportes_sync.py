@@ -625,6 +625,12 @@ def processar_dataframe_para_banco(df_resumo, arquivo_origem=""):
     if df_resumo is None or df_resumo.empty:
         return 0
 
+    from apps.integrations.models import TransporteProgramaAlias
+    try:
+        alias_map = {a.nome_original.lower().strip(): a.nome_padronizado for a in TransporteProgramaAlias.objects.filter(ativo=True)}
+    except Exception:
+        alias_map = {}
+
     unique_objs = {}
     for _, row in df_resumo.iterrows():
         id_corrida = str(row.get('ID da Corrida') or '').strip()
@@ -699,8 +705,8 @@ def processar_dataframe_para_banco(df_resumo, arquivo_origem=""):
             solicitado_em=dt_solic,
             concluido_em=dt_cheg,
             servico=str(row.get('Serviço') or '').strip(),
-            programa=str(row.get('Programa') or '').strip(),
-            grupo=str(row.get('Grupo') or '').strip(),
+            programa=alias_map.get(str(row.get('Programa') or '').strip().lower(), str(row.get('Programa') or '').strip()),
+            grupo=alias_map.get(str(row.get('Grupo') or '').strip().lower(), str(row.get('Grupo') or '').strip()),
             nome=str(row.get('Nome') or '').strip(),
             sobrenome=str(row.get('Sobrenome') or '').strip(),
             nome_completo=str(row.get('Nome Completo') or '').strip(),

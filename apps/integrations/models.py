@@ -511,3 +511,95 @@ class TransporteCorrida(models.Model):
 
     def __str__(self):
         return f"[{self.plataforma}] {self.id_corrida} - {self.nome_completo} (R$ {self.valor_total})"
+
+
+# ==============================================================================
+# 🧹 DICIONÁRIO DE-PARA DE HIGIENIZAÇÃO (PROJETOS & CENTROS DE CUSTO)
+# ==============================================================================
+class TransporteProgramaAlias(models.Model):
+    """
+    Dicionário De-Para para higienização e padronização automática de nomes de projetos/programas.
+    Ex: 'PROVITA II' -> 'Provita II', 'provita-pe' -> 'Provita II'
+    """
+    nome_original = models.CharField(max_length=255, unique=True, db_index=True, verbose_name="Nome Original / Variação")
+    nome_padronizado = models.CharField(max_length=255, db_index=True, verbose_name="Nome Padronizado Canônico")
+    centro_custo_codigo = models.CharField(max_length=64, blank=True, verbose_name="Código Centro de Custo")
+    ativo = models.BooleanField(default=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "De-Para de Programa / Projeto"
+        verbose_name_plural = "De-Para de Programas / Projetos"
+        ordering = ["nome_padronizado", "nome_original"]
+
+    def __str__(self):
+        return f"{self.nome_original} -> {self.nome_padronizado}"
+
+
+# ==============================================================================
+# 📊 DATABASE VIEWS ANALÍTICAS DO POSTGRESQL (META.MANAGED = FALSE)
+# ==============================================================================
+class TransporteFechamentoMensalView(models.Model):
+    """
+    View PostgreSQL Analítica: Totais Consolidados por Lote/Mês e Plataforma.
+    Mapeia a view SQL 'vw_transportes_fechamento_mensal'.
+    """
+    id = models.CharField(max_length=128, primary_key=True)
+    arquivo_origem = models.CharField(max_length=255)
+    plataforma = models.CharField(max_length=16)
+    ano = models.CharField(max_length=4)
+    mes = models.CharField(max_length=2)
+    total_viagens = models.IntegerField()
+    valor_total = models.DecimalField(max_digits=14, decimal_places=2)
+    total_km = models.DecimalField(max_digits=12, decimal_places=2)
+    ticket_medio = models.DecimalField(max_digits=10, decimal_places=2)
+    km_medio = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        managed = False
+        db_table = "vw_transportes_fechamento_mensal"
+        ordering = ["-ano", "-mes", "plataforma"]
+
+
+class TransportePorProgramaView(models.Model):
+    """
+    View PostgreSQL Analítica: Gastos Consolidados por Programa/Projeto Social.
+    Mapeia a view SQL 'vw_transportes_por_programa'.
+    """
+    id = models.CharField(max_length=255, primary_key=True)
+    programa = models.CharField(max_length=255)
+    plataforma = models.CharField(max_length=16)
+    ano = models.CharField(max_length=4)
+    mes = models.CharField(max_length=2)
+    total_viagens = models.IntegerField()
+    valor_total = models.DecimalField(max_digits=14, decimal_places=2)
+    total_km = models.DecimalField(max_digits=12, decimal_places=2)
+    total_colaboradores = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = "vw_transportes_por_programa"
+        ordering = ["programa", "-ano", "-mes"]
+
+
+class TransportePorColaboradorView(models.Model):
+    """
+    View PostgreSQL Analítica: Extrato Mensal por Colaborador/Educador Social.
+    Mapeia a view SQL 'vw_transportes_por_colaborador'.
+    """
+    id = models.CharField(max_length=255, primary_key=True)
+    nome_completo = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    programa = models.CharField(max_length=255)
+    ano = models.CharField(max_length=4)
+    mes = models.CharField(max_length=2)
+    total_viagens = models.IntegerField()
+    valor_total = models.DecimalField(max_digits=14, decimal_places=2)
+    total_km = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        managed = False
+        db_table = "vw_transportes_por_colaborador"
+        ordering = ["nome_completo", "-ano", "-mes"]
+

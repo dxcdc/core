@@ -30,6 +30,9 @@ urlpatterns = [
     path('api/v1/transportes/corridas/', views.transportes_api_corridas_view, name='api_transportes_corridas'),
     path('api/v1/transportes/metricas/', views.transportes_api_metricas_view, name='api_transportes_metricas'),
     path('api/v1/transportes/arquivos/', views.transportes_api_arquivos_view, name='api_transportes_arquivos'),
+    path('api/v1/transportes/fechamentos/', views.transportes_api_fechamentos_view, name='api_transportes_fechamentos'),
+    path('api/v1/transportes/programas/', views.transportes_api_programas_view, name='api_transportes_programas'),
+    path('api/v1/transportes/colaboradores/', views.transportes_api_colaboradores_view, name='api_transportes_colaboradores'),
     path('api/v1/transportes/exportar/', views.transportes_exportar_excel_view, name='api_transportes_exportar'),
 
     path('dashboard/integracoes/ecosistema/', views.ecosistema_m2m_view, name='ecosistema_m2m'),

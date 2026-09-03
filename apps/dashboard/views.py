@@ -2340,6 +2340,156 @@ def transportes_api_arquivos_view(request):
     return transportes_arquivos_mensais_data_view(request)
 
 
+@require_transportes_api_auth
+def transportes_api_fechamentos_view(request):
+    """
+    API REST Analítica: Totais por Mês/Lote e Plataforma (via PostgreSQL View).
+    GET /api/v1/transportes/fechamentos/
+    """
+    from apps.integrations.models import TransporteFechamentoMensalView
+
+    qs = TransporteFechamentoMensalView.objects.all()
+    ano = request.GET.get('ano', '').strip()
+    if ano:
+        qs = qs.filter(ano=ano)
+
+    plat = request.GET.get('plataforma', '').strip()
+    if plat:
+        if '99' in plat:
+            qs = qs.filter(plataforma='99')
+        elif 'uber' in plat.lower():
+            qs = qs.filter(plataforma='Uber')
+
+    fechamentos = []
+    for f in qs:
+        fechamentos.append({
+            'arquivo': f.arquivo_origem,
+            'plataforma': f.plataforma,
+            'ano': f.ano,
+            'mes': f.mes,
+            'total_viagens': f.total_viagens,
+            'valor_total_brl': float(f.valor_total),
+            'total_km': float(f.total_km),
+            'ticket_medio_brl': float(f.ticket_medio),
+            'km_medio': float(f.km_medio),
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'total_registros': len(fechamentos),
+        'fechamentos': fechamentos
+    })
+
+
+@require_transportes_api_auth
+def transportes_api_programas_view(request):
+    """
+    API REST Analítica: Gastos Consolidados por Programa/Projeto Social (via PostgreSQL View).
+    GET /api/v1/transportes/programas/
+    """
+    from apps.integrations.models import TransportePorProgramaView
+
+    qs = TransportePorProgramaView.objects.all()
+    programa = request.GET.get('programa', '').strip()
+    if programa:
+        qs = qs.filter(programa__icontains=programa)
+
+    ano = request.GET.get('ano', '').strip()
+    if ano:
+        qs = qs.filter(ano=ano)
+
+    mes = request.GET.get('mes', '').strip()
+    if mes:
+        try:
+            qs = qs.filter(mes=f"{int(mes):02d}")
+        except Exception:
+            pass
+
+    plat = request.GET.get('plataforma', '').strip()
+    if plat:
+        if '99' in plat:
+            qs = qs.filter(plataforma='99')
+        elif 'uber' in plat.lower():
+            qs = qs.filter(plataforma='Uber')
+
+    programas = []
+    for p in qs:
+        programas.append({
+            'programa': p.programa,
+            'plataforma': p.plataforma,
+            'ano': p.ano,
+            'mes': p.mes,
+            'total_viagens': p.total_viagens,
+            'valor_total_brl': float(p.valor_total),
+            'total_km': float(p.total_km),
+            'total_colaboradores': p.total_colaboradores,
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'total_registros': len(programas),
+        'programas': programas
+    })
+
+
+@require_transportes_api_auth
+def transportes_api_colaboradores_view(request):
+    """
+    API REST Analítica: Extrato Mensal de Consumo por Colaborador (via PostgreSQL View).
+    GET /api/v1/transportes/colaboradores/
+    """
+    from apps.integrations.models import TransportePorColaboradorView
+    from django.core.paginator import Paginator
+
+    qs = TransportePorColaboradorView.objects.all()
+    nome = request.GET.get('nome', '').strip() or request.GET.get('busca', '').strip()
+    if nome:
+        qs = qs.filter(nome_completo__icontains=nome)
+
+    email = request.GET.get('email', '').strip()
+    if email:
+        qs = qs.filter(email__icontains=email)
+
+    ano = request.GET.get('ano', '').strip()
+    if ano:
+        qs = qs.filter(ano=ano)
+
+    mes = request.GET.get('mes', '').strip()
+    if mes:
+        try:
+            qs = qs.filter(mes=f"{int(mes):02d}")
+        except Exception:
+            pass
+
+    page = int(request.GET.get('page', 1))
+    page_size = min(int(request.GET.get('page_size', 50)), 200)
+
+    paginator = Paginator(qs, page_size)
+    page_obj = paginator.get_page(page)
+
+    colaboradores = []
+    for c in page_obj:
+        colaboradores.append({
+            'nome_completo': c.nome_completo,
+            'email': c.email,
+            'programa': c.programa,
+            'ano': c.ano,
+            'mes': c.mes,
+            'total_viagens': c.total_viagens,
+            'valor_total_brl': float(c.valor_total),
+            'total_km': float(c.total_km),
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'total_registros': paginator.count,
+        'total_paginas': paginator.num_pages,
+        'pagina_atual': page_obj.number,
+        'tamanho_pagina': page_size,
+        'colaboradores': colaboradores
+    })
+
+
 @login_required(login_url='dashboard:login')
 def transportes_api_proxy_view(request, provider, endpoint_key):
     """

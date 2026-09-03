@@ -687,12 +687,131 @@
                             <i class="ri-file-excel-line"></i> Baixar .xlsx
                         </a>
                     </td>
+                <!-- 5. Endpoint: Fechamentos Mensais (View SQL) -->
+                <tr class="main-row" id="api-row-fechamentos" onclick="handleApiRowClick('fechamentos', event)">
+                    <td style="text-align: center;">
+                        <button type="button" class="btn-expand-toggle" id="btn-api-toggle-fechamentos" onclick="toggleApiDetailRow('fechamentos', event)">
+                            <i class="ri-add-line" id="icon-api-toggle-fechamentos"></i>
+                        </button>
+                    </td>
+                    <td><span class="method-badge method-get">GET</span></td>
+                    <td>
+                        <div class="fw-bold text-dark" style="font-size: 0.95em;">5. Fechamentos Consolidados por Lote/Mês <span class="badge bg-primary-subtle text-primary border border-primary" style="font-size: 0.7em;">PostgreSQL View</span></div>
+                        <code class="text-primary font-monospace" style="font-size: 0.82em;">/api/v1/transportes/fechamentos/</code>
+                        <small class="text-muted d-block" style="font-size: 0.78em;">Retorna totais de viagens, faturamento, ticket médio e km médio calculados direto na view do banco.</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border px-2 py-1 font-monospace" style="font-size: 0.74em;">
+                            <i class="ri-key-2-line text-warning me-1"></i> X-API-Key
+                        </span>
+                    </td>
+                    <td><span class="badge bg-success-subtle text-success border border-success font-monospace" style="font-size: 0.74em;">JSON (UTF-8)</span></td>
+                    <td>
+                        <span class="badge bg-success-subtle text-success border border-success px-2 py-1 fw-bold font-monospace" style="font-size: 0.74em;">
+                            <i class="ri-checkbox-circle-fill me-1"></i> Ativo
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button type="button" class="btn btn-sm btn-primary fw-bold px-2.5 py-1" onclick="testarEndpointApiAoVivo('fechamentos', event)" style="font-size: 0.78em; border-radius: 6px;">
+                            <i class="ri-play-fill"></i> Testar no Console
+                        </button>
+                    </td>
                 </tr>
-                <tr class="detail-row d-none" id="api-detail-exportar">
+                <tr class="detail-row d-none" id="api-detail-fechamentos">
                     <td colspan="7" class="p-0">
                         <div class="detail-drawer">
-                            <h6 class="fw-bold text-dark mb-2 small"><i class="ri-information-line text-primary me-1"></i> Parâmetros para Download Isolado de Mês:</h6>
-                            <p class="small text-muted mb-2"><code>?arquivo=2026.08.csv&plataforma=Uber</code> gera o arquivo <code>Relatorio_Transportes_2026.08_Uber.xlsx</code>.</p>
+                            <h6 class="fw-bold text-dark mb-2 small"><i class="ri-information-line text-primary me-1"></i> Parâmetros Suportados:</h6>
+                            <p class="small text-muted mb-2"><code>?ano=2026</code> e <code>?plataforma=uber|99</code>.</p>
+                            <div class="terminal-black-box mb-0">
+                                <pre class="terminal-output p-2 mb-0" style="max-height: 110px;">curl -X GET "https://core.cdc.org.br/api/v1/transportes/fechamentos/?ano=2026" \
+     -H "X-API-Key: SUA_CHAVE_M2M_AQUI"</pre>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- 6. Endpoint: Gastos por Programa / Projeto (View SQL) -->
+                <tr class="main-row" id="api-row-programas" onclick="handleApiRowClick('programas', event)">
+                    <td style="text-align: center;">
+                        <button type="button" class="btn-expand-toggle" id="btn-api-toggle-programas" onclick="toggleApiDetailRow('programas', event)">
+                            <i class="ri-add-line" id="icon-api-toggle-programas"></i>
+                        </button>
+                    </td>
+                    <td><span class="method-badge method-get">GET</span></td>
+                    <td>
+                        <div class="fw-bold text-dark" style="font-size: 0.95em;">6. Gastos Consolidados por Programa / Projeto Social <span class="badge bg-primary-subtle text-primary border border-primary" style="font-size: 0.7em;">PostgreSQL View</span></div>
+                        <code class="text-primary font-monospace" style="font-size: 0.82em;">/api/v1/transportes/programas/</code>
+                        <small class="text-muted d-block" style="font-size: 0.78em;">Ideal para prestação de contas por projeto (Atitude, Provita, PPCAM, etc.).</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border px-2 py-1 font-monospace" style="font-size: 0.74em;">
+                            <i class="ri-key-2-line text-warning me-1"></i> X-API-Key
+                        </span>
+                    </td>
+                    <td><span class="badge bg-success-subtle text-success border border-success font-monospace" style="font-size: 0.74em;">JSON (UTF-8)</span></td>
+                    <td>
+                        <span class="badge bg-success-subtle text-success border border-success px-2 py-1 fw-bold font-monospace" style="font-size: 0.74em;">
+                            <i class="ri-checkbox-circle-fill me-1"></i> Ativo
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button type="button" class="btn btn-sm btn-primary fw-bold px-2.5 py-1" onclick="testarEndpointApiAoVivo('programas', event)" style="font-size: 0.78em; border-radius: 6px;">
+                            <i class="ri-play-fill"></i> Testar no Console
+                        </button>
+                    </td>
+                </tr>
+                <tr class="detail-row d-none" id="api-detail-programas">
+                    <td colspan="7" class="p-0">
+                        <div class="detail-drawer">
+                            <h6 class="fw-bold text-dark mb-2 small"><i class="ri-information-line text-primary me-1"></i> Parâmetros Suportados:</h6>
+                            <p class="small text-muted mb-2"><code>?programa=Atitude</code>, <code>?ano=2026</code>, <code>?mes=08</code>, <code>?plataforma=Uber</code>.</p>
+                            <div class="terminal-black-box mb-0">
+                                <pre class="terminal-output p-2 mb-0" style="max-height: 110px;">curl -X GET "https://core.cdc.org.br/api/v1/transportes/programas/?programa=Provita&ano=2026" \
+     -H "X-API-Key: SUA_CHAVE_M2M_AQUI"</pre>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- 7. Endpoint: Consumo por Colaborador (View SQL) -->
+                <tr class="main-row" id="api-row-colaboradores" onclick="handleApiRowClick('colaboradores', event)">
+                    <td style="text-align: center;">
+                        <button type="button" class="btn-expand-toggle" id="btn-api-toggle-colaboradores" onclick="toggleApiDetailRow('colaboradores', event)">
+                            <i class="ri-add-line" id="icon-api-toggle-colaboradores"></i>
+                        </button>
+                    </td>
+                    <td><span class="method-badge method-get">GET</span></td>
+                    <td>
+                        <div class="fw-bold text-dark" style="font-size: 0.95em;">7. Extrato Mensal por Colaborador / Educador <span class="badge bg-primary-subtle text-primary border border-primary" style="font-size: 0.7em;">PostgreSQL View</span></div>
+                        <code class="text-primary font-monospace" style="font-size: 0.82em;">/api/v1/transportes/colaboradores/</code>
+                        <small class="text-muted d-block" style="font-size: 0.78em;">Consolidação paginada de viagens, quilômetros e valores por usuário.</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border px-2 py-1 font-monospace" style="font-size: 0.74em;">
+                            <i class="ri-key-2-line text-warning me-1"></i> X-API-Key
+                        </span>
+                    </td>
+                    <td><span class="badge bg-success-subtle text-success border border-success font-monospace" style="font-size: 0.74em;">JSON (UTF-8)</span></td>
+                    <td>
+                        <span class="badge bg-success-subtle text-success border border-success px-2 py-1 fw-bold font-monospace" style="font-size: 0.74em;">
+                            <i class="ri-checkbox-circle-fill me-1"></i> Ativo
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button type="button" class="btn btn-sm btn-primary fw-bold px-2.5 py-1" onclick="testarEndpointApiAoVivo('colaboradores', event)" style="font-size: 0.78em; border-radius: 6px;">
+                            <i class="ri-play-fill"></i> Testar no Console
+                        </button>
+                    </td>
+                </tr>
+                <tr class="detail-row d-none" id="api-detail-colaboradores">
+                    <td colspan="7" class="p-0">
+                        <div class="detail-drawer">
+                            <h6 class="fw-bold text-dark mb-2 small"><i class="ri-information-line text-primary me-1"></i> Parâmetros Suportados:</h6>
+                            <p class="small text-muted mb-2"><code>?busca=nome</code>, <code>?email=usuario@cdc.org.br</code>, <code>?ano=2026</code>, <code>?page=1</code>, <code>?page_size=50</code>.</p>
+                            <div class="terminal-black-box mb-0">
+                                <pre class="terminal-output p-2 mb-0" style="max-height: 110px;">curl -X GET "https://core.cdc.org.br/api/v1/transportes/colaboradores/?ano=2026&page=1" \
+     -H "X-API-Key: SUA_CHAVE_M2M_AQUI"</pre>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -1379,6 +1498,12 @@
             inputUrl.value = "/api/v1/transportes/corridas/?page_size=3";
         } else if (tipo === 'arquivos') {
             inputUrl.value = "/api/v1/transportes/arquivos/?ano=2026";
+        } else if (tipo === 'fechamentos') {
+            inputUrl.value = "/api/v1/transportes/fechamentos/?ano=2026";
+        } else if (tipo === 'programas') {
+            inputUrl.value = "/api/v1/transportes/programas/?ano=2026";
+        } else if (tipo === 'colaboradores') {
+            inputUrl.value = "/api/v1/transportes/colaboradores/?page=1&page_size=5";
         }
         executarConsoleApi();
     }
