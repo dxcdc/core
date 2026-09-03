@@ -2151,10 +2151,15 @@ def transportes_upload_lote_view(request):
     })
 
 
+from apps.dashboard.api_auth import require_transportes_api_auth
+
+
+@require_transportes_api_auth
 def transportes_exportar_excel_view(request):
     """
     Download sob demanda do arquivo Relatorio_Transportes_Consolidado.xlsx
     ou de um arquivo/mês específico.
+    Protegido por autenticação de sessão ou cabeçalho X-API-Key/Bearer token.
     """
     from apps.integrations.models import TransporteCorrida
     from apps.integrations.transportes_sync import gerar_planilha_consolidada_excel
@@ -2196,11 +2201,13 @@ def transportes_exportar_excel_view(request):
     return response
 
 
+@require_transportes_api_auth
 def transportes_api_corridas_view(request):
     """
     API REST JSON Oficial para o Ecossistema CDC:
     GET /api/v1/transportes/corridas/
     Retorna os 22 campos oficiais por corrida com suporte a paginação e filtros.
+    Protegido por autenticação de sessão ou cabeçalho X-API-Key/Bearer token.
     """
     from apps.integrations.models import TransporteCorrida
     from django.core.paginator import Paginator
@@ -2285,10 +2292,12 @@ def transportes_api_corridas_view(request):
     })
 
 
+@require_transportes_api_auth
 def transportes_api_metricas_view(request):
     """
     API REST de Métricas & Resumo Consolidado:
     GET /api/v1/transportes/metricas/
+    Protegido por autenticação de sessão ou cabeçalho X-API-Key/Bearer token.
     """
     from apps.integrations.models import TransporteCorrida
     from django.db.models import Sum, Count
@@ -2321,10 +2330,12 @@ def transportes_api_metricas_view(request):
     })
 
 
+@require_transportes_api_auth
 def transportes_api_arquivos_view(request):
     """
     API REST JSON Oficial para listar lotes/arquivos mensais disponíveis no ecossistema:
     GET /api/v1/transportes/arquivos/
+    Protegido por autenticação de sessão ou cabeçalho X-API-Key/Bearer token.
     """
     return transportes_arquivos_mensais_data_view(request)
 
