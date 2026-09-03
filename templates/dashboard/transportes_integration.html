@@ -5,6 +5,46 @@
 
 {% block extra_css %}
 <style>
+    .file-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .file-card:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    }
+    .file-card.uber-border {
+        border-top: 4px solid #000000;
+    }
+    .file-card.didi-border {
+        border-top: 4px solid #f59e0b;
+    }
+    .file-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: bold;
+    }
+    .file-icon-uber {
+        background: #0f172a;
+        color: #ffffff;
+    }
+    .file-icon-99 {
+        background: #fef3c7;
+        color: #b45309;
+    }
     .table-endpoints, .table-corridas {
         border-collapse: separate;
         border-spacing: 0;
@@ -81,13 +121,6 @@
         border-bottom: 1px solid #cbd5e1;
         padding: 20px;
     }
-    .diagnostic-box {
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-radius: 10px;
-        padding: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-    }
     .terminal-black-box {
         background-color: #0f172a;
         color: #38bdf8;
@@ -136,6 +169,26 @@
         border-color: #0f172a;
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
     }
+    .filter-pill {
+        font-size: 0.80em;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .filter-pill:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .filter-pill.active {
+        background: #0284c7;
+        color: #ffffff;
+        border-color: #0284c7;
+    }
     .drop-zone {
         border: 2px dashed #94a3b8;
         border-radius: 12px;
@@ -165,20 +218,6 @@
         padding: 3px 8px;
         border-radius: 6px;
     }
-    .toast-copy {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        background: #0f172a;
-        color: #ffffff;
-        padding: 12px 20px;
-        border-radius: 8px;
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
 </style>
 {% endblock %}
 
@@ -195,15 +234,15 @@
             </h4>
         </div>
         <p class="text-muted mb-0" style="font-size: 0.88em;">
-            Banco de dados atômico unificado da <strong>Uber</strong> e <strong>99 Empresas</strong>, servido via <strong>API REST</strong> com exportação e conciliação contábil por projeto.
+            Gestão por <strong>Arquivos Mensais (.CSV / .XLSX)</strong> da <strong>Uber</strong> e <strong>99</strong> com persistência atômica e API REST.
         </p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
         <button type="button" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUploadLote" style="border-radius: 6px; font-size: 0.84em;">
-            <i class="ri-upload-cloud-2-line"></i> Ingestão de Arquivos (Lotes)
+            <i class="ri-upload-cloud-2-line"></i> Ingestão de Novo Lote (.CSV)
         </button>
         <a href="{% url 'dashboard:api_transportes_exportar' %}" class="btn btn-success btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" style="border-radius: 6px; font-size: 0.84em;">
-            <i class="ri-file-excel-2-line"></i> Baixar Relatório Consolidado (.xlsx)
+            <i class="ri-file-excel-2-line"></i> Baixar Consolidado Geral (.xlsx)
         </a>
     </div>
 </div>
@@ -270,39 +309,83 @@
 <!-- SELETOR PRINCIPAL DE ABAS -->
 <div class="d-flex align-items-center justify-content-between mb-4 p-2 bg-white rounded-3 border shadow-sm flex-wrap gap-2">
     <div class="d-flex align-items-center gap-2 flex-wrap">
-        <button type="button" class="main-tab-pill active" id="tabBtnCorridas" onclick="switchMainTab('corridas')">
-            <i class="ri-list-check-2 fs-18"></i>
-            <span>Extrato de Corridas & Auditoria ({{ total_corridas }})</span>
+        <button type="button" class="main-tab-pill active" id="tabBtnArquivos" onclick="switchMainTab('arquivos')">
+            <i class="ri-folder-zip-line fs-18 text-warning"></i>
+            <span>Arquivos Mensais .CSV (Lotes por Mês)</span>
+        </button>
+        <button type="button" class="main-tab-pill" id="tabBtnCorridas" onclick="switchMainTab('corridas')">
+            <i class="ri-list-check-2 fs-18 text-primary"></i>
+            <span>Extrato Global ({{ total_corridas }})</span>
         </button>
         <button type="button" class="main-tab-pill" id="tabBtnApiDoc" onclick="switchMainTab('apidoc')">
             <i class="ri-code-s-slash-line text-info fs-18"></i>
-            <span>API REST do Ecossistema CDC</span>
+            <span>API REST CDC</span>
         </button>
         <button type="button" class="main-tab-pill" id="tabBtnUber" onclick="switchMainTab('uber')">
             <i class="ri-taxi-line text-dark fs-18"></i>
-            <span>Endpoints Uber API</span>
+            <span>Uber API</span>
         </button>
         <button type="button" class="main-tab-pill" id="tabBtnDidi" onclick="switchMainTab('didi')">
             <i class="ri-car-washing-line text-warning fs-18"></i>
-            <span>Endpoints 99 API</span>
+            <span>99 API</span>
         </button>
     </div>
     <div class="d-flex align-items-center gap-2 px-3 text-muted" style="font-size: 0.8em;">
         <i class="ri-shield-check-line text-success fs-16"></i>
-        <span>Dados Atômicos com Idempotência por ID</span>
+        <span>Idempotência Atômica por Arquivo</span>
     </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- ABA 1: TABELA DE CORRIDAS ATÔMICAS                                        -->
+<!-- ABA 1: ARQUIVOS MENSAIS (.CSV / .XLSX)                                    -->
 <!-- ========================================================================= -->
-<div id="tabContentCorridas">
+<div id="tabContentArquivos">
+    <!-- Barra de Filtros por Ano e Plataforma -->
+    <div class="p-3 bg-white border rounded-3 shadow-sm mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <!-- Filtro de Anos -->
+            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                <span class="text-muted small fw-bold me-2"><i class="ri-calendar-line me-1"></i> Ano:</span>
+                <button type="button" class="filter-pill active" onclick="filtrarAno('', this)">Todos os Anos</button>
+                <button type="button" class="filter-pill" onclick="filtrarAno('2026', this)">2026 (Atual)</button>
+                <button type="button" class="filter-pill" onclick="filtrarAno('2025', this)">2025</button>
+                <button type="button" class="filter-pill" onclick="filtrarAno('2024', this)">2024</button>
+                <button type="button" class="filter-pill" onclick="filtrarAno('2023', this)">2023</button>
+            </div>
+
+            <!-- Filtro de Plataforma -->
+            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                <span class="text-muted small fw-bold me-2"><i class="ri-car-line me-1"></i> Plataforma:</span>
+                <button type="button" class="filter-pill active" onclick="filtrarPlataforma('', this)">Todas</button>
+                <button type="button" class="filter-pill" onclick="filtrarPlataforma('uber', this)">Uber</button>
+                <button type="button" class="filter-pill" onclick="filtrarPlataforma('99', this)">99</button>
+            </div>
+
+            <!-- Contador de Arquivos -->
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-light text-dark border font-monospace" id="lblContadorArquivos" style="font-size: 0.8em;">Carregando arquivos...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grade de Arquivos Mensais -->
+    <div class="row g-3 mb-4" id="gridArquivosMensais">
+        <div class="col-12 text-center py-5 text-muted">
+            <span class="spinner-border spinner-border-sm me-2"></span> Carregando arquivos mensais...
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- ABA 2: EXTRATO GLOBAL DE CORRIDAS                                         -->
+<!-- ========================================================================= -->
+<div id="tabContentCorridas" class="d-none">
     <div class="card border shadow-sm rounded-3 mb-4">
         <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 550px;">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="ri-search-line"></i></span>
-                    <input type="text" class="form-control border-start-0" id="inputBuscaCorridas" placeholder="Buscar por ID, Colaborador, Projeto, Destino ou Justificativa..." oninput="debounceSearchCorridas()">
+                    <input type="text" class="form-control border-start-0" id="inputBuscaCorridas" placeholder="Buscar por ID, Colaborador, Projeto, Destino..." oninput="debounceSearchCorridas()">
                 </div>
                 <select class="form-select form-select-sm" id="selectPlataformaFiltro" onchange="carregarCorridas(1)" style="max-width: 140px;">
                     <option value="">Todas</option>
@@ -350,7 +433,7 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- ABA 2: DOCUMENTAÇÃO DA API REST DO ECOSSISTEMA                            -->
+<!-- ABA 3: DOCUMENTAÇÃO DA API REST                                           -->
 <!-- ========================================================================= -->
 <div id="tabContentApiDoc" class="d-none">
     <div class="card border shadow-sm rounded-3 mb-4">
@@ -363,7 +446,6 @@
             </p>
 
             <div class="row g-4">
-                <!-- Endpoint 1 -->
                 <div class="col-md-6">
                     <div class="border rounded-3 p-3 bg-light h-100">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -395,7 +477,6 @@
                     </div>
                 </div>
 
-                <!-- Endpoint 2 -->
                 <div class="col-md-6">
                     <div class="border rounded-3 p-3 bg-light h-100">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -425,7 +506,7 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- ABA 3: UBER FOR BUSINESS (ENDPOINTS REST)                                 -->
+<!-- ABA 4: UBER API ENDPOINTS                                                 -->
 <!-- ========================================================================= -->
 <div id="tabContentUber" class="d-none">
     <div class="table-responsive mb-4 shadow-sm" style="border-radius: 12px;">
@@ -449,28 +530,18 @@
                             <i class="ri-add-line" id="icon-toggle-{{ ep.id }}"></i>
                         </button>
                     </td>
-                    <td>
-                        <span class="method-badge method-get">GET</span>
-                    </td>
+                    <td><span class="method-badge method-get">GET</span></td>
                     <td>
                         <div class="fw-bold text-dark" style="font-size: 0.95em;">{{ ep.nome }}</div>
                         <code class="text-primary font-monospace" style="font-size: 0.82em;">/v1/business/{{ ep.path }}</code>
                     </td>
                     <td>
-                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" style="font-size: 0.74em; border-radius: 6px;">
                             <i class="ri-checkbox-circle-fill me-1"></i> Preparado (Pronto)
                         </span>
                     </td>
-                    <td>
-                        <span class="badge bg-light text-dark border px-2 py-1 font-monospace" style="font-size: 0.76em;">
-                            {{ ep.modelo_db }}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge px-2 py-1 font-monospace" style="background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; font-size: 0.75em;">
-                            {{ ep.db_count }} registros
-                        </span>
-                    </td>
+                    <td><span class="badge bg-light text-dark border px-2 py-1 font-monospace" style="font-size: 0.76em;">{{ ep.modelo_db }}</span></td>
+                    <td><span class="badge px-2 py-1 font-monospace" style="background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; font-size: 0.75em;">{{ ep.db_count }} registros</span></td>
                     <td style="text-align: right;">
                         <button type="button" class="btn btn-sm btn-outline-success fw-bold px-2 py-1" id="btn-quick-{{ ep.id }}" onclick="testTransportEndpoint('uber', '{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', event)" style="border-radius: 6px; font-size: 0.78em;">
                             <i class="ri-play-fill"></i> Testar
@@ -499,7 +570,7 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- ABA 4: 99 EMPRESAS (ENDPOINTS REST)                                       -->
+<!-- ABA 5: 99 API ENDPOINTS                                                   -->
 <!-- ========================================================================= -->
 <div id="tabContentDidi" class="d-none">
     <div class="table-responsive mb-4 shadow-sm" style="border-radius: 12px;">
@@ -523,28 +594,18 @@
                             <i class="ri-add-line" id="icon-toggle-{{ ep.id }}"></i>
                         </button>
                     </td>
-                    <td>
-                        <span class="method-badge method-get">GET</span>
-                    </td>
+                    <td><span class="method-badge method-get">GET</span></td>
                     <td>
                         <div class="fw-bold text-dark" style="font-size: 0.95em;">{{ ep.nome }}</div>
                         <code class="text-warning font-monospace" style="font-size: 0.82em;">/v4/{{ ep.path }}</code>
                     </td>
                     <td>
-                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
+                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" style="font-size: 0.74em; border-radius: 6px;">
                             <i class="ri-checkbox-circle-fill me-1"></i> Preparado (Pronto)
                         </span>
                     </td>
-                    <td>
-                        <span class="badge bg-light text-dark border px-2 py-1 font-monospace" style="font-size: 0.76em;">
-                            {{ ep.modelo_db }}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge px-2 py-1 font-monospace" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 0.75em;">
-                            {{ ep.db_count }} registros
-                        </span>
-                    </td>
+                    <td><span class="badge bg-light text-dark border px-2 py-1 font-monospace" style="font-size: 0.76em;">{{ ep.modelo_db }}</span></td>
+                    <td><span class="badge px-2 py-1 font-monospace" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 0.75em;">{{ ep.db_count }} registros</span></td>
                     <td style="text-align: right;">
                         <button type="button" class="btn btn-sm btn-outline-success fw-bold px-2 py-1" id="btn-quick-{{ ep.id }}" onclick="testTransportEndpoint('99', '{{ ep.id }}', '{{ ep.path }}', '{{ ep.metodo }}', event)" style="border-radius: 6px; font-size: 0.78em;">
                             <i class="ri-play-fill"></i> Testar
@@ -573,6 +634,86 @@
 </div>
 
 <!-- ========================================================================= -->
+<!-- MODAL DE VISUALIZAÇÃO DE ARQUIVO ESPECÍFICO                               -->
+<!-- ========================================================================= -->
+<div class="modal fade" id="modalArquivoDetalhes" tabindex="-1" aria-labelledby="modalArquivoDetalhesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white py-3">
+                <div>
+                    <h6 class="modal-title fw-bold mb-0 d-flex align-items-center gap-2" id="modalArquivoDetalhesLabel">
+                        <i class="ri-file-text-line text-warning fs-18"></i>
+                        <span id="modalTituloArquivo">Arquivo .CSV</span>
+                    </h6>
+                    <small class="text-slate-300 font-monospace" id="modalSubtituloArquivo">Plataforma & Período</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="#" id="btnDownloadArquivoExcel" class="btn btn-xs btn-success fw-bold px-2 py-1" style="font-size: 0.78em;">
+                        <i class="ri-file-excel-line me-1"></i> Baixar .xlsx do Mês
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+            </div>
+            <div class="modal-body p-3">
+                <!-- Mini cards de resumo do arquivo -->
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <div class="p-2.5 bg-light border rounded-3 text-center">
+                            <small class="text-muted d-block" style="font-size: 0.74em;">CORRIDAS AUDITADAS</small>
+                            <span class="fw-bold text-dark fs-6" id="modalStatCorridas">0</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-2.5 bg-light border rounded-3 text-center">
+                            <small class="text-muted d-block" style="font-size: 0.74em;">VALOR TOTAL FATURADO</small>
+                            <span class="fw-bold text-success font-monospace fs-6" id="modalStatValor">R$ 0,00</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-2.5 bg-light border rounded-3 text-center">
+                            <small class="text-muted d-block" style="font-size: 0.74em;">DISTÂNCIA TOTAL</small>
+                            <span class="fw-bold text-primary font-monospace fs-6" id="modalStatKm">0 km</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campo de busca dentro do arquivo -->
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text bg-light border-end-0"><i class="ri-search-line"></i></span>
+                    <input type="text" class="form-control border-start-0" id="inputBuscaModal" placeholder="Filtrar corridas deste arquivo (colaborador, projeto, destino)..." oninput="debounceSearchModal()">
+                </div>
+
+                <!-- Tabela de Corridas do Arquivo -->
+                <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                    <table class="table-corridas mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 120px;">ID Viagem</th>
+                                <th style="width: 130px;">Data & Hora</th>
+                                <th>Colaborador</th>
+                                <th>Projeto / Programa</th>
+                                <th>Centro de Custo</th>
+                                <th style="width: 100px; text-align: right;">Valor</th>
+                                <th style="width: 70px; text-align: right;">KM</th>
+                                <th style="width: 70px; text-align: center;">Min</th>
+                                <th style="width: 85px; text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyModalCorridas">
+                            <tr><td colspan="9" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span> Carregando corridas do arquivo...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2 d-flex justify-content-between">
+                <small class="text-muted" id="lblModalPaginacaoInfo">Página 1</small>
+                <div class="d-flex gap-1" id="divModalPaginacaoBotoes"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
 <!-- MODAL DE UPLOAD DE LOTES (DRAG & DROP)                                    -->
 <!-- ========================================================================= -->
 <div class="modal fade" id="modalUploadLote" tabindex="-1" aria-labelledby="modalUploadLoteLabel" aria-hidden="true">
@@ -580,18 +721,18 @@
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title fs-6 fw-bold" id="modalUploadLoteLabel">
-                    <i class="ri-upload-cloud-2-line me-2 text-primary"></i> Ingestão Atômica de Lotes (Uber & 99)
+                    <i class="ri-upload-cloud-2-line me-2 text-primary"></i> Ingestão Atômica de Arquivos Mensais (.CSV / .XLSX)
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body p-4">
                 <p class="text-muted small mb-3">
-                    Selecione ou arraste os arquivos <code>.csv</code> ou <code>.xlsx</code> mensais da Uber ou 99. O CDC Core detectará automaticamente os layouts e normalizará os 22 campos com idempotência total.
+                    Selecione ou arraste os arquivos <code>.csv</code> ou <code>.xlsx</code> mensais da Uber ou 99 (ex: <code>2026.09.csv</code>). O CDC Core fará a normalização atômica das 22 colunas com deduplicação.
                 </p>
 
                 <div class="drop-zone mb-3" id="dropZone" onclick="document.getElementById('inputArquivosUpload').click()">
                     <i class="ri-file-upload-line text-primary" style="font-size: 3em;"></i>
-                    <h6 class="fw-bold mt-2 mb-1">Arraste os arquivos aqui ou clique para selecionar</h6>
+                    <h6 class="fw-bold mt-2 mb-1">Arraste os arquivos .csv aqui ou clique para selecionar</h6>
                     <p class="text-muted small mb-0">Suporte a múltiplos arquivos .CSV e .XLSX</p>
                     <input type="file" id="inputArquivosUpload" multiple accept=".csv,.xlsx,.xls" class="d-none" onchange="handleFileSelect(event)">
                 </div>
@@ -603,7 +744,7 @@
 
                 <div id="divProgressUpload" class="d-none mb-3">
                     <div class="d-flex justify-content-between small text-muted mb-1">
-                        <span id="lblProgressStatus">Processando e persistindo no PostgreSQL...</span>
+                        <span id="lblProgressStatus">Processando e gravando no PostgreSQL...</span>
                         <span id="lblProgressPct">0%</span>
                     </div>
                     <div class="progress" style="height: 10px;">
@@ -625,27 +766,28 @@
         </div>
     </div>
 </div>
-
-<div id="toastCopyNotification" class="toast-copy d-none">
-    <i class="ri-checkbox-circle-fill text-success fs-18"></i>
-    <span id="toastCopyText">Laudo de Diagnóstico copiado para a área de transferência!</span>
-</div>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    let paginaAtualCorridas = 1;
-    let searchTimeout = null;
+    let filtroAnoAtual = '';
+    let filtroPlatAtual = '';
+    let listaArquivosCache = [];
+    let arquivoModalSelecionado = '';
+    let platModalSelecionada = '';
+    let paginaModalAtual = 1;
+    let searchModalTimeout = null;
+    let searchCorridasTimeout = null;
     let arquivosParaEnvio = [];
 
     document.addEventListener("DOMContentLoaded", function() {
+        carregarArquivosMensais();
         carregarCorridas(1);
         setupDragAndDrop();
     });
 
     function switchMainTab(tabName) {
-        const tabs = ['corridas', 'apidoc', 'uber', 'didi'];
+        const tabs = ['arquivos', 'corridas', 'apidoc', 'uber', 'didi'];
         tabs.forEach(t => {
             const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
             const content = document.getElementById(`tabContent${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -654,8 +796,194 @@
         });
     }
 
+    function filtrarAno(ano, btn) {
+        filtroAnoAtual = ano;
+        btn.parentElement.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        renderizarGridArquivos();
+    }
+
+    function filtrarPlataforma(plat, btn) {
+        filtroPlatAtual = plat;
+        btn.parentElement.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        renderizarGridArquivos();
+    }
+
+    function carregarArquivosMensais() {
+        fetch("{% url 'dashboard:transportes_arquivos_data' %}")
+        .then(r => r.json())
+        .then(data => {
+            listaArquivosCache = data.arquivos || [];
+            document.getElementById("lblContadorArquivos").innerText = `${listaArquivosCache.length} arquivos mensais cadastrados`;
+            renderizarGridArquivos();
+        })
+        .catch(err => {
+            document.getElementById("gridArquivosMensais").innerHTML = `<div class="col-12 text-center text-danger py-4">Erro ao carregar arquivos: ${err}</div>`;
+        });
+    }
+
+    function renderizarGridArquivos() {
+        const grid = document.getElementById("gridArquivosMensais");
+        let filtrados = listaArquivosCache;
+
+        if (filtroAnoAtual) {
+            filtrados = filtrados.filter(a => a.ano === filtroAnoAtual);
+        }
+        if (filtroPlatAtual) {
+            filtrados = filtrados.filter(a => a.plataforma.toLowerCase().includes(filtroPlatAtual.toLowerCase()));
+        }
+
+        if (filtrados.length === 0) {
+            grid.innerHTML = `<div class="col-12 text-center py-5 text-muted">
+                <i class="ri-folder-open-line fs-1 text-secondary mb-2 d-block"></i>
+                Nenhum arquivo mensal encontrado para os filtros selecionados.
+            </div>`;
+            return;
+        }
+
+        let html = "";
+        filtrados.forEach(arq => {
+            const isUber = arq.plataforma === 'Uber';
+            const borderClass = isUber ? 'uber-border' : 'didi-border';
+            const iconBoxClass = isUber ? 'file-icon-uber' : 'file-icon-99';
+            const badgePlat = isUber ? 
+                '<span class="platform-badge-uber"><i class="ri-taxi-line me-1"></i>Uber</span>' : 
+                '<span class="platform-badge-99"><i class="ri-car-fill me-1"></i>99</span>';
+            const iconSvg = isUber ? 'ri-file-text-fill' : 'ri-file-excel-fill';
+
+            const urlDownloadXlsx = `{% url 'dashboard:api_transportes_exportar' %}?arquivo=${encodeURIComponent(arq.arquivo_nome)}&plataforma=${encodeURIComponent(arq.plataforma)}`;
+
+            html += `
+            <div class="col-md-4 col-lg-3">
+                <div class="file-card ${borderClass} h-100 shadow-sm">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="file-icon-box ${iconBoxClass}">
+                                <i class="${iconSvg}"></i>
+                            </div>
+                            <div>${badgePlat}</div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-0 font-monospace" style="font-size:0.95em;">${arq.arquivo_nome}</h6>
+                        <small class="text-muted d-block mb-3 fw-bold">${arq.mes_extenso}</small>
+
+                        <div class="bg-light p-2.5 rounded-3 mb-3 border">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted" style="font-size:0.75em;">Corridas:</small>
+                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82em;">${arq.total_viagens} viagens</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted" style="font-size:0.75em;">Faturamento:</small>
+                                <span class="fw-bold text-success font-monospace" style="font-size:0.84em;">R$ ${arq.total_valor_fmt}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted" style="font-size:0.75em;">Distância:</small>
+                                <span class="fw-bold text-primary font-monospace" style="font-size:0.80em;">${arq.total_km_fmt} km</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-1.5 pt-2 border-top">
+                        <button type="button" class="btn btn-sm btn-dark flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-1" onclick="abrirModalArquivo('${arq.arquivo_nome}', '${arq.plataforma}', '${arq.mes_extenso}', ${arq.total_viagens}, '${arq.total_valor_fmt}', '${arq.total_km_fmt}')" style="font-size:0.78em; border-radius:6px;">
+                            <i class="ri-eye-line"></i> Abrir Arquivo
+                        </button>
+                        <a href="${urlDownloadXlsx}" class="btn btn-sm btn-outline-success fw-bold px-2.5" title="Baixar Planilha .xlsx deste Mês" style="font-size:0.78em; border-radius:6px;">
+                            <i class="ri-download-2-line"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>`;
+        });
+        grid.innerHTML = html;
+    }
+
+    function abrirModalArquivo(nomeArq, plat, mesExtenso, totalViagens, totalValor, totalKm) {
+        arquivoModalSelecionado = nomeArq;
+        platModalSelecionada = plat;
+        paginaModalAtual = 1;
+
+        document.getElementById("modalTituloArquivo").innerText = `${nomeArq} — ${plat}`;
+        document.getElementById("modalSubtituloArquivo").innerText = `${mesExtenso} • Ingestão Atômica no PostgreSQL`;
+        document.getElementById("modalStatCorridas").innerText = `${totalViagens} viagens`;
+        document.getElementById("modalStatValor").innerText = `R$ ${totalValor}`;
+        document.getElementById("modalStatKm").innerText = `${totalKm} km`;
+
+        document.getElementById("btnDownloadArquivoExcel").href = `{% url 'dashboard:api_transportes_exportar' %}?arquivo=${encodeURIComponent(nomeArq)}&plataforma=${encodeURIComponent(plat)}`;
+        document.getElementById("inputBuscaModal").value = "";
+
+        const modalEl = document.getElementById("modalArquivoDetalhes");
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        carregarCorridasModal(1);
+    }
+
+    function carregarCorridasModal(pagina) {
+        paginaModalAtual = pagina;
+        const tbody = document.getElementById("tbodyModalCorridas");
+        const busca = document.getElementById("inputBuscaModal").value.trim();
+
+        const url = `{% url 'dashboard:transportes_corridas_data' %}?page=${pagina}&page_size=20&arquivo=${encodeURIComponent(arquivoModalSelecionado)}&plataforma=${encodeURIComponent(platModalSelecionada)}&busca=${encodeURIComponent(busca)}`;
+
+        fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById("lblModalPaginacaoInfo").innerText = `Página ${data.page} de ${data.total_pages || 1} (${data.total} corridas neste arquivo)`;
+
+            if (!data.items || data.items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">Nenhuma corrida encontrada neste arquivo.</td></tr>`;
+                renderizarModalPaginacao(1, 1);
+                return;
+            }
+
+            let html = "";
+            data.items.forEach(c => {
+                html += `<tr>
+                    <td><code class="text-dark font-monospace fw-bold" style="font-size:0.82em;">${c.id_corrida}</code></td>
+                    <td>
+                        <div class="fw-bold" style="font-size:0.84em;">${c.data_solicitacao || '-'}</div>
+                        <small class="text-muted font-monospace">${c.hora_solicitacao || ''}</small>
+                    </td>
+                    <td>
+                        <div class="fw-bold text-dark" style="font-size:0.86em;">${c.nome_completo || 'Não informado'}</div>
+                        <small class="text-muted d-block" style="font-size:0.75em;">${c.email || ''}</small>
+                    </td>
+                    <td><span class="badge bg-light text-dark border">${c.programa || 'Geral'}</span></td>
+                    <td><small class="text-muted font-monospace">${c.grupo || '-'}</small></td>
+                    <td class="text-end fw-bold text-dark font-monospace">R$ ${c.valor_total}</td>
+                    <td class="text-end font-monospace">${c.distancia_km ? c.distancia_km + ' km' : '-'}</td>
+                    <td class="text-center font-monospace">${c.duracao_minutos ? c.duracao_minutos + 'm' : '-'}</td>
+                    <td class="text-center"><span class="badge bg-success-subtle text-success border border-success" style="font-size:0.74em;">${c.status || 'Concluída'}</span></td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+            renderizarModalPaginacao(data.page, data.total_pages);
+        })
+        .catch(err => {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger">Erro ao carregar: ${err}</td></tr>`;
+        });
+    }
+
+    function renderizarModalPaginacao(atual, total) {
+        const div = document.getElementById("divModalPaginacaoBotoes");
+        if (total <= 1) { div.innerHTML = ""; return; }
+        let html = "";
+        if (atual > 1) {
+            html += `<button class="btn btn-xs btn-outline-secondary" onclick="carregarCorridasModal(${atual - 1})"><i class="ri-arrow-left-s-line"></i></button>`;
+        }
+        html += `<span class="btn btn-xs btn-dark disabled px-2">${atual} / ${total}</span>`;
+        if (atual < total) {
+            html += `<button class="btn btn-xs btn-outline-secondary" onclick="carregarCorridasModal(${atual + 1})"><i class="ri-arrow-right-s-line"></i></button>`;
+        }
+        div.innerHTML = html;
+    }
+
+    function debounceSearchModal() {
+        clearTimeout(searchModalTimeout);
+        searchModalTimeout = setTimeout(() => { carregarCorridasModal(1); }, 300);
+    }
+
     function carregarCorridas(pagina) {
-        paginaAtualCorridas = pagina;
         const tbody = document.getElementById("tbodyCorridas");
         const busca = document.getElementById("inputBuscaCorridas").value.trim();
         const plataforma = document.getElementById("selectPlataformaFiltro").value;
@@ -670,7 +998,7 @@
             document.getElementById("lblPaginacaoInfo").innerText = `Página ${data.page} de ${data.total_pages || 1} (${data.total} total)`;
 
             if (!data.items || data.items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-muted">Nenhuma corrida encontrada. Clique em <strong>Ingestão de Arquivos</strong> para importar novos lotes.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-muted">Nenhuma corrida encontrada.</td></tr>`;
                 renderizarPaginacao(1, 1);
                 return;
             }
@@ -723,11 +1051,11 @@
     }
 
     function debounceSearchCorridas() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => { carregarCorridas(1); }, 300);
+        clearTimeout(searchCorridasTimeout);
+        searchCorridasTimeout = setTimeout(() => { carregarCorridas(1); }, 300);
     }
 
-    // Drag and drop setup
+    // Drag and Drop
     function setupDragAndDrop() {
         const dropZone = document.getElementById('dropZone');
         if (!dropZone) return;
@@ -814,6 +1142,7 @@
                 Total no banco: <strong>${data.total_acumulado_banco}</strong> registros.`;
             
             btn.disabled = false;
+            carregarArquivosMensais();
             carregarCorridas(1);
         })
         .catch(err => {

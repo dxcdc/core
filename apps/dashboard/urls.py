@@ -21,6 +21,7 @@ urlpatterns = [
 
 
     path('dashboard/integracoes/transportes/', views.transportes_integration_view, name='transportes_integracao'),
+    path('dashboard/integracoes/transportes/arquivos-data/', views.transportes_arquivos_mensais_data_view, name='transportes_arquivos_data'),
     path('dashboard/integracoes/transportes/corridas-data/', views.transportes_corridas_data_view, name='transportes_corridas_data'),
     path('dashboard/integracoes/transportes/upload/', views.transportes_upload_lote_view, name='transportes_upload_lote'),
     path('dashboard/integracoes/transportes/api/<str:provider>/<str:endpoint_key>/', views.transportes_api_proxy_view, name='transportes_api_proxy'),

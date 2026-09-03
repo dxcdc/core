@@ -1960,16 +1960,91 @@ def transportes_integration_view(request):
     return render(request, 'dashboard/transportes_integration.html', context)
 
 
-@login_required(login_url='dashboard:login')
+def transportes_arquivos_mensais_data_view(request):
+    """
+    Retorna a lista de arquivos mensais (.csv / .xlsx) agrupados por Ano, Mês e Plataforma
+    com métricas de viagens, valor total e km para renderização dos cards/pastas mensais.
+    """
+    from apps.integrations.models import TransporteCorrida
+    from django.db.models import Count, Sum
+    import re
+
+    qs = TransporteCorrida.objects.all()
+
+    ano_filtro = request.GET.get('ano', '').strip()
+    plataforma_filtro = request.GET.get('plataforma', '').strip()
+
+    if ano_filtro:
+        qs = qs.filter(arquivo_origem__startswith=f"{ano_filtro}.")
+
+    if plataforma_filtro:
+        if '99' in plataforma_filtro:
+            qs = qs.filter(plataforma=TransporteCorrida.Plataforma.NOVENOVE)
+        elif 'uber' in plataforma_filtro.lower():
+            qs = qs.filter(plataforma=TransporteCorrida.Plataforma.UBER)
+
+    grupos = qs.values('arquivo_origem', 'plataforma').annotate(
+        total_viagens=Count('id'),
+        total_valor=Sum('valor_total'),
+        total_km=Sum('distancia_km')
+    ).order_by('-arquivo_origem', 'plataforma')
+
+    meses_pt = {
+        '01': 'Janeiro', '02': 'Fevereiro', '03': 'Março', '04': 'Abril',
+        '05': 'Maio', '06': 'Junho', '07': 'Julho', '08': 'Agosto',
+        '09': 'Setembro', '10': 'Outubro', '11': 'Novembro', '12': 'Dezembro'
+    }
+
+    arquivos = []
+    for g in grupos:
+        arq_nome = g['arquivo_origem'] or 'Importação Avulsa'
+        plat = g['plataforma']
+
+        ano = ''
+        mes = ''
+        mes_extenso = ''
+        m = re.match(r'^(\d{4})\.(\d{2})', arq_nome)
+        if m:
+            ano, mes = m.groups()
+            mes_extenso = f"{meses_pt.get(mes, mes)} de {ano}"
+        else:
+            ano = '2026'
+            mes_extenso = arq_nome
+
+        arquivos.append({
+            'arquivo_nome': arq_nome,
+            'plataforma': plat,
+            'ano': ano,
+            'mes': mes,
+            'mes_extenso': mes_extenso,
+            'total_viagens': g['total_viagens'],
+            'total_valor': float(g['total_valor'] or 0.0),
+            'total_valor_fmt': f"{g['total_valor'] or 0:.2f}".replace('.', ','),
+            'total_km': float(g['total_km'] or 0.0),
+            'total_km_fmt': f"{g['total_km'] or 0:.2f}".replace('.', ',') if g['total_km'] else '-',
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'total_arquivos': len(arquivos),
+        'arquivos': arquivos
+    })
+
+
 def transportes_corridas_data_view(request):
     """
     Retorna lista paginada de corridas para a tabela interativa do painel.
+    Permite filtrar por arquivo mensal específico (?arquivo=2026.08.csv) e plataforma.
     """
     from apps.integrations.models import TransporteCorrida
     from django.core.paginator import Paginator
     from django.db.models import Q
 
     qs = TransporteCorrida.objects.all().order_by('-solicitado_em', '-id')
+
+    arquivo = request.GET.get('arquivo', '').strip()
+    if arquivo:
+        qs = qs.filter(arquivo_origem=arquivo)
 
     plataforma = request.GET.get('plataforma', '').strip()
     if plataforma:
@@ -2078,13 +2153,18 @@ def transportes_upload_lote_view(request):
 
 def transportes_exportar_excel_view(request):
     """
-    Download sob demanda do arquivo Relatorio_Transportes_Consolidado.xlsx.
+    Download sob demanda do arquivo Relatorio_Transportes_Consolidado.xlsx
+    ou de um arquivo/mês específico.
     """
     from apps.integrations.models import TransporteCorrida
     from apps.integrations.transportes_sync import gerar_planilha_consolidada_excel
     from django.http import HttpResponse
 
     qs = TransporteCorrida.objects.all().order_by('-solicitado_em', '-id')
+
+    arquivo = request.GET.get('arquivo', '').strip()
+    if arquivo:
+        qs = qs.filter(arquivo_origem=arquivo)
 
     plataforma = request.GET.get('plataforma', '').strip()
     if plataforma:
@@ -2107,7 +2187,10 @@ def transportes_exportar_excel_view(request):
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     nome_arquivo = 'Relatorio_Transportes_Consolidado.xlsx'
-    if plataforma:
+    if arquivo:
+        arq_clean = arquivo.replace('.csv', '').replace('.xlsx', '')
+        nome_arquivo = f'Relatorio_Transportes_{arq_clean}_{plataforma or "Consolidado"}.xlsx'
+    elif plataforma:
         nome_arquivo = f'Relatorio_Transportes_{plataforma}.xlsx'
     response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}"'
     return response
@@ -2124,6 +2207,10 @@ def transportes_api_corridas_view(request):
     from django.db.models import Q
 
     qs = TransporteCorrida.objects.all().order_by('-solicitado_em', '-id')
+
+    arquivo = request.GET.get('arquivo', '').strip()
+    if arquivo:
+        qs = qs.filter(arquivo_origem=arquivo)
 
     plataforma = request.GET.get('plataforma', '').strip()
     if plataforma:
