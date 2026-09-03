@@ -29,6 +29,7 @@ urlpatterns = [
     # 🚗 API REST Pública / M2M de Transportes (Uber & 99)
     path('api/v1/transportes/corridas/', views.transportes_api_corridas_view, name='api_transportes_corridas'),
     path('api/v1/transportes/metricas/', views.transportes_api_metricas_view, name='api_transportes_metricas'),
+    path('api/v1/transportes/arquivos/', views.transportes_api_arquivos_view, name='api_transportes_arquivos'),
     path('api/v1/transportes/exportar/', views.transportes_exportar_excel_view, name='api_transportes_exportar'),
 
     path('dashboard/integracoes/ecosistema/', views.ecosistema_m2m_view, name='ecosistema_m2m'),

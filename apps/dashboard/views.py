@@ -2321,6 +2321,14 @@ def transportes_api_metricas_view(request):
     })
 
 
+def transportes_api_arquivos_view(request):
+    """
+    API REST JSON Oficial para listar lotes/arquivos mensais disponíveis no ecossistema:
+    GET /api/v1/transportes/arquivos/
+    """
+    return transportes_arquivos_mensais_data_view(request)
+
+
 @login_required(login_url='dashboard:login')
 def transportes_api_proxy_view(request, provider, endpoint_key):
     """
