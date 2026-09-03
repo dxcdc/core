@@ -11,7 +11,7 @@ urlpatterns = [
     path('dashboard/workspace/', views.workspace_view, name='workspace'),
     path('dashboard/integracoes/', views.integracoes_view, name='integracoes'),
     path('dashboard/integracoes/ongsys/', views.ongsys_integration_view, name='ongsys_integration'),
-    path('dashboard/integracoes/ongsys/sync/', views.ongsys_trigger_sync_view, name='ongsys_trigger_sync'),
+    path('dashboard/integracoes/ongsys/sync/', views.ongsys_trigger_sync_async_view, name='ongsys_trigger_sync'),
     path('dashboard/integracoes/ongsys/api/<str:endpoint_key>/', views.ongsys_api_proxy_view, name='ongsys_api_proxy'),
     path('dashboard/integracoes/ongsys/report/pdf/', views.ongsys_download_report_pdf_view, name='ongsys_report_pdf'),
     path('dashboard/integracoes/ongsys/report/data/', views.ongsys_report_data_view, name='ongsys_report_data'),
@@ -21,7 +21,14 @@ urlpatterns = [
 
 
     path('dashboard/integracoes/transportes/', views.transportes_integration_view, name='transportes_integracao'),
+    path('dashboard/integracoes/transportes/corridas-data/', views.transportes_corridas_data_view, name='transportes_corridas_data'),
+    path('dashboard/integracoes/transportes/upload/', views.transportes_upload_lote_view, name='transportes_upload_lote'),
     path('dashboard/integracoes/transportes/api/<str:provider>/<str:endpoint_key>/', views.transportes_api_proxy_view, name='transportes_api_proxy'),
+
+    # 🚗 API REST Pública / M2M de Transportes (Uber & 99)
+    path('api/v1/transportes/corridas/', views.transportes_api_corridas_view, name='api_transportes_corridas'),
+    path('api/v1/transportes/metricas/', views.transportes_api_metricas_view, name='api_transportes_metricas'),
+    path('api/v1/transportes/exportar/', views.transportes_exportar_excel_view, name='api_transportes_exportar'),
 
     path('dashboard/integracoes/ecosistema/', views.ecosistema_m2m_view, name='ecosistema_m2m'),
 

@@ -25,6 +25,17 @@ logger = logging.getLogger(__name__)
 BASE_URL = "https://www.ongsys.com.br/app/index.php/api/v2/"
 
 
+class OngsysSyncError(RuntimeError):
+    """Falha explícita que impede uma sincronização de ser declarada concluída."""
+
+
+def _ensure_success(response, entity, page):
+    if response.status_code != 200:
+        raise OngsysSyncError(
+            f"{entity}: HTTP {response.status_code} na página {page}."
+        )
+
+
 def get_headers():
     from apps.integrations.ongsys_credentials import get_ongsys_headers
 
@@ -73,8 +84,7 @@ def sync_fornecedores(max_pages=None):
                 params={"pageNumber": page},
                 timeout=20,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Fornecedores", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -123,7 +133,7 @@ def sync_fornecedores(max_pages=None):
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar fornecedores pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Fornecedores", "total": total_processed, "duracao": duracao}
@@ -149,8 +159,7 @@ def sync_clientes(max_pages=None):
                 params={"pageNumber": page},
                 timeout=20,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Clientes", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -197,7 +206,7 @@ def sync_clientes(max_pages=None):
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar clientes pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Clientes", "total": total_processed, "duracao": duracao}
@@ -228,8 +237,7 @@ def sync_contas_pagar(max_pages=None, data_inicio="2025-07-01", data_fim="2026-1
                 },
                 timeout=25,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Contas a Pagar", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -306,7 +314,7 @@ def sync_contas_pagar(max_pages=None, data_inicio="2025-07-01", data_fim="2026-1
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar contas a pagar pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Contas a Pagar", "total": total_processed, "duracao": duracao}
@@ -337,8 +345,7 @@ def sync_contas_receber(max_pages=None, data_inicio="2025-07-01", data_fim="2026
                 },
                 timeout=25,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Contas a Receber", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -405,7 +412,7 @@ def sync_contas_receber(max_pages=None, data_inicio="2025-07-01", data_fim="2026
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar contas a receber pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Contas a Receber", "total": total_processed, "duracao": duracao}
@@ -436,8 +443,7 @@ def sync_lancamentos_bancarios(max_pages=None, data_inicio="2025-07-01", data_fi
                 },
                 timeout=25,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Lançamentos Bancários", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -484,7 +490,7 @@ def sync_lancamentos_bancarios(max_pages=None, data_inicio="2025-07-01", data_fi
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar lançamentos bancários pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Lançamentos Bancários", "total": total_processed, "duracao": duracao}
@@ -510,8 +516,7 @@ def sync_contratos(max_pages=None):
                 params={"pageNumber": page},
                 timeout=20,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Contratos a Pagar", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -561,7 +566,7 @@ def sync_contratos(max_pages=None):
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar contratos pagar pág {page}: {e}")
-            break
+            raise
 
     # Contratos a Receber
     page = 1
@@ -575,8 +580,7 @@ def sync_contratos(max_pages=None):
                 params={"pageNumber": page},
                 timeout=20,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Contratos a Receber", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -626,7 +630,7 @@ def sync_contratos(max_pages=None):
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar contratos receber pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Contratos", "total": total_processed, "duracao": duracao}
@@ -652,8 +656,7 @@ def sync_produtos(max_pages=None):
                 params={"pageNumber": page},
                 timeout=20,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Produtos", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -702,7 +705,7 @@ def sync_produtos(max_pages=None):
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar produtos pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Produtos", "total": total_processed, "duracao": duracao}
@@ -735,8 +738,7 @@ def sync_notas_servico(max_pages=None, data_inicio=None, data_fim=None, on_progr
                 params=params,
                 timeout=25,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Notas de Serviço", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -803,7 +805,7 @@ def sync_notas_servico(max_pages=None, data_inicio=None, data_fim=None, on_progr
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar NFS-e pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Notas de Servico (NFS-e)", "total": total_processed, "duracao": duracao}
@@ -836,8 +838,7 @@ def sync_notas_produto(max_pages=None, data_inicio=None, data_fim=None, on_progr
                 params=params,
                 timeout=25,
             )
-            if resp.status_code != 200:
-                break
+            _ensure_success(resp, "Notas de Produto", page)
             payload = resp.json()
             items = payload.get("data", [])
             if not items:
@@ -902,7 +903,7 @@ def sync_notas_produto(max_pages=None, data_inicio=None, data_fim=None, on_progr
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar NF-e pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Notas de Produto (NF-e)", "total": total_processed, "duracao": duracao}
@@ -926,8 +927,7 @@ def sync_logs(data_inicio="2025-09-01", data_fim="2026-09-01", max_pages=None):
         try:
             params = {"data_inicio": data_inicio, "data_fim": data_fim, "pageNumber": page}
             r = requests.get(f"{BASE_URL}logs", headers=headers, params=params, timeout=12)
-            if r.status_code != 200:
-                break
+            _ensure_success(r, "Logs de Auditoria", page)
             data = r.json()
             items = data.get("data", [])
             if not items:
@@ -984,7 +984,7 @@ def sync_logs(data_inicio="2025-09-01", data_fim="2026-09-01", max_pages=None):
                 break
         except Exception as e:
             logger.error(f"Erro ao sincronizar Logs de Auditoria pág {page}: {e}")
-            break
+            raise
 
     duracao = round(time.time() - t0, 2)
     return {"entidade": "Logs de Auditoria", "total": total_processed, "duracao": duracao}
@@ -1006,5 +1006,4 @@ def sync_all_ongsys(max_pages_per_entity=3):
     results.append(sync_notas_produto(max_pages=max_pages_per_entity))
     results.append(sync_logs(max_pages=max_pages_per_entity))
     return results
-
 

@@ -1,0 +1,28 @@
+---
+# Playbook 03 — Monitoramento de Saúde da Infraestrutura
+- name: Checkup de Saúde e Diagnóstico da VPS CDC
+  hosts: production_vps
+  gather_facts: yes
+  tasks:
+    - name: Coletar uso de disco na raiz (/)
+      command: df -h /
+      register: disk_usage
+
+    - name: Coletar uso de memória RAM
+      command: free -h
+      register: ram_usage
+
+    - name: Listar containers Docker em execução
+      command: "{% raw %}docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'{% endraw %}"
+
+      register: docker_ps
+
+    - name: Exibir Relatório de Saúde
+      debug:
+        msg:
+          - "=== DISCO ROOT ==="
+          - "{{ disk_usage.stdout_lines }}"
+          - "=== MEMÓRIA RAM ==="
+          - "{{ ram_usage.stdout_lines }}"
+          - "=== CONTAINERS ATIVOS ==="
+          - "{{ docker_ps.stdout_lines }}"

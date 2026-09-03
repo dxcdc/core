@@ -1356,7 +1356,7 @@
                                     </div>
                                     <div class="text-end">
                                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 fw-bold" style="font-size: 0.76rem;">
-                                            🟢 95% OPERACIONAL E HOMOLOGADA
+                                            Status calculado pela telemetria persistida
                                         </span>
                                     </div>
                                 </div>
@@ -1371,8 +1371,7 @@
                                         </div>
                                         <div class="col-md-5 text-md-end">
                                             <div><strong>Data de Emissão:</strong> <span id="a4ReportDate">{{ key_last_verified }}</span></div>
-                                            <div class="mt-1"><strong>CNPJ (Anonimizado):</strong> <code>03...29</code></div>
-                                            <div class="mt-1"><strong>Credencial API:</strong> <code>f0...5e</code> (Conexão Segura M2M)</div>
+                                            <div class="mt-1"><strong>Autenticação:</strong> credencial mantida exclusivamente no servidor</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1383,12 +1382,12 @@
                                 </h6>
                                 <p style="font-size: 0.78rem; line-height: 1.5; color: #334155;" class="mb-3">
                                     Prezada equipe técnica do <strong>ONGSYS</strong>,<br/>
-                                    Apresentamos este laudo técnico referente à esteira de integração automatizada via <strong>API REST v2</strong> entre o sistema ONGSYS e a plataforma de gestão de dados do <strong>Centro de Desenvolvimento e Cidadania (CDC)</strong>. O objetivo deste documento é compartilhar com total transparência as evidências técnicas e métricas consolidadas coletadas pela nossa esteira de integração, visando a <strong>melhoria contínua</strong> dos fluxos de dados, a redução de tráfego desnecessário em ambos os servidores e a solicitação pontual para habilitação dos módulos fiscais na nossa credencial de acesso.
+                                    Este relatório apresenta somente contagens locais e telemetria persistida dos testes de leitura realizados pela integração. Rotas ainda não testadas são exibidas explicitamente como indisponíveis para avaliação.
                                 </p>
 
                                 <!-- Seção 2: Matriz de Endpoints -->
                                 <h6 class="fw-bold mb-1" style="color: #1e3a8a; font-size: 0.90rem;">
-                                    2. Matriz de Mapeamento dos 25 Endpoints (API v2)
+                                    2. Matriz de Endpoints de Leitura Permitidos (API v2)
                                 </h6>
                                 <div class="table-responsive mb-3">
                                     <table class="table table-sm table-bordered align-middle mb-0" style="font-size: 0.70rem; border-color: #cbd5e1;">
@@ -1425,10 +1424,8 @@
                                         <em>Sugestão de Ganho Mútuo:</em> Alinhamento operacional para transição do status para <code>"Ordem finalizada"</code> no momento da entrega física dos materiais.
                                     </div>
                                     <div>
-                                        <strong class="text-dark">• Ponto C: Habilitação de Acesso às Rotas Fiscais (NFS-e e NF-e):</strong><br/>
-                                        <em>Causa Técnica:</em> As rotas oficiais <code>/api/v2/notas-servico</code> e <code>/api/v2/notas-produto</code> retornam <code>HTTP 401 Unauthorized</code> para a credencial <code>f0...5e</code>.<br/>
-                                        <em>Impacto Operacional:</em> Impossibilidade de sincronização automatizada dos arquivos XML e DANFE para a escrituração contábil.<br/>
-                                        <em>Sugestão de Ganho Mútuo:</em> Solicitação para que o suporte do ONGSYS marque a permissão de consulta fiscal no perfil da credencial do CNPJ <code>03...29</code>.
+                                        <strong class="text-dark">• Rotas fiscais (NFS-e e NF-e):</strong><br/>
+                                        O estado apresentado é obtido do último teste persistido. Na ausência de teste, o relatório não presume disponibilidade nem causa de falha.
                                     </div>
                                 </div>
 
@@ -1442,42 +1439,42 @@
                                 <div class="row g-2 mb-3" style="font-size: 0.74rem;">
                                     <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            🛡️ <strong>Auditoria:</strong> {{ db_logs|default:"112.170" }} <span class="badge bg-success float-end">100% OK</span>
+                                            🛡️ <strong>Auditoria:</strong> {{ db_logs }} <span class="badge bg-secondary float-end">Persistidos</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            💳 <strong>Contas Pagar:</strong> {{ db_contas_pagar }} <span class="badge bg-success float-end">100% OK</span>
+                                            💳 <strong>Contas Pagar:</strong> {{ db_contas_pagar }} <span class="badge bg-secondary float-end">Persistidos</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            🏢 <strong>Fornecedores:</strong> {{ db_fornecedores }} <span class="badge bg-success float-end">100% OK</span>
+                                            🏢 <strong>Fornecedores:</strong> {{ db_fornecedores }} <span class="badge bg-secondary float-end">Persistidos</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            📈 <strong>Contas Receber:</strong> {{ db_contas_receber }} <span class="badge bg-success float-end">100% OK</span>
+                                            📈 <strong>Contas Receber:</strong> {{ db_contas_receber }} <span class="badge bg-secondary float-end">Persistidos</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            📦 <strong>Produtos:</strong> {{ db_produtos }} <span class="badge bg-success float-end">100% OK</span>
+                                            📦 <strong>Produtos:</strong> {{ db_produtos }} <span class="badge bg-secondary float-end">Persistidos</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            🏦 <strong>Lançamentos:</strong> {{ db_lancamentos }} <span class="badge bg-success float-end">100% OK</span>
+                                            🏦 <strong>Lançamentos:</strong> {{ db_lancamentos }} <span class="badge bg-secondary float-end">Persistidos</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            👥 <strong>Clientes:</strong> {{ db_clientes|default:"234" }} <span class="badge bg-success float-end">100% OK</span>
+                                            👥 <strong>Clientes:</strong> {{ db_clientes }} <span class="badge bg-secondary float-end">Persistidos</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="p-2 border rounded bg-light">
-                                            📑 <strong>Contratos:</strong> {{ db_contratos }} <span class="badge bg-success float-end">100% OK</span>
+                                            📑 <strong>Contratos:</strong> {{ db_contratos }} <span class="badge bg-secondary float-end">Persistidos</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1487,7 +1484,7 @@
                                     5. Resumo das Sugestões Técnicas de Melhoria Contínua
                                 </h6>
                                 <ol style="font-size: 0.76rem; line-height: 1.45; color: #334155;" class="mb-3 ps-3">
-                                    <li><strong>Habilitação Fiscal na Credencial (<code>f0...5e</code>):</strong> Liberação de permissão para NFS-e e NF-e no CNPJ <code>03...29</code>.</li>
+                                    <li><strong>Validação fiscal:</strong> confirmar NFS-e e NF-e por teste de leitura autenticado e persistir a evidência.</li>
                                     <li><strong>Filtro de Período e Paginação em <code>/pedidos</code>:</strong> Redução de tráfego de rede e ganho de performance mútua.</li>
                                     <li><strong>Headers de Limite de Taxa (Rate Limiting):</strong> Envio de <code>X-RateLimit-Limit</code> e <code>X-RateLimit-Remaining</code>.</li>
                                     <li><strong>Delta Sync Incremental:</strong> Suporte a <code>?atualizado_apos=YYYY-MM-DD HH:MM:SS</code> para sincronização rápida de alterações diárias (-95% de payload).</li>
@@ -1499,11 +1496,7 @@
                                     6. Apêndice: Registros Sanitizados de Teste da Esteira CDC
                                 </h6>
                                 <div class="p-2.5 mb-3 border rounded-2 bg-light font-monospace" style="font-size: 0.68rem; line-height: 1.35; color: #0f172a;">
-                                    <strong>A.1. Registro de Timeout de Leitura na Rota /pedidos (>30s):</strong><br/>
-                                    [LOG INTEGRAL SANITIZADO - CDC ETL]<br/>
-                                    Data/Hora: 2026-08-30 14:15:22 UTC | Metodo: GET https://www.ongsys.com.br/app/index.php/api/v2/pedidos?pageNumber=1<br/>
-                                    Status: Conexao interrompida por estouro do tempo limite padrao (30s) | Erro: Read timed out (read timeout=30)<br/>
-                                    Medida Adotada pelo CDC: Aumento de timeout para 120s e paginacao controlada.
+                                    Evidências operacionais devem ser obtidas da telemetria persistida. Este relatório não inclui amostras históricas fixas.
                                 </div>
 
                                 <!-- Rodapé Institucional -->
@@ -1514,9 +1507,9 @@
                                     </div>
                                     <div class="text-end">
                                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold">
-                                            🟢 95% OPERACIONAL E HOMOLOGADA
+                                            Status calculado pela telemetria persistida
                                         </span><br/>
-                                        <small class="text-muted">137.557 registros transacionais gravados</small>
+                                        <small class="text-muted">{{ db_total }} registros persistidos</small>
                                     </div>
                                 </div>
 
@@ -1576,7 +1569,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <strong class="d-block text-dark" style="font-size: 0.85rem;">Sincronização Completa (Recomendada)</strong>
-                            <small class="text-muted" style="font-size: 0.75rem;">Sincroniza todos os 8 módulos principais em segundo plano.</small>
+                            <small class="text-muted" style="font-size: 0.75rem;">Enfileira as 10 entidades permitidas para processamento controlado pelo Rundeck.</small>
                         </div>
                         <button type="button" class="btn btn-sm btn-success fw-bold px-3 py-1.5 d-flex align-items-center gap-1.5 shadow-sm" onclick="runAtomicSync('all', 5)" style="border-radius: 6px;">
                             <i class="ri-flashlight-line"></i> Sincronizar Tudo
@@ -1588,15 +1581,15 @@
                     <label class="form-label fw-bold" style="font-size: 0.82em;">Ou sincronize uma Entidade Específica:</label>
                     <select class="form-select form-select-sm" id="syncEntitySelect" style="border-radius: 6px;">
                         <option value="all" selected>🌟 Todas as Entidades (Completo)</option>
-                        <option value="fornecedores">🏢 Fornecedores (2.900+ registros)</option>
-                        <option value="contas_pagar">💳 Contas a Pagar (27.000+ registros)</option>
-                        <option value="contas_receber">📈 Contas a Receber (3.200+ registros)</option>
-                        <option value="lancamentos_bancarios">🏦 Lançamentos Bancários (800+ extratos)</option>
-                        <option value="clientes">👥 Clientes / Projetos (230+ registros)</option>
-                        <option value="contratos">📄 Contratos (100+ registros)</option>
-                        <option value="produtos">📦 Produtos / Itens (1.600+ itens)</option>
-                        <option value="notas_servico">📑 Notas Fiscais de Serviço (NFS-e - 119 registros)</option>
-                        <option value="notas_produto">📦 Notas Fiscais de Produto (NF-e - 5.400+ notas)</option>
+                        <option value="fornecedores">🏢 Fornecedores</option>
+                        <option value="contas_pagar">💳 Contas a Pagar</option>
+                        <option value="contas_receber">📈 Contas a Receber</option>
+                        <option value="lancamentos_bancarios">🏦 Lançamentos Bancários</option>
+                        <option value="clientes">👥 Clientes / Projetos</option>
+                        <option value="contratos">📄 Contratos</option>
+                        <option value="produtos">📦 Produtos / Itens</option>
+                        <option value="notas_servico">📑 Notas Fiscais de Serviço (NFS-e)</option>
+                        <option value="notas_produto">📦 Notas Fiscais de Produto (NF-e)</option>
                         <option value="logs">🛡️ Logs de Auditoria & Governança (/logs)</option>
                     </select>
                 </div>
@@ -1876,6 +1869,10 @@
 
     function testSingleEndpoint(epId, path, method, defaultParamsStr, event) {
         if (event) event.stopPropagation();
+        if (String(method).toUpperCase() !== 'GET') {
+            showToast('Operações de escrita não são testadas automaticamente.');
+            return Promise.resolve({ blocked: true });
+        }
 
         const badge = document.getElementById(`badge-status-${epId}`);
         const btn = document.getElementById(`btn-quick-${epId}`);
@@ -1951,6 +1948,10 @@
     }
 
     function executeTerminalTest(epId, path, method) {
+        if (String(method).toUpperCase() !== 'GET') {
+            showToast('Operações de escrita não são executadas pelo terminal de diagnóstico.');
+            return;
+        }
         const btn = document.getElementById(`btn-exec-${epId}`);
         const inputVal = document.getElementById(`input-params-${epId}`).value.trim();
         const termJson = document.getElementById(`terminal-json-${epId}`);
@@ -2368,7 +2369,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         if (tbody && data.endpoints) {
             let html = '';
             data.endpoints.forEach(ep => {
-                const badgeColor = ep.class === 'success' ? '#16a34a' : (ep.class === 'warning' ? '#d97706' : '#ef4444');
+                const badgeColor = ep.class === 'success' ? '#16a34a' : (ep.class === 'untested' ? '#64748b' : '#ef4444');
                 html += `
                     <tr>
                         <td class="py-1 px-2 fw-bold text-dark">${ep.modulo}</td>
@@ -2391,6 +2392,10 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         // 4. Linha do Tempo / Histórico
         const timeline = document.getElementById('timelineHistoryContainer');
         if (timeline && data.history) {
+            if (data.history.length === 0) {
+                timeline.innerHTML = '<div class="text-muted text-center p-4 border rounded-2 bg-light">Sem histórico operacional persistido.</div>';
+                return;
+            }
             let histHtml = '<div class="d-flex flex-column gap-3">';
             data.history.forEach(item => {
                 histHtml += `
@@ -2484,7 +2489,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         if (pill) pill.classList.add('d-none');
         if (topBar) topBar.classList.remove('d-none');
         if (widget) widget.classList.remove('d-none');
-        if (widgetTitle) widgetTitle.innerText = 'Testando 18 Rotas da API OngSys';
+        if (widgetTitle) widgetTitle.innerText = 'Testando 14 Rotas de Leitura da API OngSys';
         if (widgetStep) widgetStep.innerText = 'Iniciando bateria de testes no servidor...';
         if (widgetPct) widgetPct.innerText = '5%';
         if (widgetBar) widgetBar.style.width = '5%';
@@ -2590,10 +2595,14 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
         .then(data => {
             if (data.task_id) {
                 pollTaskProgress(data.task_id, (result) => {
-                    showToast("✅ Sincronização atômica concluída com sucesso!");
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1800);
+                    if (result.status === 'completed') {
+                        showToast("✅ Sincronização concluída com sucesso!");
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1800);
+                    } else {
+                        showToast("⚠️ Sincronização encerrada com falhas. Consulte o resultado da tarefa.");
+                    }
                 });
             } else {
                 throw new Error("Sem task_id");
@@ -2629,7 +2638,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                 clearInterval(activePollingInterval);
                 activePollingInterval = null;
                 window.isBackgroundTaskRunning = false;
-                if (widgetStep) widgetStep.innerText = 'Processo em segundo plano concluído no servidor!';
+                if (widgetStep) widgetStep.innerText = 'Monitoramento encerrado; a tarefa continua no servidor. Consulte o status novamente.';
                 setTimeout(() => {
                     if (topBar) topBar.classList.add('d-none');
                     if (widget) widget.classList.add('d-none');
@@ -2658,7 +2667,7 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                     if (pillPct) pillPct.innerText = `${pct}%`;
                     if (widgetStep && task.current_step) widgetStep.innerText = task.current_step;
 
-                    if (task.status === 'completed' || task.status === 'error') {
+                    if (['completed', 'partial', 'error'].includes(task.status)) {
                         clearInterval(activePollingInterval);
                         activePollingInterval = null;
                         window.isBackgroundTaskRunning = false;
@@ -2667,8 +2676,12 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
                         if (widgetBar) widgetBar.style.width = '100%';
                         if (widgetPct) widgetPct.innerText = '100%';
                         if (pillPct) pillPct.innerText = '100%';
-                        if (widgetSpinner) widgetSpinner.className = 'ri-checkbox-circle-fill text-success fs-18';
-                        if (widgetStep) widgetStep.innerText = task.current_step || 'Processo finalizado com sucesso!';
+                        if (widgetSpinner) {
+                            widgetSpinner.className = task.status === 'completed'
+                                ? 'ri-checkbox-circle-fill text-success fs-18'
+                                : 'ri-error-warning-fill text-warning fs-18';
+                        }
+                        if (widgetStep) widgetStep.innerText = task.current_step || 'Processo finalizado.';
 
                         setTimeout(() => {
                             if (topBar) topBar.classList.add('d-none');
@@ -2694,5 +2707,3 @@ Favor verificar o endpoint acima na infraestrutura da OngSys e orientar quanto a
     }
 </script>
 {% endblock %}
-
-

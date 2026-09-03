@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  semaphore-db:
+    image: mariadb:10.11
+    container_name: cdc-semaphore-db
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: semaphore
+      MYSQL_USER: semaphore
+      MYSQL_PASSWORD: ${SEMAPHORE_DB_PASS:-semaphore_pass_cdc2026}
+    volumes:
+      - semaphore_db_data:/var/lib/mysql
+
+  semaphore:
+    image: semaphoreui/semaphore:v2.10.35
+    container_name: cdc-semaphore-web
+
+    restart: always
+    ports:
+      - "3030:3000"
+    environment:
+      SEMAPHORE_DB_DIALECT: mysql
+      SEMAPHORE_DB_HOST: semaphore-db
+      SEMAPHORE_DB_PORT: 3306
+      SEMAPHORE_DB_USER: semaphore
+      SEMAPHORE_DB_PASS: ${SEMAPHORE_DB_PASS:-semaphore_pass_cdc2026}
+      SEMAPHORE_DB: semaphore
+      SEMAPHORE_ADMIN_USER: ${SEMAPHORE_ADMIN_USER:-admin}
+      SEMAPHORE_ADMIN_PASSWORD: ${SEMAPHORE_ADMIN_PASSWORD:-admin_cdc_nave_mae}
+      SEMAPHORE_ADMIN_NAME: "Admin CDC"
+      SEMAPHORE_ADMIN_EMAIL: "gt.transformadigital@cdc.org.br"
+      SEMAPHORE_ACCESS_KEY_ENCRYPTION: ${SEMAPHORE_ACCESS_KEY_ENCRYPTION:-cdc_nave_mae_encryption_key_2026}
+    depends_on:
+      - semaphore-db
+    volumes:
+      - semaphore_ansible_data:/tmp/semaphore
+
+volumes:
+  semaphore_db_data:
+  semaphore_ansible_data:

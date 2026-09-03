@@ -30,40 +30,31 @@ class OngsysCredentials:
 
 def get_ongsys_credentials():
     import os
-    import re
     from pathlib import Path
-    from django.conf import settings
 
     username = None
     password = None
     base_url = None
 
-    for env_file in [
-        "/etc/cdc/secrets/ongsys.env",
-        "/app/.env",
-        "/root/cdc-core/.env",
-        str(settings.BASE_DIR / ".env"),
-    ]:
-        if os.path.exists(env_file):
-            try:
-                with open(env_file, "r", encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if line.startswith("#") or "=" not in line:
-                            continue
-                        k, v = line.split("=", 1)
-                        k = k.strip()
-                        v = v.strip().strip('"').strip("'")
-                        if k in ("ONGSYS_PASSWORD", "ONGSYS_API_KEY") and v:
-                            password = v
-                        elif k in ("ONGSYS_USERNAME", "ONGSYS_CNPJ") and v:
-                            username = v
-                        elif k in ("ONGSYS_URL_BASE", "ONGSYS_BASE_URL") and v:
-                            base_url = v
-            except Exception:
-                pass
-        if username and password:
-            break
+    secret_file = Path('/etc/cdc/secrets/ongsys.env')
+    if secret_file.is_file():
+        try:
+            for line in secret_file.read_text(encoding='utf-8').splitlines():
+                line = line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                key, value = line.split('=', 1)
+                value = value.strip().strip('"').strip("'")
+                if key.strip() in ('ONGSYS_PASSWORD', 'ONGSYS_API_KEY') and value:
+                    password = value
+                elif key.strip() in ('ONGSYS_USERNAME', 'ONGSYS_CNPJ') and value:
+                    username = value
+                elif key.strip() in ('ONGSYS_URL_BASE', 'ONGSYS_BASE_URL') and value:
+                    base_url = value
+        except OSError as exc:
+            raise OngsysCredentialsError(
+                'Não foi possível ler o cofre de credenciais OngSys.'
+            ) from exc
 
     if not username:
         username = os.environ.get("ONGSYS_USERNAME") or os.environ.get("ONGSYS_CNPJ") or getattr(settings, "ONGSYS_USERNAME", None) or getattr(settings, "ONGSYS_CNPJ", None)

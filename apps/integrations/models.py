@@ -1,4 +1,8 @@
+import uuid
+
+from django.conf import settings
 from django.db import models
+from django.db.models import Q
 
 
 class IntegrationSystem(models.Model):
@@ -344,9 +348,67 @@ class OngsysEndpointStatus(models.Model):
         verbose_name = "Status de Endpoint OngSys"
         verbose_name_plural = "Status de Endpoints OngSys"
         ordering = ["endpoint_id"]
+        permissions = [
+            ("test_ongsys_api", "Pode executar testes de leitura na API OngSys"),
+            ("sync_ongsys_data", "Pode sincronizar dados da API OngSys"),
+            ("view_ongsys_report", "Pode visualizar relatórios da integração OngSys"),
+        ]
 
     def __str__(self):
         return f"{self.endpoint_id} - HTTP {self.ultimo_status_http} ({self.status_classificacao})"
+
+
+class OngsysTask(models.Model):
+    class Tipo(models.TextChoices):
+        TEST_ALL = "test_all", "Testar rotas de leitura"
+        SYNC_DB = "sync_db", "Sincronizar banco"
+
+    class Status(models.TextChoices):
+        QUEUED = "queued", "Na fila"
+        RUNNING = "running", "Em execução"
+        COMPLETED = "completed", "Concluída"
+        PARTIAL = "partial", "Concluída parcialmente"
+        ERROR = "error", "Com erro"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tipo = models.CharField(max_length=16, choices=Tipo.choices)
+    status = models.CharField(
+        max_length=16, choices=Status.choices, default=Status.QUEUED, db_index=True
+    )
+    solicitante = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="ongsys_tasks",
+    )
+    entidade = models.CharField(max_length=32, default="all")
+    paginas = models.PositiveSmallIntegerField(default=1)
+    progresso_pct = models.PositiveSmallIntegerField(default=0)
+    etapa_atual = models.CharField(max_length=255, blank=True)
+    total_itens = models.PositiveSmallIntegerField(default=0)
+    itens_concluidos = models.PositiveSmallIntegerField(default=0)
+    resultados = models.JSONField(default=list, blank=True)
+    erro = models.TextField(blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True, db_index=True)
+    iniciado_em = models.DateTimeField(null=True, blank=True)
+    finalizado_em = models.DateTimeField(null=True, blank=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Tarefa OngSys"
+        verbose_name_plural = "Tarefas OngSys"
+        ordering = ["-criado_em"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tipo", "entidade"],
+                condition=Q(status="running"),
+                name="uniq_running_ongsys_task_entity",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.tipo}:{self.entidade} ({self.status})"
 
 
 class OngsysAuditLog(models.Model):
@@ -377,3 +439,75 @@ class OngsysAuditLog(models.Model):
         return f"Log #{self.log_id} - {self.usuario_nome} ({self.origem}) [{self.data_evento}]"
 
 
+# ==============================================================================
+# TRANSPORTES & MOBILIDADE ATÔMICA (UBER & 99)
+# ==============================================================================
+class TransporteCorrida(models.Model):
+    """
+    Registro Atômico de Corridas & Deslocamentos Corporativos (Uber & 99).
+    Armazena as 22 colunas oficiais para prestação de contas, conciliação e API REST.
+    """
+    class Plataforma(models.TextChoices):
+        UBER = "Uber", "Uber"
+        NOVENOVE = "99", "99"
+
+    id_corrida = models.CharField(max_length=128, db_index=True, verbose_name="ID da Corrida")
+    plataforma = models.CharField(max_length=16, choices=Plataforma.choices, default=Plataforma.UBER, db_index=True)
+
+    # Datas e Horas (Formatos oficiais do relatório e DateTimeField para consultas rápidas)
+    data_solicitacao = models.CharField(max_length=32, blank=True, verbose_name="Data Solicitação")
+    hora_solicitacao = models.CharField(max_length=32, blank=True, verbose_name="Hora Solicitação")
+    data_chegada = models.CharField(max_length=32, blank=True, verbose_name="Data Chegada")
+    hora_chegada = models.CharField(max_length=32, blank=True, verbose_name="Hora Chegada")
+    solicitado_em = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name="Data/Hora Início")
+    concluido_em = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name="Data/Hora Fim")
+
+    # Classificação
+    servico = models.CharField(max_length=120, blank=True, verbose_name="Serviço")
+    programa = models.CharField(max_length=255, blank=True, db_index=True, verbose_name="Programa / Projeto")
+    grupo = models.CharField(max_length=255, blank=True, db_index=True, verbose_name="Grupo / Centro de Custo")
+
+    # Colaborador / Passageiro
+    nome = models.CharField(max_length=120, blank=True, verbose_name="Nome")
+    sobrenome = models.CharField(max_length=120, blank=True, verbose_name="Sobrenome")
+    nome_completo = models.CharField(max_length=255, blank=True, db_index=True, verbose_name="Nome Completo")
+    email = models.CharField(max_length=255, blank=True, db_index=True, verbose_name="Email")
+
+    # Despesas e Métricas
+    detalhamento_despesa = models.TextField(blank=True, verbose_name="Detalhamento da despesa")
+    valor_total = models.DecimalField(max_digits=12, decimal_places=2, default=0.0, db_index=True, verbose_name="Valor Total")
+    distancia_km = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Distância (km)")
+    duracao_minutos = models.IntegerField(null=True, blank=True, verbose_name="Duração (min)")
+
+    # Localização
+    endereco_partida = models.TextField(blank=True, verbose_name="Endereço Partida")
+    endereco_destino = models.TextField(blank=True, verbose_name="Endereço Destino")
+    cidade = models.CharField(max_length=120, blank=True, db_index=True, verbose_name="Cidade")
+    pais = models.CharField(max_length=64, default="Brasil", verbose_name="País")
+    status = models.CharField(max_length=64, default="Concluída", db_index=True, verbose_name="Status")
+
+    # Rastreabilidade e Auditoria
+    arquivo_origem = models.CharField(max_length=255, blank=True, db_index=True, verbose_name="Arquivo de Origem")
+    dados_brutos = models.JSONField(default=dict, blank=True, verbose_name="Dados Brutos JSON")
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Corrida de Transporte (Uber/99)"
+        verbose_name_plural = "Corridas de Transporte (Uber/99)"
+        ordering = ["-solicitado_em", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["id_corrida", "plataforma"],
+                name="uniq_transporte_corrida_plataforma"
+            )
+        ]
+        indexes = [
+            models.Index(fields=["plataforma", "solicitado_em"]),
+            models.Index(fields=["programa", "solicitado_em"]),
+            models.Index(fields=["grupo", "solicitado_em"]),
+            models.Index(fields=["nome_completo", "solicitado_em"]),
+        ]
+
+    def __str__(self):
+        return f"[{self.plataforma}] {self.id_corrida} - {self.nome_completo} (R$ {self.valor_total})"

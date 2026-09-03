@@ -1,0 +1,31 @@
+---
+# Playbook 01 — Provisionamento e Fortalecimento Inicial do Servidor VPS
+- name: Preparação e Fortalecimento da VPS CDC Core
+  hosts: production_vps
+  gather_facts: yes
+  tasks:
+    - name: Garantir atualização de pacotes do sistema operacional (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+        upgrade: safe
+
+    - name: Instalar utilitários básicos do sistema
+      apt:
+        name:
+          - curl
+          - git
+          - ufw
+          - htop
+          - unzip
+          - jq
+          - rsync
+        state: present
+
+    - name: Verificar se o Docker engine está instalado
+      command: docker --version
+      register: docker_check
+      ignore_errors: yes
+
+    - name: Exibir versão do Docker na VPS
+      debug:
+        msg: "Docker Engine: {{ docker_check.stdout }}"

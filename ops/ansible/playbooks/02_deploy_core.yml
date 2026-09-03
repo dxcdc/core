@@ -1,0 +1,22 @@
+---
+# Playbook 02 — Deploy e Atualização do CDC Core na VPS
+- name: Deploy Automatizado da Aplicação Nave Mãe (CDC Core)
+  hosts: production_vps
+  gather_facts: no
+  tasks:
+    - name: Checar status do container cdc-core-app
+      command: docker inspect -f '{{.State.Running}}' cdc-core-app
+      register: container_status
+      ignore_errors: yes
+
+    - name: Exibir status do Container Principal
+      debug:
+        msg: "Status do container cdc-core-app: {{ container_status.stdout | default('Não encontrado') }}"
+
+    - name: Executar migrações do banco de dados no container
+      command: docker exec -i cdc-core-app python manage.py migrate --noinput
+      when: container_status.stdout == 'true'
+
+    - name: Coletar arquivos estáticos
+      command: docker exec -i cdc-core-app python manage.py collectstatic --noinput
+      when: container_status.stdout == 'true'

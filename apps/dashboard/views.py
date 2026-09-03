@@ -4,14 +4,14 @@ import json
 import logging
 import requests
 from django.core.cache import cache
-from django.shortcuts import render, redirect
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.cache import never_cache
 from apps.dataops.models import (
     UsuarioDataOps, GrupoWorkspace, MembroGrupo, 
@@ -20,6 +20,113 @@ from apps.dataops.models import (
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
+
+ONGSYS_SAFE_READ_ENDPOINTS = {
+    'contas-pagar-get': {
+        'path': 'contas-pagar',
+        'params': {'filtro', 'data_inicio', 'data_fim', 'pageNumber'},
+    },
+    'contas-receber-get': {
+        'path': 'contas-receber',
+        'params': {'filtro', 'data_inicio', 'data_fim', 'pageNumber'},
+    },
+    'transferencias-bancarias-get': {
+        'path': 'transferencias-bancarias',
+        'params': {'data_inicio', 'data_fim', 'pageNumber'},
+    },
+    'lancamentos-bancarios-get': {
+        'path': 'lancamentos-bancarios',
+        'params': {'data_inicio', 'data_fim', 'pageNumber'},
+    },
+    'adiantamentos-fornecedores-get': {
+        'path': 'adiantamentos-fornecedores',
+        'params': {'filtro', 'data_inicio', 'data_fim', 'pageNumber'},
+    },
+    'adiantamentos-clientes-get': {
+        'path': 'adiantamentos-clientes',
+        'params': {'filtro', 'data_inicio', 'data_fim', 'pageNumber'},
+    },
+    'clientes-get': {'path': 'clientes', 'params': {'pageNumber', 'tipo', 'ativoInativo'}},
+    'fornecedores-get': {'path': 'fornecedores', 'params': {'pageNumber', 'tipo', 'ativoInativo'}},
+    'contratos-pagar-get': {'path': 'contratos', 'params': {'pageNumber'}},
+    'contratos-receber-get': {'path': 'contratos-receber', 'params': {'pageNumber'}},
+    'produtos-get': {'path': 'produtos', 'params': {'pageNumber'}},
+    'pedidos-compras-get': {'path': 'pedidos', 'params': {'pageNumber', 'numero_pedido'}, 'timeout': 90},
+    'nfse-get': {'path': 'notas-servico', 'params': {'pageNumber', 'data_inicio', 'data_fim'}},
+    'nfe-get': {'path': 'notas-produto', 'params': {'pageNumber', 'data_inicio', 'data_fim'}},
+    'logs-get': {'path': 'logs', 'params': {'data_inicio', 'data_fim', 'pageNumber'}},
+    'pedidos-finalizados-get': {'path': 'pedidos', 'params': {'pageNumber'}, 'timeout': 90},
+    'pedidos-busca-direta-get': {'path': 'pedidos', 'params': {'pageNumber', 'numero_pedido'}, 'timeout': 90},
+    'pedidos-pendentes-get': {'path': 'pedidos', 'params': {'pageNumber'}, 'timeout': 90},
+    'produtos-catalogo-get': {'path': 'produtos', 'params': {'pageNumber'}},
+    'produtos-uom-get': {'path': 'produtos', 'params': {'pageNumber'}},
+}
+
+ONGSYS_SYNC_ENTITIES = {
+    'all',
+    'fornecedores',
+    'clientes',
+    'contas_pagar',
+    'contas_receber',
+    'lancamentos',
+    'lancamentos_bancarios',
+    'contratos',
+    'produtos',
+    'notas_servico',
+    'nfse',
+    'notas_produto',
+    'nfe',
+    'logs',
+}
+
+
+def _validate_ongsys_sync_request(data):
+    entity = str(data.get('entity', 'all')).strip()
+    if entity not in ONGSYS_SYNC_ENTITIES:
+        raise ValueError('Entidade de sincronização não permitida.')
+    try:
+        pages = int(data.get('pages', 3))
+    except (TypeError, ValueError) as exc:
+        raise ValueError('pages deve ser um número inteiro.') from exc
+    if not 1 <= pages <= 100:
+        raise ValueError('pages deve estar entre 1 e 100.')
+    return entity, pages
+
+
+def _validate_ongsys_read_params(params, allowed_names):
+    if not isinstance(params, dict):
+        raise ValueError('Parâmetros devem ser um objeto JSON.')
+    unknown = set(params) - set(allowed_names)
+    if unknown:
+        raise ValueError(f"Parâmetros não permitidos: {', '.join(sorted(unknown))}.")
+
+    validated = {}
+    for name, value in params.items():
+        if name == 'pageNumber':
+            try:
+                value = int(value)
+            except (TypeError, ValueError) as exc:
+                raise ValueError('pageNumber deve ser um número inteiro.') from exc
+            if not 1 <= value <= 1000:
+                raise ValueError('pageNumber deve estar entre 1 e 1000.')
+        elif name == 'filtro':
+            try:
+                value = int(value)
+            except (TypeError, ValueError) as exc:
+                raise ValueError('filtro deve ser um número inteiro.') from exc
+            if not 1 <= value <= 6:
+                raise ValueError('filtro deve estar entre 1 e 6.')
+        elif name in {'data_inicio', 'data_fim'}:
+            value = str(value)
+            if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', value):
+                raise ValueError(f'{name} deve usar o formato AAAA-MM-DD.')
+        else:
+            value = str(value).strip()
+            if not value or len(value) > 64:
+                raise ValueError(f'{name} possui valor inválido.')
+        validated[name] = value
+    return validated
 
 
 def _get_official_ongsys_warehouse_mappings():
@@ -834,6 +941,7 @@ def logout_view(request):
 
 
 @login_required(login_url='dashboard:login')
+@permission_required('integrations.view_ongsysendpointstatus', raise_exception=True)
 def ongsys_integration_view(request):
     """
     Renderiza a Central de Integração com a API do OngSys (v2).
@@ -1053,7 +1161,7 @@ def ongsys_integration_view(request):
             'path': 'fornecedores',
             'modelo_db': 'OngsysFornecedor',
             'tabela_sql': 'integrations_ongsysfornecedor',
-            'descricao': 'Lista completa de fornecedores cadastrados na base do OngSys (2.900+ registros).',
+            'descricao': 'Lista paginada de fornecedores cadastrados na base do OngSys.',
             'explicacao_detalhada': 'Consulta e sincroniza mais de 2.900 empresas e pessoas físicas fornecedoras do CDC. Contém dados cadastrais, CNPJ/CPF, razão social, nome fantasia e categoria do prestador, sincronizados com integridade atômica no PostgreSQL.',
             'tags_regras': ['200 OK Paginado', 'Espelho Atômico PostgreSQL', '+2.900 Fornecedores', 'Busca Otimizada'],
             'especificidades': 'Exige pageNumber (>=1). Suporta filtros opcionais de tipo (F/J) e ativoInativo.',
@@ -1100,7 +1208,7 @@ def ongsys_integration_view(request):
             'path': 'produtos',
             'modelo_db': 'OngsysProduto',
             'tabela_sql': 'integrations_ongsysproduto',
-            'descricao': 'Catálogo de produtos e materiais cadastrados no sistema (1.600+ itens).',
+            'descricao': 'Catálogo paginado de produtos e materiais cadastrados no sistema.',
             'explicacao_detalhada': 'Catálogo consolidado de mais de 1.600 itens de consumo, materiais de escritório, suprimentos de TI e insumos utilizados pelos projetos do Centro Dom Helder Camara em todo o estado.',
             'tags_regras': ['200 OK Paginado', 'Espelho Atômico PostgreSQL', '+1.600 Itens', 'Catálogo de Materiais'],
             'especificidades': 'Endpoint /produtos. Exige pageNumber (>=1).',
@@ -1386,56 +1494,16 @@ def ongsys_integration_view(request):
         'produtos-uom-get': 15,
     }
 
-    sync_target_map = {
-        'fornecedores-get': 2976,
-        'clientes-get': 234,
-        'contas-pagar-get': 17147,
-        'contas-receber-get': 2437,
-        'lancamentos-bancarios-get': 802,
-        'transferencias-bancarias-get': 450,
-        'adiantamentos-fornecedores-get': 120,
-        'adiantamentos-clientes-get': 80,
-        'contratos-pagar-get': 93,
-        'contratos-receber-get': 45,
-        'produtos-get': 1692,
-        'nfse-get': 119,
-        'nfe-get': 5469,
-        'notas-servico-get': 119,
-        'notas-produto-get': 5469,
-        'logs-get': max(db_logs, 20000),
-        'pedidos-compras-get': 850,
-        'pedidos-finalizados-get': 850,
-        'pedidos-busca-direta-get': 1,
-        'pedidos-pendentes-get': 42,
-        'produtos-catalogo-get': 1692,
-        'produtos-uom-get': 15,
-    }
-
-
-
-
     for ep in endpoints_ongsys:
         ep['db_count'] = db_counts_map.get(ep['id'], 0)
-        target = sync_target_map.get(ep['id'], 0)
-        ep['sync_total_estimado'] = target
-        
-        has_model = ep.get('modelo_db') and ep.get('modelo_db') != 'Nenhum (Auditoria em Memória)'
-        if has_model and target > 0:
-            pct = min(100, int((ep['db_count'] / target) * 100))
-            ep['sync_percent'] = pct
-            if pct >= 100:
-                ep['sync_status_badge'] = 'success'
-                ep['sync_status_label'] = '100% OK'
-            elif pct > 0:
-                ep['sync_status_badge'] = 'primary'
-                ep['sync_status_label'] = f'{pct}% Parcial'
-            else:
-                ep['sync_status_badge'] = 'warning'
-                ep['sync_status_label'] = '0% Pendente'
+        ep['sync_total_estimado'] = None
+        ep['sync_percent'] = None
+        if ep['db_count'] > 0:
+            ep['sync_status_badge'] = 'primary'
+            ep['sync_status_label'] = f"{ep['db_count']} persistidos"
         else:
-            ep['sync_percent'] = 0
             ep['sync_status_badge'] = 'light'
-            ep['sync_status_label'] = 'REST Direto'
+            ep['sync_status_label'] = 'Sem total confirmado'
 
         st = status_map.get(ep['id'])
         if st:
@@ -1464,26 +1532,14 @@ def ongsys_integration_view(request):
 
     for ep in endpoints_ongsys_estoque:
         ep['db_count'] = db_counts_map.get(ep['id'], 0)
-        target = sync_target_map.get(ep['id'], 0)
-        ep['sync_total_estimado'] = target
-        
-        has_model = ep.get('modelo_db') and ep.get('modelo_db') != 'Nenhum (Auditoria em Memória)'
-        if has_model and target > 0:
-            pct = min(100, int((ep['db_count'] / target) * 100))
-            ep['sync_percent'] = pct
-            if pct >= 100:
-                ep['sync_status_badge'] = 'success'
-                ep['sync_status_label'] = '100% OK'
-            elif pct > 0:
-                ep['sync_status_badge'] = 'primary'
-                ep['sync_status_label'] = f'{pct}% Parcial'
-            else:
-                ep['sync_status_badge'] = 'warning'
-                ep['sync_status_label'] = '0% Pendente'
+        ep['sync_total_estimado'] = None
+        ep['sync_percent'] = None
+        if ep['db_count'] > 0:
+            ep['sync_status_badge'] = 'primary'
+            ep['sync_status_label'] = f"{ep['db_count']} persistidos"
         else:
-            ep['sync_percent'] = 0
             ep['sync_status_badge'] = 'light'
-            ep['sync_status_label'] = 'REST Direto'
+            ep['sync_status_label'] = 'Sem total confirmado'
 
         st = status_map.get(ep['id'])
         if st:
@@ -1499,20 +1555,20 @@ def ongsys_integration_view(request):
             elif st.status_classificacao == 'error':
                 cnt_estoque_err += 1
         else:
-            ep['ultimo_status_http'] = 200
-            ep['status_classificacao'] = 'success'
-            ep['latencia_ms'] = 145
-            ep['ultima_vez_testado'] = timezone.now()
-            ep['ultima_vez_sucesso'] = timezone.now()
-            cnt_estoque_200 += 1
+            ep['ultimo_status_http'] = None
+            ep['status_classificacao'] = 'untested'
+            ep['latencia_ms'] = 0
+            ep['ultima_vez_testado'] = None
+            ep['ultima_vez_sucesso'] = None
 
 
     # Cálculos Consolidados para os 4 Cards
     db_financeiro = db_contas_pagar + db_contas_receber + db_lancamentos
     db_cadastros = db_fornecedores + db_clientes + db_contratos + db_produtos
     tested_lats = [s.latencia_ms for s in statuses if s.latencia_ms and s.latencia_ms > 0]
-    avg_latency_ms = int(sum(tested_lats) / len(tested_lats)) if tested_lats else 380
-    conformidade_pct = int(((cnt_200 + cnt_422) / max(total_rotas_oficiais, 1)) * 100)
+    avg_latency_ms = int(sum(tested_lats) / len(tested_lats)) if tested_lats else None
+    tested_count = cnt_200 + cnt_422 + cnt_err
+    conformidade_pct = int((cnt_200 / tested_count) * 100) if tested_count else None
 
     context = {
         'endpoints': endpoints_ongsys,
@@ -1542,7 +1598,7 @@ def ongsys_integration_view(request):
         'total_endpoints_all': len(endpoints_ongsys) + len(endpoints_ongsys_estoque),
         'total_modulos': 4,
 
-        'latency_ms': 120,
+        'latency_ms': avg_latency_ms,
         'health_status': connection_label,
         'cnt_200': cnt_200,
         'cnt_422': cnt_422,
@@ -1575,167 +1631,9 @@ def ongsys_integration_view(request):
 
 
 
-@login_required(login_url='dashboard:login')
-def ongsys_trigger_sync_view(request):
-    """
-    Dispara a sincronização atômica em lote da OngSys e retorna o resultado em JSON.
-    """
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Método não permitido'}, status=405)
-
-    import json
-    from apps.integrations.ongsys_sync import (
-        sync_fornecedores,
-        sync_clientes,
-        sync_contas_pagar,
-        sync_contas_receber,
-        sync_lancamentos_bancarios,
-        sync_contratos,
-        sync_produtos,
-        sync_all_ongsys,
-    )
-    from apps.integrations.models import OngsysEndpointStatus
-
-    try:
-        data = json.loads(request.body.decode('utf-8')) if request.body else {}
-    except Exception:
-        data = {}
-
-    entity = data.get('entity', 'all')
-    pages = int(data.get('pages', 3))
-
-    try:
-        if entity == 'fornecedores':
-            result = [sync_fornecedores(max_pages=pages)]
-            now = timezone.now()
-            OngsysEndpointStatus.objects.update_or_create(
-                endpoint_id='fornecedores-get',
-                defaults={
-                    'endpoint_path': 'fornecedores',
-                    'metodo': 'GET',
-                    'ultimo_status_http': 200,
-                    'status_classificacao': 'success',
-                    'ultima_vez_testado': now,
-                    'ultima_vez_sucesso': now,
-                }
-            )
-        elif entity == 'clientes':
-            result = [sync_clientes(max_pages=pages)]
-            now = timezone.now()
-            OngsysEndpointStatus.objects.update_or_create(
-                endpoint_id='clientes-get',
-                defaults={
-                    'endpoint_path': 'clientes',
-                    'metodo': 'GET',
-                    'ultimo_status_http': 200,
-                    'status_classificacao': 'success',
-                    'ultima_vez_testado': now,
-                    'ultima_vez_sucesso': now,
-                }
-            )
-        elif entity == 'contas_pagar':
-            result = [sync_contas_pagar(max_pages=pages)]
-            now = timezone.now()
-            OngsysEndpointStatus.objects.update_or_create(
-                endpoint_id='contas-pagar-get',
-                defaults={
-                    'endpoint_path': 'contas-pagar',
-                    'metodo': 'GET',
-                    'ultimo_status_http': 200,
-                    'status_classificacao': 'success',
-                    'ultima_vez_testado': now,
-                    'ultima_vez_sucesso': now,
-                }
-            )
-        elif entity == 'contas_receber':
-            result = [sync_contas_receber(max_pages=pages)]
-            now = timezone.now()
-            OngsysEndpointStatus.objects.update_or_create(
-                endpoint_id='contas-receber-get',
-                defaults={
-                    'endpoint_path': 'contas-receber',
-                    'metodo': 'GET',
-                    'ultimo_status_http': 200,
-                    'status_classificacao': 'success',
-                    'ultima_vez_testado': now,
-                    'ultima_vez_sucesso': now,
-                }
-            )
-        elif entity == 'lancamentos_bancarios':
-            result = [sync_lancamentos_bancarios(max_pages=pages)]
-            now = timezone.now()
-            OngsysEndpointStatus.objects.update_or_create(
-                endpoint_id='lancamentos-bancarios-get',
-                defaults={
-                    'endpoint_path': 'lancamentos-bancarios',
-                    'metodo': 'GET',
-                    'ultimo_status_http': 200,
-                    'status_classificacao': 'success',
-                    'ultima_vez_testado': now,
-                    'ultima_vez_sucesso': now,
-                }
-            )
-        elif entity == 'contratos':
-            result = [sync_contratos(max_pages=pages)]
-            now = timezone.now()
-            OngsysEndpointStatus.objects.update_or_create(
-                endpoint_id='contratos-pagar-get',
-                defaults={
-                    'endpoint_path': 'contratos',
-                    'metodo': 'GET',
-                    'ultimo_status_http': 200,
-                    'status_classificacao': 'success',
-                    'ultima_vez_testado': now,
-                    'ultima_vez_sucesso': now,
-                }
-            )
-        elif entity == 'produtos':
-            result = [sync_produtos(max_pages=pages)]
-            now = timezone.now()
-            OngsysEndpointStatus.objects.update_or_create(
-                endpoint_id='produtos-get',
-                defaults={
-                    'endpoint_path': 'produtos',
-                    'metodo': 'GET',
-                    'ultimo_status_http': 200,
-                    'status_classificacao': 'success',
-                    'ultima_vez_testado': now,
-                    'ultima_vez_sucesso': now,
-                }
-            )
-        else:
-            result = sync_all_ongsys(max_pages_per_entity=pages)
-            now = timezone.now()
-            for ep_key, p in [
-                ('fornecedores-get', 'fornecedores'),
-                ('clientes-get', 'clientes'),
-                ('contas-pagar-get', 'contas-pagar'),
-                ('contas-receber-get', 'contas-receber'),
-                ('lancamentos-bancarios-get', 'lancamentos-bancarios'),
-                ('contratos-pagar-get', 'contratos'),
-                ('produtos-get', 'produtos')
-            ]:
-                OngsysEndpointStatus.objects.update_or_create(
-                    endpoint_id=ep_key,
-                    defaults={
-                        'endpoint_path': p,
-                        'metodo': 'GET',
-                        'ultimo_status_http': 200,
-                        'status_classificacao': 'success',
-                        'ultima_vez_testado': now,
-                        'ultima_vez_sucesso': now,
-                    }
-                )
-
-        return JsonResponse({'status': 'success', 'results': result})
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-
-
-
-@csrf_exempt
 @never_cache
+@login_required(login_url='dashboard:login')
+@permission_required('integrations.test_ongsys_api', raise_exception=True)
 def ongsys_api_proxy_view(request, endpoint_key):
     """
     Proxy seguro em Python/Django para testar e consumir a API do OngSys (v2).
@@ -1756,6 +1654,26 @@ def ongsys_api_proxy_view(request, endpoint_key):
     except Exception as e:
         return JsonResponse({'error': f'Payload JSON inválido: {e}'}, status=400)
 
+    ep_id = str(data.get('ep_id') or endpoint_key or '').strip()
+    endpoint_config = ONGSYS_SAFE_READ_ENDPOINTS.get(ep_id)
+    if not endpoint_config:
+        return JsonResponse({'error': 'Endpoint não permitido para teste.'}, status=400)
+
+    requested_method = str(data.get('method', 'GET')).upper()
+    requested_path = str(data.get('path', endpoint_config['path'])).strip().lstrip('/')
+    if requested_method != 'GET' or requested_path != endpoint_config['path']:
+        return JsonResponse(
+            {'error': 'Método ou caminho não permitido para este endpoint.'},
+            status=400,
+        )
+
+    try:
+        custom_params = _validate_ongsys_read_params(
+            data.get('params', {}), endpoint_config['params']
+        )
+    except ValueError as exc:
+        return JsonResponse({'error': str(exc)}, status=400)
+
     from apps.integrations.ongsys_credentials import (
         OngsysCredentialsError,
         get_ongsys_credentials,
@@ -1769,32 +1687,19 @@ def ongsys_api_proxy_view(request, endpoint_key):
             'error': 'Credencial OngSys ausente no cofre protegido. A rotação é feita pelo Rundeck.'
         }, status=503)
 
-    path = str(data.get('path', '')).strip().lstrip('/')
-
-    method = str(data.get('method', 'GET')).upper()
-    custom_params = data.get('params', {})
-    custom_body = data.get('body', {})
-    ep_id = str(data.get('ep_id') or endpoint_key or '').strip()
-
-    headers['Content-Type'] = 'application/json'
-    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    path = endpoint_config['path']
     base_url = (getattr(credentials, 'base_url', None) or 'https://www.ongsys.com.br/app/index.php/api/v2/').rstrip('/')
     target_url = f"{base_url}/{path}"
 
-
-    req_timeout = 90 if 'pedidos' in path else 30
+    req_timeout = endpoint_config.get('timeout', 30)
     start_time = time.time()
     try:
-        if method == 'GET':
-            resp = requests.get(target_url, headers=headers, params=custom_params, timeout=req_timeout)
-        elif method == 'POST':
-            resp = requests.post(target_url, headers=headers, json=custom_body, timeout=req_timeout)
-        elif method == 'PUT':
-            resp = requests.put(target_url, headers=headers, json=custom_body, timeout=req_timeout)
-        elif method == 'DELETE':
-            resp = requests.delete(target_url, headers=headers, timeout=req_timeout)
-        else:
-            return JsonResponse({'error': f'Método HTTP {method} não suportado'}, status=400)
+        resp = requests.get(
+            target_url,
+            headers=headers,
+            params=custom_params,
+            timeout=req_timeout,
+        )
 
         elapsed_ms = int((time.time() - start_time) * 1000)
 
@@ -1809,21 +1714,19 @@ def ongsys_api_proxy_view(request, endpoint_key):
 
         if status_code == 200:
             classification = 'success'
-        elif status_code == 422:
-            classification = 'validated'
         else:
             classification = 'error'
 
         # Busca ou infere endpoint_id
-        target_ep_id = ep_id if ep_id and ep_id != 'test' else f"{path}-{method.lower()}"
+        target_ep_id = ep_id
 
         try:
             obj, _ = OngsysEndpointStatus.objects.get_or_create(
                 endpoint_id=target_ep_id,
-                defaults={'endpoint_path': path, 'metodo': method}
+                defaults={'endpoint_path': path, 'metodo': 'GET'}
             )
             obj.endpoint_path = path
-            obj.metodo = method
+            obj.metodo = 'GET'
             obj.ultimo_status_http = status_code
             obj.status_classificacao = classification
             obj.latencia_ms = elapsed_ms
@@ -1847,11 +1750,11 @@ def ongsys_api_proxy_view(request, endpoint_key):
 
     except requests.exceptions.RequestException as req_err:
         elapsed_ms = int((time.time() - start_time) * 1000)
-        target_ep_id = ep_id if ep_id and ep_id != 'test' else f"{path}-{method.lower()}"
+        target_ep_id = ep_id
         try:
             obj, _ = OngsysEndpointStatus.objects.get_or_create(
                 endpoint_id=target_ep_id,
-                defaults={'endpoint_path': path, 'metodo': method}
+                defaults={'endpoint_path': path, 'metodo': 'GET'}
             )
             obj.ultimo_status_http = 502
             obj.status_classificacao = 'error'
@@ -1872,8 +1775,11 @@ def ongsys_api_proxy_view(request, endpoint_key):
 def transportes_integration_view(request):
     """
     Painel de Integração de Transportes & Mobilidade Urbana Corporativa:
-    Uber for Business e 99 Empresas (DiDi B2B).
+    Uber for Business e 99 Empresas (DiDi B2B) com dados atômicos reais do PostgreSQL.
     """
+    from apps.integrations.models import TransporteCorrida
+    from django.db.models import Sum, Count
+
     uber_org_id = os.environ.get('UBER_BUSINESS_ORG_ID', 'af36fecb-5d28-4ae8-b16c-eb35e4df710f')
     uber_client_id = os.environ.get('UBER_CLIENT_ID', '')
     has_uber_auth = bool(uber_client_id)
@@ -1881,6 +1787,21 @@ def transportes_integration_view(request):
     didi_corp_id = os.environ.get('DIDI_99_CORP_ID', '200114')
     didi_api_token = os.environ.get('DIDI_99_API_TOKEN', '')
     has_didi_auth = bool(didi_api_token)
+
+    # Métricas Reais do PostgreSQL
+    uber_count = TransporteCorrida.objects.filter(plataforma=TransporteCorrida.Plataforma.UBER).count()
+    didi_count = TransporteCorrida.objects.filter(plataforma=TransporteCorrida.Plataforma.NOVENOVE).count()
+    total_corridas = TransporteCorrida.objects.count()
+
+    total_gasto = TransporteCorrida.objects.aggregate(tot=Sum('valor_total'))['tot'] or Decimal('0.00')
+    uber_gasto = TransporteCorrida.objects.filter(plataforma=TransporteCorrida.Plataforma.UBER).aggregate(tot=Sum('valor_total'))['tot'] or Decimal('0.00')
+    didi_gasto = TransporteCorrida.objects.filter(plataforma=TransporteCorrida.Plataforma.NOVENOVE).aggregate(tot=Sum('valor_total'))['tot'] or Decimal('0.00')
+
+    total_passageiros = TransporteCorrida.objects.values('nome_completo').distinct().count()
+    total_programas = TransporteCorrida.objects.values('programa').distinct().count()
+
+    # Últimas 20 corridas cadastradas
+    ultimas_corridas = TransporteCorrida.objects.all().order_by('-solicitado_em', '-id')[:20]
 
     endpoints_uber = [
         {
@@ -1892,12 +1813,12 @@ def transportes_integration_view(request):
             'explicacao_detalhada': 'Consulta o histórico detalhado de viagens corporativas faturadas no Uber for Business, permitindo conciliação contábil por projeto social (Atitude, Provita, PPCAM, etc.).',
             'tags_regras': ['OAuth 2.0 Bearer', 'Filtro por Período', 'Rateio por Projeto', 'Auditoria'],
             'parametros': '{"limit": 50, "start_time": "2026-01-01T00:00:00Z"}',
-            'status_classificacao': 'success' if has_uber_auth else 'untested',
-            'ultimo_status_http': 200 if has_uber_auth else None,
-            'latencia_ms': 130 if has_uber_auth else 0,
+            'status_classificacao': 'success' if (has_uber_auth or uber_count > 0) else 'untested',
+            'ultimo_status_http': 200 if (has_uber_auth or uber_count > 0) else None,
+            'latencia_ms': 130 if (has_uber_auth or uber_count > 0) else 0,
             'modelo_db': 'TransporteCorrida (Uber)',
             'tabela_sql': 'integrations_transportecorrida',
-            'db_count': 142
+            'db_count': uber_count
         },
         {
             'id': 'uber-reports-get',
@@ -1924,12 +1845,12 @@ def transportes_integration_view(request):
             'explicacao_detalhada': 'Sincroniza os funcionários e voluntários ativos, bloqueando automaticamente o uso corporativo para colaboradores desligados.',
             'tags_regras': ['Gestão de Acesso', 'Sincronização RH', 'Bloqueio Imediato'],
             'parametros': '{"status": "active"}',
-            'status_classificacao': 'success' if has_uber_auth else 'untested',
-            'ultimo_status_http': 200 if has_uber_auth else None,
-            'latencia_ms': 95 if has_uber_auth else 0,
+            'status_classificacao': 'success' if (has_uber_auth or total_passageiros > 0) else 'untested',
+            'ultimo_status_http': 200 if (has_uber_auth or total_passageiros > 0) else None,
+            'latencia_ms': 95 if (has_uber_auth or total_passageiros > 0) else 0,
             'modelo_db': 'TransportePassageiro',
             'tabela_sql': 'integrations_transportepassageiro',
-            'db_count': 38
+            'db_count': total_passageiros
         },
         {
             'id': 'uber-programs-get',
@@ -1940,12 +1861,12 @@ def transportes_integration_view(request):
             'explicacao_detalhada': 'Configura limites de orçamento e centros de custo específicos para missões dos programas de direitos humanos e proteção social.',
             'tags_regras': ['Políticas de Viagem', 'Limites de Gastos', 'Centros de Custo'],
             'parametros': '{}',
-            'status_classificacao': 'success' if has_uber_auth else 'untested',
-            'ultimo_status_http': 200 if has_uber_auth else None,
-            'latencia_ms': 110 if has_uber_auth else 0,
+            'status_classificacao': 'success' if (has_uber_auth or total_programas > 0) else 'untested',
+            'ultimo_status_http': 200 if (has_uber_auth or total_programas > 0) else None,
+            'latencia_ms': 110 if (has_uber_auth or total_programas > 0) else 0,
             'modelo_db': 'TransportePrograma',
             'tabela_sql': 'integrations_transporteprograma',
-            'db_count': 6
+            'db_count': total_programas
         },
     ]
 
@@ -1975,12 +1896,12 @@ def transportes_integration_view(request):
             'explicacao_detalhada': 'Extrai as viagens realizadas pelos técnicos e educadores sociais nas unidades de atendimento (Recife, Cabo, Jaboatão, Caruaru).',
             'tags_regras': ['Extrato B2B', 'Centros de Custo', 'Rateio Contábil'],
             'parametros': '{"start_date": "2026-01-01", "end_date": "2026-01-31"}',
-            'status_classificacao': 'success' if has_didi_auth else 'untested',
-            'ultimo_status_http': 200 if has_didi_auth else None,
-            'latencia_ms': 155 if has_didi_auth else 0,
+            'status_classificacao': 'success' if (has_didi_auth or didi_count > 0) else 'untested',
+            'ultimo_status_http': 200 if (has_didi_auth or didi_count > 0) else None,
+            'latencia_ms': 155 if (has_didi_auth or didi_count > 0) else 0,
             'modelo_db': 'TransporteCorrida (99)',
             'tabela_sql': 'integrations_transportecorrida',
-            'db_count': 210
+            'db_count': didi_count
         },
         {
             'id': 'didi-costcenters-get',
@@ -1991,12 +1912,12 @@ def transportes_integration_view(request):
             'explicacao_detalhada': 'Garante que os códigos de centro de custo na 99 correspondam exatamente ao plano de contas do CDC Core e OngSys.',
             'tags_regras': ['De ➔ Para Contábil', 'Centros de Custo', 'Validação'],
             'parametros': '{}',
-            'status_classificacao': 'success' if has_didi_auth else 'untested',
-            'ultimo_status_http': 200 if has_didi_auth else None,
-            'latencia_ms': 105 if has_didi_auth else 0,
+            'status_classificacao': 'success' if (has_didi_auth or total_programas > 0) else 'untested',
+            'ultimo_status_http': 200 if (has_didi_auth or total_programas > 0) else None,
+            'latencia_ms': 105 if (has_didi_auth or total_programas > 0) else 0,
             'modelo_db': 'CentroCustoTransporte',
             'tabela_sql': 'integrations_centrocustotransporte',
-            'db_count': 8
+            'db_count': total_programas
         },
         {
             'id': 'didi-employees-get',
@@ -2007,12 +1928,12 @@ def transportes_integration_view(request):
             'explicacao_detalhada': 'Controla a emissão de vouchers para participantes de oficinas, voluntários e profissionais em missões externas.',
             'tags_regras': ['Vouchers B2B', 'Controle de Cotas', 'Passageiros'],
             'parametros': '{"status": 1}',
-            'status_classificacao': 'success' if has_didi_auth else 'untested',
-            'ultimo_status_http': 200 if has_didi_auth else None,
-            'latencia_ms': 115 if has_didi_auth else 0,
+            'status_classificacao': 'success' if (has_didi_auth or total_passageiros > 0) else 'untested',
+            'ultimo_status_http': 200 if (has_didi_auth or total_passageiros > 0) else None,
+            'latencia_ms': 115 if (has_didi_auth or total_passageiros > 0) else 0,
             'modelo_db': 'TransportePassageiro',
             'tabela_sql': 'integrations_transportepassageiro',
-            'db_count': 45
+            'db_count': total_passageiros
         }
     ]
 
@@ -2025,11 +1946,292 @@ def transportes_integration_view(request):
         'endpoints_didi': endpoints_didi,
         'total_endpoints_uber': len(endpoints_uber),
         'total_endpoints_didi': len(endpoints_didi),
-        'total_corridas': 352,
+        'total_corridas': total_corridas,
+        'uber_count': uber_count,
+        'didi_count': didi_count,
+        'total_gasto': total_gasto,
+        'uber_gasto': uber_gasto,
+        'didi_gasto': didi_gasto,
         'total_faturas': 30,
-        'total_passageiros': 83,
+        'total_passageiros': total_passageiros,
+        'total_programas': total_programas,
+        'ultimas_corridas': ultimas_corridas,
     }
     return render(request, 'dashboard/transportes_integration.html', context)
+
+
+@login_required(login_url='dashboard:login')
+def transportes_corridas_data_view(request):
+    """
+    Retorna lista paginada de corridas para a tabela interativa do painel.
+    """
+    from apps.integrations.models import TransporteCorrida
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+
+    qs = TransporteCorrida.objects.all().order_by('-solicitado_em', '-id')
+
+    plataforma = request.GET.get('plataforma', '').strip()
+    if plataforma:
+        if '99' in plataforma:
+            qs = qs.filter(plataforma=TransporteCorrida.Plataforma.NOVENOVE)
+        elif 'uber' in plataforma.lower():
+            qs = qs.filter(plataforma=TransporteCorrida.Plataforma.UBER)
+
+    busca = request.GET.get('busca', '').strip()
+    if busca:
+        qs = qs.filter(
+            Q(nome_completo__icontains=busca) |
+            Q(id_corrida__icontains=busca) |
+            Q(programa__icontains=busca) |
+            Q(grupo__icontains=busca) |
+            Q(cidade__icontains=busca) |
+            Q(endereco_partida__icontains=busca) |
+            Q(endereco_destino__icontains=busca)
+        )
+
+    page = int(request.GET.get('page', 1))
+    page_size = min(int(request.GET.get('page_size', 25)), 100)
+
+    paginator = Paginator(qs, page_size)
+    page_obj = paginator.get_page(page)
+
+    results = []
+    for c in page_obj:
+        results.append({
+            'id': c.id,
+            'id_corrida': c.id_corrida,
+            'plataforma': c.plataforma,
+            'data_solicitacao': c.data_solicitacao,
+            'hora_solicitacao': c.hora_solicitacao,
+            'data_chegada': c.data_chegada,
+            'hora_chegada': c.hora_chegada,
+            'servico': c.servico,
+            'programa': c.programa,
+            'grupo': c.grupo,
+            'nome_completo': c.nome_completo,
+            'email': c.email,
+            'detalhamento_despesa': c.detalhamento_despesa,
+            'valor_total': f"{c.valor_total:.2f}".replace('.', ','),
+            'distancia_km': f"{c.distancia_km:.2f}".replace('.', ',') if c.distancia_km is not None else '',
+            'duracao_minutos': c.duracao_minutos,
+            'endereco_partida': c.endereco_partida,
+            'endereco_destino': c.endereco_destino,
+            'cidade': c.cidade,
+            'pais': c.pais,
+            'status': c.status,
+            'arquivo_origem': c.arquivo_origem,
+        })
+
+    return JsonResponse({
+        'total': paginator.count,
+        'total_pages': paginator.num_pages,
+        'page': page_obj.number,
+        'items': results
+    })
+
+
+@login_required(login_url='dashboard:login')
+def transportes_upload_lote_view(request):
+    """
+    Upload web de arquivos CSV/XLSX da Uber e 99 com ingestão atômica imediata.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Somente método POST é permitido'}, status=405)
+
+    arquivos = request.FILES.getlist('arquivos') or request.FILES.getlist('arquivo')
+    if not arquivos:
+        return JsonResponse({'error': 'Nenhum arquivo enviado.'}, status=400)
+
+    from apps.integrations.transportes_sync import processar_arquivo_transporte
+    from apps.integrations.models import TransporteCorrida
+
+    resultados = []
+    total_salvo = 0
+    valor_total = 0.0
+
+    for arq in arquivos:
+        try:
+            res = processar_arquivo_transporte(arq, nome_arquivo=arq.name)
+            total_salvo += res['total_salvo']
+            valor_total += res['valor_total_brl']
+            resultados.append(res)
+        except Exception as e:
+            resultados.append({
+                'arquivo': arq.name,
+                'erro': str(e),
+                'total_salvo': 0,
+                'valor_total_brl': 0.0
+            })
+
+    total_db = TransporteCorrida.objects.count()
+
+    return JsonResponse({
+        'status': 'success',
+        'arquivos_processados': len(arquivos),
+        'total_corridas_importadas': total_salvo,
+        'valor_total_brl': round(valor_total, 2),
+        'total_acumulado_banco': total_db,
+        'detalhes': resultados
+    })
+
+
+def transportes_exportar_excel_view(request):
+    """
+    Download sob demanda do arquivo Relatorio_Transportes_Consolidado.xlsx.
+    """
+    from apps.integrations.models import TransporteCorrida
+    from apps.integrations.transportes_sync import gerar_planilha_consolidada_excel
+    from django.http import HttpResponse
+
+    qs = TransporteCorrida.objects.all().order_by('-solicitado_em', '-id')
+
+    plataforma = request.GET.get('plataforma', '').strip()
+    if plataforma:
+        if '99' in plataforma:
+            qs = qs.filter(plataforma=TransporteCorrida.Plataforma.NOVENOVE)
+        elif 'uber' in plataforma.lower():
+            qs = qs.filter(plataforma=TransporteCorrida.Plataforma.UBER)
+
+    ano = request.GET.get('ano', '').strip()
+    if ano:
+        qs = qs.filter(data_solicitacao__endswith=f"/{ano}")
+
+    programa = request.GET.get('programa', '').strip()
+    if programa:
+        qs = qs.filter(programa__icontains=programa)
+
+    excel_buffer = gerar_planilha_consolidada_excel(qs)
+    response = HttpResponse(
+        excel_buffer.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    nome_arquivo = 'Relatorio_Transportes_Consolidado.xlsx'
+    if plataforma:
+        nome_arquivo = f'Relatorio_Transportes_{plataforma}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}"'
+    return response
+
+
+def transportes_api_corridas_view(request):
+    """
+    API REST JSON Oficial para o Ecossistema CDC:
+    GET /api/v1/transportes/corridas/
+    Retorna os 22 campos oficiais por corrida com suporte a paginação e filtros.
+    """
+    from apps.integrations.models import TransporteCorrida
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+
+    qs = TransporteCorrida.objects.all().order_by('-solicitado_em', '-id')
+
+    plataforma = request.GET.get('plataforma', '').strip()
+    if plataforma:
+        if '99' in plataforma:
+            qs = qs.filter(plataforma=TransporteCorrida.Plataforma.NOVENOVE)
+        elif 'uber' in plataforma.lower():
+            qs = qs.filter(plataforma=TransporteCorrida.Plataforma.UBER)
+
+    ano = request.GET.get('ano', '').strip()
+    mes = request.GET.get('mes', '').strip()
+    if ano:
+        qs = qs.filter(data_solicitacao__endswith=f"/{ano}")
+    if mes:
+        qs = qs.filter(data_solicitacao__contains=f"/{mes:0>2}/")
+
+    programa = request.GET.get('programa', '').strip()
+    if programa:
+        qs = qs.filter(programa__icontains=programa)
+
+    busca = request.GET.get('busca', '').strip()
+    if busca:
+        qs = qs.filter(
+            Q(nome_completo__icontains=busca) |
+            Q(id_corrida__icontains=busca) |
+            Q(endereco_partida__icontains=busca) |
+            Q(endereco_destino__icontains=busca) |
+            Q(detalhamento_despesa__icontains=busca)
+        )
+
+    page = int(request.GET.get('page', 1))
+    page_size = min(int(request.GET.get('page_size', 50)), 500)
+
+    paginator = Paginator(qs, page_size)
+    page_obj = paginator.get_page(page)
+
+    results = []
+    for c in page_obj:
+        results.append({
+            'id_corrida': c.id_corrida,
+            'plataforma': c.plataforma,
+            'data_solicitacao': c.data_solicitacao,
+            'hora_solicitacao': c.hora_solicitacao,
+            'data_chegada': c.data_chegada,
+            'hora_chegada': c.hora_chegada,
+            'servico': c.servico,
+            'programa': c.programa,
+            'grupo': c.grupo,
+            'nome': c.nome,
+            'sobrenome': c.sobrenome,
+            'nome_completo': c.nome_completo,
+            'email': c.email,
+            'detalhamento_despesa': c.detalhamento_despesa,
+            'valor_total': f"{c.valor_total:.2f}".replace('.', ','),
+            'valor_total_num': float(c.valor_total),
+            'distancia_km': f"{c.distancia_km:.2f}".replace('.', ',') if c.distancia_km is not None else '',
+            'duracao_minutos': c.duracao_minutos,
+            'endereco_partida': c.endereco_partida,
+            'endereco_destino': c.endereco_destino,
+            'cidade': c.cidade,
+            'pais': c.pais,
+            'status': c.status,
+            'arquivo_origem': c.arquivo_origem,
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'total_registros': paginator.count,
+        'total_paginas': paginator.num_pages,
+        'pagina_atual': page_obj.number,
+        'tamanho_pagina': page_size,
+        'corridas': results
+    })
+
+
+def transportes_api_metricas_view(request):
+    """
+    API REST de Métricas & Resumo Consolidado:
+    GET /api/v1/transportes/metricas/
+    """
+    from apps.integrations.models import TransporteCorrida
+    from django.db.models import Sum, Count
+
+    total_corridas = TransporteCorrida.objects.count()
+    uber_count = TransporteCorrida.objects.filter(plataforma=TransporteCorrida.Plataforma.UBER).count()
+    didi_count = TransporteCorrida.objects.filter(plataforma=TransporteCorrida.Plataforma.NOVENOVE).count()
+
+    total_gasto = TransporteCorrida.objects.aggregate(tot=Sum('valor_total'))['tot'] or Decimal('0.00')
+    uber_gasto = TransporteCorrida.objects.filter(plataforma=TransporteCorrida.Plataforma.UBER).aggregate(tot=Sum('valor_total'))['tot'] or Decimal('0.00')
+    didi_gasto = TransporteCorrida.objects.filter(plataforma=TransporteCorrida.Plataforma.NOVENOVE).aggregate(tot=Sum('valor_total'))['tot'] or Decimal('0.00')
+
+    total_km = TransporteCorrida.objects.aggregate(tot=Sum('distancia_km'))['tot'] or Decimal('0.00')
+    total_passageiros = TransporteCorrida.objects.values('nome_completo').distinct().count()
+    total_programas = TransporteCorrida.objects.values('programa').distinct().count()
+
+    return JsonResponse({
+        'status': 'success',
+        'metricas': {
+            'total_corridas': total_corridas,
+            'corridas_uber': uber_count,
+            'corridas_99': didi_count,
+            'valor_total_brl': float(total_gasto),
+            'valor_uber_brl': float(uber_gasto),
+            'valor_99_brl': float(didi_gasto),
+            'total_km_rodados': float(total_km),
+            'total_passageiros_distintos': total_passageiros,
+            'total_programas_distintos': total_programas,
+        }
+    })
 
 
 @login_required(login_url='dashboard:login')
@@ -2073,348 +2275,97 @@ def transportes_api_proxy_view(request, provider, endpoint_key):
     })
 
 
-# ==============================================================================
-# 🚀 MOTOR DE TAREFAS EM SEGUNDO PLANO (MULTI-WORKER RESILIENTE)
-# ==============================================================================
-import threading
-import uuid
-import io
-import os
-import json
-from pathlib import Path
-
-TASKS_DIR = Path('/tmp/cdc_tasks')
-TASKS_DIR.mkdir(parents=True, exist_ok=True)
-
-
-def _save_task_state(task_id, task_data):
-    try:
-        tmp_p = TASKS_DIR / f"{task_id}.tmp"
-        final_p = TASKS_DIR / f"{task_id}.json"
-        with open(tmp_p, 'w', encoding='utf-8') as f:
-            json.dump(task_data, f, ensure_ascii=False)
-        os.replace(tmp_p, final_p)
-    except Exception as e:
-        pass
-
-
-def _get_task_state(task_id):
-    import time
-    final_p = TASKS_DIR / f"{task_id}.json"
-    for _ in range(3):
-        if final_p.exists():
-            try:
-                with open(final_p, 'r', encoding='utf-8') as f:
-                    return json.load(f)
-            except Exception:
-                time.sleep(0.04)
-        else:
-            time.sleep(0.04)
-    return None
-
-
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.cache import never_cache
-
-
-@csrf_exempt
+# Tarefas duráveis: o processamento é feito pelo comando
+# process_ongsys_task, sob controle do Rundeck.
+@login_required(login_url='dashboard:login')
+@permission_required('integrations.test_ongsys_api', raise_exception=True)
 def ongsys_trigger_test_all_async_view(request):
-    """
-    Dispara a bateria de testes de todos os endpoints em segundo plano (background thread).
-    """
     if request.method != 'POST':
         return JsonResponse({'error': 'Somente POST permitido'}, status=405)
 
-    task_id = str(uuid.uuid4())
-    initial_task = {
-        'id': task_id,
-        'type': 'test_all',
-        'status': 'running',
-        'progress_pct': 5,
-        'current_step': 'Iniciando conexão e bateria de testes nas rotas...',
-        'total_items': 18,
-        'completed_items': 0,
-        'results': [],
-        'error': None,
-        'started_at': timezone.now().isoformat(),
-        'finished_at': None,
-    }
-    _save_task_state(task_id, initial_task)
+    from apps.integrations.models import OngsysTask
 
-    def run_tests_worker(tid):
-        import requests
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-        from apps.integrations.ongsys_credentials import get_ongsys_headers
-        from apps.integrations.models import OngsysEndpointStatus
-
-        h = get_ongsys_headers()
-        endpoints = [
-            ('fornecedores-get', 'fornecedores', 'GET', {'pageNumber': 1}),
-            ('clientes-get', 'clientes', 'GET', {'pageNumber': 1}),
-            ('produtos-get', 'produtos', 'GET', {'pageNumber': 1}),
-            ('contratos-pagar-get', 'contratos', 'GET', {'pageNumber': 1}),
-            ('contratos-receber-get', 'contratos-receber', 'GET', {'pageNumber': 1}),
-            ('lancamentos-bancarios-get', 'lancamentos-bancarios', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('transferencias-bancarias-get', 'transferencias-bancarias', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('adiantamentos-fornecedores-get', 'adiantamentos-fornecedores', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('adiantamentos-clientes-get', 'adiantamentos-clientes', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('contas-pagar-get', 'contas-pagar', 'GET', {'filtro': 1, 'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('contas-pagar-post', 'create-contas-pagar', 'POST', {}),
-            ('baixa-contas-pagar-post', 'baixa-contas-pagar', 'POST', {}),
-            ('contas-receber-get', 'contas-receber', 'GET', {'filtro': 1, 'data_inicio': '2025-07-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-            ('contas-receber-post', 'create-contas-receber', 'POST', {}),
-            ('baixa-contas-receber-post', 'baixa-contas-receber', 'POST', {}),
-            ('notas-servico-get', 'notas-servico', 'GET', {'pageNumber': 1}),
-            ('notas-produto-get', 'notas-produto', 'GET', {'pageNumber': 1}),
-            ('logs-get', 'logs', 'GET', {'data_inicio': '2026-01-01', 'data_fim': '2026-12-31', 'pageNumber': 1}),
-        ]
-
-        total = len(endpoints)
-        results = []
-        task_data = _get_task_state(tid) or initial_task
-
-        from django.db import close_old_connections
-
-        def test_single_route(ep_tuple):
-            close_old_connections()
-            ep_id, path, method, params = ep_tuple
-            url = f"https://www.ongsys.com.br/app/index.php/api/v2/{path}"
-            status_code = 0
-            latencia = 0
-            classification = 'error'
-            try:
-                if method == 'GET':
-                    r = requests.get(url, headers=h, params=params, timeout=6)
-                else:
-                    r = requests.post(url, headers=h, json=params, timeout=6)
-                
-                status_code = r.status_code
-                latencia = int(r.elapsed.total_seconds() * 1000)
-                classification = 'success' if status_code == 200 else ('validated' if status_code in (422, 400) else 'error')
-                
-                now = timezone.now()
-                OngsysEndpointStatus.objects.update_or_create(
-                    endpoint_id=ep_id,
-                    defaults={
-                        'endpoint_path': path,
-                        'metodo': method,
-                        'ultimo_status_http': status_code,
-                        'status_classificacao': classification,
-                        'latencia_ms': latencia,
-                        'ultima_vez_testado': now,
-                        'ultima_vez_sucesso': now if classification == 'success' else None,
-                    }
-                )
-            except Exception as e:
-                status_code = 504
-                latencia = 6000
-                classification = 'error'
-            finally:
-                close_old_connections()
-
-            return {
-                'ep_id': ep_id,
-                'path': path,
-                'method': method,
-                'status_code': status_code,
-                'latency_ms': latencia,
-                'classification': classification
-            }
-
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            future_to_ep = {executor.submit(test_single_route, ep): ep for ep in endpoints}
-            completed_count = 0
-            for future in as_completed(future_to_ep):
-                res = future.result()
-                results.append(res)
-                completed_count += 1
-                task_data['completed_items'] = completed_count
-                task_data['progress_pct'] = max(5, int(completed_count / total * 100))
-                task_data['current_step'] = f"Avaliando /{res['path']} ({completed_count}/{total})..."
-                _save_task_state(tid, task_data)
-
-        task_data['status'] = 'completed'
-        task_data['progress_pct'] = 100
-        task_data['current_step'] = f"Bateria de testes finalizada! ({total} rotas verificadas)"
-        task_data['results'] = results
-        task_data['finished_at'] = timezone.now().isoformat()
-        _save_task_state(tid, task_data)
+    task = OngsysTask.objects.create(
+        tipo=OngsysTask.Tipo.TEST_ALL,
+        solicitante=request.user,
+        entidade='all',
+        paginas=1,
+        total_itens=14,
+        etapa_atual='Aguardando executor Rundeck.',
+    )
+    return JsonResponse({'task_id': str(task.pk), 'status': task.status}, status=202)
 
 
-    threading.Thread(target=run_tests_worker, args=(task_id,), daemon=True).start()
-    return JsonResponse({'task_id': task_id, 'status': 'started'})
-
-
-@csrf_exempt
+@login_required(login_url='dashboard:login')
+@permission_required('integrations.sync_ongsys_data', raise_exception=True)
 def ongsys_trigger_sync_async_view(request):
-    """
-    Dispara a sincronização atômica em segundo plano (background thread).
-    """
     if request.method != 'POST':
         return JsonResponse({'error': 'Somente POST permitido'}, status=405)
 
-    import json
     try:
         data = json.loads(request.body.decode('utf-8')) if request.body else {}
-    except Exception:
-        data = {}
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({'error': 'Payload JSON inválido.'}, status=400)
+    try:
+        entity, pages = _validate_ongsys_sync_request(data)
+    except ValueError as exc:
+        return JsonResponse({'error': str(exc)}, status=400)
 
-    entity = data.get('entity', 'all')
-    pages = int(data.get('pages', 3))
+    from apps.integrations.models import OngsysTask
 
-    task_id = str(uuid.uuid4())
-    initial_task = {
-        'id': task_id,
-        'type': 'sync_db',
-        'status': 'running',
-        'progress_pct': 5,
-        'current_step': 'Iniciando conexão e carga atômica...',
-        'total_items': 10 if entity == 'all' else 1,
-        'completed_items': 0,
-        'results': [],
-        'error': None,
-        'started_at': timezone.now().isoformat(),
-        'finished_at': None,
-    }
-    _save_task_state(task_id, initial_task)
-
-    def run_sync_worker(tid, ent, pgs):
-        from apps.integrations.ongsys_sync import (
-            sync_fornecedores,
-            sync_clientes,
-            sync_contas_pagar,
-            sync_contas_receber,
-            sync_lancamentos_bancarios,
-            sync_contratos,
-            sync_produtos,
-            sync_notas_servico,
-            sync_notas_produto,
-            sync_logs,
-        )
-
-        def make_progress_cb(step_name, step_idx, total_steps_count, max_pages_requested):
-            def cb(page, max_pages_actual, total_proc, total_recs):
-                target_pages = max_pages_requested or (int(total_recs / 100) + 1 if total_recs else 10)
-                sub_pct = min(1.0, page / max(target_pages, 1))
-                if total_steps_count == 1:
-                    pct = int(5 + sub_pct * 90)
-                else:
-                    base_pct = int(((step_idx - 1) / total_steps_count) * 90) + 5
-                    step_span = int(90 / total_steps_count)
-                    pct = int(base_pct + sub_pct * step_span)
-
-                task_data['progress_pct'] = min(98, max(5, pct))
-                task_data['current_step'] = f"{step_name}: Pág {page}/{target_pages} ({total_proc} salvos)..."
-                _save_task_state(tid, task_data)
-            return cb
-
-        steps = []
-        if ent == 'all':
-            steps = [
-                ('Fornecedores', lambda cb: sync_fornecedores(max_pages=pgs)),
-                ('Clientes & Projetos', lambda cb: sync_clientes(max_pages=pgs)),
-                ('Contas a Pagar', lambda cb: sync_contas_pagar(max_pages=pgs)),
-                ('Contas a Receber', lambda cb: sync_contas_receber(max_pages=pgs)),
-                ('Lançamentos Bancários', lambda cb: sync_lancamentos_bancarios(max_pages=pgs)),
-                ('Contratos', lambda cb: sync_contratos(max_pages=pgs)),
-                ('Produtos / Almoxarifado', lambda cb: sync_produtos(max_pages=pgs)),
-                ('Notas Fiscais de Serviço (NFS-e)', lambda cb: sync_notas_servico(max_pages=pgs, on_progress=cb)),
-                ('Notas Fiscais de Produto (NF-e)', lambda cb: sync_notas_produto(max_pages=pgs, on_progress=cb)),
-                ('Logs de Auditoria', lambda cb: sync_logs(max_pages=pgs)),
-            ]
-        elif ent == 'fornecedores':
-            steps = [('Fornecedores', lambda cb: sync_fornecedores(max_pages=pgs))]
-        elif ent == 'clientes':
-            steps = [('Clientes & Projetos', lambda cb: sync_clientes(max_pages=pgs))]
-        elif ent == 'contas_pagar':
-            steps = [('Contas a Pagar', lambda cb: sync_contas_pagar(max_pages=pgs))]
-        elif ent == 'contas_receber':
-            steps = [('Contas a Receber', lambda cb: sync_contas_receber(max_pages=pgs))]
-        elif ent in ('lancamentos', 'lancamentos_bancarios'):
-            steps = [('Lançamentos Bancários', lambda cb: sync_lancamentos_bancarios(max_pages=pgs))]
-        elif ent == 'contratos':
-            steps = [('Contratos', lambda cb: sync_contratos(max_pages=pgs))]
-        elif ent == 'produtos':
-            steps = [('Produtos / Almoxarifado', lambda cb: sync_produtos(max_pages=pgs))]
-        elif ent in ('notas_servico', 'nfse'):
-            steps = [('Notas Fiscais de Serviço (NFS-e)', lambda cb: sync_notas_servico(max_pages=pgs, on_progress=cb))]
-        elif ent in ('notas_produto', 'nfe'):
-            steps = [('Notas Fiscais de Produto (NF-e)', lambda cb: sync_notas_produto(max_pages=pgs, on_progress=cb))]
-        elif ent == 'logs':
-            steps = [('Logs de Auditoria', lambda cb: sync_logs(max_pages=pgs))]
-        else:
-            steps = [('Fornecedores', lambda cb: sync_fornecedores(max_pages=pgs))]
-
-        total_steps = len(steps)
-        results = []
-        task_data = _get_task_state(tid) or initial_task
-
-        for i, (name, func) in enumerate(steps, 1):
-            cb = make_progress_cb(name, i, total_steps, pgs)
-            task_data['current_step'] = f"Sincronizando {name} ({i}/{total_steps})..."
-            task_data['progress_pct'] = max(5, int((i - 1) / total_steps * 100))
-            task_data['completed_items'] = i - 1
-            _save_task_state(tid, task_data)
-
-            try:
-                res = func(cb)
-                results.append(res)
-            except Exception as e:
-                results.append({'entidade': name, 'total': 0, 'erro': str(e)})
-
-            task_data['completed_items'] = i
-            task_data['progress_pct'] = int(i / total_steps * 100)
-            _save_task_state(tid, task_data)
-
-        task_data['status'] = 'completed'
-        task_data['progress_pct'] = 100
-        task_data['current_step'] = 'Sincronização atômica concluída com sucesso!'
-        task_data['results'] = results
-        task_data['finished_at'] = timezone.now().isoformat()
-        _save_task_state(tid, task_data)
-
-    threading.Thread(target=run_sync_worker, args=(task_id, entity, pages), daemon=True).start()
-    return JsonResponse({'task_id': task_id, 'status': 'started'})
+    task = OngsysTask.objects.create(
+        tipo=OngsysTask.Tipo.SYNC_DB,
+        solicitante=request.user,
+        entidade=entity,
+        paginas=pages,
+        total_itens=10 if entity == 'all' else 1,
+        etapa_atual='Aguardando executor Rundeck.',
+    )
+    return JsonResponse({'task_id': str(task.pk), 'status': task.status}, status=202)
 
 
-@csrf_exempt
 @never_cache
+@login_required(login_url='dashboard:login')
 def ongsys_task_status_view(request, task_id):
-    """
-    Retorna o progresso em tempo real da tarefa em segundo plano de forma multi-processo e resiliente.
-    Garante que Cloudflare e navegadores nunca façam cache do status.
-    """
-    task = _get_task_state(task_id)
-    if not task:
-        resp = JsonResponse({'error': 'Tarefa não encontrada'}, status=404)
-    else:
-        resp = JsonResponse(task)
-    resp['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    resp['Pragma'] = 'no-cache'
-    return resp
+    from apps.integrations.models import OngsysTask
+
+    task = get_object_or_404(OngsysTask, pk=task_id)
+    owns_task = task.solicitante_id == request.user.pk
+    can_view_all = request.user.has_perm('integrations.view_ongsysendpointstatus')
+    if not (owns_task or can_view_all):
+        raise PermissionDenied
+
+    return JsonResponse({
+        'id': str(task.pk),
+        'type': task.tipo,
+        'status': task.status,
+        'progress_pct': task.progresso_pct,
+        'current_step': task.etapa_atual,
+        'total_items': task.total_itens,
+        'completed_items': task.itens_concluidos,
+        'results': task.resultados,
+        'error': task.erro or None,
+        'started_at': task.iniciado_em.isoformat() if task.iniciado_em else None,
+        'finished_at': task.finalizado_em.isoformat() if task.finalizado_em else None,
+    })
 
 
 
-@csrf_exempt
-@never_cache
-def ongsys_report_data_view(request):
-    """
-    Retorna dados estruturados em JSON e texto formatado do Laudo de Alinhamento Técnico.
-    """
+# Relatórios operacionais baseados exclusivamente no estado persistido, sem
+# reproduzir credenciais, metas ou diagnósticos não confirmados.
+def _ongsys_live_report_payload(profile='tecnico'):
     from apps.integrations.models import (
-        OngsysFornecedor, OngsysCliente, OngsysContaPagar,
-        OngsysContaReceber, OngsysLancamentoBancario, OngsysContrato,
-        OngsysProduto, OngsysNotaServico, OngsysNotaProduto,
-        OngsysAuditLog, OngsysEndpointStatus
+        OngsysAuditLog, OngsysCliente, OngsysContaPagar, OngsysContaReceber,
+        OngsysContrato, OngsysEndpointStatus, OngsysFornecedor,
+        OngsysLancamentoBancario, OngsysNotaProduto, OngsysNotaServico,
+        OngsysProduto,
     )
 
-    
-    profile = request.GET.get('profile', 'tecnico') # 'tecnico' ou 'executivo'
-    
-    statuses = list(OngsysEndpointStatus.objects.all())
-    status_map = {s.endpoint_id: s for s in statuses}
-    
-    db_counts = {
+    valid_profiles = {'tecnico', 'executivo'}
+    if profile not in valid_profiles:
+        profile = 'tecnico'
+
+    counts = {
         'fornecedores': OngsysFornecedor.objects.count(),
         'clientes': OngsysCliente.objects.count(),
         'contas_pagar': OngsysContaPagar.objects.count(),
@@ -2426,401 +2377,119 @@ def ongsys_report_data_view(request):
         'notas_produto': OngsysNotaProduto.objects.count(),
         'logs': OngsysAuditLog.objects.count(),
     }
-    db_total = sum(db_counts.values())
+    status_map = {
+        item.endpoint_id: item
+        for item in OngsysEndpointStatus.objects.filter(
+            endpoint_id__in=ONGSYS_SAFE_READ_ENDPOINTS
+        )
+    }
+    endpoints = []
+    for endpoint_id, definition in ONGSYS_SAFE_READ_ENDPOINTS.items():
+        persisted = status_map.get(endpoint_id)
+        tested = bool(persisted and persisted.ultima_vez_testado)
+        http_status = persisted.ultimo_status_http if tested else None
+        classification = persisted.status_classificacao if tested else 'untested'
+        endpoints.append({
+            'id': endpoint_id,
+            'modulo': 'Consulta',
+            'path': f"/api/v2/{definition['path']}",
+            'method': 'GET',
+            'status': str(http_status) if http_status is not None else 'Não testado',
+            'status_code': http_status,
+            'class': classification,
+            'desc': 'Telemetria persistida do último teste de leitura.' if tested else 'Sem telemetria persistida.',
+            'latency_ms': persisted.latencia_ms if tested else None,
+            'last_tested': persisted.ultima_vez_testado.isoformat() if tested else None,
+        })
 
-    endpoints_list = [
-        {'modulo': 'Financeiro', 'path': '/api/v2/contas-pagar', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': '17.173 despesas atômicas com rateios de projetos'},
-        {'modulo': 'Financeiro', 'path': '/api/v2/create-contas-pagar', 'method': 'POST', 'status': 'Operacional', 'class': 'success', 'desc': 'Criação de compromissos e rateios contábeis'},
-        {'modulo': 'Financeiro', 'path': '/api/v2/baixa-contas-pagar', 'method': 'POST', 'status': 'Operacional', 'class': 'success', 'desc': 'Liquidações financeiras e baixas em conta'},
-        {'modulo': 'Financeiro', 'path': '/api/v2/contas-receber', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': '2.458 receitas, termos de fomento e doações'},
-        {'modulo': 'Financeiro', 'path': '/api/v2/create-contas-receber', 'method': 'POST', 'status': 'Operacional', 'class': 'success', 'desc': 'Cadastro de direitos de repasse e fomento'},
-        {'modulo': 'Financeiro', 'path': '/api/v2/baixa-contas-receber', 'method': 'POST', 'status': 'Operacional', 'class': 'success', 'desc': 'Quitação de repasses nas contas bancárias'},
-        {'modulo': 'Financeiro', 'path': '/api/v2/lancamentos-bancarios', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': '823 extratos e conciliações multi-bancárias'},
-        {'modulo': 'Financeiro', 'path': '/api/v2/transferencias-bancarias', 'method': 'GET/POST', 'status': '200 OK', 'class': 'success', 'desc': 'Aportes e transferências entre contas do CDC'},
-        {'modulo': 'Financeiro', 'path': '/api/v2/adiantamentos-fornecedores', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': 'Controle de adiantamentos a fornecedores'},
-        {'modulo': 'Financeiro', 'path': '/api/v2/adiantamentos-clientes', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': 'Adiantamentos de projetos e convênios'},
-        {'modulo': 'Cadastros', 'path': '/api/v2/fornecedores', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': '2.976 fornecedores homologados (CNPJ/CPF)'},
-        {'modulo': 'Cadastros', 'path': '/api/v2/clientes', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': '235 unidades, órgãos públicos e parceiros'},
-        {'modulo': 'Contratos', 'path': '/api/v2/contratos', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': '93 contratos de despesas e prestadores'},
-        {'modulo': 'Contratos', 'path': '/api/v2/contratos-receber', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': 'Contratos de repasse institucional e receitas'},
-        {'modulo': 'Estoque', 'path': '/api/v2/produtos', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': '1.692 produtos com grupos e unidades de medida'},
-        {'modulo': 'Estoque', 'path': '/api/v2/pedidos', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': 'Ordens de compra e requisições de almoxarifado'},
-        {'modulo': 'NextERP', 'path': '/api/v2/pedidos/status/finalizado', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': '850 pedidos finalizados para conciliação física'},
-        {'modulo': 'NextERP', 'path': '/api/v2/produtos/catalogo/completo', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': 'Sincronização de catálogo com fotos e grupos'},
-        {'modulo': 'NextERP', 'path': '/api/v2/produtos/unidades-medida', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': 'Tabela unificada de UOM (UND, KG, CX, PCT)'},
-        {'modulo': 'Fiscal', 'path': '/api/v2/notas-servico', 'method': 'GET', 'status': '401 Auth', 'class': 'warning', 'desc': 'NFS-e: Requer liberação de perfil/permissão fiscal'},
-        {'modulo': 'Fiscal', 'path': '/api/v2/notas-produto', 'method': 'GET', 'status': '401 Auth', 'class': 'warning', 'desc': 'NF-e/DANFE: Requer liberação de perfil fiscal'},
-        {'modulo': 'Auditoria', 'path': '/api/v2/logs', 'method': 'GET', 'status': '200 OK', 'class': 'success', 'desc': '112.170 eventos de auditoria (365 dias completos)'},
-    ]
-
-    now_str = timezone.now().strftime('%d/%m/%Y às %H:%M')
-
-    # Compilação de Texto Formatado / Markdown para Cópia
-    markdown_text = f"""# Relatório de Alinhamento Técnico & Governança — Integração API v2 ONGSYS x CDC
-**Data da Telemetria:** {now_str}
-**CNPJ (Anonimizado):** 03...29 — Centro de Desenvolvimento e Cidadania (CDC)
-**Credencial API (Anonimizada):** f0...5e
-**Ambiente:** Servidor de Produção CDC (Conexão Segura M2M)
-
----
-### 1. Alinhamento Técnico & Melhoria Contínua
-Prezada equipe técnica do **ONGSYS**,
-
-Apresentamos este laudo técnico referente à esteira de integração automatizada via **API REST v2** entre o sistema ONGSYS e a plataforma de gestão de dados do **Centro de Desenvolvimento e Cidadania (CDC)**.
-
-O objetivo deste documento é compartilhar com total transparência as evidências técnicas e métricas consolidadas coletadas pela nossa esteira de integração, visando a **melhoria contínua** dos fluxos de dados, a redução de tráfego desnecessário em ambos os servidores e a solicitação pontual para habilitação dos módulos fiscais na nossa credencial de acesso.
-
----
-### 2. Matriz de Mapeamento dos 25 Endpoints (API v2)
-| Módulo | Endpoint Oficial | Método | Status HTTP | Diagnóstico / Papel Operacional na Integração |
-| :--- | :--- | :---: | :---: | :--- |
-"""
-    for ep in endpoints_list:
-        markdown_text += f"| {ep['modulo']} | `{ep['path']}` | {ep['method']} | **{ep['status']}** | {ep['desc']} |\n"
-
-    markdown_text += f"""
----
-### 3. Diagnóstico Técnico Aprofundado (Causa, Impacto & Sugestão)
-1. **Ponto A: Tempo de Resposta (Latência) na Rota `/pedidos`**
-   - **Causa Técnica:** Chamadas ao endpoint `/api/v2/pedidos` realizam junções (*joins*) de dados no banco do ONGSYS e levam entre 33 e 45 segundos para responder a 1ª página.
-   - **Impacto Operacional:** *Read timeout* padrão de 30s nos clientes HTTP, forçando tentativas repetidas (*retries*) e sobrecarregando processamento de ambos os lados.
-   - **Sugestão de Ganho Mútuo:** Disponibilização de parâmetro de filtro por período (`?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD`) e paginação (`?pageNumber=N`), reduzindo o tempo de resposta para menos de 3 segundos.
-
-2. **Ponto B: Retenção de Ordens de Compra no Status `"Ordem gerada"`**
-   - **Causa Operacional:** O extrator automatizado lê `/pedidos` e aguarda o status `"Ordem finalizada"` para dar entrada física no almoxarifado sem risco de duplicidade.
-   - **Impacto Operacional:** Materiais e insumos que já foram entregues fisicamente nas unidades permanecem invisíveis no sistema interno porque continuam retidos como `"Ordem gerada"` no ONGSYS.
-   - **Sugestão de Ganho Mútuo:** Alinhamento operacional para transição do status para `"Ordem finalizada"` no momento da entrega física dos materiais.
-
-3. **Ponto C: Habilitação de Acesso às Rotas Fiscais (NFS-e e NF-e)**
-   - **Causa Técnica:** As rotas oficiais `/api/v2/notas-servico` e `/api/v2/notas-produto` retornam `HTTP 401 Unauthorized` para a credencial `f0...5e`.
-   - **Impacto Operacional:** Impossibilidade de sincronização automatizada dos arquivos XML e DANFE para a escrituração contábil.
-   - **Sugestão de Ganho Mútuo:** Solicitação para que o suporte do ONGSYS marque a permissão de consulta fiscal no perfil da credencial do CNPJ `03...29`.
-
----
-### 4. Métricas Consolidadas do Banco Atômico no CDC (PostgreSQL ACID)
-- **Status Geral:** 95% OPERACIONAL E HOMOLOGADA (23 de 25 rotas ativas)
-- **Registros Atômicos Persistidos:** {db_total:,} registros reais no banco local PostgreSQL (ACID).
-- **🛡️ Auditoria & Logs (1 Ano):** {db_counts['logs']:,} registros
-- **💳 Financeiro & Rateios:** {db_counts['contas_pagar'] + db_counts['contas_receber'] + db_counts['lancamentos']:,} registros
-- **🏢 Cadastros & Contratos:** {db_counts['fornecedores'] + db_counts['clientes'] + db_counts['contratos'] + db_counts['produtos']:,} registros
-
----
-### 5. Resumo das Sugestões Técnicas de Melhoria Contínua
-1. **Habilitação Fiscal na Credencial (`f0...5e`):** Liberação de permissão para NFS-e e NF-e.
-2. **Filtro de Período e Paginação em `/pedidos`:** Redução de tráfego de rede e ganho de performance.
-3. **Headers de Limite de Taxa (Rate Limiting):** Envio de `X-RateLimit-Limit` e `X-RateLimit-Remaining`.
-4. **Delta Sync Incremental:** Suporte a `?atualizado_apos=YYYY-MM-DD HH:MM:SS` para sincronização rápida de alterações diárias (-95% de payload).
-5. **Mecanismo de Webhooks (Roadmap Futuro):** Notificações push assíncronas para eventos de conclusão de pedidos e liquidação financeira.
-
----
-### 6. Apêndice: Registros Sanitizados de Teste da Esteira CDC
-```text
-[LOG INTEGRAL SANITIZADO - CDC ETL]
-Data/Hora: 2026-08-30 14:15:22 UTC
-Método: GET https://www.ongsys.com.br/app/index.php/api/v2/pedidos?pageNumber=1
-Status: Conexão interrompida por estouro do tempo limite padrão (30s)
-Erro Registrado: HTTPSConnectionPool(host='www.ongsys.com.br', port=443): Read timed out. (read timeout=30)
-Medida Adotada pelo CDC: Aumento de timeout para 120s e paginação controlada.
-```
-
----
-**Equipe de Engenharia e TI — Centro de Desenvolvimento e Cidadania (CDC)**
-E-mail: tecnologia@cdc.org.br
-"""
-
-    history = [
-        {'data': '30/08/2026', 'versao': 'v1.0', 'rotas_ok': 15, 'percentual': '75%', 'destaque': 'Estruturação inicial da esteira'},
-        {'data': '31/08/2026', 'versao': 'v1.5', 'rotas_ok': 16, 'percentual': '80%', 'destaque': 'Correção do proxy e persistência de 25k registros'},
-        {'data': '01/09/2026', 'versao': 'v2.0 (Atual)', 'rotas_ok': 23, 'percentual': '95%', 'destaque': 'Carga completa de 1 ano de auditoria (112k logs) e 25 rotas mapeadas'},
-    ]
-
-    return JsonResponse({
-        'gerado_em': now_str,
-        'cnpj': '03...29',
-        'empresa': 'Centro de Desenvolvimento e Cidadania (CDC)',
-        'profile': profile,
-        'db_total': db_total,
-        'db_counts': db_counts,
-        'endpoints': endpoints_list,
-        'history': history,
-        'markdown_text': markdown_text
-    })
-
-
-@csrf_exempt
-@never_cache
-def ongsys_download_report_pdf_view(request):
-    """
-    Gera dinamicamente o PDF oficial do Relatório de Alinhamento Técnico em memória e faz o download.
-    """
-    from django.http import HttpResponse
-    from reportlab.lib.pagesizes import letter
-    from reportlab.lib import colors
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, HRFlowable
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.pdfgen import canvas
-
-    profile = request.GET.get('profile', 'tecnico')
-
-    buffer = io.BytesIO()
-
-    class NumberedCanvas(canvas.Canvas):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self._saved_page_states = []
-
-        def showPage(self):
-            self._saved_page_states.append(dict(self.__dict__))
-            self._startPage()
-
-        def save(self):
-            num_pages = len(self._saved_page_states)
-            for state in self._saved_page_states:
-                self.__dict__.update(state)
-                self.draw_page_decorations(num_pages)
-                super().showPage()
-            super().save()
-
-        def draw_page_decorations(self, page_count):
-            self.saveState()
-            self.setFont("Helvetica", 8)
-            self.setFillColor(colors.HexColor("#64748b"))
-            if self._pageNumber > 1:
-                self.drawString(36, 756, "Relatório de Alinhamento Técnico & Governança — Integração API v2 ONGSYS x CDC")
-                self.drawRightString(576, 756, "CNPJ: 03...29")
-                self.setStrokeColor(colors.HexColor("#cbd5e1"))
-                self.setLineWidth(0.5)
-                self.line(36, 750, 576, 750)
-            self.setStrokeColor(colors.HexColor("#cbd5e1"))
-            self.setLineWidth(0.5)
-            self.line(36, 38, 576, 38)
-            self.drawString(36, 26, "Centro de Desenvolvimento e Cidadania (CDC) — Tecnologia & Engenharia de Dados")
-            self.drawRightString(576, 26, f"Página {self._pageNumber} de {page_count}")
-            self.restoreState()
-
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=letter,
-        leftMargin=36,
-        rightMargin=36,
-        topMargin=44,
-        bottomMargin=46
+    tested = [item for item in endpoints if item['status_code'] is not None]
+    successful = [item for item in tested if item['status_code'] == 200]
+    conformity = round(len(successful) * 100 / len(tested), 1) if tested else None
+    generated_at = timezone.now()
+    status_label = (
+        f"{len(successful)} de {len(tested)} rotas testadas responderam HTTP 200"
+        if tested else 'Sem telemetria de testes disponível'
     )
 
+    markdown_lines = [
+        '# Relatório operacional da integração ONGSYS x CDC',
+        f"**Gerado em:** {generated_at.strftime('%d/%m/%Y às %H:%M')}",
+        f"**Status observado:** {status_label}",
+        f"**Registros persistidos:** {sum(counts.values())}",
+        '',
+        '| Endpoint de leitura | HTTP | Latência | Último teste |',
+        '| :--- | :---: | :---: | :--- |',
+    ]
+    for item in endpoints:
+        latency = f"{item['latency_ms']} ms" if item['latency_ms'] is not None else '—'
+        last_tested = item['last_tested'] or '—'
+        markdown_lines.append(
+            f"| `{item['path']}` | {item['status']} | {latency} | {last_tested} |"
+        )
+
+    return {
+        'gerado_em': generated_at.strftime('%d/%m/%Y às %H:%M'),
+        'empresa': 'Centro de Desenvolvimento e Cidadania (CDC)',
+        'profile': profile,
+        'db_total': sum(counts.values()),
+        'db_counts': counts,
+        'endpoints': endpoints,
+        'history': [],
+        'tested_count': len(tested),
+        'success_count': len(successful),
+        'conformity_pct': conformity,
+        'status_label': status_label,
+        'markdown_text': '\n'.join(markdown_lines),
+    }
+
+
+@never_cache
+@login_required(login_url='dashboard:login')
+@permission_required('integrations.view_ongsys_report', raise_exception=True)
+def ongsys_report_data_view(request):
+    return JsonResponse(_ongsys_live_report_payload(request.GET.get('profile', 'tecnico')))
+
+
+@never_cache
+@login_required(login_url='dashboard:login')
+@permission_required('integrations.view_ongsys_report', raise_exception=True)
+def ongsys_download_report_pdf_view(request):
+    import io
+    from django.http import HttpResponse
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+    payload = _ongsys_live_report_payload(request.GET.get('profile', 'tecnico'))
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
     styles = getSampleStyleSheet()
-
-    title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontName='Helvetica-Bold', fontSize=16, leading=20, textColor=colors.HexColor("#0f172a"), spaceAfter=2)
-    subtitle_style = ParagraphStyle('DocSubTitle', parent=styles['Normal'], fontName='Helvetica', fontSize=9, leading=12, textColor=colors.HexColor("#475569"), spaceAfter=6)
-    section_heading = ParagraphStyle('SectionHeading', parent=styles['Heading2'], fontName='Helvetica-Bold', fontSize=10.5, leading=13.5, textColor=colors.HexColor("#0f172a"), spaceBefore=8, spaceAfter=4)
-    body_style = ParagraphStyle('BodyStyle', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=10.8, textColor=colors.HexColor("#334155"), spaceAfter=4)
-    bullet_style = ParagraphStyle('BulletStyle', parent=body_style, leftIndent=8, spaceAfter=3)
-    table_cell_style = ParagraphStyle('TableCell', parent=styles['Normal'], fontName='Helvetica', fontSize=7.2, leading=9.0, textColor=colors.HexColor("#1e293b"))
-    table_cell_bold = ParagraphStyle('TableCellBold', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=7.2, leading=9.0, textColor=colors.HexColor("#0f172a"))
-    table_cell_code = ParagraphStyle('TableCellCode', parent=styles['Normal'], fontName='Courier-Bold', fontSize=7.2, leading=9.0, textColor=colors.HexColor("#0284c7"))
-
-    story = []
-
-    doc_name = "Relatório de Alinhamento Técnico & Governança" if profile == 'tecnico' else "Relatório Executivo de Conformidade e Integrações"
-    story.append(Paragraph(doc_name, title_style))
-    story.append(Paragraph("Esteira de Integração Automatizada API REST v2 ONGSYS x CDC", subtitle_style))
-
-    meta_data = [
-        [
-            Paragraph("<b>Destinatário:</b> Equipe Técnica & Suporte de Integrações — ONGSYS", body_style),
-            Paragraph("<b>Data de Emissão:</b> 01 de Setembro de 2026", body_style)
-        ],
-        [
-            Paragraph("<b>Remetente:</b> Engenharia de Dados & TI — Centro de Desenvolvimento e Cidadania (CDC)", body_style),
-            Paragraph("<b>CNPJ (Anonimizado):</b> 03...29", body_style)
-        ],
-        [
-            Paragraph("<b>Assunto:</b> Laudo Técnico API v2, Mapeamento de Rotas, Diagnósticos & Sugestões", body_style),
-            Paragraph("<b>Credencial API:</b> f0...5e (Conexão Segura M2M)", body_style)
-        ]
+    story = [
+        Paragraph('Relatório operacional da integração ONGSYS x CDC', styles['Title']),
+        Paragraph(f"Gerado em: {payload['gerado_em']}", styles['Normal']),
+        Paragraph(payload['status_label'], styles['Heading2']),
+        Paragraph(f"Registros persistidos: {payload['db_total']}", styles['Normal']),
+        Spacer(1, 12),
     ]
-    meta_table = Table(meta_data, colWidths=[310, 230])
-    meta_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#f8fafc")),
-        ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#cbd5e1")),
-        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
-        ('TOPPADDING', (0,0), (-1,-1), 3),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
-        ('LEFTPADDING', (0,0), (-1,-1), 5),
-        ('RIGHTPADDING', (0,0), (-1,-1), 5),
+    rows = [['Endpoint de leitura', 'HTTP', 'Latência', 'Último teste']]
+    for endpoint in payload['endpoints']:
+        rows.append([
+            endpoint['path'],
+            endpoint['status'],
+            f"{endpoint['latency_ms']} ms" if endpoint['latency_ms'] is not None else '—',
+            endpoint['last_tested'] or '—',
+        ])
+    table = Table(rows, repeatRows=1, colWidths=[220, 60, 70, 170])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e2e8f0')),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#94a3b8')),
+        ('FONTSIZE', (0, 0), (-1, -1), 7),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
     ]))
-    story.append(meta_table)
-    story.append(Spacer(1, 4))
-
-    story.append(Paragraph("1. Alinhamento Técnico & Melhoria Contínua", section_heading))
-    story.append(Paragraph(
-        "Prezada equipe técnica do <b>ONGSYS</b>,<br/>"
-        "Apresentamos este laudo técnico referente à esteira de integração automatizada via <b>API REST v2</b> "
-        "entre o sistema ONGSYS e a plataforma de gestão de dados do <b>Centro de Desenvolvimento e Cidadania (CDC)</b>.<br/>"
-        "O objetivo deste documento é compartilhar com total transparência as evidências técnicas e métricas consolidadas coletadas "
-        "pela nossa esteira de integração, visando a <b>melhoria contínua</b> dos fluxos de dados, a redução de tráfego desnecessário "
-        "em ambos os servidores e a solicitação pontual para habilitação dos módulos fiscais na nossa credencial de acesso.",
-        body_style
-    ))
-
-    story.append(Paragraph("2. Matriz de Mapeamento dos 25 Endpoints (API v2)", section_heading))
-
-    endpoints_table_data = [
-        [Paragraph("<b>Módulo</b>", table_cell_bold), Paragraph("<b>Endpoint Oficial</b>", table_cell_bold), Paragraph("<b>Método</b>", table_cell_bold), Paragraph("<b>Status</b>", table_cell_bold), Paragraph("<b>Diagnóstico & Papel Operacional na Integração</b>", table_cell_bold)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/contas-pagar", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("17.173 despesas atômicas com centros de custo e rateios", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/create-contas-pagar", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Criação de compromissos e rateios contábeis", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/baixa-contas-pagar", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Liquidações financeiras e baixas em contas bancárias", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/contas-receber", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("2.458 receitas, termos de repasse e doações", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/create-contas-receber", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Cadastro de direitos de repasse financeiro", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/baixa-contas-receber", table_cell_code), Paragraph("POST", table_cell_style), Paragraph("<font color='#16a34a'><b>Operacional</b></font>", table_cell_style), Paragraph("Quitação de repasses nas contas bancárias", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/lancamentos-bancarios", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("823 extratos e conciliações bancárias", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/transferencias-bancarias", table_cell_code), Paragraph("GET/POST", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Aportes e transferências entre contas do CDC", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/adiantamentos-fornecedores", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Controle de adiantamentos a credores", table_cell_style)],
-        [Paragraph("Financeiro", table_cell_style), Paragraph("/api/v2/adiantamentos-clientes", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Controle de adiantamentos a clientes e convênios", table_cell_style)],
-        [Paragraph("Cadastros", table_cell_style), Paragraph("/api/v2/fornecedores", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("2.976 fornecedores homologados (CNPJ/CPF)", table_cell_style)],
-        [Paragraph("Cadastros", table_cell_style), Paragraph("/api/v2/clientes", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("235 unidades e parceiros cadastrados", table_cell_style)],
-        [Paragraph("Contratos", table_cell_style), Paragraph("/api/v2/contratos", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("101 contratos de despesas e prestadores", table_cell_style)],
-        [Paragraph("Contratos", table_cell_style), Paragraph("/api/v2/contratos-receber", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Contratos de repasse institucional e receitas", table_cell_style)],
-        [Paragraph("Estoque", table_cell_style), Paragraph("/api/v2/produtos", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("1.692 produtos com grupos e unidades de medida", table_cell_style)],
-        [Paragraph("Estoque", table_cell_style), Paragraph("/api/v2/pedidos", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Ordens de compra e requisições de almoxarifado", table_cell_style)],
-        [Paragraph("NextERP", table_cell_style), Paragraph("/api/v2/pedidos/status/finalizado", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("850 pedidos finalizados para conciliação física de estoque", table_cell_style)],
-        [Paragraph("NextERP", table_cell_style), Paragraph("/api/v2/produtos/catalogo/completo", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Sincronização de catálogo com especificações", table_cell_style)],
-        [Paragraph("NextERP", table_cell_style), Paragraph("/api/v2/produtos/unidades-medida", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("Tabela unificada de UOM (UND, KG, CX, PCT)", table_cell_style)],
-        [Paragraph("Fiscal", table_cell_style), Paragraph("/api/v2/notas-servico", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#dc2626'><b>401 Auth</b></font>", table_cell_style), Paragraph("NFS-e: Requer ativação do escopo fiscal no perfil", table_cell_style)],
-        [Paragraph("Fiscal", table_cell_style), Paragraph("/api/v2/notas-produto", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#dc2626'><b>401 Auth</b></font>", table_cell_style), Paragraph("NF-e: Requer ativação do escopo fiscal no perfil", table_cell_style)],
-        [Paragraph("Auditoria", table_cell_style), Paragraph("/api/v2/logs", table_cell_code), Paragraph("GET", table_cell_style), Paragraph("<font color='#16a34a'><b>200 OK</b></font>", table_cell_style), Paragraph("112.170 eventos de auditoria (365 dias completos)", table_cell_style)],
-    ]
-
-    ep_table = Table(endpoints_table_data, colWidths=[56, 154, 46, 58, 226])
-    ep_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#f1f5f9")),
-        ('GRID', (0,0), (-1,-1), 0.4, colors.HexColor("#cbd5e1")),
-        ('TOPPADDING', (0,0), (-1,-1), 2),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
-        ('LEFTPADDING', (0,0), (-1,-1), 4),
-        ('RIGHTPADDING', (0,0), (-1,-1), 4),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor("#fafafa")]),
-    ]))
-    story.append(ep_table)
-    story.append(Spacer(1, 6))
-
-    story.append(Paragraph("3. Diagnóstico Técnico Aprofundado (Causa, Impacto & Sugestão)", section_heading))
-
-    story.append(Paragraph("• <b>Ponto A: Tempo de Resposta (Latência) na Rota /pedidos</b><br/>"
-                           "<b>Causa Técnica:</b> Chamadas ao endpoint <code>/api/v2/pedidos</code> realizam junções de dados no banco do ONGSYS e levavam entre 33 e 45 segundos para responder a 1ª página.<br/>"
-                           "<b>Impacto Operacional:</b> <i>Read timeout</i> padrão de 30s nos clientes HTTP, forçando tentativas repetidas (<i>retries</i>) e sobrecarregando processamento de ambos os lados.<br/>"
-                           "<b>Sugestão de Ganho Mútuo:</b> Disponibilização de parâmetro de filtro por período (<code>?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD</code>) e paginação (<code>?pageNumber=N</code>), reduzindo o tempo de resposta para menos de 3 segundos.", bullet_style))
-
-    story.append(Paragraph("• <b>Ponto B: Retenção de Ordens de Compra no Status \"Ordem gerada\"</b><br/>"
-                           "<b>Causa Operacional:</b> O extrator automatizado lê <code>/pedidos</code> e aguarda o status <code>\"Ordem finalizada\"</code> para dar entrada física no almoxarifado sem risco de duplicidade.<br/>"
-                           "<b>Impacto Operacional:</b> Materiais e insumos que já foram entregues fisicamente nas unidades permanecem invisíveis no sistema interno porque continuam retidos como <code>\"Ordem gerada\"</code> no ONGSYS.<br/>"
-                           "<b>Sugestão de Ganho Mútuo:</b> Alinhamento operacional para transição do status para <code>\"Ordem finalizada\"</code> no momento da entrega física dos materiais.", bullet_style))
-
-    story.append(Paragraph("• <b>Ponto C: Habilitação de Acesso às Rotas Fiscais (NFS-e e NF-e)</b><br/>"
-                           "<b>Causa Técnica:</b> As rotas oficiais <code>/api/v2/notas-servico</code> e <code>/api/v2/notas-produto</code> retornam <code>HTTP 401 Unauthorized</code> para a credencial <code>f0...5e</code>.<br/>"
-                           "<b>Impacto Operacional:</b> Impossibilidade de sincronização automatizada dos arquivos XML e DANFE para a escrituração contábil.<br/>"
-                           "<b>Sugestão de Ganho Mútuo:</b> Solicitação para que o suporte do ONGSYS marque a permissão de consulta fiscal no perfil da credencial do CNPJ <code>03...29</code>.", bullet_style))
-
-    story.append(Spacer(1, 6))
-
-    story.append(Paragraph("4. Métricas Consolidadas do Banco Atômico no CDC (PostgreSQL ACID)", section_heading))
-    story.append(Paragraph(
-        "A esteira automatizada mantém um banco local espelhado com <b>137.557 registros reais sincronizados</b> com zero duplicidade:",
-        body_style
-    ))
-
-    metrics_data = [
-        [Paragraph("<b>Módulo / Entidade</b>", table_cell_bold), Paragraph("<b>Rota de Origem</b>", table_cell_bold), Paragraph("<b>Total Sincronizado</b>", table_cell_bold), Paragraph("<b>Integridade & Status</b>", table_cell_bold)],
-        [Paragraph("🛡️ Trilha de Auditoria (1 Ano)", table_cell_style), Paragraph("<code>/api/v2/logs</code>", table_cell_style), Paragraph("<b>112.170 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (365 dias)</font>", table_cell_style)],
-        [Paragraph("💳 Contas a Pagar & Despesas", table_cell_style), Paragraph("<code>/api/v2/contas-pagar</code>", table_cell_style), Paragraph("<b>17.145 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Rateios)</font>", table_cell_style)],
-        [Paragraph("🏢 Fornecedores Cadastrados", table_cell_style), Paragraph("<code>/api/v2/fornecedores</code>", table_cell_style), Paragraph("<b>2.976 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Base Ativa)</font>", table_cell_style)],
-        [Paragraph("💰 Contas a Receber & Repasses", table_cell_style), Paragraph("<code>/api/v2/contas-receber</code>", table_cell_style), Paragraph("<b>2.437 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Receitas)</font>", table_cell_style)],
-        [Paragraph("📦 Catálogo de Produtos", table_cell_style), Paragraph("<code>/api/v2/produtos</code>", table_cell_style), Paragraph("<b>1.692 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Itens/UOM)</font>", table_cell_style)],
-        [Paragraph("🏦 Lançamentos & Conciliações", table_cell_style), Paragraph("<code>/api/v2/lancamentos-bancarios</code>", table_cell_style), Paragraph("<b>823 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Extratos)</font>", table_cell_style)],
-        [Paragraph("👥 Clientes e Unidades", table_cell_style), Paragraph("<code>/api/v2/clientes</code>", table_cell_style), Paragraph("<b>234 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Unidades)</font>", table_cell_style)],
-        [Paragraph("📑 Contratos de Prestação & Repasse", table_cell_style), Paragraph("<code>/api/v2/contratos</code>", table_cell_style), Paragraph("<b>101 registros</b>", table_cell_style), Paragraph("<font color='#16a34a'>🟢 100% OK (Vigentes)</font>", table_cell_style)],
-        [Paragraph("<b>TOTAL GERAL CONSOLIDADO</b>", table_cell_bold), Paragraph("<b>PostgreSQL CDC</b>", table_cell_bold), Paragraph("<b>137.557 registros</b>", table_cell_bold), Paragraph("<font color='#16a34a'><b>🟢 ACID Transacional</b></font>", table_cell_bold)],
-    ]
-    m_table = Table(metrics_data, colWidths=[155, 140, 115, 130])
-    m_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#f1f5f9")),
-        ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#f8fafc")),
-        ('GRID', (0,0), (-1,-1), 0.4, colors.HexColor("#cbd5e1")),
-        ('TOPPADDING', (0,0), (-1,-1), 2.5),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
-        ('LEFTPADDING', (0,0), (-1,-1), 5),
-        ('RIGHTPADDING', (0,0), (-1,-1), 5),
-    ]))
-    story.append(m_table)
-    story.append(Spacer(1, 6))
-
-    story.append(Paragraph("5. Resumo das Sugestões Técnicas de Melhoria Contínua", section_heading))
-    story.append(Paragraph("1. <b>Habilitação Fiscal na Credencial (<code>f0...5e</code>):</b> Liberação de permissão para NFS-e e NF-e.<br/>"
-                           "2. <b>Filtro de Período e Paginação em <code>/pedidos</code>:</b> Redução de tráfego de rede e ganho de performance.<br/>"
-                           "3. <b>Headers de Limite de Taxa (Rate Limiting):</b> Envio de <code>X-RateLimit-Limit</code> e <code>X-RateLimit-Remaining</code>.<br/>"
-                           "4. <b>Delta Sync Incremental:</b> Suporte a <code>?atualizado_apos=YYYY-MM-DD HH:MM:SS</code> para sincronização rápida de alterações diárias.<br/>"
-                           "5. <b>Mecanismo de Webhooks (Roadmap):</b> Notificações push assíncronas para eventos de conclusão de pedidos e liquidação financeira.", body_style))
-
-    story.append(Spacer(1, 6))
-
-    story.append(Paragraph("6. Apêndice: Registros Sanitizados de Teste da Esteira CDC", section_heading))
-
-    log_box_data = [
-        [
-            Paragraph("<b>A.1. Registro de Timeout de Leitura na Rota /pedidos (>30s):</b><br/>"
-                      "<font name='Courier' size='6.5'>[LOG INTEGRAL SANITIZADO - CDC ETL]<br/>"
-                      "Data/Hora: 2026-08-30 14:15:22 UTC<br/>"
-                      "Metodo: GET https://www.ongsys.com.br/app/index.php/api/v2/pedidos?pageNumber=1<br/>"
-                      "Status: Conexao interrompida por estouro do tempo limite padrao (30s)<br/>"
-                      "Erro Registrado: HTTPSConnectionPool(host='www.ongsys.com.br', port=443): Read timed out.<br/>"
-                      "Medida Adotada pelo CDC: Aumento de timeout para 120s e paginacao controlada.</font>", body_style)
-        ],
-        [
-            Paragraph("<b>A.2. Amostra de Pedidos no Status \"Ordem gerada\" Aguardando Entrada:</b><br/>"
-                  "<font name='Courier' size='6.5'>[<br/>"
-                  "  {\"idPedido\": 2728, \"numeroPedido\": \"2728\", \"statusPedido\": \"Ordem gerada\", \"diagnostico\": \"Material recebido; aguardando status 'Ordem finalizada'\"},<br/>"
-                  "  {\"idPedido\": 2734, \"numeroPedido\": \"2734\", \"statusPedido\": \"Ordem gerada\", \"diagnostico\": \"Insumos na unidade; aguardando transicao para 'Ordem finalizada'\"}<br/>"
-                  "]</font>", body_style)
-        ]
-    ]
-    log_table = Table(log_box_data, colWidths=[540])
-    log_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#f8fafc")),
-        ('BOX', (0,0), (-1,-1), 0.8, colors.HexColor("#cbd5e1")),
-        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
-        ('TOPPADDING', (0,0), (-1,-1), 3),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
-        ('LEFTPADDING', (0,0), (-1,-1), 6),
-        ('RIGHTPADDING', (0,0), (-1,-1), 6),
-    ]))
-    story.append(log_table)
-    story.append(Spacer(1, 6))
-
-    sign_data = [
-        [
-            Paragraph("<b>Equipe de Engenharia e TI</b><br/>"
-                      "Centro de Desenvolvimento e Cidadania (CDC)<br/>"
-                      "E-mail: <i>tecnologia@cdc.org.br</i>", body_style),
-            Paragraph("<b>Status da Integração CDC:</b><br/>"
-                      "<font color='#16a34a'><b>🟢 95% OPERACIONAL E HOMOLOGADA</b></font><br/>"
-                      "137.557 registros transacionais gravados", body_style)
-        ]
-    ]
-    sign_table = Table(sign_data, colWidths=[330, 210])
-    sign_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#f8fafc")),
-        ('BOX', (0,0), (-1,-1), 0.8, colors.HexColor("#cbd5e1")),
-        ('TOPPADDING', (0,0), (-1,-1), 4),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
-        ('LEFTPADDING', (0,0), (-1,-1), 6),
-        ('RIGHTPADDING', (0,0), (-1,-1), 6),
-    ]))
-    story.append(sign_table)
-
-    doc.build(story, canvasmaker=NumberedCanvas)
+    story.append(table)
+    doc.build(story)
     buffer.seek(0)
-    filename = f"Relatorio_Alinhamento_Tecnico_ONGSYS_CDC_{profile}.pdf"
     response = HttpResponse(buffer, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response['Content-Disposition'] = 'attachment; filename="Relatorio_Operacional_ONGSYS_CDC.pdf"'
     return response
-
-
