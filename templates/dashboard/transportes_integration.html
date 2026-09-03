@@ -28,13 +28,13 @@
         border-top: 4px solid #f59e0b;
     }
     .file-icon-box {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 22px;
+        font-size: 20px;
         font-weight: bold;
     }
     .file-icon-uber {
@@ -45,7 +45,7 @@
         background: #fef3c7;
         color: #b45309;
     }
-    .table-endpoints, .table-corridas {
+    .table-endpoints, .table-corridas, .table-arquivos {
         border-collapse: separate;
         border-spacing: 0;
         width: 100%;
@@ -54,7 +54,7 @@
         overflow: hidden;
         border: 1px solid #e2e8f0;
     }
-    .table-endpoints thead th, .table-corridas thead th {
+    .table-endpoints thead th, .table-corridas thead th, .table-arquivos thead th {
         background-color: #0f172a;
         color: #f8fafc;
         font-size: 0.78em;
@@ -64,14 +64,14 @@
         font-weight: 700;
         border: none;
     }
-    .table-endpoints tbody tr.main-row, .table-corridas tbody tr {
+    .table-endpoints tbody tr.main-row, .table-corridas tbody tr, .table-arquivos tbody tr {
         transition: background-color 0.15s ease;
         border-bottom: 1px solid #f1f5f9;
     }
-    .table-endpoints tbody tr.main-row:hover, .table-corridas tbody tr:hover {
+    .table-endpoints tbody tr.main-row:hover, .table-corridas tbody tr:hover, .table-arquivos tbody tr:hover {
         background-color: #f8fafc;
     }
-    .table-endpoints td, .table-corridas td {
+    .table-endpoints td, .table-corridas td, .table-arquivos td {
         padding: 12px 14px;
         vertical-align: middle;
         font-size: 0.86em;
@@ -238,10 +238,10 @@
         </p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <button type="button" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUploadLote" style="border-radius: 6px; font-size: 0.84em;">
-            <i class="ri-upload-cloud-2-line"></i> Ingestão de Novo Lote (.CSV)
+        <button type="button" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalUploadLote" style="border-radius: 6px; font-size: 0.85em;">
+            <i class="ri-upload-cloud-2-line fs-16"></i> + Fazer Upload de Arquivo (.CSV)
         </button>
-        <a href="{% url 'dashboard:api_transportes_exportar' %}" class="btn btn-success btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm" style="border-radius: 6px; font-size: 0.84em;">
+        <a href="{% url 'dashboard:api_transportes_exportar' %}" class="btn btn-success btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm px-3" style="border-radius: 6px; font-size: 0.85em;">
             <i class="ri-file-excel-2-line"></i> Baixar Consolidado Geral (.xlsx)
         </a>
     </div>
@@ -337,16 +337,31 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- ABA 1: ARQUIVOS MENSAIS (.CSV / .XLSX)                                    -->
+<!-- ABA 1: ARQUIVOS MENSAIS (.CSV / .XLSX) — EXIBIÇÃO EM LISTA (TABELA)       -->
 <!-- ========================================================================= -->
 <div id="tabContentArquivos">
-    <!-- Barra de Filtros por Ano e Plataforma -->
-    <div class="p-3 bg-white border rounded-3 shadow-sm mb-4">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div class="card border shadow-sm rounded-3 mb-4">
+        <!-- Header da Lista com Botão de Upload Destacado -->
+        <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h6 class="fw-bold mb-0 text-dark">
+                    <i class="ri-folder-zip-fill text-warning me-2 fs-18"></i> Acervo de Arquivos Mensais (.CSV / .XLSX)
+                </h6>
+                <small class="text-muted">Lista dos arquivos de fechamento mensal importados para conciliação contábil</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-1.5 shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalUploadLote" style="border-radius: 6px; font-size: 0.85em;">
+                    <i class="ri-upload-cloud-2-line fs-16"></i> + Fazer Upload de Arquivo (.CSV)
+                </button>
+            </div>
+        </div>
+
+        <!-- Barra de Filtros e Alternador de Visualização -->
+        <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between flex-wrap gap-3">
             <!-- Filtro de Anos -->
             <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                <span class="text-muted small fw-bold me-2"><i class="ri-calendar-line me-1"></i> Ano:</span>
-                <button type="button" class="filter-pill active" onclick="filtrarAno('', this)">Todos os Anos</button>
+                <span class="text-muted small fw-bold me-1"><i class="ri-calendar-line"></i> Ano:</span>
+                <button type="button" class="filter-pill active" onclick="filtrarAno('', this)">Todos</button>
                 <button type="button" class="filter-pill" onclick="filtrarAno('2026', this)">2026 (Atual)</button>
                 <button type="button" class="filter-pill" onclick="filtrarAno('2025', this)">2025</button>
                 <button type="button" class="filter-pill" onclick="filtrarAno('2024', this)">2024</button>
@@ -355,23 +370,53 @@
 
             <!-- Filtro de Plataforma -->
             <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                <span class="text-muted small fw-bold me-2"><i class="ri-car-line me-1"></i> Plataforma:</span>
+                <span class="text-muted small fw-bold me-1"><i class="ri-car-line"></i> Plataforma:</span>
                 <button type="button" class="filter-pill active" onclick="filtrarPlataforma('', this)">Todas</button>
                 <button type="button" class="filter-pill" onclick="filtrarPlataforma('uber', this)">Uber</button>
                 <button type="button" class="filter-pill" onclick="filtrarPlataforma('99', this)">99</button>
             </div>
 
-            <!-- Contador de Arquivos -->
+            <!-- Alternador de Visualização & Contador -->
             <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-light text-dark border font-monospace" id="lblContadorArquivos" style="font-size: 0.8em;">Carregando arquivos...</span>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" id="btnModoLista" onclick="setModoExibicao('lista')" title="Exibir em Lista / Tabela">
+                        <i class="ri-list-check"></i> Lista
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnModoGrade" onclick="setModoExibicao('grade')" title="Exibir em Grade / Cartões">
+                        <i class="ri-grid-fill"></i> Grade
+                    </button>
+                </div>
+                <span class="badge bg-white text-dark border font-monospace" id="lblContadorArquivos" style="font-size: 0.8em;">0 arquivos</span>
             </div>
         </div>
-    </div>
 
-    <!-- Grade de Arquivos Mensais -->
-    <div class="row g-3 mb-4" id="gridArquivosMensais">
-        <div class="col-12 text-center py-5 text-muted">
-            <span class="spinner-border spinner-border-sm me-2"></span> Carregando arquivos mensais...
+        <!-- MODO 1: TABELA / LISTA DE ARQUIVOS (PADRÃO) -->
+        <div class="table-responsive" id="divContainerListaArquivos">
+            <table class="table-arquivos mb-0" id="tabelaArquivosMensais">
+                <thead>
+                    <tr>
+                        <th style="width: 220px;">Arquivo .CSV</th>
+                        <th style="width: 110px;">Plataforma</th>
+                        <th>Período / Mês</th>
+                        <th style="width: 140px; text-align: center;">Viagens Auditadas</th>
+                        <th style="width: 160px; text-align: right;">Faturamento Total</th>
+                        <th style="width: 130px; text-align: right;">KM Total</th>
+                        <th style="width: 200px; text-align: right;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyArquivosMensais">
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Carregando arquivos mensais...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MODO 2: GRADE DE CARDS -->
+        <div class="p-3 d-none" id="divContainerGradeArquivos">
+            <div class="row g-3" id="gridArquivosMensais"></div>
         </div>
     </div>
 </div>
@@ -454,7 +499,7 @@
                         </div>
                         <h6 class="fw-bold mb-1">Listagem Paginada de Corridas (22 Campos)</h6>
                         <code class="text-primary font-monospace d-block mb-2" style="font-size: 0.84em;">/api/v1/transportes/corridas/</code>
-                        <p class="text-muted small mb-2">Filtros aceitos: <code>?ano=2026</code>, <code>?mes=08</code>, <code>?plataforma=uber|99</code>, <code>?programa=atitude</code>, <code>?busca=texto</code>, <code>?page=1</code>, <code>?page_size=50</code>.</p>
+                        <p class="text-muted small mb-2">Filtros aceitos: <code>?arquivo=2026.08.csv</code>, <code>?ano=2026</code>, <code>?mes=08</code>, <code>?plataforma=uber|99</code>, <code>?programa=atitude</code>, <code>?busca=texto</code>, <code>?page=1</code>, <code>?page_size=50</code>.</p>
                         <div class="terminal-black-box p-2">
                             <pre class="terminal-output p-2 mb-0" style="max-height: 180px;">{
   "status": "success",
@@ -536,7 +581,7 @@
                         <code class="text-primary font-monospace" style="font-size: 0.82em;">/v1/business/{{ ep.path }}</code>
                     </td>
                     <td>
-                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" style="font-size: 0.74em; border-radius: 6px;">
+                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
                             <i class="ri-checkbox-circle-fill me-1"></i> Preparado (Pronto)
                         </span>
                     </td>
@@ -600,7 +645,7 @@
                         <code class="text-warning font-monospace" style="font-size: 0.82em;">/v4/{{ ep.path }}</code>
                     </td>
                     <td>
-                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" style="font-size: 0.74em; border-radius: 6px;">
+                        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1 fw-bold font-monospace" id="badge-status-{{ ep.id }}" style="font-size: 0.74em; border-radius: 6px;">
                             <i class="ri-checkbox-circle-fill me-1"></i> Preparado (Pronto)
                         </span>
                     </td>
@@ -770,6 +815,7 @@
 
 {% block extra_js %}
 <script>
+    let modoExibicaoArquivos = 'lista';
     let filtroAnoAtual = '';
     let filtroPlatAtual = '';
     let listaArquivosCache = [];
@@ -796,18 +842,27 @@
         });
     }
 
+    function setModoExibicao(modo) {
+        modoExibicaoArquivos = modo;
+        document.getElementById("btnModoLista").classList.toggle("active", modo === 'lista');
+        document.getElementById("btnModoGrade").classList.toggle("active", modo === 'grade');
+        document.getElementById("divContainerListaArquivos").classList.toggle("d-none", modo !== 'lista');
+        document.getElementById("divContainerGradeArquivos").classList.toggle("d-none", modo !== 'grade');
+        renderizarVisualizacaoArquivos();
+    }
+
     function filtrarAno(ano, btn) {
         filtroAnoAtual = ano;
         btn.parentElement.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("active"));
         btn.classList.add("active");
-        renderizarGridArquivos();
+        renderizarVisualizacaoArquivos();
     }
 
     function filtrarPlataforma(plat, btn) {
         filtroPlatAtual = plat;
         btn.parentElement.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("active"));
         btn.classList.add("active");
-        renderizarGridArquivos();
+        renderizarVisualizacaoArquivos();
     }
 
     function carregarArquivosMensais() {
@@ -815,16 +870,15 @@
         .then(r => r.json())
         .then(data => {
             listaArquivosCache = data.arquivos || [];
-            document.getElementById("lblContadorArquivos").innerText = `${listaArquivosCache.length} arquivos mensais cadastrados`;
-            renderizarGridArquivos();
+            document.getElementById("lblContadorArquivos").innerText = `${listaArquivosCache.length} arquivos mensais`;
+            renderizarVisualizacaoArquivos();
         })
         .catch(err => {
-            document.getElementById("gridArquivosMensais").innerHTML = `<div class="col-12 text-center text-danger py-4">Erro ao carregar arquivos: ${err}</div>`;
+            document.getElementById("tbodyArquivosMensais").innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">Erro ao carregar arquivos: ${err}</td></tr>`;
         });
     }
 
-    function renderizarGridArquivos() {
-        const grid = document.getElementById("gridArquivosMensais");
+    function renderizarVisualizacaoArquivos() {
         let filtrados = listaArquivosCache;
 
         if (filtroAnoAtual) {
@@ -834,67 +888,113 @@
             filtrados = filtrados.filter(a => a.plataforma.toLowerCase().includes(filtroPlatAtual.toLowerCase()));
         }
 
+        // Renderiza Lista (Tabela)
+        const tbody = document.getElementById("tbodyArquivosMensais");
         if (filtrados.length === 0) {
-            grid.innerHTML = `<div class="col-12 text-center py-5 text-muted">
-                <i class="ri-folder-open-line fs-1 text-secondary mb-2 d-block"></i>
-                Nenhum arquivo mensal encontrado para os filtros selecionados.
-            </div>`;
-            return;
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="ri-folder-open-line fs-2 d-block mb-1 text-secondary"></i>Nenhum arquivo mensal encontrado para os filtros selecionados.</td></tr>`;
+        } else {
+            let htmlTable = "";
+            filtrados.forEach(arq => {
+                const isUber = arq.plataforma === 'Uber';
+                const badgePlat = isUber ? 
+                    '<span class="platform-badge-uber"><i class="ri-taxi-line me-1"></i>Uber</span>' : 
+                    '<span class="platform-badge-99"><i class="ri-car-fill me-1"></i>99</span>';
+                const iconSvg = isUber ? 'ri-file-text-fill text-dark' : 'ri-file-excel-fill text-warning';
+                const urlDownloadXlsx = `{% url 'dashboard:api_transportes_exportar' %}?arquivo=${encodeURIComponent(arq.arquivo_nome)}&plataforma=${encodeURIComponent(arq.plataforma)}`;
+
+                htmlTable += `<tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="${iconSvg} fs-18"></i>
+                            <span class="font-monospace fw-bold text-dark" style="font-size:0.92em;">${arq.arquivo_nome}</span>
+                        </div>
+                    </td>
+                    <td>${badgePlat}</td>
+                    <td>
+                        <span class="fw-bold text-dark" style="font-size:0.88em;">${arq.mes_extenso}</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-light text-dark border font-monospace px-2 py-1" style="font-size:0.82em;">${arq.total_viagens} viagens</span>
+                    </td>
+                    <td class="text-end fw-bold font-monospace text-success" style="font-size:0.92em;">
+                        R$ ${arq.total_valor_fmt}
+                    </td>
+                    <td class="text-end font-monospace text-muted" style="font-size:0.86em;">
+                        ${arq.total_km_fmt} km
+                    </td>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-1.5">
+                            <button type="button" class="btn btn-sm btn-dark fw-bold px-2.5 py-1 d-inline-flex align-items-center gap-1" onclick="abrirModalArquivo('${arq.arquivo_nome}', '${arq.plataforma}', '${arq.mes_extenso}', ${arq.total_viagens}, '${arq.total_valor_fmt}', '${arq.total_km_fmt}')" style="font-size:0.78em; border-radius:6px;">
+                                <i class="ri-eye-line"></i> Abrir Arquivo
+                            </button>
+                            <a href="${urlDownloadXlsx}" class="btn btn-sm btn-outline-success fw-bold px-2 py-1" title="Baixar .xlsx deste Mês" style="font-size:0.78em; border-radius:6px;">
+                                <i class="ri-file-excel-2-line"></i> .xlsx
+                            </a>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = htmlTable;
         }
 
-        let html = "";
-        filtrados.forEach(arq => {
-            const isUber = arq.plataforma === 'Uber';
-            const borderClass = isUber ? 'uber-border' : 'didi-border';
-            const iconBoxClass = isUber ? 'file-icon-uber' : 'file-icon-99';
-            const badgePlat = isUber ? 
-                '<span class="platform-badge-uber"><i class="ri-taxi-line me-1"></i>Uber</span>' : 
-                '<span class="platform-badge-99"><i class="ri-car-fill me-1"></i>99</span>';
-            const iconSvg = isUber ? 'ri-file-text-fill' : 'ri-file-excel-fill';
+        // Renderiza Grade (Cards)
+        const grid = document.getElementById("gridArquivosMensais");
+        if (filtrados.length === 0) {
+            grid.innerHTML = `<div class="col-12 text-center py-5 text-muted"><i class="ri-folder-open-line fs-1 text-secondary mb-2 d-block"></i>Nenhum arquivo encontrado.</div>`;
+        } else {
+            let htmlGrid = "";
+            filtrados.forEach(arq => {
+                const isUber = arq.plataforma === 'Uber';
+                const borderClass = isUber ? 'uber-border' : 'didi-border';
+                const iconBoxClass = isUber ? 'file-icon-uber' : 'file-icon-99';
+                const badgePlat = isUber ? 
+                    '<span class="platform-badge-uber"><i class="ri-taxi-line me-1"></i>Uber</span>' : 
+                    '<span class="platform-badge-99"><i class="ri-car-fill me-1"></i>99</span>';
+                const iconSvg = isUber ? 'ri-file-text-fill' : 'ri-file-excel-fill';
+                const urlDownloadXlsx = `{% url 'dashboard:api_transportes_exportar' %}?arquivo=${encodeURIComponent(arq.arquivo_nome)}&plataforma=${encodeURIComponent(arq.plataforma)}`;
 
-            const urlDownloadXlsx = `{% url 'dashboard:api_transportes_exportar' %}?arquivo=${encodeURIComponent(arq.arquivo_nome)}&plataforma=${encodeURIComponent(arq.plataforma)}`;
-
-            html += `
-            <div class="col-md-4 col-lg-3">
-                <div class="file-card ${borderClass} h-100 shadow-sm">
-                    <div>
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <div class="file-icon-box ${iconBoxClass}">
-                                <i class="${iconSvg}"></i>
+                htmlGrid += `
+                <div class="col-md-4 col-lg-3">
+                    <div class="file-card ${borderClass} h-100 shadow-sm">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="file-icon-box ${iconBoxClass}">
+                                    <i class="${iconSvg}"></i>
+                                </div>
+                                <div>${badgePlat}</div>
                             </div>
-                            <div>${badgePlat}</div>
+                            <h6 class="fw-bold text-dark mb-0 font-monospace" style="font-size:0.95em;">${arq.arquivo_nome}</h6>
+                            <small class="text-muted d-block mb-3 fw-bold">${arq.mes_extenso}</small>
+
+                            <div class="bg-light p-2.5 rounded-3 mb-3 border">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted" style="font-size:0.75em;">Corridas:</small>
+                                    <span class="fw-bold text-dark font-monospace" style="font-size:0.82em;">${arq.total_viagens} viagens</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted" style="font-size:0.75em;">Faturamento:</small>
+                                    <span class="fw-bold text-success font-monospace" style="font-size:0.84em;">R$ ${arq.total_valor_fmt}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted" style="font-size:0.75em;">Distância:</small>
+                                    <span class="fw-bold text-primary font-monospace" style="font-size:0.80em;">${arq.total_km_fmt} km</span>
+                                </div>
+                            </div>
                         </div>
-                        <h6 class="fw-bold text-dark mb-0 font-monospace" style="font-size:0.95em;">${arq.arquivo_nome}</h6>
-                        <small class="text-muted d-block mb-3 fw-bold">${arq.mes_extenso}</small>
 
-                        <div class="bg-light p-2.5 rounded-3 mb-3 border">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <small class="text-muted" style="font-size:0.75em;">Corridas:</small>
-                                <span class="fw-bold text-dark font-monospace" style="font-size:0.82em;">${arq.total_viagens} viagens</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <small class="text-muted" style="font-size:0.75em;">Faturamento:</small>
-                                <span class="fw-bold text-success font-monospace" style="font-size:0.84em;">R$ ${arq.total_valor_fmt}</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted" style="font-size:0.75em;">Distância:</small>
-                                <span class="fw-bold text-primary font-monospace" style="font-size:0.80em;">${arq.total_km_fmt} km</span>
-                            </div>
+                        <div class="d-flex gap-1.5 pt-2 border-top">
+                            <button type="button" class="btn btn-sm btn-dark flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-1" onclick="abrirModalArquivo('${arq.arquivo_nome}', '${arq.plataforma}', '${arq.mes_extenso}', ${arq.total_viagens}, '${arq.total_valor_fmt}', '${arq.total_km_fmt}')" style="font-size:0.78em; border-radius:6px;">
+                                <i class="ri-eye-line"></i> Abrir Arquivo
+                            </button>
+                            <a href="${urlDownloadXlsx}" class="btn btn-sm btn-outline-success fw-bold px-2.5" title="Baixar Planilha .xlsx deste Mês" style="font-size:0.78em; border-radius:6px;">
+                                <i class="ri-download-2-line"></i>
+                            </a>
                         </div>
                     </div>
-
-                    <div class="d-flex gap-1.5 pt-2 border-top">
-                        <button type="button" class="btn btn-sm btn-dark flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-1" onclick="abrirModalArquivo('${arq.arquivo_nome}', '${arq.plataforma}', '${arq.mes_extenso}', ${arq.total_viagens}, '${arq.total_valor_fmt}', '${arq.total_km_fmt}')" style="font-size:0.78em; border-radius:6px;">
-                            <i class="ri-eye-line"></i> Abrir Arquivo
-                        </button>
-                        <a href="${urlDownloadXlsx}" class="btn btn-sm btn-outline-success fw-bold px-2.5" title="Baixar Planilha .xlsx deste Mês" style="font-size:0.78em; border-radius:6px;">
-                            <i class="ri-download-2-line"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>`;
-        });
-        grid.innerHTML = html;
+                </div>`;
+            });
+            grid.innerHTML = htmlGrid;
+        }
     }
 
     function abrirModalArquivo(nomeArq, plat, mesExtenso, totalViagens, totalValor, totalKm) {
@@ -1055,7 +1155,7 @@
         searchCorridasTimeout = setTimeout(() => { carregarCorridas(1); }, 300);
     }
 
-    // Drag and Drop
+    // Drag and Drop Setup
     function setupDragAndDrop() {
         const dropZone = document.getElementById('dropZone');
         if (!dropZone) return;
