@@ -21,6 +21,123 @@ Este documento consolida a análise técnica dos **10 pilares da engenharia mode
 
 ---
 
+## ⚡ Choque de Realidade & Alinhamento (Sem Métricas de Ego)
+
+> [!WARNING]
+> **Por que esta seção existe?**  
+> Na engenharia de software, existe uma armadilha frequente chamada **"Métricas de Ego"**: a tendência de acreditar que uma prática está consolidada apenas porque instalamos uma ferramenta, criamos uma pasta no repositório ou temos uma documentação escrita.  
+> Esta seção faz uma **auditoria técnica fria, sem rodeios e baseada no código real** do repositório para separar o que é **realidade em produção** do que é apenas **intenção, protótipo ou ilusão operacional**.
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              RESUMO DO CHOQUE DE REALIDADE                             │
+├────────────────────────┬───────────────────────────────────┬───────────────────────────┤
+│ Pilar                  │ A Percepção (Métrica de Ego)      │ A Realidade Crua no Código│
+├────────────────────────┼───────────────────────────────────┼───────────────────────────┤
+│ 1. Cloud               │ "Estamos em nuvem com Rclone"     │ VPS fixa com cópia de dir │
+│ 2. DevOps              │ "Temos Rundeck, logo temos DevOps"│ Falta CI; zero testes Git │
+│ 3. IaC                 │ "Infra codificada em Terraform"   │ main.tf só tem comando echo│
+│ 4. Containers          │ "Aplicação 100% containerizada"   │ Sem compose orquestrado   │
+│ 5. Observabilidade     │ "Monitoramos com logs"            │ Reativo; zero alertas     │
+│ 6. IA Generativa       │ "Bot integrado às operações"      │ Chatbot isolado do Core   │
+│ 7. Context Engineering │ "Temos Wiki e Moodle prontas"     │ Zero código RAG/vetorial  │
+│ 8. Harness Engineering │ "Código coberto por testes"       │ Sem mocks; zero evals IA  │
+│ 9. Agentes             │ "OpenClaw é nosso agente autônomo"│ Não executa tools no Core │
+│ 10. Governança         │ "Segurança e cofres resolvidos"   │ O mais maduro, mas sem log│
+│ BI & DataOps           │ "BI implementado no dataops"      │ Apenas models e dados fake│
+└────────────────────────┴───────────────────────────────────┴───────────────────────────┘
+```
+
+---
+
+### 1. ☁️ Cloud
+* **A Percepção (Ego):** *"Somos uma organização orientada a nuvem porque temos servidores remotos e cópias em nuvem via Rclone."*
+* **A Realidade Técnica no Código:** Temos uma **hospedagem tradicional em VPS única** com IP estático e um script de backup. Não há recursos elásticos (*auto-scaling*), não há banco de dados gerenciado em nuvem, não há separação de aplicação e persistência, e não há balanceamento de carga. Se a máquina física do provedor tiver uma pane de hardware, o CDC Core sai do ar instantaneamente.
+* **Observação Crítica:** Essa estratégia é perfeitamente justificável pelo orçamento enxuto do terceiro setor, mas **não deve ser rotulada como "Arquitetura Cloud moderna"**. É infraestrutura tradicional virtualizada com backup remoto.
+
+---
+
+### 2. ♾️ DevOps
+* **A Percepção (Ego):** *"Temos cultura DevOps ativa porque usamos Rundeck, Ansible e Semaphore para deploys."*
+* **A Realidade Técnica no Código:** O Rundeck hoje funciona essencialmente como um **"cron corporativo com interface web bonita"**. A perna fundamental de **Dev** e de **CI (Integração Contínua)** simplesmente não existe no repositório `dxcdc/core`. Um desenvolvedor pode fazer um commit com erro de sintaxe ou imports quebrados direto na branch `main`, e nenhuma barreira automatizada no GitHub impedirá o código de quebrar a VPS.
+* **Observação Crítica:** Automatizar a execução de scripts (Ops) sem ter testes automáticos antes do merge (CI) é apenas metade do caminho. Não temos DevOps completo; temos automação de tarefas operacionais.
+
+---
+
+### 3. ⌨️ IaC (Infrastructure as Code)
+* **A Percepção (Ego):** *"Nossa infraestrutura está padronizada e descrita como código no Terraform."*
+* **A Realidade Técnica no Código:** Ao inspecionar o arquivo [`ops/terraform/main.tf`](ops/terraform/main.tf), encontramos:
+  ```hcl
+  resource "null_resource" "vps_production_node" {
+    provisioner "local-exec" {
+      command = "echo 'Nave Mãe conectada à VPS de Produção: ${var.vps_ip}'"
+    }
+  }
+  ```
+  O Terraform **não provisiona nada**. Não cria a máquina na nuvem, não define firewalls, não reserva discos e não cria DNS. A VPS foi contratada manualmente clicando no painel da empresa de hospedagem (*ClickOps*).
+* **Observação Crítica:** O Terraform atualmente é apenas um arquivo esqueleto/decorativo. O Ansible faz um bom trabalho na configuração do Linux, mas a infraestrutura base é 100% manual.
+
+---
+
+### 4. 📦 Containers
+* **A Percepção (Ego):** *"Nossos sistemas rodam de forma moderna e conteinerizada em produção."*
+* **A Realidade Técnica no Código:** Existe um `Dockerfile` funcional que empacota o Django com Gunicorn, mas **não existe um ambiente de produção orquestrado**. O banco de dados PostgreSQL roda de forma separada ou no host, não há `docker-compose.production.yml` oficial amarrando os serviços em rede interna segura, o container roda com privilégios de usuário root e as imagens não são versionadas em um Container Registry (GHCR/DockerHub).
+* **Observação Crítica:** Estamos no nível do "Docker básico de desenvolvimento". Falta a padronização formal da orquestração de containers para produção.
+
+---
+
+### 5. 📈 Observabilidade
+* **A Percepção (Ego):** *"Acompanhamos a saúde do sistema através de logs do Django e scripts de verificação."*
+* **A Realidade Técnica no Código:** **Não temos observabilidade.** Temos apenas leitura manual de logs em arquivos de texto quando alguém avisa que algo quebrou. Se o Gunicorn travar ou a conexão com o banco cair em um sábado de madrugada, a equipe só descobrirá na segunda-feira. Não há métricas de CPU/RAM em tempo real, não há rastreamento de exceções (Sentry) e não há alerta automático de queda.
+* **Observação Crítica:** Monitoramento não é rodar um playbook manual quando há suspeita de erro; monitoramento é o sistema gritar no celular do administrador no exato instante em que a falha ocorre.
+
+---
+
+### 6. ✨ IA Generativa
+* **A Percepção (Ego):** *"Já estamos aplicando IA Generativa nas operações do CDC com o `bot.cdc.org.br` e o OpenClaw."*
+* **A Realidade Técnica no Código:** Temos uma interface web de chat no ar em estágio piloto/experimental, mas ela está **completamente isolada do CDC Core**. O bot não lê notas fiscais do banco de dados, não analisa inconsistências do OngSys, não audita relatórios de transportes e não possui saídas estruturadas em JSON conectadas aos sistemas da ONG.
+* **Observação Crítica:** Colocar um modelo de linguagem para conversar em uma página web é simples; a verdadeira IA Generativa aplicada à engenharia é aquela integrada às regras de negócio e às rotinas da instituição.
+
+---
+
+### 7. 🧠 Context Engineering (Engenharia de Contexto)
+* **A Percepção (Ego):** *"Nosso contexto está bem atendido porque já temos a Wiki oficial (`wiki.cdc.org.br`) e os cursos do Educa CDC / Moodle (`educa.cdc.org.br`)."*
+* **A Realidade Técnica no Código:** **Esta é a maior ilusão/confusão conceitual.** Ter Wiki e Moodle significa que o CDC tem *excelente documentação humana*. Engenharia de Contexto é *código de software*: envolve web scrapers/APIs que extraem esses textos, algoritmos que fatiam os artigos (*chunking*), modelos que geram representações matemáticas (*embeddings*) e tabelas vetoriais (`pgvector`) que alimentam a IA. No momento, **não há uma única linha de código implementando isso**. A IA não consegue ler nenhuma página da Wiki nem nenhuma aula do Moodle hoje.
+* **Observação Crítica:** Temos a jazida de minério (o texto humano), mas não construímos a esteira nem a fábrica (a engenharia de software de contexto).
+
+---
+
+### 8. ⚙️ Harness Engineering (Engenharia de Testes, Mocks & Evals)
+* **A Percepção (Ego):** *"Nosso código possui suítes de testes na pasta `tests/` garantindo a estabilidade."*
+* **A Realidade Técnica no Código:** A pasta de testes possui pouquíssimos testes pontuais. Não há simuladores (*mocks*) para testar as rotinas de sincronização do OngSys ou da API do Google sem internet, tornando os testes lentos e dependentes de rede externa. No lado da IA, o cenário é de **zero evals**: não existe um banco de 50 perguntas padrão para avaliar se uma mudança de prompt piorou as respostas do bot.
+* **Observação Crítica:** Sem harness, qualquer alteração no código de integração ou no bot de IA é um teste às cegas feito diretamente em produção com usuários reais.
+
+---
+
+### 9. 🤖 Agentes (AI Agents)
+* **A Percepção (Ego):** *"O OpenClaw / `bot.cdc.org.br` é um agente inteligente autônomo trabalhando pelo CDC."*
+* **A Realidade Técnica no Código:** Um **Agente** por definição possui loop de planejamento, memória de longo prazo e **ferramentas ativas (*Tool Calling*)** para agir no sistema (ex: executar tarefas no Rundeck, consultar o banco e emitir pareceres). O bot atual é um **chatbot conversacional**: ele conversa, mas não tem permissão nem código para acionar ferramentas no CDC Core.
+* **Observação Crítica:** Chamar um chatbot de agente é inflar o status da ferramenta. Ele só se tornará um agente quando o CDC Core expuser APIs de ferramentas seguras para ele interagir.
+
+---
+
+### 10. 🛡️ Governança, Identidade & Segurança
+* **A Percepção (Ego):** *"Nossa governança de segurança está totalmente consolidada com OpenBao, Vaultwarden, VPN e Workspace."*
+* **A Realidade Técnica no Código:** **Este é o pilar mais real e maduro do CDC.** O uso de VPN, Vaultwarden e Google Workspace com 2FA é concreto e superior à maioria das ONGs. Porém, existem três brechas críticas reais:
+  1. As credenciais na VPS ainda ficam em arquivos de texto claro `.env` (o OpenBao ainda não as injeta dinamicamente em memória durante a execução);
+  2. No Django, não há auditoria de banco (`django-auditlog`), o que significa que se um operador alterar um valor de transporte no admin, não fica registrado quem alterou nem o valor anterior;
+  3. Não há mecanismos automáticos de conformidade com a LGPD para expurgo de dados sensíveis de beneficiários.
+* **Observação Crítica:** O pilar é excelente, mas fechar essas três brechas é o que separa um ambiente "seguro no dia a dia" de um ambiente "100% auditável por órgãos de controle público".
+
+---
+
+### 📊 BI (Business Intelligence) & DataOps
+* **A Percepção (Ego):** *"Temos o BI e o módulo DataOps rodando no CDC Core para tomada de decisão."*
+* **A Realidade Técnica no Código:** Ao abrir a pasta [`apps/dataops/`](apps/dataops/), encontramos apenas o arquivo `models.py` e um script de sementes (`seed_dataops.py`) que preenche dados falsos no banco. Não há rotina de ingestão automática conectada à API do Google Workspace, não há interface gráfica de BI (como Metabase, Superset ou Power BI) instalada, e nenhum diretor do CDC toma decisões hoje olhando para o `dataops`.
+* **Observação Crítica:** O BI atualmente é uma **modelagem conceitual no papel**, não uma solução de inteligência de dados em funcionamento.
+
+---
+
 ## 1. ☁️ Cloud (Computação em Nuvem)
 
 ### O que é?
