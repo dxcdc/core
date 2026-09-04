@@ -11,7 +11,7 @@ Para cada pilar (e para o tópico transversal de BI), o documento adota uma **es
 
 | # | Pilar | O que é | Status Real no CDC | Tecnologias & Ferramentas no CDC | Nível de Maturidade | O que falta / Próximo Passo |
 |---|---|---|:---:|---|:---:|---|
-| 1 | **Cloud** | Recursos elásticos sob demanda (VMs, storage, bancos) | 🟡 Parcial | VPS Linux (`76.13.227.135`), Rclone para Google Drive / Storages | Operacional Criativo | Snapshot real da VPS e teste de restore drill documentado |
+| 1 | **Cloud** | Recursos elásticos sob demanda (VMs, storage, bancos) | 🟡 Parcial | VPS Linux (`76.13.xxx.xxx`), Rclone para Google Drive / Storages | Operacional Criativo | Snapshot real da VPS e teste de restore drill documentado |
 | 2 | **DevOps** | Cultura de automação unindo Dev (CI) e Operações (CD) | 🟡 Parcial | Rundeck (executor/locks), Ansible, Semaphore, Git | Intermediário (Foco Ops) | GitHub Actions (CI) com checagem de sintaxe e testes pré-merge |
 | 3 | **IaC** | Infraestrutura declarada e versionada em código | 🟢 Atendido | Terraform (`ops/terraform`), Ansible (`ops/ansible`), OpenBao, Rundeck | Estruturado | Estado do Terraform em backend remoto e segredos dinâmicos |
 | 4 | **Containers** | Aplicação isolada em imagem padronizada | 🟢 Atendido | Dockerfile, Docker na VPS, Gunicorn, Whitenoise | Em Produção | Docker Compose orquestrado e container rodando sem usuário root |
@@ -124,7 +124,7 @@ flowchart TD
   O fornecimento sob demanda de poder computacional, armazenamento, bancos de dados e redes via internet por provedores especializados, eliminando equipamentos físicos locais e custos de manutenção de datacenter próprio.
 
 * **Como o CDC atende hoje?**  
-  Devido a restrições de orçamento típicas de ONGs, o CDC adotou uma arquitetura híbrida e pragmática: uma VPS Linux dedicada (`76.13.227.135`) aliada ao **Rclone** sincronizando dados, bancos e mídias para provedores de storage em nuvem (como Google Drive corporativo / storages offsite).
+  Devido a restrições de orçamento típicas de ONGs, o CDC adotou uma arquitetura híbrida e pragmática: uma VPS Linux dedicada (`76.13.xxx.xxx`) aliada ao **Rclone** sincronizando dados, bancos e mídias para provedores de storage em nuvem (como Google Drive corporativo / storages offsite).
 
 * **Exemplo Prático no CDC:**  
   Uma rotina periódica no cron/Rundeck que gera o `pg_dump` do banco de dados do CDC Core, compacta mídias e executa:  

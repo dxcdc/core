@@ -12,7 +12,7 @@ Este diretório contém a estrutura de **Infraestrutura como Código (IaC)** e *
   * `outputs.tf`: Informações de saída expostas pelo Terraform.
 * `ansible/`: Automação, configuração e gerenciamento de servidores.
   * `ansible.cfg`: Configurações globais do Ansible.
-  * `inventory/production.ini`: Inventário dos servidores gerenciados (ex: VPS `76.13.227.135`).
+  * `inventory/production.ini`: Inventário dos servidores gerenciados (ex: VPS `76.13.xxx.xxx`).
   * `playbooks/`:
     * `01_setup_server.yml`: Fortalecimento, atualização de SO e preparação do servidor.
     * `02_deploy_core.yml`: Deploy automatizado, migrações e arquivos estáticos.

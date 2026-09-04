@@ -1,7 +1,7 @@
 # Exemplo de arquivo de variáveis de ambiente para o Terraform
 # Copie para terraform.tfvars para sobrecrever valores padrão
 
-vps_ip      = "76.13.227.135"
+vps_ip      = "76.13.xxx.xxx"
 vps_user    = "root"
 domain_name = "core.cdc.org.br"
 environment = "production"

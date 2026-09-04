@@ -3,7 +3,7 @@
 variable "vps_ip" {
   type        = string
   description = "Endereço IP principal da VPS de Produção CDC"
-  default     = "76.13.227.135"
+  default     = "76.13.xxx.xxx"
 }
 
 variable "vps_user" {
