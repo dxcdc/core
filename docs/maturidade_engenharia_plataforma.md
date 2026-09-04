@@ -24,6 +24,61 @@ Para cada pilar (e para o tópico transversal de BI), o documento adota uma **es
 
 ---
 
+## 📐 Arquitetura Alvo Integrada do Ecossistema CDC
+
+O diagrama abaixo ilustra como todas as peças do ecossistema se conectam de ponta a ponta, eliminando sobreposições e garantindo segurança, rastreabilidade e inteligência operacional:
+
+```mermaid
+flowchart TD
+    subgraph Usuários & Interfaces
+        U1[Colaborador / Operador] -->|Telegram / WhatsApp / Web| BOT[Bot CDC / OpenClaw<br/>bot.cdc.org.br]
+        U2[Diretoria & Coordenação] -->|Navegador Seguro / VPN| CORE_UI[CDC Core Dashboard<br/>Django Templates]
+        U3[Equipe Operacional] -->|Acesso Corporativo 2FA| VW[Vaultwarden<br/>Cofre de Senhas da Equipe]
+    end
+
+    subgraph Inteligência & Contexto
+        BOT -->|Consulta RAG| PGV[(PostgreSQL + pgvector<br/>Banco Vetorial)]
+        WIKI[Wiki Oficial<br/>wiki.cdc.org.br] -.->|Ingestão de Manuais / Textos| PGV
+        EDUCA[Educa CDC / Moodle<br/>educa.cdc.org.br] -.->|Ingestão de Aulas / Tutoriais| PGV
+        BOT -->|Tool Calling / API Segura| CORE_API[CDC Core API Gateway<br/>Token de Serviço Restrito]
+    end
+
+    subgraph Core & Dados
+        CORE_API --> CORE[CDC Core Platform<br/>Django + Celery]
+        CORE_UI --> CORE
+        CORE --> PG[(PostgreSQL Relacional<br/>Dados Fiscais & Usuários)]
+        CORE --> DATAOPS[Módulo DataOps & BI<br/>Conciliação e Telemetria]
+        DATAOPS <-->|API REST| GWS[Google Workspace API<br/>Contas, 2FA, Cotas GB]
+    end
+
+    subgraph Orquestração & Operações
+        CORE -->|Despacha Tarefas / Lock| RD[Rundeck<br/>Executor Institucional]
+        RD -->|Consome Segredos em Memória| BAO[OpenBao<br/>Cofre de Máquinas & Chaves]
+        RD -->|Executa Comandos| ONGSYS[OngSys Fiscal<br/>Sincronização de Notas]
+        RD -->|Playbooks Automatizados| ANS[Ansible<br/>Gestão de Configuração]
+    end
+
+    subgraph Infraestrutura & Continuidade
+        ANS --> VPS[VPS de Produção Linux<br/>Docker Containers]
+        VPS -->|pg_dump + mídias| RCLONE[Rclone Engine<br/>--backup-dir datado]
+        RCLONE --> GDRIVE[(Google Drive Institucional<br/>Storage Offsite / Backups)]
+        GIT[GitHub dxcdc/core] -->|Pull Request| GHA[GitHub Actions CI<br/>flake8 + check + bandit]
+        GHA -->|Webhook Pós-Aprovação| RD
+    end
+
+    classDef security fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef ai fill:#ede7f6,stroke:#512da8,stroke-width:2px;
+    classDef core fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
+    classDef ops fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
+
+    class BAO,VW,GWS security;
+    class BOT,PGV,WIKI,EDUCA ai;
+    class CORE,CORE_API,CORE_UI,PG,DATAOPS core;
+    class RD,ANS,ONGSYS,RCLONE,GHA ops;
+```
+
+---
+
 # ⚡ Choque de Realidade & Alinhamento (Sem Métricas de Ego)
 ## Auditoria Técnica dos 10 Pilares & BI na Estrutura de 7 Camadas
 
@@ -425,10 +480,105 @@ Aqui estão sugestões objetivas de ações ordenadas por impacto e viabilidade,
 
 8. **API Gateway / Tooling Layer para o `bot.cdc.org.br` / OpenClaw:**
    * Criar endpoints dedicados no CDC Core protegidos por token de serviço com escopo mínimo para o bot.
-   * O bot não deve acessar banco de dados diretamente; ele consulta rotas como `/api/v1/bot/resumo-tarefas/` ou `/api/v1/bot/status-ongsys/`.
+* O bot não deve acessar banco de dados diretamente; ele consulta rotas como `/api/v1/bot/resumo-tarefas/` ou `/api/v1/bot/status-ongsys/`.
 9. **Base de Conhecimento RAG do CDC (Engenharia de Contexto Real):**
    * Configurar `pgvector` no PostgreSQL existente do Core.
    * Criar um script para indexar os artigos da Wiki (`wiki.cdc.org.br`) e as ementas do Educa CDC (`educa.cdc.org.br`).
    * O bot passa a consultar essa base antes de responder perguntas institucionais, operando com precisão de normas e citando links.
 10. **Bancada de Evals (Harness de IA):**
     * Manter uma lista de 50 perguntas padrão e respostas ideais para rodar a cada atualização do modelo ou prompt do bot.
+
+---
+
+## ✅ Critérios Objetivos de Homologação ("Definition of Done" por Pilar)
+
+Para eliminar qualquer ambiguidade ou "métrica de ego", um pilar só pode ser considerado **🟢 Maduro / Atendido** quando todos os itens de seu respectivo checklist forem concluídos e comprovados em produção:
+
+### 1. Cloud
+- [ ] Script do Rclone executando diariamente com parâmetro `--backup-dir` datado.
+- [ ] Dump do banco de dados compactado e testado no destino offsite (Google Drive).
+- [ ] Procedimento trimestral de teste de restauração em máquina zerada documentado em `docs/`.
+
+### 2. DevOps
+- [ ] Workflow `.github/workflows/ci.yml` configurado no repositório `dxcdc/core`.
+- [ ] Linter (`flake8`) e checagem de modelos Django (`python manage.py check`) rodando a cada PR.
+- [ ] Bloqueio de merge configurado no GitHub para Pull Requests com testes falhos.
+- [ ] Webhook pós-merge disparando rotina de deploy no Rundeck sem intervenção manual via SSH.
+
+### 3. IaC (Infraestrutura como Código)
+- [ ] Provedor de VPS real (ex: DigitalOcean, AWS, Hetzner) declarado no `main.tf` do Terraform (eliminando o `null_resource` com `echo`).
+- [ ] Estado do Terraform (`terraform.tfstate`) armazenado em backend remoto seguro com locking.
+- [ ] Playbooks Ansible idempotentes executando 100% da configuração do host sem comandos manuais soltos.
+
+### 4. Containers
+- [ ] Arquivo `docker-compose.production.yml` orquestrando Core, PostgreSQL, Redis e Celery.
+- [ ] Container do Django rodando sob usuário sem privilégios de root (`USER appuser`).
+- [ ] Imagens versionadas e publicadas em um Container Registry oficial (ex: GHCR).
+
+### 5. Observabilidade
+- [ ] Uptime Kuma rodando em container e testando endpoints a cada 60 segundos.
+- [ ] Canal de alertas no Telegram/Discord ativo notificando quedas em menos de 2 minutos.
+- [ ] Sentry integrado ao Django capturando erros 500 com rastreamento de pilha.
+- [ ] Rota `/healthz` implementada no Core testando conexões de banco e cache em < 200ms.
+
+### 6. IA Generativa
+- [ ] API do modelo (ex: Gemini/OpenAI) consumida através de chamadas com JSON estruturado (*Structured Outputs*).
+- [ ] Extração automatizada de dados em PDFs/fotos de notas fiscais com OCR semântico homologada.
+- [ ] Tratamento de exceções e fallback para indisponibilidade de cotas da API de IA.
+
+### 7. Context Engineering (Engenharia de Contexto)
+- [ ] Extensão `pgvector` instalada e habilitada no PostgreSQL do CDC Core.
+- [ ] Rotina no Rundeck que faz scraping/leitura da Wiki (`wiki.cdc.org.br`) e Moodle (`educa.cdc.org.br`) e gera embeddings.
+- [ ] Pipeline RAG injetando trechos literais dos manuais e cursos no prompt do Bot CDC antes da resposta.
+
+### 8. Harness Engineering (Mocks & Evals)
+- [ ] Bateria de testes do Django utilizando simuladores (`responses` ou `unittest.mock`) para APIs externas (OngSys e Google).
+- [ ] Execução da suíte de testes de integração em menos de 10 segundos no ambiente local sem necessidade de conexão com a internet.
+- [ ] Arquivo `evals_dataset.json` com no mínimo 50 perguntas e respostas padrão para avaliar a qualidade e assertividade do Bot CDC a cada mudança.
+
+### 9. Agentes (AI Agents)
+- [ ] Rotas de API restritas (*Service APIs*) criadas no CDC Core para consumo exclusivo do bot.
+- [ ] Mecanismo de *Human-in-the-Loop* exigindo confirmação humana para ações financeiras, fiscais ou de deleção.
+- [ ] Agente do OpenClaw executando tarefas em múltiplos passos (consultar status -> acionar job no Rundeck -> reportar resultado no chat).
+
+### 10. Governança, Identidade & Segurança
+- [ ] Biblioteca `django-auditlog` instalada e ativa nos models fiscais, de transportes e de usuários.
+- [ ] Credenciais do OpenBao injetadas diretamente em memória na VPS via AppRole, eliminando arquivos `.env` em texto claro.
+- [ ] Política e comando automatizado de anonimização/expurgo de dados sensíveis de beneficiários em conformidade com a LGPD.
+- [ ] 100% dos usuários administrativos com MFA/2FA obrigatório no Google Workspace e Vaultwarden.
+
+### BI (Business Intelligence) & DataOps
+- [ ] Comando de sincronização periódica consumindo as APIs do Google Workspace e populando a tabela `UsuarioDataOps` com dados reais.
+- [ ] Ferramenta de BI (Metabase / Superset) instalada e conectada em modo somente-leitura ao PostgreSQL.
+- [ ] Dashboard operacional ativo exibindo taxa de conciliação fiscal do OngSys e indicadores de capacitação do Moodle.
+
+---
+
+## ⚠️ Matriz de Riscos Operacionais: O Custo da Inação
+
+O que acontece com o CDC se esses pontos continuarem apenas no papel ou tratados como "métricas de ego"?
+
+| Falha / Pilar Não Atendido | Risco Concreto para o CDC | Impacto Institucional | Nível de Risco |
+|---|---|---|:---:|
+| **Sem Auditoria no Django (`django-auditlog`)** | Impossibilidade de provar quem alterou lançamentos contábeis ou bancários em caso de divergência fiscal. | Glosa de recursos por Tribunais de Contas e perda de convênios públicos. | 🔴 Crítico |
+| **Sem CI no GitHub Actions** | Um commit com erro de digitação é enviado à `main` na véspera do fechamento contábil e derruba o sistema. | Paralisação das operações financeiras e desgaste com fornecedores e equipe. | 🔴 Crítico |
+| **Sem Observabilidade Automática (Uptime Kuma)** | A VPS trava na sexta-feira à noite e o sistema fica 48 horas fora do ar sem ninguém da TI perceber. | Perda de prazos de prestação de contas e imagem de amadorismo perante parceiros. | 🟡 Alto |
+| **Sem Mocks no Harness do OngSys** | Qualquer teste de sincronização mexe em dados reais de produção ou depende da instabilidade do sistema externo. | Corrupção acidental de dados de transportes e lentidão no desenvolvimento. | 🟡 Alto |
+| **Sem Context Engineering Real (RAG)** | O Bot CDC responde com base em conhecimento geral da internet e "alucina" inventando regras que contradizem os editais da ONG. | Desinformação de colaboradores, compras irregulares e retrabalho administrativo. | 🟡 Alto |
+| **Sem Segredos em Memória (OpenBao)** | Arquivos `.env` com senhas de banco e chaves de API expostos em texto claro na VPS. | Se a VPS for comprometida, todos os acessos institucionais vazam de uma só vez. | 🔴 Crítico |
+
+---
+
+## 📖 Glossário Descomplicado para o Terceiro Setor
+
+Para que diretores, conselheiros, educadores e assistentes sociais compreendam o vocabulário técnico sem jargões herméticos:
+
+* **CI/CD (Integração e Entrega Contínuas):** É a "esteira rolante de inspeção de fábrica". Antes de uma peça nova entrar no carro em movimento, um robô testa se ela não tem defeito. Se tiver defeito, a peça é rejeitada antes de causar um acidente.
+* **IaC (Infraestrutura como Código):** É a "planta arquitetônica digital". Em vez de construir uma casa tijolo por tijolo de memória, você tem a planta inteira registrada. Se a casa cair, você aperta um botão e a construtora digital ergue uma réplica exata em minutos.
+* **Observabilidade:** É o "painel de instrumentos e sensores do avião". Em vez de esperar o motor falhar para descobrir que acabou o óleo, os sensores avisam a temperatura, o nível e a pressão a cada segundo.
+* **RAG (Retrieval-Augmented Generation / Engenharia de Contexto):** É a "prova com consulta ao livro". Uma IA normal tenta responder de cabeça e pode inventar respostas (alucinar). O RAG obriga a IA a abrir o manual do CDC na página certa, ler o parágrafo oficial e responder baseando-se estritamente nele.
+* **Tool Calling (Chamada de Ferramentas por IA):** É dar "mãos e pernas ao cérebro da IA". Em vez de ela apenas dar conselhos em texto, ela recebe permissão para acionar um botão no sistema, emitir uma guia ou consultar um saldo.
+* **Test Harness (Arnês de Teste / Mocks):** É o "simulador de voo". Permite ao piloto treinar pousos de emergência em tempestades sem colocar em risco um avião de verdade com passageiros reais.
+* **Evals (Avaliações de IA):** É o "exame vestibular contínuo da IA". Uma prova com 50 questões institucionais que a IA precisa fazer toda vez que mexemos nela para garantir que sua nota continua acima de 9,5.
+* **Idempotência:** É o "interruptor inteligente". Não importa se você aperta o botão de 'ligar' 1 vez ou 100 vezes seguidas, o resultado final será sempre o mesmo: a luz estará ligada, sem queimar a lâmpada nem criar fiação duplicada.
+* **RBAC (Role-Based Access Control):** É o "molho de chaves por setor". A pessoa da recepção tem a chave da porta da frente; a pessoa do financeiro tem a chave do cofre. Ninguém anda com a chave-mestra no bolso desnecessariamente.
