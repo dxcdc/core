@@ -1,6 +1,9 @@
 # 🧭 Os 10 Pilares da Engenharia de Plataforma & IA no Ecossistema CDC
+## Guia de Maturidade Técnica, Choque de Realidade & Roadmap Operacional
 
-Este documento consolida a análise técnica dos **10 pilares da engenharia moderna de software, plataforma e inteligência artificial**, calibrados estritamente para a realidade operacional, restrições orçamentárias de terceiro setor e ferramentas já adotadas pelo **Centro Dom Helder Camara (CDC)** (incluindo **CDC Core**, **Rundeck**, **OpenBao**, **Vaultwarden**, **Rclone**, **VPN**, **Google Workspace** e a iniciativa **Bot CDC / OpenClaw**).
+Este documento consolida a análise técnica dos **10 pilares da engenharia moderna de software, plataforma e inteligência artificial**, calibrados estritamente para a realidade operacional, restrições orçamentárias de terceiro setor e ferramentas já adotadas pelo **Centro Dom Helder Camara (CDC)** (incluindo **CDC Core**, **Rundeck**, **OpenBao**, **Vaultwarden**, **Rclone**, **VPN**, **Google Workspace**, **Wiki**, **Educa CDC / Moodle** e a iniciativa **Bot CDC / OpenClaw**).
+
+Para cada pilar (e para o tópico transversal de BI), o documento adota uma **estrutura padrão de 7 camadas**, confrontando a teoria, a operação atual, o exemplo prático, o plano de melhoria e a **auditoria técnica fria (sem métricas de ego)**.
 
 ---
 
@@ -21,52 +24,88 @@ Este documento consolida a análise técnica dos **10 pilares da engenharia mode
 
 ---
 
-## ⚡ Choque de Realidade & Alinhamento (Sem Métricas de Ego)
-
-> [!WARNING]
-> **Por que esta seção existe?**  
-> Na engenharia de software, existe uma armadilha frequente chamada **"Métricas de Ego"**: a tendência de acreditar que uma prática está consolidada apenas porque instalamos uma ferramenta, criamos uma pasta no repositório ou temos uma documentação escrita.  
-> Esta seção faz uma **auditoria técnica fria, sem rodeios e baseada no código real** do repositório para separar o que é **realidade em produção** do que é apenas **intenção, protótipo ou ilusão operacional**.
-
-```text
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                              RESUMO DO CHOQUE DE REALIDADE                             │
-├────────────────────────┬───────────────────────────────────┬───────────────────────────┤
-│ Pilar                  │ A Percepção (Métrica de Ego)      │ A Realidade Crua no Código│
-├────────────────────────┼───────────────────────────────────┼───────────────────────────┤
-│ 1. Cloud               │ "Estamos em nuvem com Rclone"     │ VPS fixa com cópia de dir │
-│ 2. DevOps              │ "Temos Rundeck, logo temos DevOps"│ Falta CI; zero testes Git │
-│ 3. IaC                 │ "Infra codificada em Terraform"   │ main.tf só tem comando echo│
-│ 4. Containers          │ "Aplicação 100% containerizada"   │ Sem compose orquestrado   │
-│ 5. Observabilidade     │ "Monitoramos com logs"            │ Reativo; zero alertas     │
-│ 6. IA Generativa       │ "Bot integrado às operações"      │ Chatbot isolado do Core   │
-│ 7. Context Engineering │ "Temos Wiki e Moodle prontas"     │ Zero código RAG/vetorial  │
-│ 8. Harness Engineering │ "Código coberto por testes"       │ Sem mocks; zero evals IA  │
-│ 9. Agentes             │ "OpenClaw é nosso agente autônomo"│ Não executa tools no Core │
-│ 10. Governança         │ "Segurança e cofres resolvidos"   │ O mais maduro, mas sem log│
-│ BI & DataOps           │ "BI implementado no dataops"      │ Apenas models e dados fake│
-└────────────────────────┴───────────────────────────────────┴───────────────────────────┘
-```
+# 🔍 Detalhamento dos 10 Pilares na Estrutura Padrão
 
 ---
 
-### 1. ☁️ Cloud
-* **A Percepção (Ego):** *"Somos uma organização orientada a nuvem porque temos servidores remotos e cópias em nuvem via Rclone."*
-* **A Realidade Técnica no Código:** Temos uma **hospedagem tradicional em VPS única** com IP estático e um script de backup. Não há recursos elásticos (*auto-scaling*), não há banco de dados gerenciado em nuvem, não há separação de aplicação e persistência, e não há balanceamento de carga. Se a máquina física do provedor tiver uma pane de hardware, o CDC Core sai do ar instantaneamente.
-* **Observação Crítica:** Essa estratégia é perfeitamente justificável pelo orçamento enxuto do terceiro setor, mas **não deve ser rotulada como "Arquitetura Cloud moderna"**. É infraestrutura tradicional virtualizada com backup remoto.
+## 1. ☁️ Cloud (Computação em Nuvem)
+
+* **O que é?**  
+  O fornecimento sob demanda de poder computacional, armazenamento, bancos de dados e redes via internet por provedores especializados, eliminando equipamentos físicos locais e custos de manutenção de datacenter próprio.
+
+* **Como o CDC atende hoje?**  
+  Devido a restrições de orçamento típicas de ONGs, o CDC adotou uma arquitetura híbrida e pragmática: uma VPS Linux dedicada (`76.13.227.135`) aliada ao **Rclone** sincronizando dados, bancos e mídias para provedores de storage em nuvem (como Google Drive corporativo / storages offsite).
+
+* **Exemplo Prático no CDC:**  
+  Uma rotina periódica no cron/Rundeck que gera o `pg_dump` do banco de dados do CDC Core, compacta mídias e executa:  
+  `rclone sync /backups remote-drive:cdc-backups/core/ --backup-dir remote-drive:cdc-backups/historico/$(date +%Y-%m-%d)`
+
+* **Como podemos melhorar & O que falta:**  
+  * Habilitar snapshot automático de disco no painel do provedor de VPS (quando viável financeiramente).
+  * Criar e documentar um procedimento trimestral de teste de recuperação de desastres (*Restore Drill*): baixar os dados do Rclone em uma máquina zerada e validar se o banco restaura com integridade.
+
+* **A Percepção (Ego):**  
+  *"Somos uma organização orientada a nuvem porque temos servidores remotos e backups em nuvem via Rclone."*
+
+* **A Realidade Técnica no Código:**  
+  Temos uma **hospedagem tradicional em VPS única** com IP fixo e um script de cópia de arquivos. Não há elasticidade (*auto-scaling*), não há banco gerenciado em nuvem, não há separação de aplicação e persistência, e não há balanceamento de carga. Se o nó físico da VPS falhar, o CDC Core sai do ar instantaneamente.
+
+* **Observação Crítica:**  
+  Essa estratégia é inteligente e excelente para o orçamento do terceiro setor, mas **não é arquitetura Cloud-Native**. É hospedagem tradicional virtualizada com replicação de arquivos.
 
 ---
 
-### 2. ♾️ DevOps
-* **A Percepção (Ego):** *"Temos cultura DevOps ativa porque usamos Rundeck, Ansible e Semaphore para deploys."*
-* **A Realidade Técnica no Código:** O Rundeck hoje funciona essencialmente como um **"cron corporativo com interface web bonita"**. A perna fundamental de **Dev** e de **CI (Integração Contínua)** simplesmente não existe no repositório `dxcdc/core`. Um desenvolvedor pode fazer um commit com erro de sintaxe ou imports quebrados direto na branch `main`, e nenhuma barreira automatizada no GitHub impedirá o código de quebrar a VPS.
-* **Observação Crítica:** Automatizar a execução de scripts (Ops) sem ter testes automáticos antes do merge (CI) é apenas metade do caminho. Não temos DevOps completo; temos automação de tarefas operacionais.
+## 2. ♾️ DevOps (Desenvolvimento + Operações)
+
+* **O que é?**  
+  A cultura, práticas e ferramentas que unem o desenvolvimento de software e as operações de infraestrutura, com foco em automação contínua de testes, integração (CI) e entrega/deploy (CD).
+
+* **Como o CDC atende hoje?**  
+  O CDC possui uma perna de **Ops/Orquestração forte**: utiliza **Rundeck**, **Ansible** e **Semaphore** para executar tarefas, gerenciar deploys e processar filas (como o processamento do OngSys com locks e timeouts institucionais).
+
+* **Exemplo Prático no CDC:**  
+  O playbook `02_deploy_core.yml` que puxa a versão mais recente do código no Git, roda as migrações do Django e coleta os arquivos estáticos na VPS, comandado pelo painel do Rundeck.
+
+* **Como podemos melhorar & O que falta:**  
+  * Implementar **GitHub Actions** em `dxcdc/core` disparados a cada `git push` e `Pull Request`, executando checagens de sintaxe (`flake8`), segurança (`bandit`) e integridade do Django (`python manage.py check`) antes de qualquer merge.
+  * Conectar o término aprovado do GitHub Actions a um webhook seguro que notifique o Rundeck para iniciar o deploy na VPS.
+
+* **A Percepção (Ego):**  
+  *"Temos cultura DevOps ativa porque usamos Rundeck, Ansible e Semaphore para deploys."*
+
+* **A Realidade Técnica no Código:**  
+  O Rundeck funciona essencialmente como um **"cron corporativo com interface web bonita"**. A perna de **Dev / CI (Integração Contínua)** inexiste no repositório `dxcdc/core`. Qualquer desenvolvedor pode cometer um erro de digitação ou quebrar imports na branch `main`, e nenhuma ferramenta automatizada no GitHub impede o código quebrado de subir para a produção.
+
+* **Observação Crítica:**  
+  Automatizar tarefas operacionais (Ops) sem ter testes e validações automáticas antes do merge (CI) é apenas metade do caminho. Não temos DevOps pleno; temos automação de tarefas assistida.
 
 ---
 
-### 3. ⌨️ IaC (Infrastructure as Code)
-* **A Percepção (Ego):** *"Nossa infraestrutura está padronizada e descrita como código no Terraform."*
-* **A Realidade Técnica no Código:** Ao inspecionar o arquivo [`ops/terraform/main.tf`](ops/terraform/main.tf), encontramos:
+## 3. ⌨️ IaC (Infrastructure as Code) & Divisão de Papéis
+
+* **O que é?**  
+  Gerenciamento, provisionamento e configuração de servidores, redes e serviços por meio de arquivos de código versionados em Git (ex: Terraform, OpenTofu, Ansible), eliminando configurações manuais via painel web ou SSH ("ClickOps").
+
+* **Como o CDC atende hoje?**  
+  Existe a estrutura de diretórios [`ops/terraform/`](ops/terraform/) e [`ops/ansible/`](ops/ansible/) com papéis definidos:
+  * **Terraform:** Declaração de recursos brutos.
+  * **Ansible:** Configuração do SO, pacotes, Docker, Nginx e firewall UFW.
+  * **OpenBao:** Armazenamento seguro de tokens e credenciais.
+  * **Rundeck:** Orquestração e execução de rotinas operacionais.
+  * **Rclone:** Replicação e transporte de dados para a nuvem.
+
+* **Exemplo Prático no CDC:**  
+  O playbook `01_setup_server.yml` preparando o ambiente do servidor, instalando Docker e ajustando permissões em `/etc/cdc/`.
+
+* **Como podemos melhorar & O que falta:**  
+  * Armazenar o estado do Terraform (`terraform.tfstate`) em backend compartilhado seguro com trava de concorrência.
+  * Integrar o Ansible e o Rundeck para consumirem chaves do OpenBao diretamente em memória (via AppRole), sem gravar arquivos estáticos `.env` no disco da VPS.
+
+* **A Percepção (Ego):**  
+  *"Nossa infraestrutura está padronizada e descrita como código no Terraform."*
+
+* **A Realidade Técnica no Código:**  
+  Ao inspecionar o arquivo [`ops/terraform/main.tf`](ops/terraform/main.tf), encontramos:
   ```hcl
   resource "null_resource" "vps_production_node" {
     provisioner "local-exec" {
@@ -75,374 +114,245 @@ Este documento consolida a análise técnica dos **10 pilares da engenharia mode
   }
   ```
   O Terraform **não provisiona nada**. Não cria a máquina na nuvem, não define firewalls, não reserva discos e não cria DNS. A VPS foi contratada manualmente clicando no painel da empresa de hospedagem (*ClickOps*).
-* **Observação Crítica:** O Terraform atualmente é apenas um arquivo esqueleto/decorativo. O Ansible faz um bom trabalho na configuração do Linux, mas a infraestrutura base é 100% manual.
 
----
-
-### 4. 📦 Containers
-* **A Percepção (Ego):** *"Nossos sistemas rodam de forma moderna e conteinerizada em produção."*
-* **A Realidade Técnica no Código:** Existe um `Dockerfile` funcional que empacota o Django com Gunicorn, mas **não existe um ambiente de produção orquestrado**. O banco de dados PostgreSQL roda de forma separada ou no host, não há `docker-compose.production.yml` oficial amarrando os serviços em rede interna segura, o container roda com privilégios de usuário root e as imagens não são versionadas em um Container Registry (GHCR/DockerHub).
-* **Observação Crítica:** Estamos no nível do "Docker básico de desenvolvimento". Falta a padronização formal da orquestração de containers para produção.
-
----
-
-### 5. 📈 Observabilidade
-* **A Percepção (Ego):** *"Acompanhamos a saúde do sistema através de logs do Django e scripts de verificação."*
-* **A Realidade Técnica no Código:** **Não temos observabilidade.** Temos apenas leitura manual de logs em arquivos de texto quando alguém avisa que algo quebrou. Se o Gunicorn travar ou a conexão com o banco cair em um sábado de madrugada, a equipe só descobrirá na segunda-feira. Não há métricas de CPU/RAM em tempo real, não há rastreamento de exceções (Sentry) e não há alerta automático de queda.
-* **Observação Crítica:** Monitoramento não é rodar um playbook manual quando há suspeita de erro; monitoramento é o sistema gritar no celular do administrador no exato instante em que a falha ocorre.
-
----
-
-### 6. ✨ IA Generativa
-* **A Percepção (Ego):** *"Já estamos aplicando IA Generativa nas operações do CDC com o `bot.cdc.org.br` e o OpenClaw."*
-* **A Realidade Técnica no Código:** Temos uma interface web de chat no ar em estágio piloto/experimental, mas ela está **completamente isolada do CDC Core**. O bot não lê notas fiscais do banco de dados, não analisa inconsistências do OngSys, não audita relatórios de transportes e não possui saídas estruturadas em JSON conectadas aos sistemas da ONG.
-* **Observação Crítica:** Colocar um modelo de linguagem para conversar em uma página web é simples; a verdadeira IA Generativa aplicada à engenharia é aquela integrada às regras de negócio e às rotinas da instituição.
-
----
-
-### 7. 🧠 Context Engineering (Engenharia de Contexto)
-* **A Percepção (Ego):** *"Nosso contexto está bem atendido porque já temos a Wiki oficial (`wiki.cdc.org.br`) e os cursos do Educa CDC / Moodle (`educa.cdc.org.br`)."*
-* **A Realidade Técnica no Código:** **Esta é a maior ilusão/confusão conceitual.** Ter Wiki e Moodle significa que o CDC tem *excelente documentação humana*. Engenharia de Contexto é *código de software*: envolve web scrapers/APIs que extraem esses textos, algoritmos que fatiam os artigos (*chunking*), modelos que geram representações matemáticas (*embeddings*) e tabelas vetoriais (`pgvector`) que alimentam a IA. No momento, **não há uma única linha de código implementando isso**. A IA não consegue ler nenhuma página da Wiki nem nenhuma aula do Moodle hoje.
-* **Observação Crítica:** Temos a jazida de minério (o texto humano), mas não construímos a esteira nem a fábrica (a engenharia de software de contexto).
-
----
-
-### 8. ⚙️ Harness Engineering (Engenharia de Testes, Mocks & Evals)
-* **A Percepção (Ego):** *"Nosso código possui suítes de testes na pasta `tests/` garantindo a estabilidade."*
-* **A Realidade Técnica no Código:** A pasta de testes possui pouquíssimos testes pontuais. Não há simuladores (*mocks*) para testar as rotinas de sincronização do OngSys ou da API do Google sem internet, tornando os testes lentos e dependentes de rede externa. No lado da IA, o cenário é de **zero evals**: não existe um banco de 50 perguntas padrão para avaliar se uma mudança de prompt piorou as respostas do bot.
-* **Observação Crítica:** Sem harness, qualquer alteração no código de integração ou no bot de IA é um teste às cegas feito diretamente em produção com usuários reais.
-
----
-
-### 9. 🤖 Agentes (AI Agents)
-* **A Percepção (Ego):** *"O OpenClaw / `bot.cdc.org.br` é um agente inteligente autônomo trabalhando pelo CDC."*
-* **A Realidade Técnica no Código:** Um **Agente** por definição possui loop de planejamento, memória de longo prazo e **ferramentas ativas (*Tool Calling*)** para agir no sistema (ex: executar tarefas no Rundeck, consultar o banco e emitir pareceres). O bot atual é um **chatbot conversacional**: ele conversa, mas não tem permissão nem código para acionar ferramentas no CDC Core.
-* **Observação Crítica:** Chamar um chatbot de agente é inflar o status da ferramenta. Ele só se tornará um agente quando o CDC Core expuser APIs de ferramentas seguras para ele interagir.
-
----
-
-### 10. 🛡️ Governança, Identidade & Segurança
-* **A Percepção (Ego):** *"Nossa governança de segurança está totalmente consolidada com OpenBao, Vaultwarden, VPN e Workspace."*
-* **A Realidade Técnica no Código:** **Este é o pilar mais real e maduro do CDC.** O uso de VPN, Vaultwarden e Google Workspace com 2FA é concreto e superior à maioria das ONGs. Porém, existem três brechas críticas reais:
-  1. As credenciais na VPS ainda ficam em arquivos de texto claro `.env` (o OpenBao ainda não as injeta dinamicamente em memória durante a execução);
-  2. No Django, não há auditoria de banco (`django-auditlog`), o que significa que se um operador alterar um valor de transporte no admin, não fica registrado quem alterou nem o valor anterior;
-  3. Não há mecanismos automáticos de conformidade com a LGPD para expurgo de dados sensíveis de beneficiários.
-* **Observação Crítica:** O pilar é excelente, mas fechar essas três brechas é o que separa um ambiente "seguro no dia a dia" de um ambiente "100% auditável por órgãos de controle público".
-
----
-
-### 📊 BI (Business Intelligence) & DataOps
-* **A Percepção (Ego):** *"Temos o BI e o módulo DataOps rodando no CDC Core para tomada de decisão."*
-* **A Realidade Técnica no Código:** Ao abrir a pasta [`apps/dataops/`](apps/dataops/), encontramos apenas o arquivo `models.py` e um script de sementes (`seed_dataops.py`) que preenche dados falsos no banco. Não há rotina de ingestão automática conectada à API do Google Workspace, não há interface gráfica de BI (como Metabase, Superset ou Power BI) instalada, e nenhum diretor do CDC toma decisões hoje olhando para o `dataops`.
-* **Observação Crítica:** O BI atualmente é uma **modelagem conceitual no papel**, não uma solução de inteligência de dados em funcionamento.
-
----
-
-## 1. ☁️ Cloud (Computação em Nuvem)
-
-### O que é?
-O modelo de consumo de infraestrutura (servidores, redes, discos e banco de dados) sob demanda via provedores globais, eliminando equipamentos físicos locais e custos de manutenção de datacenter próprio.
-
-### Como o CDC atende hoje?
-* **Realidade:** Devido a restrições de orçamento típicas de ONGs, o CDC adotou uma **arquitetura híbrida e pragmática**: uma VPS em nuvem dedicada aliada ao **Rclone** sincronizando dados para provedores de storage em nuvem (como Google Drive corporativo / storages offsite).
-* **Rclone equivale a um Snapshot?**
-  * **Não exatamente, mas é um excelente backup offsite em nível de arquivos.**
-  * *Diferença técnica:* O **Snapshot de disco** (fornecido pelo painel da VPS/cloud) tira uma foto instantânea do bloco binário inteiro do disco (incluindo memória RAM, SO instalado, permissões Unix e arquivos abertos). É como congelar a máquina no tempo.
-  * O **Rclone** atua em nível de arquivo (*file-level* ou *object-level*). Ele copia pastas, dumps do banco de dados e arquivos de mídia para o destino remoto.
-  * *Veredito:* Para proteção contra corrupção de arquivos, sequestro de dados (ransomware) ou perda acidental de documentos, o **Rclone é muito eficiente e infinitamente mais barato**. Porém, ele não restaura a máquina inteira em 2 minutos em caso de pane no sistema operacional (você precisará reinstalar o SO e rodar o Ansible/Docker para recolocar os arquivos copiados pelo Rclone).
-
-### Exemplo Prático no CDC:
-Uma rotina periódica no cron/Rundeck que gera o `pg_dump` do banco de dados do CDC Core, compacta mídias e executa `rclone sync /backups remote-drive:cdc-backups/core/ --backup-dir remote-drive:cdc-backups/historico/$(date +%Y-%m-%d)`.
-
-### Como podemos melhorar & O que falta:
-* **Habilitar Snapshot de disco na VPS (quando viável):** A maioria dos provedores de VPS cobra centavos de dólar/mês para manter 1 snapshot semanal automático da máquina completa.
-* **Testes de Restauração (Restore Drill):** Não basta enviar dados com o Rclone; falta uma rotina trimestral documentada de baixar o backup em uma máquina zerada e validar se o banco sobe intacto.
-
----
-
-## 2. ♾️ DevOps (Desenvolvimento + Operações)
-
-### O que é?
-A união entre quem programa (Dev) e quem sustenta a infraestrutura (Ops). O coração do DevOps são os pipelines de **CI/CD**:
-* **CI (Continuous Integration):** Toda vez que um dev manda código para o Git, robôs verificam se o código compila, se a sintaxe segue os padrões, se há brechas de segurança e se os testes unitários passaram.
-* **CD (Continuous Delivery / Deployment):** Se a CI aprovou, o sistema empacota a aplicação e atualiza o servidor (ou disponibiliza para o executor).
-
-### Como o CDC atende hoje?
-* O CDC possui um lado **Ops/Orquestração forte**: usa **Rundeck**, **Ansible** e **Semaphore** para executar tarefas, gerenciar deploys e processar filas (como o processamento do OngSys).
-* O ponto cego atual está na **CI (Integração Contínua dentro do Git)**: o código hoje pode ser mergeado no GitHub sem que nenhum robô tenha executado testes automáticos antes.
-
-### Por que e como implantar GitHub Actions junto com o Rundeck?
-O GitHub Actions **não substitui o Rundeck**; eles trabalham juntos em etapas complementares:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Dev as Desenvolvedor CDC
-    participant Git as GitHub (Repositório)
-    participant CI as GitHub Actions (CI)
-    participant RD as Rundeck (Ops/VPS)
-    participant Core as CDC Core (Produção)
-
-    Dev->>Git: git push (ou abre Pull Request)
-    Git->>CI: Dispara Workflow (.github/workflows/ci.yml)
-    Note over CI: Roda flake8/black (Sintaxe)<br/>Roda bandit (Segurança de senhas)<br/>Roda pytest (Testes de integração)
-    alt Testes Falharam ❌
-        CI-->>Dev: Notifica erro no PR! Bloqueia o merge.
-    else Testes Passaram ✅
-        CI-->>Git: Aprova PR para merge na branch main!
-        Dev->>Git: Faz o Merge
-        Git->>RD: Dispara Webhook de Deploy (ou agendado)
-        RD->>Core: Executa playbook Ansible / deploy_core.yml
-        Core-->>RD: Deploy concluído com sucesso!
-    end
-```
-
-### Exemplo Prático de Implementação:
-Criar o arquivo `.github/workflows/ci.yml`:
-1. **Linter & Sintaxe:** `flake8 apps/ config/` (impede código com erros de indentação ou variáveis órfãs).
-2. **Segurança de Código:** `pip install bandit && bandit -r apps/` (alerta se alguém deixou uma senha mockada ou chave hardcoded no commit).
-3. **Validação do Django:** `python manage.py check` e `pytest` (garante que nenhuma alteração quebrou a leitura dos modelos do banco ou a integração do OngSys).
-
-### Como podemos melhorar & O que falta:
-* Integrar o gatilho de sucesso do GitHub Actions para notificar o Rundeck via Webhook seguro com token do OpenBao, automatizando o deploy assim que aprovado.
-
----
-
-## 3. ⌨️ IaC (Infrastructure as Code) & Divisão de Papéis
-
-### O que é?
-Escrever a infraestrutura como arquivos de texto versionados em Git, permitindo recriar todo o ambiente do zero caso a máquina atual exploda.
-
-### A Divisão Clara de Papéis das Ferramentas no CDC:
-Para o ecossistema funcionar com clareza sem que uma ferramenta "atropele" a outra, a convenção ideal é:
-
-1. **Terraform:** *O Construtor.* Cria os recursos brutos (cria a VPS, contrata volume de disco, cria chaves SSH públicas, define DNS). Ele não deve configurar serviços internos do Linux.
-2. **Ansible:** *O Eletricista e Encanador.* Entra na VPS recém-criada via SSH e instala o Docker, configura Nginx, cria diretórios do sistema, ajusta o firewall (UFW) e prepara os usuários Linux.
-3. **OpenBao:** *O Guardião das Chaves.* Armazena de forma criptografada as credenciais de banco, chaves da API Google, tokens do OngSys e segredos de produção.
-4. **Rundeck:** *O Maestro e Operador do Painel.* Interface web para executar rotinas, agendar tarefas cron, processar jobs do OngSys e acionar os playbooks do Ansible sem precisar de acesso SSH direto de operadores humanos.
-5. **Rclone:** *O Caminhão de Mudança.* Garante o transporte e a sincronização periódica de mídias, backups e relatórios para armazenamento seguro externo.
-
-### Exemplo Prático:
-O Terraform cria a máquina; o Ansible roda uma vez para instalar o Docker e a pasta `/etc/cdc/secrets/`; o Rundeck chama o script `python manage.py process_ongsys_task` puxando credenciais seguras do OpenBao; e o Rclone roda de madrugada sincronizando a pasta `/backups` com o Google Drive.
-
-### Como podemos melhorar & O que falta:
-* Criar playbooks Ansible dedicados que saibam conversar com a API do OpenBao para injetar variáveis de ambiente temporárias em memória no momento do deploy, sem gravar senhas permanentes em arquivos de texto claro no disco.
+* **Observação Crítica:**  
+  O Terraform atualmente é apenas um arquivo esqueleto/decorativo. O Ansible faz um bom trabalho na configuração do Linux, mas a infraestrutura física/cloud ainda é 100% manual.
 
 ---
 
 ## 4. 📦 Containers (Docker)
 
-### O que é?
-Isolamento da aplicação em processos fechados com sistema de arquivos próprio, garantindo paridade total entre ambiente de desenvolvimento local e o servidor de produção.
+* **O que é?**  
+  Tecnologia de empacotamento que isola uma aplicação e todas as suas dependências em uma imagem padronizada (Docker/OCI), garantindo que ela funcione exatamente da mesma forma no computador do desenvolvedor e no servidor de produção.
 
-### Como o CDC atende hoje?
-* O CDC Core já conta com `Dockerfile` funcional e deploy de containers na VPS.
+* **Como o CDC atende hoje?**  
+  O CDC Core já conta com [`Dockerfile`](Dockerfile), [`.dockerignore`](.dockerignore) e utiliza containers para rodar o Django com Gunicorn e bibliotecas de sistema na VPS.
 
-### Exemplo Prático:
-Executar a aplicação localmente com `docker build -t cdc-core . && docker run -p 8000:8000 cdc-core` com a certeza de que rodará com a mesma versão do Python, bibliotecas C e dependências que estão no servidor.
+* **Exemplo Prático no CDC:**  
+  Executar a aplicação com `docker build -t cdc-core . && docker run -p 8000:8000 cdc-core` garantindo a mesma versão do Python 3.11 e bibliotecas de manipulação de relatórios.
 
-### Como podemos melhorar & O que falta:
-* **Docker Compose de Produção:** Estruturar um `docker-compose.yml` que orquestre `core`, `redis`, `celery_worker` e `nginx` com rede interna isolada.
-* **Volume Persistence e Rclone:** Garantir mapeamento explícito de volumes nomeados do Docker (ex: `postgres_data`, `media_volume`) para que o Rclone faça o espelhamento das pastas certas sem travar arquivos abertos do banco de dados (o banco deve ser espelhado via dump `.sql.gz`).
+* **Como podemos melhorar & O que falta:**  
+  * Criar um arquivo `docker-compose.production.yml` oficial unindo CDC Core, PostgreSQL, Redis, Celery Worker e Nginx Reverse Proxy em rede interna isolada.
+  * Configurar execução sob usuário não-root no Dockerfile para proteção contra escalada de privilégios.
+  * Publicar imagens versionadas no GitHub Container Registry (GHCR).
+
+* **A Percepção (Ego):**  
+  *"Nossos sistemas rodam de forma moderna e conteinerizada em produção."*
+
+* **A Realidade Técnica no Código:**  
+  Existe um `Dockerfile` funcional que empacota o Django com Gunicorn, mas **não existe um ambiente de produção orquestrado**. O banco de dados PostgreSQL roda de forma separada ou no host, não há `docker-compose.production.yml` oficial amarrando os serviços em rede interna segura, o container roda com privilégios de usuário root e as imagens não são versionadas em um Container Registry.
+
+* **Observação Crítica:**  
+  Estamos no nível do "Docker básico de desenvolvimento". Falta a padronização formal da orquestração de containers para produção.
 
 ---
 
 ## 5. 📈 Observabilidade
 
-### O que é?
-A tríade que permite responder: *"O sistema está saudável agora? Onde está o gargalo quando fica lento? O que causou o erro do usuário X às 14:03?"*. Composta por:
-1. **Métricas:** Consumo de RAM, disco, requisições/segundo.
-2. **Logs:** Histórico cronológico estruturado de acontecimentos.
-3. **Traces:** Acompanhamento do caminho de uma requisição desde que ela bate no Nginx até o banco e volta.
+* **O que é:**  
+  A capacidade de entender em tempo real o que está acontecendo dentro da aplicação e da infraestrutura através dos 3 pilares: **Métricas** (CPU, RAM, requisições/segundo), **Logs** (histórico cronológico estruturado) e **Traces** (tempo gasto em cada função ou requisição).
 
-### Como o CDC atende hoje?
-* **Diagnóstico confirmado:** Muito básico. Há logs locais nos arquivos do Gunicorn e o playbook `03_system_health.yml` executado manualmente.
+* **Como o CDC atende hoje?**  
+  Nível básico e reativo. Existem logs de texto locais gerados pelo Django/Gunicorn e o playbook `03_system_health.yml` executado manualmente via SSH quando há suspeita de instabilidade.
 
-### Exemplo Prático:
-O CDC Core começa a rejeitar cadastros do transporte porque a tabela de lock do banco ficou presa. Sem observabilidade, a equipe só descobre horas depois quando alguém reclama. Com observabilidade, em 30 segundos um canal do Telegram ou Discord recebe o alerta: *"ALERTA CRÍTICO: 5 requisições 500 consecutivas em /integrations/transportes"*.
+* **Exemplo Prático no CDC:**  
+  Uma sincronização do OngSys falha por timeout de rede. Hoje, a equipe precisa acessar o terminal da VPS e ler arquivos de log manualmente para descobrir o que houve.
 
-### Como podemos melhorar & O que falta:
-* **Uptime Kuma (Leve, Gratuito e Auto-hospedado):** Pode rodar em container na VPS; testa o `/` do CDC Core e o `bot.cdc.org.br` a cada 60 segundos e envia aviso no Telegram/WhatsApp se cair.
-* **Sentry (Crash Reporting):** Captura qualquer exceção não tratada no Python com o rastreamento da linha de código e variáveis locais.
-* **Healthcheck Endpoint no Django:** Criar uma view `/healthz` que testa se a conexão com o banco e o Redis respondem em menos de 200ms.
+* **Como podemos melhorar & O que falta:**  
+  * Subir um container gratuito do **Uptime Kuma** na VPS para testar o CDC Core e o `bot.cdc.org.br` a cada 60 segundos com alertas no Telegram/Discord.
+  * Adicionar o **Sentry** ao Django para capturar qualquer exceção 500 informando a linha exata de código.
+  * Criar um endpoint `/healthz` no Core que verifica a conectividade com o banco e o Redis em milissegundos.
+
+* **A Percepção (Ego):**  
+  *"Acompanhamos a saúde do sistema através de logs do Django e scripts de verificação."*
+
+* **A Realidade Técnica no Código:**  
+  **Não temos observabilidade.** Temos apenas leitura manual de logs em arquivos de texto quando alguém avisa que algo quebrou. Se o Gunicorn travar ou a conexão com o banco cair em um sábado de madrugada, a equipe só descobrirá na segunda-feira. Não há métricas de CPU/RAM em tempo real, não há rastreamento de exceções (Sentry) e não há alerta automático de queda.
+
+* **Observação Crítica:**  
+  Monitoramento não é rodar um playbook manual quando há suspeita de erro; monitoramento é o sistema gritar no celular do administrador no exato instante em que a falha ocorre.
 
 ---
 
-## 6. ✨ IA Generativa vs. 9. 🤖 Agentes (Desfazendo a Confusão)
+## 6. ✨ IA Generativa
 
-Como você apontou com muita precisão, as iniciativas **`bot.cdc.org.br`** e **OpenClaw** tocam esses dois pontos, e eles frequentemente se misturam. Vamos separar claramente os conceitos:
+* **O que é?**  
+  O motor cognitivo baseado em Grandes Modelos de Linguagem (LLMs como Gemini, GPT, Claude, LLaMA) capaz de interpretar textos longos, ler imagens/PDFs (visão computacional), extrair dados não estruturados e sintetizar informações em linguagem natural.
 
-```text
-┌────────────────────────────────────────────────────────────────────────┐
-│ IA GENERATIVA (O "Cérebro" / O Motor Cognitivo)                       │
-│ - Modelo de Linguagem (ex: Gemini, Claude, LLaMA, GPT)                 │
-│ - Função: Compreender texto/voz, sintetizar, traduzir, resumir, criar. │
-│ - Exemplo: "Leia esta ata de reunião e gere um resumo em 3 tópicos."   │
-└────────────────────────────────────┬───────────────────────────────────┘
-                                     │ é utilizado por
-                                     ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│ AGENTES DE IA (As "Mãos" / O Sistema Operacional Autônomo)             │
-│ - Um loop de planejamento + memória + ferramentas (Tool Calling/APIs). │
-│ - Função: Tomar decisões em múltiplos passos para cumprir um objetivo. │
-│ - Exemplo: "Verifique os comprovantes de transporte do mês, compare    │
-│   com o OngSys, gere a folha consolidada e avise o financeiro."       │
-│   -> O agente usa ferramentas para ler banco, chamar APIs e enviar msgs│
-└────────────────────────────────────────────────────────────────────────┘
-```
+* **Como o CDC atende hoje?**  
+  Iniciativa pioneira em andamento: o CDC colocou no ar o portal **`http://bot.cdc.org.br/`** utilizando a estrutura **OpenClaw**.
 
-### Pilar 6: IA Generativa no CDC
-* **Onde o `bot.cdc.org.br` / OpenClaw se encaixa:** Quando o bot recebe um áudio, imagem ou texto de um colaborador e utiliza a IA generativa para entender o significado, interpretar a dúvida ou reformatar uma mensagem.
-* **Exemplo Prático:** O colaborador manda uma foto borrada de um recibo no WhatsApp/Telegram do bot; a IA generativa lê o texto da foto (OCR semântico), extrai CNPJ, data e valor, e responde: *"Identifiquei recibo de R$ 35,00 do Posto Central em 10/08. Deseja registrar?"*.
+* **Exemplo Prático no CDC:**  
+  Um colaborador envia no chat do bot a foto de uma nota fiscal ou recibo de transporte. A IA generativa lê o texto da foto (OCR semântico), extrai CNPJ, data e valor, e devolve os dados estruturados para conferência.
 
-### Pilar 9: Agentes de IA no CDC
-* **Onde o `bot.cdc.org.br` / OpenClaw se encaixa:** Quando o bot não apenas responde uma pergunta, mas **executa ações no sistema**. Ele possui permissão de chamar a API do CDC Core, consultar tarefas no Rundeck ou criar uma issue no GitHub.
-* **Exemplo Prático:**
-  1. O usuário diz no bot: *"Rode a sincronização de transportes de ontem e me avise se teve erro."*
-  2. O **Agente** planeja:
-     * *Passo 1:* Chamar a tool `trigger_rundeck_job("sync_transportes")`.
-     * *Passo 2:* Consultar o status da tarefa no banco do Core a cada 30 segundos.
-     * *Passo 3:* Se houver inconsistência fiscal, acionar a tool `query_fiscal_divergences()`.
-     * *Passo 4:* Compilar o resultado e responder no chat para o usuário com o PDF anexado.
+* **Como podemos melhorar & O que falta:**  
+  * Padronizar as chamadas de modelo com schemas de saída em JSON estrito (Structured Outputs), impedindo respostas em texto livre quando o sistema precisa de dados contábeis exatos.
+  * Conectar o motor de IA generativa do `bot.cdc.org.br` diretamente às rotinas de backend do CDC Core.
 
-### Como podemos melhorar & O que falta:
-* Criar uma camada segura de **Tool Calling** (funções OpenAPI/JSON) no CDC Core com permissões limitadas, permitindo que o bot OpenClaw execute consultas sem ter acesso direto irrestrito ao banco de dados.
+* **A Percepção (Ego):**  
+  *"Já estamos aplicando IA Generativa nas operações do CDC com o `bot.cdc.org.br` e o OpenClaw."*
+
+* **A Realidade Técnica no Código:**  
+  Temos uma interface web de chat no ar em estágio piloto/experimental, mas ela está **completamente isolada do CDC Core**. O bot não lê notas fiscais do banco de dados, não analisa inconsistências do OngSys, não audita relatórios de transportes e não possui saídas estruturadas em JSON conectadas aos sistemas da ONG.
+
+* **Observação Crítica:**  
+  Colocar um modelo de linguagem para conversar em uma página web é simples; a verdadeira IA Generativa aplicada à engenharia é aquela integrada às regras de negócio e às rotinas da instituição.
 
 ---
 
 ## 7. 🧠 Context Engineering (Engenharia de Contexto)
 
-### O que é?
-A arte e técnica de fornecer **exatamente as informações necessárias** para a IA no momento do prompt. Nem informação de menos (que gera alucinações e respostas genéricas), nem informação demais (que estoura o custo de tokens e confunde o modelo).
+* **O que é?**  
+  A técnica de estruturar, curar, filtrar e injetar o conjunto exato de informações (regras de negócio, histórico relevante, trechos de documentos via RAG - *Retrieval-Augmented Generation*, metadados) no prompt da IA, garantindo respostas precisas, sem alucinações e dentro do limite da janela de contexto.
 
-Envolve:
-* **System Prompts estruturados:** Papéis e regras rígidas ("Você é o auditor financeiro do CDC. Nunca invente dados...").
-* **RAG (Retrieval-Augmented Generation):** Banco vetorial que busca pedaços de manuais e regulamentos do CDC antes de responder.
-* **Injeção de Estado Dinâmico:** Injetar no prompt quem é o usuário autenticado, seus privilégios e os projetos aos quais tem acesso.
+* **Como o CDC atende hoje?**  
+  O CDC possui o acervo institucional mais rico e estruturado do terceiro setor:
+  1. **Wiki Oficial (`https://wiki.cdc.org.br/`):** Manuais de compras, regimentos internos, diretrizes de documentação, editais e regras de processos.
+  2. **Educa CDC / Moodle (`https://educa.cdc.org.br/`):** Cursos, vídeo-aulas práticas e tutoriais passo a passo de como operar os sistemas e rotinas do CDC.
 
-### Como o CDC atende hoje?
-* **O Grande Trunfo Institucional:** Ao contrário da maioria das entidades que possuem documentos dispersos, o CDC já possui o conhecimento institucional centralizado e público em duas plataformas oficiais ativas:
-  1. **Wiki Oficial (`https://wiki.cdc.org.br/`):** Centraliza manuais operacionais, regimentos internos, diretrizes de documentação, editais e regras de processos.
-  2. **Educa CDC / Moodle (`https://educa.cdc.org.br/`):** Plataforma de ensino e capacitação contendo cursos, vídeo-aulas práticas e trilhas de passo a passo de como operar os sistemas e rotinas do CDC.
-* **O que falta:** Conectar essas duas fontes de forma automatizada ao banco vetorial do CDC Core para que o motor de IA as consulte em tempo real.
+* **Exemplo Prático no CDC:**  
+  Um novo colaborador pergunta ao bot: *"Como eu solicito diária de viagem ou lanço combustível?"*. O pipeline de contexto busca o artigo na Wiki e a aula no Educa CDC, respondendo:  
+  > *"Para solicitar diária, o procedimento exige preenchimento prévio no formulário oficial com 48h de antecedência.*  
+  > 📖 **Artigo da Wiki:** [Solicitação de Diárias](https://wiki.cdc.org.br/)  
+  > 🎓 **Vídeo-aula prática:** [Módulo 2: Viagens no Educa CDC](https://educa.cdc.org.br/)*"
 
-### Exemplo Prático no CDC:
-Um novo colaborador ou voluntário pergunta no chat do `bot.cdc.org.br`: *"Como eu faço para solicitar diária de viagem ou cadastrar nota de combustível?"*.
-O **pipeline de contexto** busca o artigo correspondente na **Wiki** e o módulo da aula no **Educa CDC**, permitindo que o bot responda de forma estruturada:
-> *"Para solicitar diária, o procedimento oficial exige preenchimento prévio no módulo de formulários com até 48h de antecedência.*  
-> 📖 **Consulte o manual completo:** [Artigo da Wiki: Solicitação de Diárias](https://wiki.cdc.org.br/)  
-> 🎓 **Assista à aula prática:** [Módulo 2: Procedimentos de Viagem no Educa CDC](https://educa.cdc.org.br/)*"
+* **Como podemos melhorar & O que falta:**  
+  * Criar rotina agendada no Rundeck que faz a leitura dos artigos da Wiki e do catálogo do Moodle, gerando fragmentos com embeddings vetoriais salvos no PostgreSQL via `pgvector`.
+  * Integrar a busca vetorial ao prompt do `bot.cdc.org.br`.
 
-### Como podemos melhorar:
-* Criar uma rotina agendada no Rundeck que faz a leitura dos artigos da Wiki (`wiki.cdc.org.br`) e do catálogo de cursos do Moodle (`educa.cdc.org.br`), gerando fragmentos com embeddings vetoriais salvos no PostgreSQL via `pgvector`.
-* Com isso, qualquer atualização feita na Wiki pela equipe é automaticamente refletida no conhecimento do Bot sem necessidade de retreinar modelos.
+* **A Percepção (Ego):**  
+  *"Nosso contexto está bem atendido porque já temos a Wiki oficial (`wiki.cdc.org.br`) e os cursos do Educa CDC / Moodle (`educa.cdc.org.br`)."*
+
+* **A Realidade Técnica no Código:**  
+  **Esta é a maior ilusão/confusão conceitual.** Ter Wiki e Moodle significa que o CDC tem *excelente documentação humana*. Engenharia de Contexto é *código de software*: envolve web scrapers/APIs que extraem esses textos, algoritmos que fatiam os artigos (*chunking*), modelos que geram representações matemáticas (*embeddings*) e tabelas vetoriais (`pgvector`) que alimentam a IA. No momento, **não há uma única linha de código implementando isso**. A IA não consegue ler nenhuma página da Wiki nem nenhuma aula do Moodle hoje.
+
+* **Observação Crítica:**  
+  Temos a jazida de minério (o texto humano), mas não construímos a esteira nem a fábrica (a engenharia de software de contexto).
 
 ---
 
-## 8. ⚙️ Harness Engineering (Engenharia de Harness / Evals) — *Aprofundamento Detalhado*
+## 8. ⚙️ Harness Engineering (Engenharia de Testes, Mocks & Evals)
 
-Como você solicitou mais explicações sobre esse conceito, vamos dissecar o que significa:
+* **O que é?**  
+  A infraestrutura de bancada de testes ("arnês") construída para testar softwares e IAs de maneira **isolada, rápida e segura**, dividida em duas áreas:
+  1. **Harness de Software:** Mocks e simuladores que entregam respostas falsas pré-gravadas da API do OngSys ou Google Drive, permitindo testar seu código em 3 segundos no notebook sem internet e sem risco de mexer em dados reais.
+  2. **Harness de IA (Evals):** Uma bateria com 50 perguntas reais de colaboradores com suas respostas ideais esperadas para testar se o bot continua respondendo com precisão após alterações de código.
 
-### O que significa a palavra "Harness"?
-Na engenharia mecânica e de aviação, um *harness* é o chicote de fiação de testes ou a estrutura de fixação que segura um motor numa bancada para testá-lo em condições extremas antes de colocá-lo no avião.
-Na engenharia de software e IA, um **Test Harness (Arnês de Teste)** é a infraestrutura auxiliar que **isola, simula e testa componentes de forma reproduzível**.
+* **Como o CDC atende hoje?**  
+  Nível básico e incipiente. Existe a pasta de testes no app `integrations`, mas a maior parte das rotinas precisa bater nos sistemas reais para ser validada.
 
-O Harness se divide em duas frentes fundamentais:
+* **Exemplo Prático no CDC:**  
+  Criar um arquivo `fixtures/ongsys_mock_transportes.json` com dados de 20 viagens. Quando você roda `pytest`, o sistema processa esses dados em 2 segundos na sua máquina sem tocar na VPS e sem bater no OngSys real, confirmando que o algoritmo de cálculo está perfeito.
 
-```text
-                    ┌──────────────────────────────────────────────┐
-                    │            HARNESS ENGINEERING               │
-                    └──────────────────────┬───────────────────────┘
-                                           │
-             ┌─────────────────────────────┴─────────────────────────────┐
-             ▼                                                           ▼
-┌────────────────────────────────────────┐  ┌────────────────────────────────────────┐
-│ 1. HARNESS DE SOFTWARE TRADICIONAL     │  │ 2. HARNESS DE IA & EVALS (AVALIAÇÃO)   │
-│ - Mocks, Fixtures e Simuladores        │  │ - Datasets de Perguntas/Respostas Ouro │
-│ - Banco de dados isolado em memória    │  │ - Métricas de Acurácia e Assertividade │
-│ - Simulação de APIs externas (OngSys)  │  │ - Detecção de Alucinações / Deriva      │
-└────────────────────────────────────────┘  └────────────────────────────────────────┘
-```
+* **Como podemos melhorar & O que falta:**  
+  * Adicionar bibliotecas de mock (`responses` ou `unittest.mock`) nas suítes de teste do Django.
+  * Montar uma planilha/JSON com as 30 a 50 perguntas mais frequentes feitas ao `bot.cdc.org.br` com suas respostas ideais para criar o primeiro benchmark de avaliação contínua.
 
-### 1. Harness de Software Tradicional (Por que é vital para o CDC?)
-* **O Problema:** Hoje, para testar se a rotina do OngSys (`ongsys_sync.py`) funciona, você quase sempre precisa bater no OngSys real. Se o OngSys estiver fora do ar ou com instabilidade, você não sabe se o seu código quebrou ou se foi a internet.
-* **A Solução com Harness:** Criar **mocks** (respostas gravadas em JSON da API do OngSys). O seu teste roda contra esse simulador falso instantaneamente no computador ou no GitHub Actions em 3 segundos, sem precisar de internet ou credenciais reais.
+* **A Percepção (Ego):**  
+  *"Nosso código possui suítes de testes na pasta `tests/` garantindo a estabilidade."*
 
-### 2. Harness de IA / Evals (Por que é vital para o Bot CDC?)
-* **O Problema:** Ao mudar o prompt do bot ou trocar de modelo de IA, você não tem como saber se ele piorou em outros assuntos sem testar manualmente 100 perguntas.
-* **A Solução com Harness de IA:**
-  * Você cria uma planilha/JSON com **50 casos de teste reais** (ex: 10 perguntas de transporte, 10 de prestação de contas, 10 de faltas de educadores, 20 de dúvidas gerais com suas respectivas "respostas ideais").
-  * Toda vez que você altera o código do bot ou o prompt, o **Harness de Avaliação** executa todas as 50 perguntas automaticamente e gera uma nota: *"Acurácia: 96%. Atenção: o bot errou a pergunta #14 sobre diárias"*.
+* **A Realidade Técnica no Código:**  
+  A pasta de testes possui pouquíssimos testes pontuais. Não há simuladores (*mocks*) para testar as rotinas de sincronização do OngSys ou da API do Google sem internet, tornando os testes lentos e dependentes de rede externa. No lado da IA, o cenário é de **zero evals**: não existe um banco de 50 perguntas padrão para avaliar se uma mudança de prompt piorou as respostas do bot.
 
-### Exemplo Prático no CDC:
-Uma pasta `tests/harness/` com um arquivo `test_ongsys_responses.json`. Quando o desenvolvedor roda `pytest`, o harness intercepta a chamada de rede, entrega o JSON mockado e valida se o CDC Core salvou os registros contábeis perfeitamente.
+* **Observação Crítica:**  
+  Sem harness, qualquer alteração no código de integração ou no bot de IA é um teste às cegas feito diretamente em produção com usuários reais.
 
-### Como podemos melhorar & O que falta:
-* Adicionar bibliotecas de mock (`responses` ou `unittest.mock`) nas suítes de teste do Django.
-* Criar a primeira lista de 20 perguntas e respostas padrão para o `bot.cdc.org.br` para servir de baseline de qualidade.
+---
+
+## 9. 🤖 Agentes (AI Agents)
+
+* **O que é:**  
+  Diferente da IA Generativa (que apenas pensa e escreve), o **Agente de IA possui mãos e ferramentas**: ele possui um loop de planejamento, memória persistente e capacidade de acionar ferramentas externas (*Tool Calling* / APIs) para cumprir objetivos complexos em múltiplos passos.
+
+* **Como o CDC atende hoje:**  
+  Em andamento através da iniciativa **`bot.cdc.org.br`** e **OpenClaw**, aliada às rotinas determinísticas do Rundeck.
+
+* **Exemplo Prático no CDC:**  
+  O operador solicita no bot: *"Sincronize os dados fiscais de ontem e me avise se houve divergência."*  
+  O **Agente**:
+  1. Chama a ferramenta `trigger_rundeck_job("sync_fiscal")`;
+  2. Monitora o status da tarefa no CDC Core;
+  3. Identifica duas notas inconsistentes;
+  4. Devolve o resumo formatado com os links das notas no chat.
+
+* **Como podemos melhorar & O que falta:**  
+  * Criar funções com permissões restritas (APIs de serviço) no CDC Core para que o OpenClaw possa consultá-las como ferramentas (*tool calling*), sem ter acesso de superusuário ao banco.
+  * Implementar controles de aprovação humana (*Human-in-the-Loop*).
+
+* **A Percepção (Ego):**  
+  *"O OpenClaw / `bot.cdc.org.br` é um agente inteligente autônomo trabalhando pelo CDC."*
+
+* **A Realidade Técnica no Código:**  
+  Um **Agente** por definição possui loop de planejamento, memória de longo prazo e **ferramentas ativas (*Tool Calling*)** para agir no sistema. O bot atual é um **chatbot conversacional**: ele conversa, mas não tem permissão nem código para acionar ferramentas no CDC Core.
+
+* **Observação Crítica:**  
+  Chamar um chatbot de agente é inflar o status da ferramenta. Ele só se tornará um agente quando o CDC Core expuser APIs de ferramentas seguras para ele interagir.
 
 ---
 
 ## 10. 🛡️ Governança, Identidade & Segurança
 
-### O que é?
-A garantia de que a organização tem controle absoluto sobre quem acessa quais dados, onde as chaves e credenciais estão guardadas, auditoria contínua de ações administrativas e conformidade legal (LGPD e prestação de contas públicas).
+* **O que é:**  
+  O ecossistema de proteção de dados, gestão de segredos, controle de acessos baseado em funções (RBAC), auditoria inalterável de ações e conformidade jurídica (LGPD e Marco Regulatório do Terceiro Setor).
 
-### Como o CDC atende hoje? (Panorama Ampliado com seus apontamentos)
-O CDC já possui um ecossistema de segurança muito superior à média do terceiro setor:
-1. **OpenBao:** Gerenciamento de credenciais de máquina, tokens de API e certificados (fork livre do Vault).
-2. **Vaultwarden:** Gerenciador de senhas corporativas para a equipe operacional e administrativa, eliminando senhas em planilhas ou post-its.
-3. **VPN (Rede Privada):** Acesso a serviços e bancos de dados restritos apenas por túnel criptografado, sem portas de banco abertas para a internet pública.
-4. **Google Workspace APIs & Gestão de Domínio CDC:** Automação de ciclo de vida de contas corporativas `@cdc.org.br` (onboarding/offboarding).
-5. **Telemetria de Segurança & 2FA:** Expansão da obrigatoriedade de autenticação em 2 fatores nas contas Google e início da coleta de logs de atividade.
+* **Como o CDC atende hoje?**  
+  Estrutura muito avançada e exemplar para o terceiro setor:
+  1. **OpenBao:** Gestão centralizada de credenciais de máquinas e serviços (fork livre do Vault).
+  2. **Vaultwarden:** Gerenciador de senhas corporativas da equipe operacional e administrativa.
+  3. **VPN (Rede Privada):** Acesso a serviços e bancos restrito por túnel criptografado.
+  4. **Google Workspace APIs:** Automação de contas corporativas `@cdc.org.br` e controle de identidade.
+  5. **Telemetria de Segurança & 2FA:** Obrigatoriedade do segundo fator de autenticação e coleta de logs.
+  6. **Controle Granular no Core:** Papéis bem definidos (observador, operador de testes, operador de sincronização, leitor de relatórios).
 
-### Exemplo Prático no CDC:
-Um novo operador de dados entra no projeto. Via API do Google Workspace sua conta é provisionada; seus acessos a senhas compartilhadas são liberados no Vaultwarden com 2FA obrigatório; para acessar o Rundeck ou a VPS ele se conecta pela VPN; e o script do CDC Core consome o token da API fiscal puxando do OpenBao em tempo de execução sem que o operador jamais veja a senha em texto claro.
+* **Exemplo Prático no CDC:**  
+  Um novo operador de dados entra no projeto. Via API do Google Workspace sua conta é provisionada; seus acessos a senhas compartilhadas são liberados no Vaultwarden com 2FA obrigatório; para acessar o Rundeck ou a VPS ele se conecta pela VPN; e o script do CDC Core consome o token da API fiscal puxando do OpenBao em tempo de execução sem que o operador jamais veja a senha em texto claro.
 
-### Como podemos melhorar & O que falta:
-* **Trilha de Auditoria no Banco do Django:** O Django por padrão não registra *o que foi alterado* em cada registro. Falta instalar `django-auditlog` para auditar alterações em tabelas fiscais e financeiras (ex: quem alterou o valor de um lançamento de transporte e qual era o valor antigo).
-* **Adequação Formal à LGPD para Beneficiários:** Criar no sistema a política de expurgo ou anonimização de dados de crianças, adolescentes e famílias atendidas após o encerramento do convênio público.
+* **Como podemos melhorar & O que falta:**  
+  * Instalar `django-auditlog` para manter uma trilha inalterável de quem modificou cada registro fiscal ou contábil.
+  * Estruturar a política e mecanismos de expurgo/anonimização de dados de beneficiários para conformidade plena com a LGPD.
+  * Injetar segredos do OpenBao diretamente em memória na VPS via AppRole, eliminando arquivos `.env` estáticos no disco.
+
+* **A Percepção (Ego):**  
+  *"Nossa governança de segurança está totalmente consolidada com OpenBao, Vaultwarden, VPN e Workspace."*
+
+* **A Realidade Técnica no Código:**  
+  **Este é o pilar mais real e maduro do CDC.** O uso de VPN, Vaultwarden e Google Workspace com 2FA é concreto e superior à maioria das ONGs. Porém, existem três brechas críticas reais:
+  1. As credenciais na VPS ainda ficam em arquivos de texto claro `.env` (o OpenBao ainda não as injeta dinamicamente em memória durante a execução);
+  2. No Django, não há auditoria de banco (`django-auditlog`), o que significa que se um operador alterar um valor de transporte no admin, não fica registrado quem alterou nem o valor anterior;
+  3. Não há mecanismos automáticos de conformidade com a LGPD para expurgo de dados sensíveis de beneficiários.
+
+* **Observação Crítica:**  
+  O pilar é excelente, mas fechar essas três brechas é o que separa um ambiente "seguro no dia a dia" de um ambiente "100% auditável por órgãos de controle público".
+
 ---
 
-## 📊 O Papel Estratégico do BI (Business Intelligence) & DataOps no Ecossistema CDC
+## 📊 BI (Business Intelligence) & DataOps
 
-O **BI** e a iniciativa de **DataOps** não representam um pilar isolado, mas sim a **ponta de lança de valor** que consolida os dados de toda a infraestrutura e os transforma em inteligência decisória para a diretoria, coordenações e conselhos do CDC.
+* **O que é?**  
+  A camada de agregação, modelagem e visualização de dados que transforma registros brutos em inteligência decisória. Atua como a **"Observabilidade do Negócio"** (medindo metas, cotas, conciliações e despesas) e como a fonte de dados estruturados para o BI Conversacional com IA.
 
-No CDC Core, esse alicerce já existe no app [`apps/dataops/`](apps/dataops/), que modela:
-* **Monitoramento do Google Workspace (`UsuarioDataOps`):** Controle de contas ativas, suspensas, voluntários, uso de cota em GB e adesão ao **MFA/2FA**.
-* **Gestão de Grupos Institucionais (`GrupoWorkspace` e `MembroGrupo`):** Mapeamento claro de permissões e listas de distribuição.
-* **Conciliação Contábil & Fiscal (`NotaFiscalConciliacao`):** Cruzamento de chaves de acesso de 44 dígitos, status de conciliação e divergências financeiras.
+* **Como o CDC atende hoje?**  
+  No CDC Core, o alicerce foi desenhado no app [`apps/dataops/`](apps/dataops/), que modela:
+  * Monitoramento de Usuários do Workspace (`UsuarioDataOps`) com status de 2FA e cota de GB;
+  * Grupos Institucionais (`GrupoWorkspace` e `MembroGrupo`);
+  * Conciliação Fiscal e Contábil (`NotaFiscalConciliacao`).
 
-```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                        COMO O BI SE CONECTA AOS PILARES                │
-├────────────────────────────────┬───────────────────────────────────────┤
-│ Pilar Conectado                │ Como o BI atua na prática             │
-├────────────────────────────────┼───────────────────────────────────────┤
-│ 5. Observabilidade             │ É a "Observabilidade de Negócio".     │
-│                                │ Enquanto a infra monitora CPU e RAM,  │
-│                                │ o BI monitora contas sem 2FA, notas   │
-│                                │ pendentes e orçamento consumido.      │
-├────────────────────────────────┼───────────────────────────────────────┤
-│ 10. Governança                 │ "Data Governance" e transparência.    │
-│                                │ Cria a Fonte Única da Verdade para    │
-│                                │ prestação de contas com poder público.│
-├────────────────────────────────┼───────────────────────────────────────┤
-│ 7. Context Engineering &       │ "BI Conversacional": Permite que o    │
-│ 9. Agentes (bot.cdc.org.br)    │ Bot CDC consulte tabelas agregadas do │
-│                                │ BI e responda números com exatidão.   │
-├────────────────────────────────┼───────────────────────────────────────┤
-│ Capacitação (Educa CDC)        │ "Learning Analytics": Mede quais      │
-│                                │ setores concluíram cursos e trilhas.  │
-└────────────────────────────────┴───────────────────────────────────────┘
-```
+* **Exemplo Prático no CDC:**  
+  O coordenador pergunta ao bot: *"Qual setor possui mais contas sem 2FA e quantas notas fiscais estão pendentes de conciliação este mês?"*. O bot consulta as tabelas de DataOps e responde com os números consolidados em 3 segundos.
 
-### Exemplo Prático de BI Conversacional com o Bot CDC:
-O coordenador pergunta por áudio ou texto no Telegram do `bot.cdc.org.br`:  
-> *"Bot, qual setor possui mais colaboradores com 2FA pendente e quantas notas fiscais ainda faltam conciliar este mês?"*  
+* **Como podemos melhorar & O que falta:**  
+  * Criar o comando de sincronização real puxando dados das APIs do Google Workspace para popular as tabelas do `UsuarioDataOps`.
+  * Instalar uma ferramenta de visualização de BI (ex: Metabase ou Apache Superset em container na VPS) conectada ao banco do CDC Core.
+  * Criar dashboards de acompanhamento da capacitação dos colaboradores no Moodle (*Learning Analytics*).
 
-O **Agente de IA** consulta o módulo `dataops` do CDC Core e responde em 3 segundos:  
-> *"Atualmente, o setor Pedagógico possui 5 colaboradores sem 2FA ativo. Na parte fiscal, existem 12 notas pendentes de conciliação totalizando R$ 6.340,00. Deseja que eu gere o relatório em PDF?"*
+* **A Percepção (Ego):**  
+  *"Temos o BI e o módulo DataOps rodando no CDC Core para tomada de decisão."*
+
+* **A Realidade Técnica no Código:**  
+  Ao abrir a pasta [`apps/dataops/`](apps/dataops/), encontramos apenas o arquivo `models.py` e um script de sementes (`seed_dataops.py`) que preenche dados falsos no banco. Não há rotina de ingestão automática conectada à API do Google Workspace, não há interface gráfica de BI (como Metabase, Superset ou Power BI) instalada, e nenhum diretor do CDC toma decisões hoje olhando para o `dataops`.
+
+* **Observação Crítica:**  
+  O BI atualmente é uma **modelagem conceitual no papel**, não uma solução de inteligência de dados em funcionamento.
 
 ---
 
@@ -473,15 +383,17 @@ Aqui estão sugestões objetivas de ações ordenadas por impacto e viabilidade,
    * **Ganho:** Segurança total para refatorar código de sincronização sem medo de corromper dados reais.
 6. **Evolução do Rclone com Versionamento Histórico:**
    * Ajustar a rotina do Rclone para usar a flag `--backup-dir`, garantindo que arquivos modificados ou deletados sejam arquivados em pastas datadas (ex: `/historico/2026-09/`), protegendo contra exclusões acidentais ou ataques.
+7. **Ingestão Real no DataOps:**
+   * Criar o comando `python manage.py sync_workspace_users` que realmente consulta a API do Google Workspace e popula o banco com status de 2FA e uso de cota.
 
 ### 🤖 Longo Prazo (Ecossistema de IA Seguro & Produtivo)
 
-7. **API Gateway / Tooling Layer para o `bot.cdc.org.br` / OpenClaw:**
+8. **API Gateway / Tooling Layer para o `bot.cdc.org.br` / OpenClaw:**
    * Criar endpoints dedicados no CDC Core protegidos por token de serviço com escopo mínimo para o bot.
    * O bot não deve acessar banco de dados diretamente; ele consulta rotas como `/api/v1/bot/resumo-tarefas/` ou `/api/v1/bot/status-ongsys/`.
-8. **Base de Conhecimento RAG do CDC (Engenharia de Contexto):**
+9. **Base de Conhecimento RAG do CDC (Engenharia de Contexto Real):**
    * Configurar `pgvector` no PostgreSQL existente do Core.
-   * Criar um script para indexar os manuais de procedimentos, regimentos internos e editais do CDC.
-   * O bot passa a consultar essa base antes de responder perguntas institucionais, operando com precisão de normas.
-9. **Bancada de Evals (Harness de IA):**
-   * Manter uma lista de perguntas padrão e respostas ideais para rodar a cada atualização do modelo ou prompt do bot.
+   * Criar um script para indexar os artigos da Wiki (`wiki.cdc.org.br`) e as ementas do Educa CDC (`educa.cdc.org.br`).
+   * O bot passa a consultar essa base antes de responder perguntas institucionais, operando com precisão de normas e citando links.
+10. **Bancada de Evals (Harness de IA):**
+    * Manter uma lista de 50 perguntas padrão e respostas ideais para rodar a cada atualização do modelo ou prompt do bot.
