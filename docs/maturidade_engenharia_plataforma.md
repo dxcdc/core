@@ -12,9 +12,9 @@ Este documento consolida a análise técnica dos **10 pilares da engenharia mode
 | 2 | **DevOps** | Cultura de automação unindo Dev (CI) e Operações (CD) | 🟡 Parcial | Rundeck (executor/locks), Ansible, Semaphore, Git | Intermediário (Foco Ops) | GitHub Actions (CI) com checagem de sintaxe e testes pré-merge |
 | 3 | **IaC** | Infraestrutura declarada e versionada em código | 🟢 Atendido | Terraform (`ops/terraform`), Ansible (`ops/ansible`), OpenBao, Rundeck | Estruturado | Estado do Terraform em backend remoto e segredos dinâmicos |
 | 4 | **Containers** | Aplicação isolada em imagem padronizada | 🟢 Atendido | Dockerfile, Docker na VPS, Gunicorn, Whitenoise | Em Produção | Docker Compose orquestrado e container rodando sem usuário root |
-| 5 | **Observabilidade** | Métricas, Logs e Traces em tempo real | 🔴 Inicial | Logs locais Gunicorn/Django, playbook `03_system_health.yml` manual | Básico / Reativo | Uptime Kuma (alertas Telegram/Discord), Sentry e rota `/healthz` |
+| 5 | **Observabilidade** | Métricas, Logs, Traces e BI de Negócio | 🟡 Parcial | Logs Gunicorn, scripts healthcheck, BI / DataOps (`apps/dataops`) | Intermediário em Negócio | Uptime Kuma (alertas Telegram), Sentry e rota `/healthz` |
 | 6 | **IA Generativa** | Modelos (LLMs) para leitura, síntese e linguagem | 🟡 Em Andamento | `bot.cdc.org.br`, OpenClaw, modelos de visão/linguagem | Piloto / Validação | Saídas estritas em JSON e conexão direta de leitura com o CDC Core |
-| 7 | **Context Engineering** | Curadoria e injeção do contexto exato no prompt | 🔴 Inicial | Manuais do CDC, editais e diretrizes documentadas | Teórico / Documental | Banco vetorial (`pgvector` no Postgres) para RAG de normas |
+| 7 | **Context Engineering** | Curadoria e injeção do contexto exato no prompt | 🟢 Rico (Acervo) / 🟡 Conexão IA | Wiki (`wiki.cdc.org.br`), Educa CDC Moodle (`educa.cdc.org.br`) | Base Pronta | Ingestão vetorial (RAG via `pgvector`) conectada ao Bot CDC |
 | 8 | **Harness Engineering** | Bancada isolada para testes rápidos e evals de IA | 🔴 Inicial | Testes pontuais no Django | Básico | Mocks offline da API do OngSys e dataset de 50 testes para o bot |
 | 9 | **Agentes** | Sistemas autônomos com metas, memória e ferramentas | 🟡 Em Andamento | `bot.cdc.org.br`, OpenClaw, rotinas procedurais no Rundeck | Piloto em estruturação | Camada de ferramentas seguras (APIs de serviço) e Human-in-the-Loop |
 | 10 | **Governança** | Segurança, cofres, controle de acessos e conformidade | 🟢 Avançado | OpenBao, Vaultwarden, VPN, Google Workspace APIs, 2FA, RBAC | Maduro e em Expansão | Trilha de auditoria (`django-auditlog`) e conformidade formal LGPD |
@@ -203,11 +203,22 @@ Envolve:
 * **RAG (Retrieval-Augmented Generation):** Banco vetorial que busca pedaços de manuais e regulamentos do CDC antes de responder.
 * **Injeção de Estado Dinâmico:** Injetar no prompt quem é o usuário autenticado, seus privilégios e os projetos aos quais tem acesso.
 
-### Exemplo Prático no CDC:
-Quando um assistente social pergunta ao `bot.cdc.org.br`: *"Posso usar a verba de alimentação para lanche de oficina no projeto Girassol?"*, a engenharia de contexto injeta automaticamente no prompt o trecho exato do **Termo de Fomento do Projeto Girassol** e a **Instrução Normativa Interna do CDC**, permitindo à IA responder categoricamente: *"Sim, conforme a Cláusula 4ª, parágrafo 2º, até o limite de R$ 15,00 por participante"*.
+### Como o CDC atende hoje?
+* **O Grande Trunfo Institucional:** Ao contrário da maioria das entidades que possuem documentos dispersos, o CDC já possui o conhecimento institucional centralizado e público em duas plataformas oficiais ativas:
+  1. **Wiki Oficial (`https://wiki.cdc.org.br/`):** Centraliza manuais operacionais, regimentos internos, diretrizes de documentação, editais e regras de processos.
+  2. **Educa CDC / Moodle (`https://educa.cdc.org.br/`):** Plataforma de ensino e capacitação contendo cursos, vídeo-aulas práticas e trilhas de passo a passo de como operar os sistemas e rotinas do CDC.
+* **O que falta:** Conectar essas duas fontes de forma automatizada ao banco vetorial do CDC Core para que o motor de IA as consulte em tempo real.
 
-### Como podemos melhorar & O que falta:
-* Estruturar um pipeline de documentos: converter PDFs de projetos, manuais de compras e regulamentos do CDC em *chunks* (trechos) com embeddings e busca semântica simples (ex: `pgvector` no próprio PostgreSQL do Core).
+### Exemplo Prático no CDC:
+Um novo colaborador ou voluntário pergunta no chat do `bot.cdc.org.br`: *"Como eu faço para solicitar diária de viagem ou cadastrar nota de combustível?"*.
+O **pipeline de contexto** busca o artigo correspondente na **Wiki** e o módulo da aula no **Educa CDC**, permitindo que o bot responda de forma estruturada:
+> *"Para solicitar diária, o procedimento oficial exige preenchimento prévio no módulo de formulários com até 48h de antecedência.*  
+> 📖 **Consulte o manual completo:** [Artigo da Wiki: Solicitação de Diárias](https://wiki.cdc.org.br/)  
+> 🎓 **Assista à aula prática:** [Módulo 2: Procedimentos de Viagem no Educa CDC](https://educa.cdc.org.br/)*"
+
+### Como podemos melhorar:
+* Criar uma rotina agendada no Rundeck que faz a leitura dos artigos da Wiki (`wiki.cdc.org.br`) e do catálogo de cursos do Moodle (`educa.cdc.org.br`), gerando fragmentos com embeddings vetoriais salvos no PostgreSQL via `pgvector`.
+* Com isso, qualquer atualização feita na Wiki pela equipe é automaticamente refletida no conhecimento do Bot sem necessidade de retreinar modelos.
 
 ---
 
@@ -274,7 +285,47 @@ Um novo operador de dados entra no projeto. Via API do Google Workspace sua cont
 ### Como podemos melhorar & O que falta:
 * **Trilha de Auditoria no Banco do Django:** O Django por padrão não registra *o que foi alterado* em cada registro. Falta instalar `django-auditlog` para auditar alterações em tabelas fiscais e financeiras (ex: quem alterou o valor de um lançamento de transporte e qual era o valor antigo).
 * **Adequação Formal à LGPD para Beneficiários:** Criar no sistema a política de expurgo ou anonimização de dados de crianças, adolescentes e famílias atendidas após o encerramento do convênio público.
-* **Centralização da Telemetria de Segurança:** Puxar os eventos de login suspeito das APIs do Google Workspace para uma rotina no Core que alerte o administrador caso uma conta corporativa faça login em país incomum.
+---
+
+## 📊 O Papel Estratégico do BI (Business Intelligence) & DataOps no Ecossistema CDC
+
+O **BI** e a iniciativa de **DataOps** não representam um pilar isolado, mas sim a **ponta de lança de valor** que consolida os dados de toda a infraestrutura e os transforma em inteligência decisória para a diretoria, coordenações e conselhos do CDC.
+
+No CDC Core, esse alicerce já existe no app [`apps/dataops/`](apps/dataops/), que modela:
+* **Monitoramento do Google Workspace (`UsuarioDataOps`):** Controle de contas ativas, suspensas, voluntários, uso de cota em GB e adesão ao **MFA/2FA**.
+* **Gestão de Grupos Institucionais (`GrupoWorkspace` e `MembroGrupo`):** Mapeamento claro de permissões e listas de distribuição.
+* **Conciliação Contábil & Fiscal (`NotaFiscalConciliacao`):** Cruzamento de chaves de acesso de 44 dígitos, status de conciliação e divergências financeiras.
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                        COMO O BI SE CONECTA AOS PILARES                │
+├────────────────────────────────┬───────────────────────────────────────┤
+│ Pilar Conectado                │ Como o BI atua na prática             │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ 5. Observabilidade             │ É a "Observabilidade de Negócio".     │
+│                                │ Enquanto a infra monitora CPU e RAM,  │
+│                                │ o BI monitora contas sem 2FA, notas   │
+│                                │ pendentes e orçamento consumido.      │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ 10. Governança                 │ "Data Governance" e transparência.    │
+│                                │ Cria a Fonte Única da Verdade para    │
+│                                │ prestação de contas com poder público.│
+├────────────────────────────────┼───────────────────────────────────────┤
+│ 7. Context Engineering &       │ "BI Conversacional": Permite que o    │
+│ 9. Agentes (bot.cdc.org.br)    │ Bot CDC consulte tabelas agregadas do │
+│                                │ BI e responda números com exatidão.   │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ Capacitação (Educa CDC)        │ "Learning Analytics": Mede quais      │
+│                                │ setores concluíram cursos e trilhas.  │
+└────────────────────────────────┴───────────────────────────────────────┘
+```
+
+### Exemplo Prático de BI Conversacional com o Bot CDC:
+O coordenador pergunta por áudio ou texto no Telegram do `bot.cdc.org.br`:  
+> *"Bot, qual setor possui mais colaboradores com 2FA pendente e quantas notas fiscais ainda faltam conciliar este mês?"*  
+
+O **Agente de IA** consulta o módulo `dataops` do CDC Core e responde em 3 segundos:  
+> *"Atualmente, o setor Pedagógico possui 5 colaboradores sem 2FA ativo. Na parte fiscal, existem 12 notas pendentes de conciliação totalizando R$ 6.340,00. Deseja que eu gere o relatório em PDF?"*
 
 ---
 
